@@ -76,6 +76,17 @@ def google(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
         data = response.content
     return data, mime
 
+def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
+    """Favicon Resolver from searxico"""
+    data, mime = (None, None)
+    url = f"https://searxico.aetherinox.workers.dev/{domain}/32"
+    logger.debug("fetch favicon from: %s", url)
+
+    response = network.get(url, **_req_args(timeout=timeout))
+    if response and response.status_code == 200 and len(response.content) > 70:
+        mime = response.headers['Content-Type']
+        data = response.content
+    return data, mime
 
 def yandex(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
     """Favicon Resolver from yandex.com"""
