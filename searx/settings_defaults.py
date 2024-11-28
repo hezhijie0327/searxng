@@ -155,7 +155,7 @@ SCHEMA = {
     },
     'search': {
         'safe_search': SettingsValue((0, 1, 2), 0),
-        'autocomplete': SettingsValue(str, ''),
+        'autocomplete': SettingsValue((list, str, False), ['']),
         'autocomplete_min': SettingsValue(int, 4),
         'favicon_resolver': SettingsValue(str, ''),
         'default_lang': SettingsValue(tuple(SXNG_LOCALE_TAGS + ['']), ''),
