@@ -8,13 +8,14 @@
 # networkneil <shankyneil1@gmail.com>, 2022.
 # return42 <markus.heiser@darmarit.de>, 2023.
 # sushen23 <sushen23@users.noreply.translate.codeberg.org>, 2024.
+# return42 <return42@users.noreply.translate.codeberg.org>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version:  searx\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-09-12 14:18+0000\n"
-"Last-Translator: sushen23 <sushen23@users.noreply.translate.codeberg.org>"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-11-25 12:40+0000\n"
+"Last-Translator: return42 <return42@users.noreply.translate.codeberg.org>"
 "\n"
 "Language: te\n"
 "Language-Team: Telugu "
@@ -298,7 +299,7 @@ msgid "active users"
 msgstr "ఆక్టివ్ యూసర్ లు"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
 msgstr "కామెంట్ లు"
@@ -314,7 +315,7 @@ msgid "community"
 msgstr "కమ్యూనిటీ"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
 msgstr "పాయింట్ లు"
 
@@ -324,7 +325,7 @@ msgid "title"
 msgstr "టైటిల్"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
 msgstr "రచయిత"
 
@@ -343,28 +344,28 @@ msgstr "క్లోస్డ్"
 msgid "answered"
 msgstr "సమాధానమిచ్చారు"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "ఏమీ దొరకలేదు"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "మూలం"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "తదుపరి పేజీని లోడ్ చేయడంలో లోపం"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "చెల్లని సెట్టింగ్‌లు, దయచేసి మీ ప్రాధాన్యతలను సవరించండి"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "చెల్లని అమరికలు"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "శోధనలో లోపము"
 
@@ -523,7 +524,7 @@ msgstr "పుస్తకం రేటింగు"
 msgid "File quality"
 msgstr "ఫైలు క్వాలిటీ"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
 msgstr "సెర్చ్ బార్ ద్వారా గణిత సమీకరణలను లెక్కించండి"
 
@@ -696,7 +697,7 @@ msgid "proxied"
 msgstr "ప్రాక్సీడ్"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
+msgid "Start submitting a new issue on GitHub"
 msgstr "GitHub లో కొత్త సంచికను సమర్పించడం ప్రారంభించండి"
 
 #: searx/templates/simple/new_issue.html:66
@@ -768,23 +769,23 @@ msgstr "నిష్క్రియ వర్గాలు"
 msgid "User interface"
 msgstr "వినియోగ మార్గము"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "ఆంతరంగికత"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "యంత్రాలు"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "ప్రస్తుతం ఉపయోగించబడుతున్న శోధన యంత్రాలు"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "ప్రత్యేక ప్రశ్నలు"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "కుకీలు"
 
@@ -1351,6 +1352,26 @@ msgstr "వినిమయసీమ భాష"
 #: searx/templates/simple/preferences/ui_locale.html:14
 msgid "Change the language of the layout"
 msgstr "వినిమయసీమ యొక్క భాషను మార్చు"
+
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr ""
 
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
@@ -1938,4 +1959,10 @@ msgstr "వీడియోను దాచిపెట్టు"
 
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "యంత్రాలు ఫలితాలను రాబట్టలేకపోతున్నాయి"
+
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "GitHub లో కొత్త సంచికను సమర్పించడం ప్రారంభించండి"
+
+#~ msgid "dummy"
+#~ msgstr ""
 

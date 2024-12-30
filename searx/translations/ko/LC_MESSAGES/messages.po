@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-07-03 17:18+0000\n"
-"Last-Translator: seonghobae "
-"<seonghobae@users.noreply.translate.codeberg.org>\n"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-11-25 12:40+0000\n"
+"Last-Translator: return42 <return42@users.noreply.translate.codeberg.org>"
+"\n"
 "Language: ko\n"
 "Language-Team: Korean "
 "<https://translate.codeberg.org/projects/searxng/searxng/ko/>\n"
@@ -300,7 +300,7 @@ msgid "active users"
 msgstr "활동 사용자"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
 msgstr "댓글"
@@ -316,7 +316,7 @@ msgid "community"
 msgstr "커뮤니티"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
 msgstr "점수"
 
@@ -326,7 +326,7 @@ msgid "title"
 msgstr "제목"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
 msgstr "작성자"
 
@@ -345,28 +345,28 @@ msgstr "닫힘"
 msgid "answered"
 msgstr "응답"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "검색 결과가 없습니다"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "소스"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "다음 페이지를 로드하는 동안 오류가 발생했습니다"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "잘못된 설정입니다, 설정을 수정하세요"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "잘못된 설정"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "검색 오류"
 
@@ -524,7 +524,7 @@ msgstr "책 평점"
 msgid "File quality"
 msgstr "파일 품질"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
 msgstr "검색바를 통해 수학연산 계산하기"
 
@@ -695,7 +695,7 @@ msgid "proxied"
 msgstr "프록시됨"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
+msgid "Start submitting a new issue on GitHub"
 msgstr "GitHub 에서 새 이슈 시작하기"
 
 #: searx/templates/simple/new_issue.html:66
@@ -767,23 +767,23 @@ msgstr "기본 카테고리"
 msgid "User interface"
 msgstr "사용자 인터페이스"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "개인정보 보호"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "검색엔진"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "현재 사용중인 검색 엔진"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "특수 쿼리"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "쿠키"
 
@@ -1339,6 +1339,26 @@ msgstr "인터페이스 언어"
 msgid "Change the language of the layout"
 msgstr "레이아웃 언어 변경"
 
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr ""
+
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
 msgstr "리포지토리"
@@ -1793,4 +1813,10 @@ msgstr "비디오 숨기기"
 
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "결과를 가져올 수 없습니다"
+
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "GitHub 에서 새 이슈 시작하기"
+
+#~ msgid "dummy"
+#~ msgstr ""
 

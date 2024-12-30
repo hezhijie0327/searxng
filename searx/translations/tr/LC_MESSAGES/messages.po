@@ -26,8 +26,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: searx\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-10-15 12:18+0000\n"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-12-26 08:08+0000\n"
 "Last-Translator: return42 <return42@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/searxng/"
 "searxng/tr/>\n"
@@ -36,7 +36,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Weblate 5.7.2\n"
+"X-Generator: Weblate 5.9.2\n"
 "Generated-By: Babel 2.16.0\n"
 
 #. CONSTANT_NAMES['NO_SUBGROUPING']
@@ -312,7 +312,7 @@ msgid "active users"
 msgstr "aktif kullanıcılar"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
 msgstr "yorumlar"
@@ -328,7 +328,7 @@ msgid "community"
 msgstr "topluluk"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
 msgstr "puanlar"
 
@@ -338,7 +338,7 @@ msgid "title"
 msgstr "başlık"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
 msgstr "yazar"
 
@@ -357,28 +357,28 @@ msgstr "kapalı"
 msgid "answered"
 msgstr "yanıtlandı"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "Öğe bulunamadı"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "Kaynak"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "Sonraki sayfa yüklenemedi"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "Geçersiz ayarlar, lütfen tercihlerinizi düzenleyin"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "Geçersiz ayarlar"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "arama hatası"
 
@@ -537,7 +537,7 @@ msgstr "Kitap değerlendirmesi"
 msgid "File quality"
 msgstr "Dosya kalitesi"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
 msgstr "Arama çubuğunu kullanarak matematiksel ifadeleri hesaplayın"
 
@@ -717,7 +717,7 @@ msgid "proxied"
 msgstr "proxylendi"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
+msgid "Start submitting a new issue on GitHub"
 msgstr "GitHub'a Yeni bir hata göndeymeye başlayin"
 
 #: searx/templates/simple/new_issue.html:66
@@ -793,23 +793,23 @@ msgstr "Varsayılan kategoriler"
 msgid "User interface"
 msgstr "Kullanıcı arayüzü"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "Gizlilik"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "Motorlar"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "Şu anda kullanılan arama motorları"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "Özel Arama Sorguları"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "Tanımlama Bilgileri"
 
@@ -1384,6 +1384,26 @@ msgstr "Arayüz dili"
 #: searx/templates/simple/preferences/ui_locale.html:14
 msgid "Change the language of the layout"
 msgstr "Düzen dilini değiştirin"
+
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr "URL Formatı"
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr ""
 
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
@@ -1990,3 +2010,9 @@ msgstr "görüntüyü gizle"
 
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "Motorlar sonuçları alamıyor"
+
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "GitHub'a Yeni bir hata göndeymeye başlayin"
+
+#~ msgid "dummy"
+#~ msgstr ""

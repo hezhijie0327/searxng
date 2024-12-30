@@ -17,21 +17,23 @@
 # akwceles <abadcopovisamuel@gmail.com>, 2023.
 # return42 <return42@users.noreply.translate.codeberg.org>, 2024.
 # sserra <sserra@users.noreply.translate.codeberg.org>, 2024.
+# dansmachina <dansmachina@users.noreply.translate.codeberg.org>, 2024.
+# xawos <xawos@users.noreply.translate.codeberg.org>, 2024.
 msgid ""
 msgstr ""
-"Project-Id-Version:  searx\n"
+"Project-Id-Version: searx\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-08-16 06:18+0000\n"
-"Last-Translator: return42 <return42@users.noreply.translate.codeberg.org>"
-"\n"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-12-21 19:47+0000\n"
+"Last-Translator: xawos <xawos@users.noreply.translate.codeberg.org>\n"
+"Language-Team: Catalan <https://translate.codeberg.org/projects/searxng/"
+"searxng/ca/>\n"
 "Language: ca\n"
-"Language-Team: Catalan "
-"<https://translate.codeberg.org/projects/searxng/searxng/ca/>\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.9.2\n"
 "Generated-By: Babel 2.16.0\n"
 
 #. CONSTANT_NAMES['NO_SUBGROUPING']
@@ -172,7 +174,7 @@ msgstr "fosc"
 #. STYLE_NAMES['BLACK']
 #: searx/searxng.msg
 msgid "black"
-msgstr ""
+msgstr "negre"
 
 #. BRAND_CUSTOM_LINKS['UPTIME']
 #: searx/searxng.msg
@@ -192,19 +194,19 @@ msgstr "Temperatura mitjana"
 #. WEATHER_TERMS['CLOUD COVER']
 #: searx/engines/open_meteo.py:91 searx/searxng.msg
 msgid "Cloud cover"
-msgstr ""
+msgstr "Ennuvolat"
 
 #. WEATHER_TERMS['CONDITION']
 #: searx/engines/duckduckgo_weather.py:45 searx/engines/wttr.py:51
 #: searx/searxng.msg
 msgid "Condition"
-msgstr ""
+msgstr "condicions"
 
 #. WEATHER_TERMS['CURRENT CONDITION']
 #: searx/engines/duckduckgo_weather.py:118 searx/engines/wttr.py:104
 #: searx/searxng.msg
 msgid "Current condition"
-msgstr ""
+msgstr "Condicions actuals"
 
 #. WEATHER_TERMS['EVENING']
 #: searx/engines/wttr.py:100 searx/searxng.msg
@@ -215,25 +217,25 @@ msgstr "Vespre"
 #: searx/engines/duckduckgo_weather.py:53 searx/engines/open_meteo.py:81
 #: searx/engines/wttr.py:59 searx/searxng.msg
 msgid "Feels like"
-msgstr ""
+msgstr "Sensació tèrmica"
 
 #. WEATHER_TERMS['HUMIDITY']
 #: searx/engines/duckduckgo_weather.py:64 searx/engines/open_meteo.py:93
 #: searx/engines/wttr.py:68 searx/searxng.msg
 msgid "Humidity"
-msgstr ""
+msgstr "Humitat"
 
 #. WEATHER_TERMS['MAX TEMP.']
 #: searx/engines/duckduckgo_weather.py:77 searx/engines/wttr.py:34
 #: searx/searxng.msg
 msgid "Max temp."
-msgstr ""
+msgstr "Temp. Max."
 
 #. WEATHER_TERMS['MIN TEMP.']
 #: searx/engines/duckduckgo_weather.py:73 searx/engines/wttr.py:33
 #: searx/searxng.msg
 msgid "Min temp."
-msgstr ""
+msgstr "Temp. Min."
 
 #. WEATHER_TERMS['MORNING']
 #: searx/engines/wttr.py:100 searx/searxng.msg
@@ -253,127 +255,127 @@ msgstr "Migdia"
 #. WEATHER_TERMS['PRESSURE']
 #: searx/engines/open_meteo.py:95 searx/searxng.msg
 msgid "Pressure"
-msgstr ""
+msgstr "Pressió"
 
 #. WEATHER_TERMS['SUNRISE']
 #: searx/engines/duckduckgo_weather.py:81 searx/engines/wttr.py:36
 #: searx/searxng.msg
 msgid "Sunrise"
-msgstr ""
+msgstr "Sortida de sol"
 
 #. WEATHER_TERMS['SUNSET']
 #: searx/engines/duckduckgo_weather.py:82 searx/engines/wttr.py:37
 #: searx/searxng.msg
 msgid "Sunset"
-msgstr ""
+msgstr "Posta de sol"
 
 #. WEATHER_TERMS['TEMPERATURE']
 #: searx/engines/duckduckgo_weather.py:48 searx/engines/open_meteo.py:76
 #: searx/engines/wttr.py:55 searx/searxng.msg
 msgid "Temperature"
-msgstr ""
+msgstr "Temperatura"
 
 #. WEATHER_TERMS['UV INDEX']
 #: searx/engines/duckduckgo_weather.py:80 searx/engines/wttr.py:35
 #: searx/searxng.msg
 msgid "UV index"
-msgstr ""
+msgstr "Índex UV"
 
 #. WEATHER_TERMS['VISIBILITY']
 #: searx/engines/duckduckgo_weather.py:62 searx/engines/wttr.py:66
 #: searx/searxng.msg
 msgid "Visibility"
-msgstr ""
+msgstr "Visibilitat"
 
 #. WEATHER_TERMS['WIND']
 #: searx/engines/duckduckgo_weather.py:58 searx/engines/open_meteo.py:86
 #: searx/engines/wttr.py:62 searx/searxng.msg
 msgid "Wind"
-msgstr ""
+msgstr "Vent"
 
 #. SOCIAL_MEDIA_TERMS['SUBSCRIBERS']
 #: searx/engines/lemmy.py:85 searx/searxng.msg
 msgid "subscribers"
-msgstr ""
+msgstr "subscriptors"
 
 #. SOCIAL_MEDIA_TERMS['POSTS']
 #: searx/engines/lemmy.py:86 searx/searxng.msg
 msgid "posts"
-msgstr ""
+msgstr "entrades"
 
 #. SOCIAL_MEDIA_TERMS['ACTIVE USERS']
 #: searx/engines/lemmy.py:87 searx/searxng.msg
 msgid "active users"
-msgstr ""
+msgstr "usuaris actius"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
-msgstr ""
+msgstr "comentaris"
 
 #. SOCIAL_MEDIA_TERMS['USER']
 #: searx/engines/lemmy.py:129 searx/engines/lemmy.py:164 searx/searxng.msg
 msgid "user"
-msgstr ""
+msgstr "usuari"
 
 #. SOCIAL_MEDIA_TERMS['COMMUNITY']
 #: searx/engines/lemmy.py:131 searx/engines/lemmy.py:165 searx/searxng.msg
 msgid "community"
-msgstr ""
+msgstr "comunitat"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
-msgstr ""
+msgstr "punts"
 
 #. SOCIAL_MEDIA_TERMS['TITLE']
 #: searx/searxng.msg
 msgid "title"
-msgstr ""
+msgstr "títol"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
-msgstr ""
+msgstr "autor"
 
 #. SOCIAL_MEDIA_TERMS['THREAD OPEN']
 #: searx/engines/discourse.py:149 searx/searxng.msg
 msgid "open"
-msgstr ""
+msgstr "obert"
 
 #. SOCIAL_MEDIA_TERMS['THREAD CLOSED']
 #: searx/engines/discourse.py:149 searx/searxng.msg
 msgid "closed"
-msgstr ""
+msgstr "tancat"
 
 #. SOCIAL_MEDIA_TERMS['THREAD ANSWERED']
 #: searx/engines/discourse.py:160 searx/searxng.msg
 msgid "answered"
-msgstr ""
+msgstr "contestat"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "No s'ha trobat cap element"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "Origen"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "S'ha produït un error en carregar la següent pàgina"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "La configuració no és vàlida, editeu-la"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "La configuració no és vàlida"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "error de cerca"
 
@@ -459,7 +461,7 @@ msgstr "Calcula {functions} dels arguments"
 
 #: searx/engines/mozhi.py:57
 msgid "Synonyms"
-msgstr ""
+msgstr "Sinònims"
 
 #: searx/engines/openstreetmap.py:159
 msgid "Get directions"
@@ -532,9 +534,9 @@ msgstr "Valoració de llibre"
 msgid "File quality"
 msgstr "Qualitat del fitxer"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
-msgstr ""
+msgstr "Calcular expressions matemàtiques a través de la barra de cerca"
 
 #: searx/plugins/hash_plugin.py:10
 msgid "Converts strings to different hash digests."
@@ -546,11 +548,13 @@ msgstr "resum del hash"
 
 #: searx/plugins/hostnames.py:103
 msgid "Hostnames plugin"
-msgstr ""
+msgstr "Plugin de noms de host"
 
 #: searx/plugins/hostnames.py:104
 msgid "Rewrite hostnames, remove results or prioritize them based on the hostname"
 msgstr ""
+"Reescriure els noms de host, eliminar resultats o prioritzar segons el "
+"nom de host"
 
 #: searx/plugins/oa_doi_rewrite.py:12
 msgid "Open Access DOI rewrite"
@@ -578,11 +582,11 @@ msgstr ""
 
 #: searx/plugins/self_info.py:28
 msgid "Your IP is: "
-msgstr ""
+msgstr "La teva IP és: "
 
 #: searx/plugins/self_info.py:31
 msgid "Your user-agent is: "
-msgstr ""
+msgstr "El teu agent d'usuari és: "
 
 #: searx/plugins/tor_check.py:24
 msgid "Tor check plugin"
@@ -625,7 +629,7 @@ msgstr "Suprimeix els arguments de rastreig dels URL retornats"
 
 #: searx/plugins/unit_converter.py:29
 msgid "Convert between units"
-msgstr ""
+msgstr "Convertir entre unitats"
 
 #: searx/templates/simple/404.html:4
 msgid "Page not found"
@@ -692,7 +696,7 @@ msgstr "Longitud"
 
 #: searx/templates/simple/macros.html:41
 msgid "Views"
-msgstr ""
+msgstr "Vistes"
 
 #: searx/templates/simple/macros.html:42
 #: searx/templates/simple/result_templates/files.html:34
@@ -710,7 +714,7 @@ msgid "proxied"
 msgstr "en servidor intermediari"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
+msgid "Start submitting a new issue on GitHub"
 msgstr "Obriu una incidència a GitHub"
 
 #: searx/templates/simple/new_issue.html:66
@@ -786,23 +790,23 @@ msgstr "Categories predeterminades"
 msgid "User interface"
 msgstr "Interfície de l'usuari"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "Privadesa"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "Motors de cerca"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "Cercadors usats actualment"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "Consultes especials"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "Galetes"
 
@@ -952,7 +956,7 @@ msgstr "Missatges dels motors de cerca"
 
 #: searx/templates/simple/elements/engines_msg.html:7
 msgid "seconds"
-msgstr ""
+msgstr "segons"
 
 #: searx/templates/simple/elements/search_url.html:3
 msgid "Search URL"
@@ -1050,7 +1054,7 @@ msgstr "Disculpeu!"
 
 #: searx/templates/simple/messages/no_results.html:12
 msgid "No results were found. You can try to:"
-msgstr "No s'han trobat resultats. Pots porvar:"
+msgstr "No s'han trobat resultats. Pots provar:"
 
 #: searx/templates/simple/messages/no_results.html:14
 msgid "There are no more results. You can try to:"
@@ -1201,11 +1205,11 @@ msgstr ""
 
 #: searx/templates/simple/preferences/engines.html:15
 msgid "Enable all"
-msgstr ""
+msgstr "Habilitar tots"
 
 #: searx/templates/simple/preferences/engines.html:16
 msgid "Disable all"
-msgstr ""
+msgstr "Deshabilitar tot"
 
 #: searx/templates/simple/preferences/engines.html:25
 msgid "!bang"
@@ -1225,11 +1229,11 @@ msgstr "Temps màxim"
 
 #: searx/templates/simple/preferences/favicon.html:2
 msgid "Favicon Resolver"
-msgstr ""
+msgstr "Resolvedor Favicon"
 
 #: searx/templates/simple/preferences/favicon.html:15
 msgid "Display favicons near search results"
-msgstr ""
+msgstr "Mostra els favicons a prop dels resultats de la cerca"
 
 #: searx/templates/simple/preferences/footer.html:2
 msgid ""
@@ -1379,6 +1383,26 @@ msgstr "Idioma de la interfície"
 msgid "Change the language of the layout"
 msgstr "Canvia la llengua de la disposició"
 
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr "Formatacio URL"
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr "Bonico"
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr "Ple"
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr "Amfitrio"
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr "Canvia el format de l'URL del resultat"
+
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
 msgstr "repositori"
@@ -1448,11 +1472,11 @@ msgstr "Versió"
 
 #: searx/templates/simple/result_templates/packages.html:18
 msgid "Maintainer"
-msgstr ""
+msgstr "Mantenidor"
 
 #: searx/templates/simple/result_templates/packages.html:24
 msgid "Updated at"
-msgstr ""
+msgstr "Actualitzat a"
 
 #: searx/templates/simple/result_templates/packages.html:30
 #: searx/templates/simple/result_templates/paper.html:25
@@ -1994,3 +2018,8 @@ msgstr "oculta el vídeo"
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "Els cercadors no poden obtenir cap resultat"
 
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "Obriu una incidència a GitHub"
+
+#~ msgid "dummy"
+#~ msgstr ""

@@ -29,13 +29,15 @@
 # tiziodcaio <tiziodcaio@users.noreply.translate.codeberg.org>, 2024.
 # Fabio_Perri <Fabio_Perri@users.noreply.translate.codeberg.org>, 2024.
 # lrnz2 <lrnz2@users.noreply.translate.codeberg.org>, 2024.
+# OpenCode <OpenCode@users.noreply.translate.codeberg.org>, 2024.
+# xawos <xawos@users.noreply.translate.codeberg.org>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: searx\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-11-14 02:16+0000\n"
-"Last-Translator: lrnz2 <lrnz2@users.noreply.translate.codeberg.org>\n"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-12-21 19:47+0000\n"
+"Last-Translator: xawos <xawos@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Italian <https://translate.codeberg.org/projects/searxng/"
 "searxng/it/>\n"
 "Language: it\n"
@@ -43,7 +45,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8.1\n"
+"X-Generator: Weblate 5.9.2\n"
 "Generated-By: Babel 2.16.0\n"
 
 #. CONSTANT_NAMES['NO_SUBGROUPING']
@@ -149,7 +151,7 @@ msgstr "d&r"
 #. CATEGORY_GROUPS['REPOS']
 #: searx/searxng.msg
 msgid "repos"
-msgstr "repos"
+msgstr "reposs"
 
 #. CATEGORY_GROUPS['SOFTWARE_WIKIS']
 #: searx/searxng.msg
@@ -319,7 +321,7 @@ msgid "active users"
 msgstr "utenti attivi"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
 msgstr "commenti"
@@ -335,7 +337,7 @@ msgid "community"
 msgstr "comunità"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
 msgstr "punti"
 
@@ -345,7 +347,7 @@ msgid "title"
 msgstr "titolo"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
 msgstr "autore"
 
@@ -364,28 +366,28 @@ msgstr "chiuso"
 msgid "answered"
 msgstr "risposto"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "Nessun oggetto trovato"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "Sorgente"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "Errore di caricamento della pagina successiva"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "Impostazioni non valide, modifica le tue preferenze"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "Impostazioni non valide"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "errore di ricerca"
 
@@ -545,7 +547,7 @@ msgstr "Valutazione del libro"
 msgid "File quality"
 msgstr "Qualità del file"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
 msgstr "Calcola espressioni matematiche nella barra di ricerca"
 
@@ -726,8 +728,8 @@ msgid "proxied"
 msgstr "proxy"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
-msgstr "Segnala un nuovo problema su GitHub"
+msgid "Start submitting a new issue on GitHub"
+msgstr "Inizia segnalando un nuovo problema su GitHub"
 
 #: searx/templates/simple/new_issue.html:66
 msgid "Please check for existing bugs about this engine on GitHub"
@@ -804,23 +806,23 @@ msgstr "Categorie predefinite"
 msgid "User interface"
 msgstr "Interfaccia utente"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "Privacy"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "Motori"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "Motori di ricerca attualmente in uso"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "Richieste speciali"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "Cookie"
 
@@ -1398,6 +1400,26 @@ msgstr "Lingua dell'interfaccia"
 #: searx/templates/simple/preferences/ui_locale.html:14
 msgid "Change the language of the layout"
 msgstr "Cambia la lingua dell'interfaccia"
+
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr "Formattazione URL"
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr "Figo"
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr "Pieno"
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr "Oste"
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr "Modifica formattazione URL del risultato"
 
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
@@ -2013,3 +2035,9 @@ msgstr "nascondi video"
 
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "I motori di ricerca non riescono a recuperare risultati"
+
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "Segnala un nuovo problema su GitHub"
+
+#~ msgid "dummy"
+#~ msgstr ""

@@ -11,23 +11,22 @@
 # vducong <vducong@users.noreply.translate.codeberg.org>, 2024.
 # tvminh19 <tvminh19@users.noreply.translate.codeberg.org>, 2024.
 # KhietVo <KhietVo@users.noreply.translate.codeberg.org>, 2024.
-# DiamondBrain113 <DiamondBrain113@users.noreply.translate.codeberg.org>, 2024.
+# DiamondBrain113 <DiamondBrain113@users.noreply.translate.codeberg.org>,
+# 2024.
 msgid ""
 msgstr ""
-"Project-Id-Version: searx\n"
+"Project-Id-Version:  searx\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-11-16 20:44+0000\n"
-"Last-Translator: DiamondBrain113 <DiamondBrain113@users.noreply.translate."
-"codeberg.org>\n"
-"Language-Team: Vietnamese <https://translate.codeberg.org/projects/searxng/"
-"searxng/vi/>\n"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-12-11 14:33+0000\n"
+"Last-Translator: KhietVo <KhietVo@users.noreply.translate.codeberg.org>\n"
 "Language: vi\n"
+"Language-Team: Vietnamese "
+"<https://translate.codeberg.org/projects/searxng/searxng/vi/>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.8.1\n"
 "Generated-By: Babel 2.16.0\n"
 
 #. CONSTANT_NAMES['NO_SUBGROUPING']
@@ -79,7 +78,7 @@ msgstr "radio"
 #. CATEGORY_NAMES['TV']
 #: searx/searxng.msg
 msgid "tv"
-msgstr "tv"
+msgstr "tivi"
 
 #. CATEGORY_NAMES['IT']
 #: searx/searxng.msg
@@ -99,7 +98,7 @@ msgstr "bản đồ"
 #. CATEGORY_NAMES['ONIONS']
 #: searx/searxng.msg
 msgid "onions"
-msgstr "củ hành"
+msgstr "hành tây"
 
 #. CATEGORY_NAMES['SCIENCE']
 #: searx/searxng.msg
@@ -304,7 +303,7 @@ msgid "active users"
 msgstr "Người dùng hoạt động"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
 msgstr "Bình luận"
@@ -320,7 +319,7 @@ msgid "community"
 msgstr "cộng đồng"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
 msgstr "điểm"
 
@@ -330,7 +329,7 @@ msgid "title"
 msgstr "tiêu đề"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
 msgstr "tác giả"
 
@@ -349,28 +348,28 @@ msgstr "đóng"
 msgid "answered"
 msgstr "đã trả lời"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "Không tìm thấy gì"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "Nguồn"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "Không thể tải trang kế tiếp"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "Cài đặt không hợp lệ, xin xem lại tuỳ chỉnh"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "Cài đặt không hợp lệ"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "lỗi tìm kiếm"
 
@@ -530,7 +529,7 @@ msgstr "Đánh giá của sách"
 msgid "File quality"
 msgstr "Chất lượng tệp"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
 msgstr "Tính toán bằng thanh tìm kiếm"
 
@@ -548,8 +547,7 @@ msgstr "Bổ trợ tên máy chủ"
 
 #: searx/plugins/hostnames.py:104
 msgid "Rewrite hostnames, remove results or prioritize them based on the hostname"
-msgstr ""
-"Viết lại máy chủ, xoá các kểt quả tìm kiếm hoặc sắp xếp dựa trên máy chủ"
+msgstr "Viết lại máy chủ, xoá các kểt quả tìm kiếm hoặc sắp xếp dựa trên máy chủ"
 
 #: searx/plugins/oa_doi_rewrite.py:12
 msgid "Open Access DOI rewrite"
@@ -709,7 +707,7 @@ msgid "proxied"
 msgstr "đã proxy"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
+msgid "Start submitting a new issue on GitHub"
 msgstr "Bắt đầu đăng một vấn đề mới trên Github"
 
 #: searx/templates/simple/new_issue.html:66
@@ -785,23 +783,23 @@ msgstr "Các danh mục mặc định"
 msgid "User interface"
 msgstr "Giao diện người dùng"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "Quyền riêng tư"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "Các trình tìm kiếm"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "Các trình tìm kiếm đang được dùng"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "Các truy vấn đặc biệt"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "Các cookie"
 
@@ -1382,6 +1380,26 @@ msgstr "Ngôn ngữ giao diện"
 #: searx/templates/simple/preferences/ui_locale.html:14
 msgid "Change the language of the layout"
 msgstr "Thay đổi ngôn ngữ giao diện"
+
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr ""
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr ""
 
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
@@ -1993,3 +2011,10 @@ msgstr "ẩn phim"
 
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "Các trình tìm kiếm không nhận được kết quả"
+
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "Bắt đầu đăng một vấn đề mới trên Github"
+
+#~ msgid "dummy"
+#~ msgstr ""
+

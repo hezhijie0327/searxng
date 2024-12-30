@@ -14,20 +14,19 @@
 # Priit Jõerüüt <jrtcdbrg@users.noreply.translate.codeberg.org>, 2024.
 msgid ""
 msgstr ""
-"Project-Id-Version: searx\n"
+"Project-Id-Version:  searx\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-05 06:24+0000\n"
-"PO-Revision-Date: 2024-10-21 20:07+0000\n"
-"Last-Translator: Priit Jõerüüt <jrtcdbrg@users.noreply.translate.codeberg."
-"org>\n"
-"Language-Team: Estonian <https://translate.codeberg.org/projects/searxng/"
-"searxng/et/>\n"
+"POT-Creation-Date: 2024-12-16 08:30+0000\n"
+"PO-Revision-Date: 2024-12-02 19:38+0000\n"
+"Last-Translator: Priit Jõerüüt "
+"<jrtcdbrg@users.noreply.translate.codeberg.org>\n"
 "Language: et\n"
+"Language-Team: Estonian "
+"<https://translate.codeberg.org/projects/searxng/searxng/et/>\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.7.2\n"
 "Generated-By: Babel 2.16.0\n"
 
 #. CONSTANT_NAMES['NO_SUBGROUPING']
@@ -303,7 +302,7 @@ msgid "active users"
 msgstr "aktiivseid kasutajaid"
 
 #. SOCIAL_MEDIA_TERMS['COMMENTS']
-#: searx/engines/discourse.py:157 searx/engines/hackernews.py:78
+#: searx/engines/discourse.py:157 searx/engines/hackernews.py:82
 #: searx/engines/lemmy.py:130 searx/searxng.msg
 msgid "comments"
 msgstr "kommentaare"
@@ -319,7 +318,7 @@ msgid "community"
 msgstr "kogukond"
 
 #. SOCIAL_MEDIA_TERMS['POINTS']
-#: searx/engines/hackernews.py:78 searx/searxng.msg
+#: searx/engines/hackernews.py:82 searx/searxng.msg
 msgid "points"
 msgstr "punkte"
 
@@ -329,7 +328,7 @@ msgid "title"
 msgstr "pealkiri"
 
 #. SOCIAL_MEDIA_TERMS['AUTHOR']
-#: searx/engines/hackernews.py:81 searx/searxng.msg
+#: searx/engines/hackernews.py:85 searx/searxng.msg
 msgid "author"
 msgstr "Autor"
 
@@ -348,28 +347,28 @@ msgstr "suletud"
 msgid "answered"
 msgstr "vastatud"
 
-#: searx/webapp.py:332
+#: searx/webapp.py:323
 msgid "No item found"
 msgstr "Üksust ei leitud"
 
 #: searx/engines/qwant.py:288
-#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:334
+#: searx/templates/simple/result_templates/images.html:23 searx/webapp.py:325
 msgid "Source"
 msgstr "Allikas"
 
-#: searx/webapp.py:336
+#: searx/webapp.py:327
 msgid "Error loading the next page"
 msgstr "Viga järgmise lehekülje laadimisel"
 
-#: searx/webapp.py:495 searx/webapp.py:898
+#: searx/webapp.py:496 searx/webapp.py:904
 msgid "Invalid settings, please edit your preferences"
 msgstr "Sobimatud seaded, palun muuda oma eelistusi"
 
-#: searx/webapp.py:511
+#: searx/webapp.py:512
 msgid "Invalid settings"
 msgstr "Sobimatud seaded"
 
-#: searx/webapp.py:588 searx/webapp.py:670
+#: searx/webapp.py:589 searx/webapp.py:679
 msgid "search error"
 msgstr "otsingu viga"
 
@@ -528,7 +527,7 @@ msgstr "Raamatu hinnang"
 msgid "File quality"
 msgstr "Faili kvaliteet"
 
-#: searx/plugins/calculator.py:14
+#: searx/plugins/calculator.py:18
 msgid "Calculate mathematical expressions via the search bar"
 msgstr "Arvuta otsinguribal matemaatilisi avaldisi"
 
@@ -710,8 +709,8 @@ msgid "proxied"
 msgstr "proksiserveris"
 
 #: searx/templates/simple/new_issue.html:64
-msgid "Start submiting a new issue on GitHub"
-msgstr "Alusta uue vea või probleemi esitamist GitHubis"
+msgid "Start submitting a new issue on GitHub"
+msgstr "Alusta veateate või ettepaneku koostamist GitHubis"
 
 #: searx/templates/simple/new_issue.html:66
 msgid "Please check for existing bugs about this engine on GitHub"
@@ -786,23 +785,23 @@ msgstr "Vaikimisi kategooriad"
 msgid "User interface"
 msgstr "Kasutajaliides"
 
-#: searx/templates/simple/preferences.html:211
+#: searx/templates/simple/preferences.html:212
 msgid "Privacy"
 msgstr "Privaatsus"
 
-#: searx/templates/simple/preferences.html:224
+#: searx/templates/simple/preferences.html:225
 msgid "Engines"
 msgstr "Otsingumootorid"
 
-#: searx/templates/simple/preferences.html:226
+#: searx/templates/simple/preferences.html:227
 msgid "Currently used search engines"
 msgstr "Hetkel kasutatud otsingumootorid"
 
-#: searx/templates/simple/preferences.html:234
+#: searx/templates/simple/preferences.html:235
 msgid "Special Queries"
 msgstr "Spetsiaalsed päringud"
 
-#: searx/templates/simple/preferences.html:240
+#: searx/templates/simple/preferences.html:241
 msgid "Cookies"
 msgstr "Küpsised"
 
@@ -1373,6 +1372,26 @@ msgstr "Kasutajaliidese keel"
 #: searx/templates/simple/preferences/ui_locale.html:14
 msgid "Change the language of the layout"
 msgstr "Muuda paigutuse keelt"
+
+#: searx/templates/simple/preferences/urlformatting.html:2
+msgid "URL formatting"
+msgstr "Võrguaadressi vorming"
+
+#: searx/templates/simple/preferences/urlformatting.html:8
+msgid "Pretty"
+msgstr "Ilus"
+
+#: searx/templates/simple/preferences/urlformatting.html:13
+msgid "Full"
+msgstr "Terviklik"
+
+#: searx/templates/simple/preferences/urlformatting.html:18
+msgid "Host"
+msgstr "Hostikohane"
+
+#: searx/templates/simple/preferences/urlformatting.html:23
+msgid "Change result URL formatting"
+msgstr "Muuda võrguaadressi vormingut otsinguvastustes"
 
 #: searx/templates/simple/result_templates/code.html:13
 msgid "repo"
@@ -1963,3 +1982,10 @@ msgstr "peida video"
 
 #~ msgid "Engines cannot retrieve results"
 #~ msgstr "Otsingumootorid ei anna päringutele vastuseid"
+
+#~ msgid "Start submiting a new issue on GitHub"
+#~ msgstr "Alusta uue vea või probleemi esitamist GitHubis"
+
+#~ msgid "dummy"
+#~ msgstr ""
+

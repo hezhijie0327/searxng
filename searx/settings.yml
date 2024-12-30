@@ -145,6 +145,8 @@ ui:
   search_on_category_select: true
   # Hotkeys: default or vim
   hotkeys: default
+  # URL formatting: pretty, full or host
+  url_formatting: pretty
 
 # Lock arbitrary settings on the preferences page.  To find the ID of the user
 # setting you want to lock, check the ID of the form on the page "preferences".
@@ -359,6 +361,25 @@ engines:
     timeout: 6
     disabled: true
 
+  - name: alexandria
+    engine: json_engine
+    shortcut: alx
+    categories: general
+    paging: true
+    search_url: https://api.alexandria.org/?a=1&q={query}&p={pageno}
+    results_query: results
+    title_query: title
+    url_query: url
+    content_query: snippet
+    timeout: 1.5
+    disabled: true
+    about:
+      website: https://alexandria.org/
+      official_api_documentation: https://github.com/alexandria-org/alexandria-api/raw/master/README.md
+      use_official_api: true
+      require_api_key: false
+      results: JSON
+
   - name: alpine linux packages
     engine: alpinelinux
     disabled: true
@@ -561,6 +582,8 @@ engines:
     url_query: link
     title_query: title
     content_query: snippet
+    title_html_to_text: true
+    content_html_to_text: true
     disabled: true
     about:
       website: https://crowdview.ai/
