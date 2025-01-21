@@ -19,6 +19,7 @@ from searx.engines import (
 from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
 
+import os
 import random
 
 
@@ -240,8 +241,6 @@ def yandex(query, _lang):
 
 
 backends = {
-    'all': all,
-    'random': random,
     'dbpedia': dbpedia,
     'duckduckgo': duckduckgo,
     'google': google_complete,
@@ -254,6 +253,8 @@ backends = {
     'wikipedia': wikipedia,
     'brave': brave,
     'yandex': yandex,
+    'combine': combine,
+    'random': random,
 }
 
 
@@ -274,11 +275,16 @@ def interleave_results(results_list):
 
 
 def search_autocomplete(backend_name, query, sxng_locale):
-    if backend_name == 'all':
-        # Collect results from all backends except 'all' and 'random'
+    if backend_name == 'combine':
+        # Read backends to combine from environment variable
+        combine_backends = os.getenv('COMBINE_BACKENDS', '').split(',')
+        combine_backends = [backend.strip() for backend in combine_backends if backend.strip()]
+
+        # Collect results from specified backends
         results_list = []
-        for backend_key, backend in backends.items():
-            if backend_key not in ['all', 'random']:  # Exclude 'all' and 'random'
+        for backend_key in combine_backends:
+            backend = backends.get(backend_key)
+            if backend is not None:
                 try:
                     results_list.append(backend(query, sxng_locale))
                 except (HTTPError, SearxEngineResponseException, ValueError):
@@ -288,7 +294,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
 
     elif backend_name == 'random':
         # Exclude 'random' from the backend selection and select a random one
-        available_backends = {key: backend for key, backend in backends.items() if key not in ['all', 'random']}
+        available_backends = {key: backend for key, backend in backends.items() if key not in ['combine', 'random']}
         backend = random.choice(list(available_backends.values()))
         try:
             return backend(query, sxng_locale)
