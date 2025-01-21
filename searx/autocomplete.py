@@ -252,8 +252,8 @@ backends = {
     'wikipedia': wikipedia,
     'brave': brave,
     'yandex': yandex,
-    'custom': 'custom',
     'all': 'all',
+    'custom': 'custom',
     'random': 'random',
 }
 
