@@ -276,9 +276,11 @@ def interleave_results(results_list):
 
 def search_autocomplete(backend_name, query, sxng_locale):
     if backend_name == 'combine':
-        # Read backends to combine from environment variable
-        combine_backends = os.getenv('COMBINE_BACKENDS', '').split(',')
-        combine_backends = [backend.strip() for backend in combine_backends if backend.strip()]
+        # Read backends to combine from settings under 'search'
+        combine_backends = settings.get('search', {}).get('autocomplete_engines', [])
+
+        # Ensure combine_backends is a list and contains valid backends
+        combine_backends = [backend.strip() for backend in combine_backends if backend.strip() in backends]
 
         # Collect results from specified backends
         results_list = []
