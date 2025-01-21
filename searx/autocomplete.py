@@ -19,7 +19,6 @@ from searx.engines import (
 from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
 
-import os
 import random
 
 
