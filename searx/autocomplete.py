@@ -269,38 +269,23 @@ def deduplicate_results(results):
     return unique_results
 
 
-def interleave_results(results_list, query):
-    # Find the minimum length of results across all result lists
-    min_len = min(len(results) for results in results_list)
-    interleaved = []
+def merge_results(results_list, query):
+    merged_results = [result for results in results_list for result in results]
 
-    # Interleave the results from each source up to the min length
-    for i in range(min_len):
-        for results in results_list:
-            interleaved.append(results[i])
+    unique_results = deduplicate_results(merged_results)
 
-    # Add the remaining results from each source
-    for results in results_list:
-        interleaved.extend(results[min_len:])
+    result_tokens = bm25s.tokenize(unique_results)
 
-    # Tokenize the interleaved results (combine title, content, and URL if needed)
-    result_tokens = bm25s.tokenize(interleaved,)
-
-    # Initialize BM25 retriever and index the tokenized results
     retriever = bm25s.BM25()
     retriever.index(result_tokens)
 
-    # Tokenize the query
     query_tokens = bm25s.tokenize(query)
 
-    # Retrieve ranked indices of results based on the query tokens
-    indices = retriever.retrieve(query_tokens, k=len(interleaved), return_as='documents', show_progress=False)
+    indices = retriever.retrieve(query_tokens, k=len(unique_results), return_as='documents', show_progress=False)
 
-    # Reorder interleaved results based on the BM25 ranking
-    ranked_results = [interleaved[index] for index in indices[0]]
+    ranked_results = [unique_results[index] for index in indices[0]]
 
-    # Return the deduplicated and ranked results
-    return deduplicate_results(ranked_results)
+    return ranked_results
 
 
 def search_autocomplete(backend_name, query, sxng_locale):
@@ -314,7 +299,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
                     results_list.append(backend(query, sxng_locale))
                 except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])
-        return interleave_results(results_list, query)
+        return merge_results(results_list, query)
 
     elif backend_name == 'random':
         available_backends = {key: backend for key, backend in backends.items() if key not in excluded_backends}
@@ -337,7 +322,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
                     results_list.append(backend(query, sxng_locale))
                 except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])
-        return interleave_results(results_list, query)
+        return merge_results(results_list, query)
 
     else:
         backend = backends.get(backend_name)
