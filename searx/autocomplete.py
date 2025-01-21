@@ -281,9 +281,8 @@ def search_autocomplete(backend_name, query, sxng_locale):
             if backend_key not in ['all', 'random']:  # Exclude 'all' and 'random'
                 try:
                     results_list.append(backend(query, sxng_locale))
-                except (HTTPError, SearxEngineResponseException):
+                except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])  # Append empty list on error
-
         # Merge results using interleave logic
         return interleave_results(results_list)
 
@@ -293,7 +292,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
         backend = random.choice(list(available_backends.values()))
         try:
             return backend(query, sxng_locale)
-        except (HTTPError, SearxEngineResponseException):
+        except (HTTPError, SearxEngineResponseException, ValueError):
             return []
 
     else:
@@ -303,5 +302,5 @@ def search_autocomplete(backend_name, query, sxng_locale):
             return []
         try:
             return backend(query, sxng_locale)
-        except (HTTPError, SearxEngineResponseException):
+        except (HTTPError, SearxEngineResponseException, ValueError):
             return []
