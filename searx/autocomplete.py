@@ -269,7 +269,7 @@ def deduplicate_results(results):
     return unique_results
 
 
-def merge_results(results_list, query):
+def rerank_results(results_list, query):
     merged_results = [result for results in results_list for result in results]
 
     unique_results = deduplicate_results(merged_results)
@@ -299,7 +299,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
                     results_list.append(backend(query, sxng_locale))
                 except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])
-        return merge_results(results_list, query)
+        return rerank_results(results_list, query)
 
     elif backend_name == 'random':
         available_backends = {key: backend for key, backend in backends.items() if key not in excluded_backends}
@@ -322,7 +322,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
                     results_list.append(backend(query, sxng_locale))
                 except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])
-        return merge_results(results_list, query)
+        return rerank_results(results_list, query)
 
     else:
         backend = backends.get(backend_name)
