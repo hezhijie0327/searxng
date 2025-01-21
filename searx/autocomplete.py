@@ -19,6 +19,9 @@ from searx.engines import (
 from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
 
+import bm25s
+import random
+
 
 def update_kwargs(**kwargs):
     if 'timeout' not in kwargs:
@@ -250,14 +253,82 @@ backends = {
     'wikipedia': wikipedia,
     'brave': brave,
     'yandex': yandex,
+    'all': 'all',
+    'custom': 'custom',
+    'random': 'random',
 }
 
 
+def deduplicate_results(results):
+    seen = set()
+    unique_results = []
+    for result in results:
+        if result not in seen:
+            unique_results.append(result)
+            seen.add(result)
+    return unique_results
+
+
+def rerank_results(results_list, query):
+    merged_results = [result for results in results_list for result in results]
+
+    unique_results = deduplicate_results(merged_results)
+
+    result_tokens = bm25s.tokenize(unique_results)
+
+    retriever = bm25s.BM25()
+    retriever.index(result_tokens)
+
+    query_tokens = bm25s.tokenize(query)
+
+    indices = retriever.retrieve(query_tokens, k=len(unique_results), return_as='documents', show_progress=False)
+
+    ranked_results = [unique_results[index] for index in indices[0]]
+
+    return ranked_results
+
+
 def search_autocomplete(backend_name, query, sxng_locale):
-    backend = backends.get(backend_name)
-    if backend is None:
-        return []
-    try:
-        return backend(query, sxng_locale)
-    except (HTTPError, SearxEngineResponseException):
-        return []
+    excluded_backends = ['all', 'custom', 'random']
+
+    if backend_name == 'all':
+        results_list = []
+        for backend_key, backend in backends.items():
+            if backend_key not in excluded_backends:
+                try:
+                    results_list.append(backend(query, sxng_locale))
+                except (HTTPError, SearxEngineResponseException, ValueError):
+                    results_list.append([])
+        return rerank_results(results_list, query)
+
+    elif backend_name == 'random':
+        available_backends = {key: backend for key, backend in backends.items() if key not in excluded_backends}
+        backend = random.choice(list(available_backends.values()))
+        try:
+            return backend(query, sxng_locale)
+        except (HTTPError, SearxEngineResponseException, ValueError):
+            return []
+
+    elif backend_name == 'custom':
+        custom_backends = settings.get('search', {}).get('autocomplete_engines', [])
+
+        custom_backends = [backend.strip() for backend in custom_backends if backend.strip() in backends]
+
+        results_list = []
+        for backend_key in custom_backends:
+            backend = backends.get(backend_key)
+            if backend is not None:
+                try:
+                    results_list.append(backend(query, sxng_locale))
+                except (HTTPError, SearxEngineResponseException, ValueError):
+                    results_list.append([])
+        return rerank_results(results_list, query)
+
+    else:
+        backend = backends.get(backend_name)
+        if backend is None:
+            return []
+        try:
+            return backend(query, sxng_locale)
+        except (HTTPError, SearxEngineResponseException, ValueError):
+            return []
