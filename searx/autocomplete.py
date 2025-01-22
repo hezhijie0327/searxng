@@ -20,7 +20,6 @@ from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
 
 import bm25s
-import random
 
 
 def update_kwargs(**kwargs):
@@ -255,7 +254,6 @@ backends = {
     'yandex': yandex,
     'all': 'all',
     'custom': 'custom',
-    'random': 'random',
 }
 
 
@@ -289,7 +287,7 @@ def rerank_results(results_list, query):
 
 
 def search_autocomplete(backend_name, query, sxng_locale):
-    excluded_backends = ['all', 'custom', 'random']
+    excluded_backends = ['all', 'custom']
 
     if backend_name == 'all':
         results_list = []
@@ -300,14 +298,6 @@ def search_autocomplete(backend_name, query, sxng_locale):
                 except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])
         return rerank_results(results_list, query)
-
-    elif backend_name == 'random':
-        available_backends = {key: backend for key, backend in backends.items() if key not in excluded_backends}
-        backend = random.choice(list(available_backends.values()))
-        try:
-            return backend(query, sxng_locale)
-        except (HTTPError, SearxEngineResponseException, ValueError):
-            return []
 
     elif backend_name == 'custom':
         custom_backends = settings.get('search', {}).get('autocomplete_engines', [])
