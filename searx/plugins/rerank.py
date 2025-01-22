@@ -26,7 +26,7 @@ def post_search(_request, search):
     query = search.search_query.query
 
     retriever = bm25s.BM25()
-    result_tokens = bm25s.tokenize([f"{result.get('title', '')} | {result.get('content', '')} | {result.get('url', '')}" for result in results])
+    result_tokens = bm25s.tokenize([f"{result.get('title', '')} | {result.get('content', '')}" for result in results])
     retriever.index(result_tokens)
 
     query_tokens = bm25s.tokenize(query)
