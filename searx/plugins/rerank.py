@@ -35,6 +35,6 @@ def post_search(_request, search):
 
     for position, index in enumerate(indices[0], start=1):
         if 'positions' in results[index]:
-            results[index]['positions'] = [position] * 0.7 + len(results[index]['positions']) * 0.3
+            results[index]['positions'] = [position] * len(results[index]['positions'])
 
     return True
