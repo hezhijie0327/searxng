@@ -33,8 +33,8 @@ def post_search(_request, search):
 
     indices = retriever.retrieve(query_tokens, k=len(results), return_as='documents', show_progress=False)
 
-    for position, index in enumerate(indices[0]):
-      if 'positions' in results[index]:
-          results[index]['positions'] = [position + 1] * len(results[index]['positions'])
+    for position, index in enumerate(indices[0], start=1):
+        if 'positions' in results[index]:
+            results[index]['positions'] = [position] * 0.7 + len(results[index]['positions']) * 0.3
 
     return True
