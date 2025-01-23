@@ -26,7 +26,7 @@ def post_search(_request, search):
     query = search.search_query.query
 
     retriever = bm25s.BM25()
-    result_tokens = bm25s.tokenize([f"{result.get('content', '')} | {result.get('title', '')}" for result in results])
+    result_tokens = bm25s.tokenize([f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results])
     retriever.index(result_tokens)
 
     query_tokens = bm25s.tokenize(query)
@@ -35,6 +35,6 @@ def post_search(_request, search):
 
     for position, index in enumerate(indices[0], start=1):
         if 'positions' in results[index]:
-            results[index]['positions'] = [position] * len(results[index]['positions'])
+            results[index]['positions'] = [position] * ( len(results[index]['positions']) * 0.3 + len(results[index]['engines']) * 0.7 )
 
     return True
