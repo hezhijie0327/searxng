@@ -31,10 +31,26 @@ def post_search(_request, search):
 
     query_tokens = bm25s.tokenize(query)
 
-    indices = retriever.retrieve(query_tokens, k=len(results), return_as='documents', show_progress=False)
+    # 获取 documents 和 scores
+    documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
-    for position, index in enumerate(indices[0], start=1):
-        if 'positions' in results[index]:
-            results[index]['positions'] = [position] * ( len(results[index]['positions']) * 0.25 + len(results[index]['engines']) * 0.75 )
+    # 遍历文档和分数
+    for position, (doc, score) in enumerate(zip(documents[0], scores[0]), start=1):
+        # 在 `results` 中找到与 `doc` 对应的索引
+        index = next(
+            (i for i, result in enumerate(results) 
+             if doc.startswith(result.get('content', ''))), 
+            None
+        )
+        if index is not None:
+            # 确保 `positions` 字段存在，并更新
+            if 'positions' in results[index]:
+                results[index]['positions'] = [
+                    pos / score if score > 0 else pos  # 防止除以 0
+                    for pos in results[index]['positions']
+                ]
+            # 添加排名位置和分数
+            results[index]['position'] = position
+            results[index]['score'] = score  # 将分数附加到结果中
 
     return True
