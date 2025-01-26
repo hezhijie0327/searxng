@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # pylint: disable=protected-access
-"""Plugin which reranks the search results using the Okapi BM25 algorithm.
+"""Plugin which reranks the search results via Okapi BM25 algorithm.
 
 Enable in ``settings.yml``:
 
@@ -16,7 +16,7 @@ from searx import settings
 import bm25s
 
 name = 'Rerank plugin'
-description = 'Rerank search results, ignoring original engine ranking'
+description = 'Rerank search results via Okapi BM25 algorithm'
 default_on = True
 preference_section = 'general'
 
