@@ -31,10 +31,14 @@ def post_search(_request, search):
 
     query_tokens = bm25s.tokenize(query)
 
-    indices = retriever.retrieve(query_tokens, k=len(results), return_as='documents', show_progress=False)
+    documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
-    for position, index in enumerate(indices[0], start=1):
-        if 'positions' in results[index]:
-            results[index]['positions'] = [position] * ( len(results[index]['positions']) * 0.25 + len(results[index]['engines']) * 0.75 )
+    for rank, index in enumerate(documents[0], start=1):
+        if index < len(results) and isinstance(results[index].get('positions'), list):
+            score = 1 + scores[0][index]
+            results[index]['positions'] = [
+                float(position * score) if isinstance(position, (int, float)) else position
+                for position in results[index]['positions']
+            ]
 
     return True
