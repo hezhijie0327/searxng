@@ -20,6 +20,7 @@ from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
 
 import bm25s
+import bm25s.stopwords as stopwords_module
 
 
 def update_kwargs(**kwargs):
@@ -288,12 +289,17 @@ def rerank_results(results_list, query):
 
     unique_results = deduplicate_results(merged_results)
 
-    result_tokens = bm25s.tokenize(unique_results)
+    stopwords = set()
+    for name, value in stopwords_module.__dict__.items():
+        if name.startswith("STOPWORDS_") and isinstance(value, tuple):
+            stopwords.update(value)
+
+    result_tokens = bm25s.tokenize(unique_results, stopwords=stopwords)
 
     retriever = bm25s.BM25()
     retriever.index(result_tokens)
 
-    query_tokens = bm25s.tokenize(query)
+    query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
     indices = retriever.retrieve(query_tokens, k=len(unique_results), return_as='documents', show_progress=False)
 
