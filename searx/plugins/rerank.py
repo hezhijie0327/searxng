@@ -15,7 +15,6 @@ from searx import settings
 
 import bm25s
 import bm25s.stopwords as stopwords_module
-import Stemmer
 
 name = 'Rerank plugin'
 description = 'Rerank search results via Okapi BM25 algorithm'
@@ -27,8 +26,6 @@ def post_search(_request, search):
     results = search.result_container._merged_results
     query = search.search_query.query
 
-    stemmer = Stemmer.Stemmer("english")
-
     stopwords = set()
     for name, value in stopwords_module.__dict__.items():
         if name.startswith("STOPWORDS_") and isinstance(value, tuple):
@@ -37,12 +34,11 @@ def post_search(_request, search):
     retriever = bm25s.BM25()
     result_tokens = bm25s.tokenize(
         [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results],
-        stopwords=stopwords,
-        stemmer=stemmer
+        stopwords=stopwords
     )
     retriever.index(result_tokens)
 
-    query_tokens = bm25s.tokenize(query, stopwords=stopwords, stemmer=stemmer)
+    query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
     documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
