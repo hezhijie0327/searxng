@@ -27,25 +27,25 @@ def post_search(_request, search):
     query = search.search_query.query
 
     corpus = [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results]
+    doc_to_index = {doc: idx for idx, doc in enumerate(corpus)}
 
-    stopwords = set()
-    for name, value in stopwords_module.__dict__.items():
-        if name.startswith("STOPWORDS_") and isinstance(value, tuple):
-            stopwords.update(value)
+    stopwords = {
+        word for name, value in stopwords_module.__dict__.items()
+        if name.startswith("STOPWORDS_") and isinstance(value, tuple) for word in value
+    }
 
-    tokenizer = bm25s.tokenization.Tokenizer(stopwords=stopwords)
-
-    corpus_tokens = tokenizer(corpus)
-    query_tokens = tokenizer(query)
+    corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
+    query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
     retriever = bm25s.BM25(corpus=corpus, backend="numba")
     retriever.index(corpus_tokens)
 
     documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
-    for index in documents[0]:
-        if index < len(results) and isinstance(results[index].get('positions'), list):
-            score = 1 + scores[0][index]
+    for doc in documents[0]:
+        index = doc_to_index.get(doc)
+        if index is not None and isinstance(results[index].get('positions'), list):
+            score = 1 + scores[0][doc_to_index[doc]]
             results[index]['positions'] = [
                 float(position * score) if isinstance(position, (int, float)) else position
                 for position in results[index]['positions']
