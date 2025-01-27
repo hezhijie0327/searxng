@@ -26,19 +26,20 @@ def post_search(_request, search):
     results = search.result_container._merged_results
     query = search.search_query.query
 
+    corpus = [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results]
+
     stopwords = set()
     for name, value in stopwords_module.__dict__.items():
         if name.startswith("STOPWORDS_") and isinstance(value, tuple):
             stopwords.update(value)
 
-    retriever = bm25s.BM25()
-    result_tokens = bm25s.tokenize(
-        [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results],
-        stopwords=stopwords
-    )
-    retriever.index(result_tokens)
+    tokenizer = bm25s.tokenization.Tokenizer(stopwords=stopwords)
 
-    query_tokens = bm25s.tokenize(query, stopwords=stopwords)
+    corpus_tokens = tokenizer(corpus)
+    query_tokens = tokenizer(query)
+
+    retriever = bm25s.BM25(corpus=corpus, backend="numba")
+    retriever.index(corpus_tokens)
 
     documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
