@@ -31,7 +31,7 @@ def post_search(_request, search):
         if name.startswith("STOPWORDS_") and isinstance(value, tuple):
             stopwords.update(value)
 
-    retriever = bm25s.BM25()
+    retriever = bm25s.BM25(backend="numba")
     result_tokens = bm25s.tokenize(
         [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results],
         stopwords=stopwords
