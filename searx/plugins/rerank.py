@@ -26,28 +26,27 @@ def post_search(_request, search):
     results = search.result_container._merged_results
     query = search.search_query.query
 
-    stopwords = set()
-    for name, value in stopwords_module.__dict__.items():
-        if name.startswith("STOPWORDS_") and isinstance(value, tuple):
-            stopwords.update(value)
+    corpus = [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results]
 
-    retriever = bm25s.BM25()
-    result_tokens = bm25s.tokenize(
-        [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results],
-        stopwords=stopwords
-    )
-    retriever.index(result_tokens)
+    stopwords = {
+        word for name, value in stopwords_module.__dict__.items()
+        if name.startswith("STOPWORDS_") and isinstance(value, tuple) for word in value
+    }
 
+    corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
     query_tokens = bm25s.tokenize(query, stopwords=stopwords)
+
+    retriever = bm25s.BM25(corpus=corpus, backend="numba")
+    retriever.index(corpus_tokens)
 
     documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
-    for index in documents[0]:
-        if index < len(results) and isinstance(results[index].get('positions'), list):
-            score = 1 + scores[0][index]
-            results[index]['positions'] = [
+    for idx, doc in enumerate(documents[0]):
+        if idx < len(results) and isinstance(results[idx].get('positions'), list):
+            score = 1 + scores[0][idx]
+            results[idx]['positions'] = [
                 float(position * score) if isinstance(position, (int, float)) else position
-                for position in results[index]['positions']
+                for position in results[idx]['positions']
             ]
 
     return True
