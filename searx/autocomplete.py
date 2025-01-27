@@ -296,7 +296,7 @@ def rerank_results(results_list, query):
 
     result_tokens = bm25s.tokenize(unique_results, stopwords=stopwords)
 
-    retriever = bm25s.BM25()
+    retriever = bm25s.BM25(backend="numba")
     retriever.index(result_tokens)
 
     query_tokens = bm25s.tokenize(query, stopwords=stopwords)
