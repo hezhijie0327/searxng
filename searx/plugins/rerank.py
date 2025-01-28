@@ -36,17 +36,17 @@ def post_search(_request, search):
     corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
     query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
-    retriever = bm25s.BM25(corpus=corpus, backend="numba")
+    retriever = bm25s.BM25(corpus=corpus)
     retriever.index(corpus_tokens)
 
     documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
 
-    for idx, doc in enumerate(documents[0]):
-        if idx < len(results) and isinstance(results[idx].get('positions'), list):
-            score = 1 + scores[0][idx]
-            results[idx]['positions'] = [
+    for index in documents[0]:
+        if index < len(results) and isinstance(results[index].get('positions'), list):
+            score = 1 + scores[0][index]
+            results[index]['positions'] = [
                 float(position * score) if isinstance(position, (int, float)) else position
-                for position in results[idx]['positions']
+                for position in results[index]['positions']
             ]
 
     return True
