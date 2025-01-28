@@ -34,10 +34,6 @@ class SXNGPlugin(Plugin):
     def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
         results = search.result_container._merged_results
         query = search.search_query.query
-        engine_results = EngineResults()
-
-        if not results or not query.strip():
-            return engine_results
 
         corpus = [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results]
 
@@ -60,6 +56,3 @@ class SXNGPlugin(Plugin):
                 if isinstance(position, (int, float)):
                     position = position / score if score != 0 else position
                     results[index]["positions"][i] = float(position)
-
-        engine_results.extend(results)
-        return engine_results
