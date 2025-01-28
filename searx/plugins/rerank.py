@@ -43,7 +43,7 @@ def post_search(_request, search):
 
     for index in documents[0]:
         results[index]['positions'] = [
-            float(position * (1 + scores[0][index])) if isinstance(position, (int, float)) else position
+            float(position / (1 - scores[0][index])) if isinstance(position, (int, float)) else position
             for position in results[index]['positions']
         ]
 
