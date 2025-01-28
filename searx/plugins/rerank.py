@@ -42,11 +42,9 @@ def post_search(_request, search):
     documents, scores = retriever.retrieve(query_tokens, k=len(corpus), return_as='tuple', show_progress=False)
 
     for index in documents[0]:
-        if index < len(results) and isinstance(results[index].get('positions'), list):
-            score = 1 + scores[0][index]
-            results[index]['positions'] = [
-                float(position * score) if isinstance(position, (int, float)) else position
-                for position in results[index]['positions']
-            ]
+        results[index]['positions'] = [
+            float(position * (1 + scores[0][index])) if isinstance(position, (int, float)) else position
+            for position in results[index]['positions']
+        ]
 
     return True
