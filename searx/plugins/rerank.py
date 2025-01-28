@@ -45,7 +45,7 @@ def post_search(_request, search):
         score = scores[0][index]
         for i, position in enumerate(results[index].get('positions', [])):
             if isinstance(position, (int, float)):
-                position = position / (1 - score) if 1 - score != 0 else position
+                position = position * (1 - score) if 1 - score != 0 else position
                 results[index]['positions'][i] = position
 
     return True
