@@ -19,7 +19,7 @@ class SXNGPlugin(Plugin):
     """
 
     id = "bm25_rerank_plugin"
-    default_on = True
+    default_on = False
 
     def __init__(self):
         super().__init__()
@@ -27,7 +27,7 @@ class SXNGPlugin(Plugin):
         self.info = PluginInfo(
             id=self.id,
             name="BM25 Rerank Plugin",
-            description="Rerank search results using the Okapi BM25 algorithm.",
+            description="Rerank search results using the Okapi BM25 algorithm",
             preference_section="general",
         )
 
