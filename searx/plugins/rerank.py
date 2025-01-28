@@ -36,10 +36,10 @@ def post_search(_request, search):
     corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
     query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
-    retriever = bm25s.BM25(corpus=corpus)
+    retriever = bm25s.BM25()
     retriever.index(corpus_tokens)
 
-    documents, scores = retriever.retrieve(query_tokens, k=len(results), return_as='tuple', show_progress=False)
+    documents, scores = retriever.retrieve(query_tokens, k=len(corpus), return_as='tuple', show_progress=False)
 
     for index in documents[0]:
         if index < len(results) and isinstance(results[index].get('positions'), list):
