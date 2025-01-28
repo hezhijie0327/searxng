@@ -295,12 +295,14 @@ def rerank_results(results_list, query):
     corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
     query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
-    retriever = bm25s.BM25(corpus=corpus)
+    retriever = bm25s.BM25()
     retriever.index(corpus_tokens)
 
-    indices = retriever.retrieve(query_tokens, k=len(corpus), return_as='documents', show_progress=False)
+    documents, scores = retriever.retrieve(query_tokens, k=len(corpus), return_as='tuple', show_progress=False)
 
-    ranked_results = [corpus[index] for index in indices[0]]
+    ranked_results = [
+        corpus[index] for index, _ in sorted(zip(documents[0], scores[0]), key=lambda x: x[1], reverse=True)
+    ]
 
     return ranked_results
 
