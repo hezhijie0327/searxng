@@ -285,25 +285,24 @@ def deduplicate_results(results):
 
 
 def rerank_results(results_list, query):
-    merged_results = [result for results in results_list for result in results]
+    corpus = deduplicate_results([result for results in results_list for result in results])
 
-    unique_results = deduplicate_results(merged_results)
+    stopwords = {
+        word for name, value in stopwords_module.__dict__.items()
+        if name.startswith("STOPWORDS_") and isinstance(value, tuple) for word in value
+    }
 
-    stopwords = set()
-    for name, value in stopwords_module.__dict__.items():
-        if name.startswith("STOPWORDS_") and isinstance(value, tuple):
-            stopwords.update(value)
-
-    result_tokens = bm25s.tokenize(unique_results, stopwords=stopwords)
-
-    retriever = bm25s.BM25()
-    retriever.index(result_tokens)
-
+    corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
     query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
-    indices = retriever.retrieve(query_tokens, k=len(unique_results), return_as='documents', show_progress=False)
+    retriever = bm25s.BM25()
+    retriever.index(corpus_tokens)
 
-    ranked_results = [unique_results[index] for index in indices[0]]
+    documents, scores = retriever.retrieve(query_tokens, k=len(corpus), return_as='tuple', show_progress=False)
+
+    ranked_results = [
+        corpus[index] for index, _ in sorted(zip(documents[0], scores[0]), key=lambda x: x[1], reverse=True)
+    ]
 
     return ranked_results
 
