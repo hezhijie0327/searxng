@@ -14,7 +14,7 @@ import bm25s
 import bm25s.stopwords as stopwords_module
 
 class SXNGPlugin(Plugin):
-    """Plugin reranks search results via the Okapi BM25 algorithm. The
+    """Rerank search results using the Okapi BM25 algorithm. The
     results are reordered to improve relevance based on the query.
     """
 
@@ -32,7 +32,6 @@ class SXNGPlugin(Plugin):
         )
 
     def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
-        """Reranks search results using BM25."""
         results = search.result_container._merged_results
         query = search.search_query.query
         engine_results = EngineResults()
