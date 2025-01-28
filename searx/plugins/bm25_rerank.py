@@ -19,7 +19,7 @@ class SXNGPlugin(Plugin):
     """
 
     id = "bm25_rerank_plugin"
-    default_on = False
+    default_on = True
 
     def __init__(self):
         super().__init__()
