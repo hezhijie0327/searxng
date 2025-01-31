@@ -54,5 +54,4 @@ class SXNGPlugin(Plugin):
             score = scores[0][index]
             for i, position in enumerate(results[index].get("positions", [])):
                 if isinstance(position, (int, float)):
-                    position = position / score if score != 0 else position
-                    results[index]["positions"][i] = float(position)
+                    results[index]["positions"][i] = float(position / (score + 1))
