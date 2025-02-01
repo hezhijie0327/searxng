@@ -290,8 +290,10 @@ def rerank_results(results_list, query):
     corpus = deduplicate_results([result for results in results_list for result in results])
 
     stopwords = {
-        word for name, value in stopwords_module.__dict__.items()
-        if name.startswith("STOPWORDS_") and isinstance(value, tuple) for word in value
+        word
+        for name, value in stopwords_module.__dict__.items()
+        if name.startswith("STOPWORDS_") and isinstance(value, tuple)
+        for word in value
     }
 
     corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
