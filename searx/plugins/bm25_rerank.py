@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# pylint: disable=missing-module-docstring, missing-class-docstring
+# pylint: disable=missing-module-docstring, missing-class-docstring, protected-access
 from __future__ import annotations
 import typing
+
+import bm25s
+import bm25s.stopwords as stopwords_module
 
 from searx.plugins import Plugin, PluginInfo
 from searx.result_types import EngineResults
@@ -9,9 +12,6 @@ from searx.result_types import EngineResults
 if typing.TYPE_CHECKING:
     from searx.search import SearchWithPlugins
     from searx.extended_types import SXNG_Request
-
-import bm25s
-import bm25s.stopwords as stopwords_module
 
 
 class SXNGPlugin(Plugin):
