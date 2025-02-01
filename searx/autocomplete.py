@@ -12,6 +12,9 @@ import lxml.etree
 import lxml.html
 from httpx import HTTPError
 
+import bm25s
+import bm25s.stopwords as stopwords_module
+
 from searx.extended_types import SXNG_Response
 from searx import settings
 from searx.engines import (
@@ -20,9 +23,6 @@ from searx.engines import (
 )
 from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
-
-import bm25s
-import bm25s.stopwords as stopwords_module
 
 
 def update_kwargs(**kwargs):
