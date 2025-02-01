@@ -8,12 +8,12 @@ import json
 import html
 from urllib.parse import urlencode, quote_plus
 
+import bm25s
+import bm25s.stopwords as stopwords_module
+
 import lxml.etree
 import lxml.html
 from httpx import HTTPError
-
-import bm25s
-import bm25s.stopwords as stopwords_module
 
 from searx.extended_types import SXNG_Response
 from searx import settings
@@ -324,7 +324,7 @@ def search_autocomplete(backend_name, query, sxng_locale):
                     results_list.append([])
         return rerank_results(results_list, query)
 
-    elif backend_name == 'custom':
+    if backend_name == 'custom':
         custom_backends = settings.get('search', {}).get('autocomplete_engines', [])
 
         custom_backends = [backend.strip() for backend in custom_backends if backend.strip() in backends]
@@ -339,11 +339,10 @@ def search_autocomplete(backend_name, query, sxng_locale):
                     results_list.append([])
         return rerank_results(results_list, query)
 
-    else:
-        backend = backends.get(backend_name)
-        if backend is None:
-            return []
-        try:
-            return backend(query, sxng_locale)
-        except (HTTPError, SearxEngineResponseException, ValueError):
-            return []
+    backend = backends.get(backend_name)
+    if backend is None:
+        return []
+    try:
+        return backend(query, sxng_locale)
+    except (HTTPError, SearxEngineResponseException, ValueError):
+        return []
