@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
 import bm25s
 import bm25s.stopwords as stopwords_module
 
+
 class SXNGPlugin(Plugin):
     """Rerank search results using the Okapi BM25 algorithm. The
     results are reordered to improve relevance based on the query.
@@ -35,11 +36,15 @@ class SXNGPlugin(Plugin):
         results = search.result_container._merged_results
         query = search.search_query.query
 
-        corpus = [f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results]
+        corpus = [
+            f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results
+        ]
 
         stopwords = {
-            word for name, value in stopwords_module.__dict__.items()
-            if name.startswith("STOPWORDS_") and isinstance(value, tuple) for word in value
+            word
+            for name, value in stopwords_module.__dict__.items()
+            if name.startswith("STOPWORDS_") and isinstance(value, tuple)
+            for word in value
         }
 
         corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
