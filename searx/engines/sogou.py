@@ -54,10 +54,12 @@ def response(resp):
             content = " ".join(content_elem).strip() if content_elem else ""
 
         if title and url:
-            results.append({
-                "title": title,
-                "url": url,
-                "content": content,
-            })
+            results.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "content": content,
+                }
+            )
 
     return results
