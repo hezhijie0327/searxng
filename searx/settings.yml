@@ -1694,6 +1694,11 @@ engines:
     engine: sepiasearch
     shortcut: sep
 
+  - name: sogou
+    engine: sogou
+    shortcut: sogou
+    disabled: true
+
   - name: soundcloud
     engine: soundcloud
     shortcut: sc
