@@ -4,7 +4,6 @@
 from urllib.parse import urlencode
 import dateutil.parser
 from lxml import html
-from searx import utils
 
 # Metadata
 about = {
@@ -54,7 +53,7 @@ def response(resp):
 
         if title and url:
             results.append(
-                    {
+                {
                     "title": title,
                     "url": url,
                     "content": content,
