@@ -3,7 +3,6 @@
 
 from urllib.parse import urlencode
 from lxml import html
-from searx import utils
 
 # Metadata
 about = {
