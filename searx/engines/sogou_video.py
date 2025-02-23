@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# pylint: disable=invalid-name
 
 import json
 import re
@@ -49,6 +48,6 @@ def response(resp):
                     "content": f"{item.get('site', '')} | {item.get('duration', '')} | {item.get('dateTime', '')}",
                     "template": "videos.html",
                 }
-            )'
+            )
 
     return results
