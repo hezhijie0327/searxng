@@ -171,6 +171,21 @@ def seznam(query, _lang):
     ]
 
 
+def so360(query, _lang):
+    # 360So search autocompleter
+    base_url = "https://sug.so.360.cn/suggest?"
+    response = get(base_url + urlencode({'format': 'json', 'word': query}))
+
+    results = []
+
+    if response.ok:
+        data = response.json()
+        if 'result' in data:
+            for item in data['result']:
+                results.append(item['word'])
+    return results
+
+
 def stract(query, _lang):
     # stract autocompleter (beta)
     url = f"https://stract.com/beta/api/autosuggest?q={quote_plus(query)}"
@@ -254,6 +269,7 @@ backends = {
     'mwmbl': mwmbl,
     'qwant': qwant,
     'seznam': seznam,
+    'so360': so360,
     'stract': stract,
     'swisscows': swisscows,
     'wikipedia': wikipedia,
