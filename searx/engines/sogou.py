@@ -33,6 +33,7 @@ def request(query, params):
 
     if 'time_range' in params:
         query_params["s_from"] = time_range_dict[params['time_range']]
+        query_params["tsn"] = 1
 
     params["url"] = f"{base_url}?{urlencode(query_params)}"
     return params
