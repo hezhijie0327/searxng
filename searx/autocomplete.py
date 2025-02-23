@@ -183,8 +183,11 @@ def sogou(query, _lang):
         end_idx = data.rfind("]")
 
         if start_idx != -1 and end_idx != -1:
-            data_list = eval(data[start_idx : end_idx + 1])
-            return data_list[1] if isinstance(data_list, list) else []
+            try:
+                data_list = json.loads(data[start_idx : end_idx + 1])
+                return data_list[1] if isinstance(data_list, list) else []
+            except json.JSONDecodeError:
+                return []
 
     return []
 
