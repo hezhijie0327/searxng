@@ -44,8 +44,9 @@ def response(resp):
                     "url": item.get("url", ""),
                     "thumbnail_src": item.get("thumbUrl", ""),
                     "img_src": item.get("picUrl", ""),
-                    "title": item.get("title", ""),
-                    "source": item.get("link", ""),
+                    "title": item.get("content_major", ""),
+                    "source": item.get("ch_site_name", ""),
                 }
             )
+
     return results
