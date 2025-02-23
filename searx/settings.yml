@@ -339,7 +339,12 @@ categories_as_tabs:
 engines:
   - name: 360so
     engine: 360so
-    shortcut: 3so
+    shortcut: 360so
+    disabled: true
+
+  - name: 360so video
+    engine: 360so_video
+    shortcut: 360sov
     disabled: true
 
   - name: 9gag
