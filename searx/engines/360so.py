@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# pylint: disable=invalid-name
 """360So search engine for searxng"""
 
 from urllib.parse import urlencode
-import dateutil.parser
 from lxml import html
 
 # Metadata
