@@ -31,7 +31,7 @@ def request(query, params):
         "page": params["pageno"],
     }
 
-    if 'time_range' in params:
+    if 'time_range' in params and params['time_range'] in time_range_dict:
         query_params["s_from"] = time_range_dict[params['time_range']]
         query_params["tsn"] = 1
 
