@@ -16,7 +16,10 @@ about = {
 # Engine Configuration
 categories = ["general"]
 paging = True
-max_page = 5
+max_page = 10
+time_range_support = True
+
+time_range_dict = {'day': 'inttime_day', 'week': 'inttime_week', 'month': 'inttime_month', 'year': 'inttime_year'}
 
 # Base URL
 base_url = "https://www.sogou.com/web"
@@ -27,6 +30,10 @@ def request(query, params):
         "query": query,
         "page": params["pageno"],
     }
+
+    if 'time_range' in params:
+        query_params["s_from"] = time_range_dict[params['time_range']]
+        query_params["tsn"] = 1
 
     params["url"] = f"{base_url}?{urlencode(query_params)}"
     return params
