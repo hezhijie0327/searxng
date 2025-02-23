@@ -1699,6 +1699,16 @@ engines:
     shortcut: sogou
     disabled: true
 
+  - name: sogou picture
+    engine: sogou_picture
+    shortcut: sogoup
+    disabled: true
+
+  - name: sogou video
+    engine: sogou_video
+    shortcut: sogouv
+    disabled: true
+
   - name: soundcloud
     engine: soundcloud
     shortcut: sc
