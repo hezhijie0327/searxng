@@ -8,7 +8,6 @@ from urllib.parse import urlencode
 # about
 about = {
     "website": "https://pic.sogou.com/",
-    "wikidata_id": None,
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
