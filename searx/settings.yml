@@ -337,6 +337,11 @@ categories_as_tabs:
   social media:
 
 engines:
+  - name: 360so
+    engine: 360so
+    shortcut: 3so
+    disabled: true
+
   - name: 9gag
     engine: 9gag
     shortcut: 9g
