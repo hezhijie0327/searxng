@@ -17,7 +17,10 @@ about = {
 # Engine Configuration
 categories = ["general"]
 paging = True
-max_page = 5
+max_page = 10
+time_range_support = True
+
+time_range_dict = {'day': 'd', 'week': 'w', 'month': 'm', 'year': 'y'}
 
 # Base URL
 base_url = "https://www.so.com/s"
@@ -28,6 +31,9 @@ def request(query, params):
         "pn": params["pageno"],
         "q": query,
     }
+
+    if 'time_range' in params:
+        query_params["adv_t"] = time_range_dict[params['time_range']]
 
     params["url"] = f"{base_url}?{urlencode(query_params)}"
     return params
