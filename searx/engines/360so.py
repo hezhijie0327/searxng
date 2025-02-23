@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""www.so.com search engine for searxng"""
+"""360So search engine for searxng"""
 
 from urllib.parse import urlencode
 import dateutil.parser
@@ -53,10 +53,12 @@ def response(resp):
         content = " ".join(content_elem).strip() if content_elem else ""
 
         if title and url:
-            results.append({
-                "title": title,
-                "url": url,
-                "content": content,
-            })
+            results.append(
+                    {
+                    "title": title,
+                    "url": url,
+                    "content": content,
+                }
+            )
 
     return results
