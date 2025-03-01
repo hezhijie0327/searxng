@@ -41,6 +41,7 @@
   - ``mwmbl``
   - ``qwant``
   - ``seznam``
+  - ``sogou``
   - ``stract``
   - ``swisscows``
   - ``wikipedia``
