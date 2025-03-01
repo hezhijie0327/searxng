@@ -20,6 +20,7 @@ from searx.engines import (
 )
 from searx.network import get as http_get, post as http_post
 from searx.exceptions import SearxEngineResponseException
+from searx.utils import extr
 
 
 def update_kwargs(**kwargs):
@@ -177,14 +178,11 @@ def sogou(query, _lang):
     response = get(base_url + urlencode({'m': 'searxng', 'key': query}))
 
     if response.ok:
-        data = response.text
-
-        start_idx = data.find("[")
-        end_idx = data.rfind("]")
+        raw_json = extr(response.text, "[", "]")
 
         if start_idx != -1 and end_idx != -1:
             try:
-                data_list = json.loads(data[start_idx : end_idx + 1])
+                data_list = json.loads(raw_json[start_idx : end_idx + 1])
                 return data_list[1] if isinstance(data_list, list) else []
             except json.JSONDecodeError:
                 return []
