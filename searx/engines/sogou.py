@@ -54,10 +54,9 @@ def response(resp):
             url = f"https://www.sogou.com{url}"
 
         content_elem = item.xpath('.//div[contains(@class, "text-layout")]//p[contains(@class, "star-wiki")]/text()')
-        content = " ".join(content_elem).strip() if content_elem else ""
         if not content:
             content_elem = item.xpath('.//div[contains(@class, "fz-mid space-txt")]/text()')
-            content = " ".join(content_elem).strip() if content_elem else ""
+        content = " ".join(content_elem).strip() if content_elem else ""
 
         if title and url:
             results.append(
