@@ -150,7 +150,7 @@ def mwmbl(query, _lang):
 
 def qihu360so(query, _lang):
     # 360So search autocompleter
-    url = f"https://sug.so.360.cn/suggest?{urlencode({'format': 'json', 'word': query})"
+    url = f"https://sug.so.360.cn/suggest?{urlencode({'format': 'json', 'word': query})}"
     response = get(url)
 
     results = []
