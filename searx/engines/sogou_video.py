@@ -51,7 +51,7 @@ def response(resp):
             video_url = f"https://v.sogou.com{video_url}"
 
         published_date = None
-        if entry.get("date", "") and entry.get("duration", ""):
+        if entry.get("date") and entry.get("duration"):
             try:
                 date_time_str = f"{entry['date']} {entry['duration']}"
                 published_date = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
