@@ -8,7 +8,6 @@ from lxml import html
 about = {
     "website": "https://www.sogou.com/",
     "wikidata_id": "Q7554565"
-    "official_api_documentation": None,
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
