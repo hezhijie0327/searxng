@@ -39,7 +39,7 @@ def response(resp):
         raise SearxEngineAPIException(f"Invalid response: {e}") from e
     results = []
 
-    if "data" not in data or "list" not in data["data"]:
+    if not data.get("data", {}).get("list"):
         raise SearxEngineAPIException("Invalid response")
 
     for entry in data["data"]["list"]:
