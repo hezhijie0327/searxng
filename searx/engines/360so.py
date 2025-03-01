@@ -32,7 +32,7 @@ def request(query, params):
         "q": query,
     }
 
-    if 'time_range' in params and params['time_range'] in time_range_dict:
+    if 'time_range' in params:
         query_params["adv_t"] = time_range_dict[params['time_range']]
 
     params["url"] = f"{base_url}?{urlencode(query_params)}"
