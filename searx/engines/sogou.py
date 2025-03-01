@@ -7,7 +7,7 @@ from lxml import html
 # Metadata
 about = {
     "website": "https://www.sogou.com/",
-    "official_api_documentation": None,
+    "wikidata_id": "Q7554565",
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
@@ -22,7 +22,7 @@ time_range_support = True
 time_range_dict = {'day': 'inttime_day', 'week': 'inttime_week', 'month': 'inttime_month', 'year': 'inttime_year'}
 
 # Base URL
-base_url = "https://www.sogou.com/web"
+base_url = "https://www.sogou.com"
 
 
 def request(query, params):
@@ -31,11 +31,11 @@ def request(query, params):
         "page": params["pageno"],
     }
 
-    if 'time_range' in params and params['time_range'] in time_range_dict:
+    if 'time_range' in params:
         query_params["s_from"] = time_range_dict[params['time_range']]
         query_params["tsn"] = 1
 
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}/web?{urlencode(query_params)}"
     return params
 
 
@@ -51,13 +51,12 @@ def response(resp):
         url = url_elem[0] if url_elem else ""
 
         if url.startswith("/link?url="):
-            url = f"https://www.sogou.com{url}"
+            url = f"{base_url}{url}"
 
         content_elem = item.xpath('.//div[contains(@class, "text-layout")]//p[contains(@class, "star-wiki")]/text()')
-        content = " ".join(content_elem).strip() if content_elem else ""
         if not content:
             content_elem = item.xpath('.//div[contains(@class, "fz-mid space-txt")]/text()')
-            content = " ".join(content_elem).strip() if content_elem else ""
+        content = " ".join(content_elem).strip() if content_elem else ""
 
         if title and url:
             results.append(

@@ -18,7 +18,7 @@ paging = True
 results_per_page = 10
 
 # Base URL
-base_url = "https://v.sogou.com/api/video/shortVideoV2"
+base_url = "https://v.sogou.com"
 
 
 def request(query, params):
@@ -28,7 +28,7 @@ def request(query, params):
         "query": query,
     }
 
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}/api/video/shortVideoV2?{urlencode(query_params)}"
     return params
 
 
@@ -39,7 +39,7 @@ def response(resp):
         raise SearxEngineAPIException(f"Invalid response: {e}") from e
     results = []
 
-    if "data" not in data or "list" not in data["data"]:
+    if not data.get("data", {}).get("list"):
         raise SearxEngineAPIException("Invalid response")
 
     for entry in data["data"]["list"]:
@@ -48,10 +48,10 @@ def response(resp):
 
         video_url = entry.get("url")
         if video_url.startswith("/vc/np"):
-            video_url = f"https://v.sogou.com{video_url}"
+            video_url = f"{base_url}{video_url}"
 
         published_date = None
-        if entry.get("date", "") and entry.get("duration", ""):
+        if entry.get("date") and entry.get("duration"):
             try:
                 date_time_str = f"{entry['date']} {entry['duration']}"
                 published_date = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")

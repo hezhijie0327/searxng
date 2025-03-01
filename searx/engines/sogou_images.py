@@ -3,11 +3,12 @@
 
 import json
 import re
-from urllib.parse import urlencode
+from urllib.parse import quote_plus
 
 # about
 about = {
     "website": "https://pic.sogou.com/",
+    "wikidata_id": "Q7554565",
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
@@ -16,15 +17,11 @@ about = {
 # engine dependent config
 categories = ["images", "web"]
 
-base_url = "https://pic.sogou.com/pics"
+base_url = "https://pic.sogou.com"
 
 
 def request(query, params):
-    query_params = {
-        "query": query,
-    }
-
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}/pics?query={quote_plus(query)}"
     return params
 
 
