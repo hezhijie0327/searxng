@@ -1699,13 +1699,13 @@ engines:
     shortcut: sogou
     disabled: true
 
-  - name: sogou picture
-    engine: sogou_picture
-    shortcut: sogoup
+  - name: sogou images
+    engine: sogou_images
+    shortcut: sogoui
     disabled: true
 
-  - name: sogou video
-    engine: sogou_video
+  - name: sogou videos
+    engine: sogou_videos
     shortcut: sogouv
     disabled: true
 
