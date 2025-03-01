@@ -20,11 +20,7 @@ base_url = "https://pic.sogou.com/pics"
 
 
 def request(query, params):
-    query_params = {
-        "query": query,
-    }
-
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}?query={quote_plus(query)}"
     return params
 
 
