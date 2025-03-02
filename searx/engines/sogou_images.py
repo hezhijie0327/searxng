@@ -17,7 +17,7 @@ about = {
 # engine dependent config
 categories = ["images"]
 paging = True
-results_per_page = 10
+max_page = 10
 
 base_url = "https://pic.sogou.com"
 
@@ -25,7 +25,7 @@ base_url = "https://pic.sogou.com"
 def request(query, params):
     query_params = {
         "query": query,
-        "start": (params["pageno"] - 1) * 10,
+        "start": (params["pageno"] - 1) * 48,
     }
 
     params["url"] = f"{base_url}/pics?{urlencode(query_params)}"
