@@ -178,14 +178,13 @@ def sogou(query, _lang):
     response = get(base_url + urlencode({'m': 'searxng', 'key': query}))
 
     if response.ok:
-        raw_json = extr(response.text, "[", "]")
+        raw_json = extr(response.text, "[", "]", default="")
 
-        if start_idx != -1 and end_idx != -1:
-            try:
-                data_list = json.loads(raw_json[start_idx : end_idx + 1])
-                return data_list[1] if isinstance(data_list, list) else []
-            except json.JSONDecodeError:
-                return []
+        try:
+            data = json.loads(f"[{raw_json}]]")
+            return data[1]
+        except json.JSONDecodeError:
+            return []
 
     return []
 
