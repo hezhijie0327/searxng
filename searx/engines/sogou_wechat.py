@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""Sogou WeChat search engine for searxng"""
+
+from urllib.parse import urlencode
+from lxml import html
+
+from searx.utils import extract_text
+
+# Metadata
+about = {
+    "website": "https://weixin.sogou.com/",
+    "use_official_api": False,
+    "require_api_key": False,
+    "results": "HTML",
+}
+
+# Engine Configuration
+categories = ["general"]
+paging = True
+max_page = 10
+
+# Base URL
+base_url = "https://weixin.sogou.com"
+
+
+def request(query, params):
+    query_params = {
+        "query": query,
+        "page": params["pageno"],
+        "type": 2,
+    }
+
+    params["url"] = f"{base_url}/weixin?{urlencode(query_params)}"
+    return params
+
+
+def response(resp):
+    dom = html.fromstring(resp.text)
+    results = []
+
+    for item in dom.xpath('//li[contains(@id, "sogou_vr_")]'):
+        title = extract_text(item.xpath('.//h3/a'))
+        url = extract_text(item.xpath('.//h3/a/@href'))
+
+        if url.startswith("/link?url="):
+            url = f"{base_url}{url}"
+
+        content = extract_text(item.xpath('.//p[@class="txt-info"]'))
+        if not content:
+            content = extract_text(item.xpath('.//p[contains(@class, "txt-info")]'))
+
+        if title and url:
+            results.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "content": content,
+                }
+            )
+
+    return results
