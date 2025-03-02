@@ -148,8 +148,8 @@ def mwmbl(query, _lang):
     return [result for result in results if not result.startswith("go: ") and not result.startswith("search: ")]
 
 
-def qihu360so(query, _lang):
-    # 360So search autocompleter
+def qihu360search(query, _lang):
+    # 360Search search autocompleter
     url = f"https://sug.so.360.cn/suggest?{urlencode({'format': 'json', 'word': query})}"
     response = get(url)
 
@@ -261,7 +261,7 @@ def yandex(query, _lang):
 
 
 backends = {
-    '360so': qihu360so,
+    '360search': qihu360search,
     'baidu': baidu,
     'brave': brave,
     'dbpedia': dbpedia,
