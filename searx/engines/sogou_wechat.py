@@ -2,9 +2,9 @@
 """Sogou WeChat search engine for searxng"""
 
 from urllib.parse import urlencode
-from lxml import html
 from datetime import datetime
 import re
+from lxml import html
 
 from searx.utils import extract_text
 
