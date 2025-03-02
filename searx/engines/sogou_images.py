@@ -15,7 +15,7 @@ about = {
 }
 
 # engine dependent config
-categories = ["images", "web"]
+categories = ["images"]
 
 base_url = "https://pic.sogou.com"
 
