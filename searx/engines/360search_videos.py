@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # pylint: disable=invalid-name
-"""360So-Videos: A search engine for retrieving videos from 360So."""
+"""360Search-Videos: A search engine for retrieving videos from 360Search."""
 
 from urllib.parse import urlencode
 from datetime import datetime
