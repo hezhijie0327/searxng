@@ -1709,6 +1709,11 @@ engines:
     shortcut: sogouv
     disabled: true
 
+  - name: sogou wechat
+    engine: sogou_wechat
+    shortcut: sogouw
+    disabled: true
+
   - name: soundcloud
     engine: soundcloud
     shortcut: sc
