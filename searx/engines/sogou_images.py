@@ -17,11 +17,11 @@ about = {
 # engine dependent config
 categories = ["images", "web"]
 
-base_url = "https://pic.sogou.com/pics"
+base_url = "https://pic.sogou.com"
 
 
 def request(query, params):
-    params["url"] = f"{base_url}?query={quote_plus(query)}"
+    params["url"] = f"{base_url}/pics?query={quote_plus(query)}"
     return params
 
 
