@@ -4,6 +4,8 @@
 from urllib.parse import urlencode
 from lxml import html
 
+from searx.utils import extract_text
+
 # Metadata
 about = {
     "website": "https://www.sogou.com/",
@@ -31,8 +33,8 @@ def request(query, params):
         "page": params["pageno"],
     }
 
-    if 'time_range' in params:
-        query_params["s_from"] = time_range_dict[params['time_range']]
+    if time_range_dict.get(params['time_range']):
+        query_params["s_from"] = time_range_dict.get(params['time_range'])
         query_params["tsn"] = 1
 
     params["url"] = f"{base_url}/web?{urlencode(query_params)}"
@@ -44,19 +46,15 @@ def response(resp):
     results = []
 
     for item in dom.xpath('//div[contains(@class, "vrwrap")]'):
-        title_elem = item.xpath('.//h3[contains(@class, "vr-title")]/a')
-        title = title_elem[0].text_content().strip() if title_elem else ""
-
-        url_elem = item.xpath('.//h3[contains(@class, "vr-title")]/a/@href')
-        url = url_elem[0] if url_elem else ""
+        title = extract_text(item.xpath('.//h3[contains(@class, "vr-title")]/a'))
+        url = extract_text(item.xpath('.//h3[contains(@class, "vr-title")]/a/@href'))
 
         if url.startswith("/link?url="):
             url = f"{base_url}{url}"
 
-        content_elem = item.xpath('.//div[contains(@class, "text-layout")]//p[contains(@class, "star-wiki")]/text()')
+        content = extract_text(item.xpath('.//div[contains(@class, "text-layout")]//p[contains(@class, "star-wiki")]'))
         if not content:
-            content_elem = item.xpath('.//div[contains(@class, "fz-mid space-txt")]/text()')
-        content = " ".join(content_elem).strip() if content_elem else ""
+            content = extract_text(item.xpath('.//div[contains(@class, "fz-mid space-txt")]'))
 
         if title and url:
             results.append(
