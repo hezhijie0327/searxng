@@ -3,6 +3,8 @@
 
 from urllib.parse import urlencode
 from lxml import html
+from datetime import datetime
+import re
 
 from searx.utils import extract_text
 
@@ -15,7 +17,7 @@ about = {
 }
 
 # Engine Configuration
-categories = ["general"]
+categories = ["news"]
 paging = True
 max_page = 10
 
@@ -49,12 +51,25 @@ def response(resp):
         if not content:
             content = extract_text(item.xpath('.//p[contains(@class, "txt-info")]'))
 
+        thumbnail = extract_text(item.xpath('.//div[@class="img-box"]/a/img/@src'))
+        if thumbnail and thumbnail.startswith("//"):
+            thumbnail = f"https:{thumbnail}"
+
+        published_date = None
+        timestamp = extract_text(item.xpath('.//script[contains(text(), "timeConvert")]'))
+        if timestamp:
+            match = re.search(r"timeConvert\('(\d+)'\)", timestamp)
+            if match:
+                published_date = datetime.fromtimestamp(int(match.group(1)))
+
         if title and url:
             results.append(
                 {
                     "title": title,
                     "url": url,
                     "content": content,
+                    'thumbnail': thumbnail,
+                    "publishedDate": published_date,
                 }
             )
 
