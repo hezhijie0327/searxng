@@ -7,7 +7,7 @@ from lxml import html
 # Metadata
 about = {
     "website": "https://www.sogou.com/",
-    "wikidata_id": "Q7554565"
+    "wikidata_id": "Q7554565",
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
