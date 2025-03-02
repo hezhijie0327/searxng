@@ -342,8 +342,8 @@ engines:
     shortcut: 360so
     disabled: true
 
-  - name: 360so video
-    engine: 360so_video
+  - name: 360so videos
+    engine: 360so_videos
     shortcut: 360sov
     disabled: true
 
