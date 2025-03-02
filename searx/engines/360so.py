@@ -10,7 +10,7 @@ from searx.utils import extract_text
 # Metadata
 about = {
     "website": "https://www.so.com/",
-    "official_api_documentation": None,
+    "wikidata_id": "Q10846064",
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
