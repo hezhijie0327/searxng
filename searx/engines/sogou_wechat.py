@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Sogou WeChat search engine for searxng"""
+"""Sogou-WeChat search engine for searxng"""
 
 from urllib.parse import urlencode
 from datetime import datetime
