@@ -19,7 +19,6 @@ about = {
 # Engine Configuration
 categories = ["news"]
 paging = True
-max_page = 10
 
 # Base URL
 base_url = "https://weixin.sogou.com"
