@@ -17,7 +17,6 @@ about = {
 # engine dependent config
 categories = ["images"]
 paging = True
-max_page = 10
 
 base_url = "https://pic.sogou.com"
 
