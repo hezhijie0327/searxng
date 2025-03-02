@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from datetime import datetime
 
 from searx.exceptions import SearxEngineAPIException
+from searx.utils import html_to_text
 
 about = {
     "website": "https://tv.360kan.com/",
@@ -52,8 +53,8 @@ def response(resp):
         results.append(
             {
                 'url': entry["play_url"],
-                'title': entry["title"],
-                'content': entry["description"],
+                'title': html_to_text(entry["title"]),
+                'content': html_to_text(entry["description"]),
                 'template': 'videos.html',
                 'publishedDate': published_date,
                 'thumbnail': entry["cover_img"],
