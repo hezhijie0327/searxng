@@ -33,7 +33,7 @@
 ``autocomplete``:
   Existing autocomplete backends, leave blank to turn it off.
 
-  - ``360so``
+  - ``360search``
   - ``baidu``
   - ``brave``
   - ``dbpedia``
