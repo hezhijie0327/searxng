@@ -25,7 +25,7 @@ time_range_support = True
 time_range_dict = {'day': 'd', 'week': 'w', 'month': 'm', 'year': 'y'}
 
 # Base URL
-base_url = "https://www.so.com/s"
+base_url = "https://www.so.com"
 
 
 def request(query, params):
@@ -37,7 +37,7 @@ def request(query, params):
     if time_range_dict.get(params['time_range']):
         query_params["adv_t"] = time_range_dict.get(params['time_range'])
 
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}/s?{urlencode(query_params)}"
     return params
 
 
