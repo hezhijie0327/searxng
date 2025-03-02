@@ -18,13 +18,13 @@ paging = True
 results_per_page = 10
 categories = ["videos"]
 
-base_url = "https://tv.360kan.com/v1/video/list"
+base_url = "https://tv.360kan.com"
 
 
 def request(query, params):
     query_params = {"count": 10, "q": query, "start": params["pageno"] * 10}
 
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}/v1/video/list?{urlencode(query_params)}"
     return params
 
 
