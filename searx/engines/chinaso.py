@@ -32,24 +32,36 @@ base_url = "https://www.chinaso.com"
 
 
 def request(query, params):
-    query_params = {
-      "pn": params["pageno"],
-      "ps": 10,
-      "q": query
-    }
-
     if time_range_dict.get(params['time_range']):
       query_params["stime"] = time_range_dict.get(params['time_range'])
       query_params["etime"] = 'now'
 
     if chinaso_category == 'news':
-      params["url"] = f"{base_url}/v5/general/v1/web/search?{urlencode(query_params)}"
+        query_params = {
+          "pn": params["pageno"],
+          "ps": 10,
+          "q": query
+        }
+
+        params["url"] = f"{base_url}/v5/general/v1/web/search?{urlencode(query_params)}"
 
     if chinaso_category == 'images':
-      params["url"] = f"{base_url}/v5/general/v1/search/image?{urlencode(query_params)}"
+        query_params = {
+          "start_index": (params["pageno"] - 1) * 10,
+          "rn": 10,
+          "q": query
+        }
+
+        params["url"] = f"{base_url}/v5/general/v1/search/image?{urlencode(query_params)}"
 
     if chinaso_category == 'videos':
-      params["url"] = f"{base_url}/v5/general/v1/search/video?{urlencode(query_params)}"
+        query_params = {
+          "start_index": (params["pageno"] - 1) * 10,
+          "rn": 10,
+          "q": query
+        }
+        
+        params["url"] = f"{base_url}/v5/general/v1/search/video?{urlencode(query_params)}"
 
     return params
 
@@ -94,14 +106,14 @@ def response(resp):
       if "data" not in data or "arrRes" not in data["data"]:
           raise SearxEngineAPIException("Invalid response")
 
-      published_date = None
-        if entry.get("publish_time"):
+      for entry in data["data"]["arrRes"]:
+          published_date = None
+          if entry.get("VideoPubDate"):
             try:
                 published_date = datetime.fromtimestamp(int(entry["VideoPubDate"]))
             except (ValueError, TypeError):
                 published_date = None
 
-      for entry in data["data"]["arrRes"]:
           results.append(
               {
                   'url': entry["url"],
