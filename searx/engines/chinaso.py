@@ -43,11 +43,11 @@ def request(query, params):
         'news': {'endpoint': '/v5/general/v1/web/search', 'params': {'pn': params["pageno"], 'ps': 10}},
         'images': {
             'endpoint': '/v5/general/v1/search/image',
-            'params': {'start_index': (params["pageno"] - 1) * page_size, 'rn': 10}
+            'params': {'start_index': (params["pageno"] - 1) * page_size, 'rn': 10},
         },
         'videos': {
             'endpoint': '/v5/general/v1/search/video',
-            'params': {'start_index': (params["pageno"] - 1) * page_size, 'rn': 10}
+            'params': {'start_index': (params["pageno"] - 1) * page_size, 'rn': 10},
         },
     }
 
