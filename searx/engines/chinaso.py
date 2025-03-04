@@ -85,12 +85,12 @@ def response(resp):
 
         for entry in data["data"]["arrRes"]:
             results.append({
-                'url': entry["url"],
+                'url': entry["web_url"],
                 'title': html_to_text(entry["title"]),
                 'content': html_to_text(entry["ImageInfo"]),
                 'template': 'images.html',
-                'img_src': entry["largeimage"],
-                'thumbnail_src': entry["smallimage"],
+                'img_src': entry["url"].replace("http://", "https://"),
+                'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
             })
 
     if chinaso_category == 'videos':
@@ -110,7 +110,7 @@ def response(resp):
                 'title': html_to_text(entry["raw_title"]),
                 'template': 'videos.html',
                 'publishedDate': published_date,
-                'thumbnail': entry["image_src"],
+                'thumbnail': entry["image_src"].replace("http://", "https://"),
             })
 
     return results
