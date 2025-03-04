@@ -29,7 +29,7 @@ base_url = "https://www.acfun.cn"
 def request(query, params):
     query_params = {
         "keyword": query,
-        "page": params["pageno"],
+        "pCursor": params["pageno"],
     }
 
     params["url"] = f"{base_url}/search?{urlencode(query_params)}"
