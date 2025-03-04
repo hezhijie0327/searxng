@@ -11,7 +11,7 @@ from lxml import html as lxml_html
 # Metadata
 about = {
     "website": "https://www.acfun.cn/",
-    "wikidata_id": None,
+    "wikidata_id": "Q3077675",
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
