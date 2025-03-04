@@ -1,17 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# pylint: disable=invalid-name
 """Acfun search engine for searxng"""
 
 from urllib.parse import urlencode
 import re
 import json
-import codecs
-import html
-from lxml import html as lxml_html
+from datetime import datetime, timedelta
+
+from searx.utils import extract_text
 
 # Metadata
 about = {
     "website": "https://www.acfun.cn/",
-    "wikidata_id": "Q3077675",
+    "wikidata_id": None,
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
@@ -22,7 +23,7 @@ categories = ["videos"]
 paging = True
 
 # Base URL
-base_url = "https://www.acfun.cn/search"
+base_url = "https://www.acfun.cn"
 
 
 def request(query, params):
@@ -31,29 +32,15 @@ def request(query, params):
         "page": params["pageno"],
     }
 
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    params["url"] = f"{base_url}/search?{urlencode(query_params)}"
     return params
 
 
 def response(resp):
-    # Force decode response content to UTF-8
-    try:
-        resp_text = resp.content.decode('utf-8')
-    except UnicodeDecodeError:
-        try:
-            resp_text = resp.content.decode('gbk')  # Try GBK encoding if UTF-8 fails
-        except UnicodeDecodeError:
-            resp_text = resp.text  # Fallback to default decoding
-
-    # Debugging: Print raw response text
-    print("Raw Response Text:")
-    print(resp_text[:500])
-
-    dom = lxml_html.fromstring(resp_text)
     results = []
 
     # Extract JSON data embedded in the HTML (bigPipe.onPageletArrive)
-    matches = re.findall(r'bigPipe\.onPageletArrive\((\{.*?\})\);', resp_text, re.DOTALL)
+    matches = re.findall(r'bigPipe\.onPageletArrive\((\{.*?\})\);', resp.text, re.DOTALL)
     if not matches:
         return results
 
@@ -63,9 +50,6 @@ def response(resp):
             raw_html = json_data.get("html", "")
             if not raw_html:
                 continue
-
-            # Decode Unicode escape sequences in raw_html
-            raw_html = codecs.decode(raw_html.encode('utf-8'), 'unicode_escape')
 
             # Split into individual video blocks
             video_blocks = re.findall(r'<div class="search-video".*?</div>\s*</div>', raw_html, re.DOTALL)
@@ -81,22 +65,18 @@ def response(resp):
                 content_id = video_data.get("content_id", "")
                 url = f"https://www.acfun.cn/v/ac{content_id}" if content_id else ""
 
+                description_match = re.search(r'<div class="video__main__intro ellipsis2">(.*?)</div>', video_block, re.DOTALL)
+                description = description_match.group(1).strip() if description_match else ""
+
                 # Extract additional details using regex within the current video block
                 cover_match = re.search(r'<img src="(.*?)" alt=', video_block)
                 cover_image = cover_match.group(1) if cover_match else ""
 
-                duration_match = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
-                duration = duration_match.group(1).strip() if duration_match else ""
-
                 publish_time_match = re.search(r'<span class="info__create-time">(.*?)</span>', video_block)
                 publish_time = publish_time_match.group(1).strip() if publish_time_match else ""
 
-                description_match = re.search(r'<div class="video__main__intro ellipsis2">(.*?)</div>', video_block, re.DOTALL)
-                description = description_match.group(1).strip() if description_match else ""
-
-                # Decode HTML entities in extracted text
-                title = html.unescape(title)
-                description = html.unescape(description)
+                duration_match = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
+                duration = duration_match.group(1).strip() if duration_match else ""
 
                 if title and url:
                     results.append(
@@ -105,8 +85,8 @@ def response(resp):
                             "url": url,
                             "content": description,
                             "thumbnail": cover_image,
-                            "duration": duration,
-                            "published_date": publish_time,
+                            #"length": duration,
+                            #"publishedDate": publish_time,
                         }
                     )
         except json.JSONDecodeError:
