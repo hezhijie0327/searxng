@@ -66,11 +66,7 @@ def response(resp):
     except Exception as e:
         raise SearxEngineAPIException(f"Invalid response: {e}") from e
 
-    parsers = {
-        'news': parse_news,
-        'images': parse_images,
-        'videos': parse_videos
-    }
+    parsers = {'news': parse_news, 'images': parse_images, 'videos': parse_videos}
 
     if chinaso_category not in parsers:
         raise SearxEngineAPIException(f"Unsupported category: {chinaso_category}")
@@ -91,12 +87,14 @@ def parse_news(data):
             except (ValueError, TypeError):
                 pass
 
-        results.append({
-            'title': html_to_text(entry["title"]),
-            'url': entry["url"],
-            'content': html_to_text(entry["snippet"]),
-            'publishedDate': published_date,
-        })
+        results.append(
+            {
+                'title': html_to_text(entry["title"]),
+                'url': entry["url"],
+                'content': html_to_text(entry["snippet"]),
+                'publishedDate': published_date,
+            }
+        )
     return results
 
 
@@ -106,14 +104,16 @@ def parse_images(data):
         raise SearxEngineAPIException("Invalid response")
 
     for entry in data["data"]["arrRes"]:
-        results.append({
-            'url': entry["web_url"],
-            'title': html_to_text(entry["title"]),
-            'content': html_to_text(entry["ImageInfo"]),
-            'template': 'images.html',
-            'img_src': entry["url"].replace("http://", "https://"),
-            'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
-        })
+        results.append(
+            {
+                'url': entry["web_url"],
+                'title': html_to_text(entry["title"]),
+                'content': html_to_text(entry["ImageInfo"]),
+                'template': 'images.html',
+                'img_src': entry["url"].replace("http://", "https://"),
+                'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
+            }
+        )
     return results
 
 
@@ -130,11 +130,13 @@ def parse_videos(data):
             except (ValueError, TypeError):
                 pass
 
-        results.append({
-            'url': entry["url"],
-            'title': html_to_text(entry["raw_title"]),
-            'template': 'videos.html',
-            'publishedDate': published_date,
-            'thumbnail': entry["image_src"].replace("http://", "https://"),
-        })
+        results.append(
+            {
+                'url': entry["url"],
+                'title': html_to_text(entry["raw_title"]),
+                'template': 'videos.html',
+                'publishedDate': published_date,
+                'thumbnail': entry["image_src"].replace("http://", "https://"),
+            }
+        )
     return results
