@@ -73,10 +73,18 @@ def response(resp):
             raise SearxEngineAPIException("Invalid response")
 
         for entry in data["data"]["data"]:
+            published_date = None
+            if entry.get("timestamp"):
+                try:
+                    published_date = datetime.fromtimestamp(int(entry["timestamp"]))
+                except (ValueError, TypeError):
+                    published_date = None
+
             results.append({
                 'title': html_to_text(entry["title"]),
                 'url': entry["url"],
                 'content': html_to_text(entry["snippet"]),
+                'publishedDate': published_date
             })
 
     if chinaso_category == 'images':
