@@ -15,13 +15,19 @@ about = {
 }
 
 paging = True
+time_range_support = True
 categories = ["videos"]
+
+time_range_dict = {'day': '1', 'week': '2', 'month': '3'}
 
 base_url = "https://mesh.if.iqiyi.com"
 
 
 def request(query, params):
     query_params = {"key": query, "pageNum": params["pageno"], "pageSize": 25}
+
+    if time_range_dict.get(params['time_range']):
+        query_params["sitePublishDate"] = time_range_dict[params['time_range']]
 
     params["url"] = f"{base_url}/portal/lw/search/homePageV3?{urlencode(query_params)}"
     return params
