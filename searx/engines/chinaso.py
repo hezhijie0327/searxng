@@ -85,7 +85,7 @@ def response(resp):
                     'title': html_to_text(entry["title"]),
                     'url': entry["url"],
                     'content': html_to_text(entry["snippet"]),
-                    'publishedDate': published_date
+                    'publishedDate': published_date,
                 }
             )
 
