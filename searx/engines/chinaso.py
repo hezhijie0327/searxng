@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 from datetime import datetime
 
 from searx.exceptions import SearxEngineAPIException
+from searx.utils import html_to_text
 
 about = {
     "website": "https://www.chinaso.com/",
@@ -32,35 +33,28 @@ base_url = "https://www.chinaso.com"
 
 
 def request(query, params):
+    query_params = {"q": query}
+
     if time_range_dict.get(params['time_range']):
-      query_params["stime"] = time_range_dict.get(params['time_range'])
-      query_params["etime"] = 'now'
+        query_params["stime"] = time_range_dict.get(params['time_range'])
+        query_params["etime"] = 'now'
 
     if chinaso_category == 'news':
-        query_params = {
-          "pn": params["pageno"],
-          "ps": 10,
-          "q": query
-        }
+        query_params["pn"] = params["pageno"]
+        query_params["ps"] = 10
 
         params["url"] = f"{base_url}/v5/general/v1/web/search?{urlencode(query_params)}"
 
-    if chinaso_category == 'images':
-        query_params = {
-          "start_index": (params["pageno"] - 1) * 10,
-          "rn": 10,
-          "q": query
-        }
+    elif chinaso_category == 'images':
+        query_params["start_index"] = (params["pageno"] - 1) * 10
+        query_params["rn"] = 10
 
         params["url"] = f"{base_url}/v5/general/v1/search/image?{urlencode(query_params)}"
 
-    if chinaso_category == 'videos':
-        query_params = {
-          "start_index": (params["pageno"] - 1) * 10,
-          "rn": 10,
-          "q": query
-        }
-        
+    elif chinaso_category == 'videos':
+        query_params["start_index"] = (params["pageno"] - 1) * 10
+        query_params["rn"] = 10
+
         params["url"] = f"{base_url}/v5/general/v1/search/video?{urlencode(query_params)}"
 
     return params
@@ -71,57 +65,52 @@ def response(resp):
         data = resp.json()
     except Exception as e:
         raise SearxEngineAPIException(f"Invalid response: {e}") from e
+
     results = []
 
     if chinaso_category == 'news':
-      if "data" not in data or "data" not in data["data"]:
-          raise SearxEngineAPIException("Invalid response")
+        if "data" not in data or "data" not in data["data"]:
+            raise SearxEngineAPIException("Invalid response")
 
-      for entry in data["data"]["data"]:
-          results.append(
-              {
-                  "title": entry.get("title"),
-                  "url": entry.get("url"),
-                  "content": entry.get("content"),
-              }
-          )
+        for entry in data["data"]["data"]:
+            results.append({
+                'title': html_to_text(entry["title"]),
+                'url': entry["url"],
+                'content': html_to_text(entry["snippet"]),
+            })
 
     if chinaso_category == 'images':
-      if "data" not in data or "arrRes" not in data["data"]:
-          raise SearxEngineAPIException("Invalid response")
+        if "data" not in data or "arrRes" not in data["data"]:
+            raise SearxEngineAPIException("Invalid response")
 
-      for entry in data["data"]["arrRes"]:
-          results.append(
-              {
-                  'url': entry.get("web_url"),
-                  'title': entry.get("title"),
-                  'content': entry.get("summary"),
-                  'template': 'images.html',
-                  'img_src': entry.get("largeimage"),
-                  'thumbnail_src': entry.get("smallimage"),
-              }
-          )
+        for entry in data["data"]["arrRes"]:
+            results.append({
+                'url': entry["url"],
+                'title': html_to_text(entry["title"]),
+                'content': html_to_text(entry["ImageInfo"]),
+                'template': 'images.html',
+                'img_src': entry["largeimage"],
+                'thumbnail_src': entry["smallimage"],
+            })
 
     if chinaso_category == 'videos':
-      if "data" not in data or "arrRes" not in data["data"]:
-          raise SearxEngineAPIException("Invalid response")
+        if "data" not in data or "arrRes" not in data["data"]:
+            raise SearxEngineAPIException("Invalid response")
 
-      for entry in data["data"]["arrRes"]:
-          published_date = None
-          if entry.get("VideoPubDate"):
-            try:
-                published_date = datetime.fromtimestamp(int(entry["VideoPubDate"]))
-            except (ValueError, TypeError):
-                published_date = None
+        for entry in data["data"]["arrRes"]:
+            published_date = None
+            if entry.get("VideoPubDate"):
+                try:
+                    published_date = datetime.fromtimestamp(int(entry["VideoPubDate"]))
+                except (ValueError, TypeError):
+                    published_date = None
 
-          results.append(
-              {
-                  'url': entry["url"],
-                  'title': entry["raw_title"],
-                  'template': 'videos.html',
-                  'publishedDate': published_date,
-                  'thumbnail': entry["image_src"],
-              }
-          )
+            results.append({
+                'url': entry["url"],
+                'title': html_to_text(entry["raw_title"]),
+                'template': 'videos.html',
+                'publishedDate': published_date,
+                'thumbnail': entry["image_src"],
+            })
 
-      return results
+    return results
