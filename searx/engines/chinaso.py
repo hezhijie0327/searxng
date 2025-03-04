@@ -66,65 +66,75 @@ def response(resp):
     except Exception as e:
         raise SearxEngineAPIException(f"Invalid response: {e}") from e
 
+    parsers = {
+        'news': parse_news,
+        'images': parse_images,
+        'videos': parse_videos
+    }
+
+    if chinaso_category not in parsers:
+        raise SearxEngineAPIException(f"Unsupported category: {chinaso_category}")
+
+    return parsers[chinaso_category](data)
+
+
+def parse_news(data):
     results = []
+    if "data" not in data or "data" not in data["data"]:
+        raise SearxEngineAPIException("Invalid response")
 
-    if chinaso_category == 'news':
-        if "data" not in data or "data" not in data["data"]:
-            raise SearxEngineAPIException("Invalid response")
+    for entry in data["data"]["data"]:
+        published_date = None
+        if entry.get("timestamp"):
+            try:
+                published_date = datetime.fromtimestamp(int(entry["timestamp"]))
+            except (ValueError, TypeError):
+                pass
 
-        for entry in data["data"]["data"]:
-            published_date = None
-            if entry.get("timestamp"):
-                try:
-                    published_date = datetime.fromtimestamp(int(entry["timestamp"]))
-                except (ValueError, TypeError):
-                    published_date = None
+        results.append({
+            'title': html_to_text(entry["title"]),
+            'url': entry["url"],
+            'content': html_to_text(entry["snippet"]),
+            'publishedDate': published_date,
+        })
+    return results
 
-            results.append(
-                {
-                    'title': html_to_text(entry["title"]),
-                    'url': entry["url"],
-                    'content': html_to_text(entry["snippet"]),
-                    'publishedDate': published_date,
-                }
-            )
 
-    if chinaso_category == 'images':
-        if "data" not in data or "arrRes" not in data["data"]:
-            raise SearxEngineAPIException("Invalid response")
+def parse_images(data):
+    results = []
+    if "data" not in data or "arrRes" not in data["data"]:
+        raise SearxEngineAPIException("Invalid response")
 
-        for entry in data["data"]["arrRes"]:
-            results.append(
-                {
-                    'url': entry["web_url"],
-                    'title': html_to_text(entry["title"]),
-                    'content': html_to_text(entry["ImageInfo"]),
-                    'template': 'images.html',
-                    'img_src': entry["url"].replace("http://", "https://"),
-                    'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
-                }
-            )
+    for entry in data["data"]["arrRes"]:
+        results.append({
+            'url': entry["web_url"],
+            'title': html_to_text(entry["title"]),
+            'content': html_to_text(entry["ImageInfo"]),
+            'template': 'images.html',
+            'img_src': entry["url"].replace("http://", "https://"),
+            'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
+        })
+    return results
 
-    if chinaso_category == 'videos':
-        if "data" not in data or "arrRes" not in data["data"]:
-            raise SearxEngineAPIException("Invalid response")
 
-        for entry in data["data"]["arrRes"]:
-            published_date = None
-            if entry.get("VideoPubDate"):
-                try:
-                    published_date = datetime.fromtimestamp(int(entry["VideoPubDate"]))
-                except (ValueError, TypeError):
-                    published_date = None
+def parse_videos(data):
+    results = []
+    if "data" not in data or "arrRes" not in data["data"]:
+        raise SearxEngineAPIException("Invalid response")
 
-            results.append(
-                {
-                    'url': entry["url"],
-                    'title': html_to_text(entry["raw_title"]),
-                    'template': 'videos.html',
-                    'publishedDate': published_date,
-                    'thumbnail': entry["image_src"].replace("http://", "https://"),
-                }
-            )
+    for entry in data["data"]["arrRes"]:
+        published_date = None
+        if entry.get("VideoPubDate"):
+            try:
+                published_date = datetime.fromtimestamp(int(entry["VideoPubDate"]))
+            except (ValueError, TypeError):
+                pass
 
+        results.append({
+            'url': entry["url"],
+            'title': html_to_text(entry["raw_title"]),
+            'template': 'videos.html',
+            'publishedDate': published_date,
+            'thumbnail': entry["image_src"].replace("http://", "https://"),
+        })
     return results
