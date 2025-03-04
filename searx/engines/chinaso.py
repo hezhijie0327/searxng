@@ -80,26 +80,30 @@ def response(resp):
                 except (ValueError, TypeError):
                     published_date = None
 
-            results.append({
-                'title': html_to_text(entry["title"]),
-                'url': entry["url"],
-                'content': html_to_text(entry["snippet"]),
-                'publishedDate': published_date
-            })
+            results.append(
+                {
+                    'title': html_to_text(entry["title"]),
+                    'url': entry["url"],
+                    'content': html_to_text(entry["snippet"]),
+                    'publishedDate': published_date
+                }
+            )
 
     if chinaso_category == 'images':
         if "data" not in data or "arrRes" not in data["data"]:
             raise SearxEngineAPIException("Invalid response")
 
         for entry in data["data"]["arrRes"]:
-            results.append({
-                'url': entry["web_url"],
-                'title': html_to_text(entry["title"]),
-                'content': html_to_text(entry["ImageInfo"]),
-                'template': 'images.html',
-                'img_src': entry["url"].replace("http://", "https://"),
-                'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
-            })
+            results.append(
+                {
+                    'url': entry["web_url"],
+                    'title': html_to_text(entry["title"]),
+                    'content': html_to_text(entry["ImageInfo"]),
+                    'template': 'images.html',
+                    'img_src': entry["url"].replace("http://", "https://"),
+                    'thumbnail_src': entry["largeimage"].replace("http://", "https://"),
+                }
+            )
 
     if chinaso_category == 'videos':
         if "data" not in data or "arrRes" not in data["data"]:
@@ -113,12 +117,14 @@ def response(resp):
                 except (ValueError, TypeError):
                     published_date = None
 
-            results.append({
-                'url': entry["url"],
-                'title': html_to_text(entry["raw_title"]),
-                'template': 'videos.html',
-                'publishedDate': published_date,
-                'thumbnail': entry["image_src"].replace("http://", "https://"),
-            })
+            results.append(
+                {
+                    'url': entry["url"],
+                    'title': html_to_text(entry["raw_title"]),
+                    'template': 'videos.html',
+                    'publishedDate': published_date,
+                    'thumbnail': entry["image_src"].replace("http://", "https://"),
+                }
+            )
 
     return results
