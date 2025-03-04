@@ -36,26 +36,33 @@ def request(query, params):
     query_params = {"q": query}
 
     if time_range_dict.get(params['time_range']):
-        query_params["stime"] = time_range_dict.get(params['time_range'])
+        query_params["stime"] = time_range_dict[params['time_range']]
         query_params["etime"] = 'now'
 
-    if chinaso_category == 'news':
-        query_params["pn"] = params["pageno"]
-        query_params["ps"] = 10
+    page_size = 10
+    start_index = (params["pageno"] - 1) * page_size
 
-        params["url"] = f"{base_url}/v5/general/v1/web/search?{urlencode(query_params)}"
+    category_config = {
+        'news': {
+            'endpoint': '/v5/general/v1/web/search',
+            'params': {'pn': params["pageno"], 'ps': page_size}
+        },
+        'images': {
+            'endpoint': '/v5/general/v1/search/image',
+            'params': {'start_index': start_index, 'rn': page_size}
+        },
+        'videos': {
+            'endpoint': '/v5/general/v1/search/video',
+            'params': {'start_index': start_index, 'rn': page_size}
+        }
+    }
 
-    elif chinaso_category == 'images':
-        query_params["start_index"] = (params["pageno"] - 1) * 10
-        query_params["rn"] = 10
+    if chinaso_category not in category_config:
+        raise SearxEngineAPIException(f"Unsupported category: {chinaso_category}")
 
-        params["url"] = f"{base_url}/v5/general/v1/search/image?{urlencode(query_params)}"
-
-    elif chinaso_category == 'videos':
-        query_params["start_index"] = (params["pageno"] - 1) * 10
-        query_params["rn"] = 10
-
-        params["url"] = f"{base_url}/v5/general/v1/search/video?{urlencode(query_params)}"
+    query_params.update(category_config[chinaso_category]['params'])
+    
+    params["url"] = f"{base_url}{category_config[chinaso_category]['endpoint']}?{urlencode(query_params)}"
 
     return params
 
