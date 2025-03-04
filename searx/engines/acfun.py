@@ -78,6 +78,21 @@ def response(resp):
                 duration_match = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
                 duration = duration_match.group(1).strip() if duration_match else ""
 
+                published_date = None
+                if publish_time:
+                    try:
+                        published_date = datetime.strptime(publish_time, "%Y-%m-%d")
+                    except (ValueError, TypeError):
+                        published_date = None
+
+                length = None
+                if duration:
+                    try:
+                        timediff = datetime.strptime(duration, "%M:%S")
+                        length = timedelta(minutes=timediff.minute, seconds=timediff.second)
+                    except (ValueError, TypeError):
+                        length = None
+
                 if title and url:
                     results.append(
                         {
@@ -85,8 +100,8 @@ def response(resp):
                             "url": url,
                             "content": description,
                             "thumbnail": cover_image,
-                            #"length": duration,
-                            #"publishedDate": publish_time,
+                            "length": length,
+                            "publishedDate": published_date,
                         }
                     )
         except json.JSONDecodeError:
