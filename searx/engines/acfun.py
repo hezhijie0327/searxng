@@ -78,6 +78,8 @@ def response(resp):
                 duration_match = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
                 duration = duration_match.group(1).strip() if duration_match else ""
 
+                iframe_url = f"https://www.acfun.cn/player/ac{content_id}"
+
                 published_date = None
                 if publish_time:
                     try:
@@ -102,6 +104,7 @@ def response(resp):
                             "thumbnail": cover_image,
                             "length": length,
                             "publishedDate": published_date,
+                            "iframe_src": iframe_url,
                         }
                     )
         except json.JSONDecodeError:
