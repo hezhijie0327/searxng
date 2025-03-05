@@ -83,7 +83,7 @@ def response(resp):
                     try:
                         published_date = datetime.strptime(publish_time, "%Y-%m-%d")
                     except (ValueError, TypeError):
-                        published_date = None
+                        pass
 
                 length = None
                 if duration:
@@ -91,7 +91,7 @@ def response(resp):
                         timediff = datetime.strptime(duration, "%M:%S")
                         length = timedelta(minutes=timediff.minute, seconds=timediff.second)
                     except (ValueError, TypeError):
-                        length = None
+                        pass
 
                 if title and url:
                     results.append(
