@@ -63,7 +63,7 @@ def response(resp):
                 video_data = json.loads(exposure_log_match.group(1))
                 title = video_data.get("title", "")
                 content_id = video_data.get("content_id", "")
-                url = f"https://www.acfun.cn/v/ac{content_id}" if content_id else ""
+                url = f"{base_url}/v/ac{content_id}" if content_id else ""
 
                 description_match = re.search(r'<div class="video__main__intro ellipsis2">(.*?)</div>', video_block, re.DOTALL)
                 description = description_match.group(1).strip() if description_match else ""
@@ -78,7 +78,7 @@ def response(resp):
                 duration_match = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
                 duration = duration_match.group(1).strip() if duration_match else ""
 
-                iframe_url = f"https://www.acfun.cn/player/ac{content_id}"
+                iframe_url = f"{base_url}/player/ac{content_id}"
 
                 published_date = None
                 if publish_time:
