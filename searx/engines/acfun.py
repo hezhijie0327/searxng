@@ -7,8 +7,6 @@ import re
 import json
 from datetime import datetime, timedelta
 
-from searx.utils import extract_text
-
 # Metadata
 about = {
     "website": "https://www.acfun.cn/",
@@ -27,11 +25,7 @@ base_url = "https://www.acfun.cn"
 
 
 def request(query, params):
-    query_params = {
-        "keyword": query,
-        "pCursor": params["pageno"],
-    }
-
+    query_params = {"keyword": query, "pCursor": params["pageno"]}
     params["url"] = f"{base_url}/search?{urlencode(query_params)}"
     return params
 
@@ -39,7 +33,6 @@ def request(query, params):
 def response(resp):
     results = []
 
-    # Extract JSON data embedded in the HTML (bigPipe.onPageletArrive)
     matches = re.findall(r'bigPipe\.onPageletArrive\((\{.*?\})\);', resp.text, re.DOTALL)
     if not matches:
         return results
@@ -51,63 +44,64 @@ def response(resp):
             if not raw_html:
                 continue
 
-            # Split into individual video blocks
             video_blocks = re.findall(r'<div class="search-video".*?</div>\s*</div>', raw_html, re.DOTALL)
 
             for video_block in video_blocks:
-                # Extract title and URL from data-exposure-log attribute
-                exposure_log_match = re.search(r'data-exposure-log=\'({.*?})\'', video_block)
-                if not exposure_log_match:
-                    continue
-
-                video_data = json.loads(exposure_log_match.group(1))
-                title = video_data.get("title", "")
-                content_id = video_data.get("content_id", "")
-                url = f"{base_url}/v/ac{content_id}" if content_id else ""
-
-                description_match = re.search(r'<div class="video__main__intro ellipsis2">(.*?)</div>', video_block, re.DOTALL)
-                description = description_match.group(1).strip() if description_match else ""
-
-                # Extract additional details using regex within the current video block
-                cover_match = re.search(r'<img src="(.*?)" alt=', video_block)
-                cover_image = cover_match.group(1) if cover_match else ""
-
-                publish_time_match = re.search(r'<span class="info__create-time">(.*?)</span>', video_block)
-                publish_time = publish_time_match.group(1).strip() if publish_time_match else ""
-
-                duration_match = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
-                duration = duration_match.group(1).strip() if duration_match else ""
-
-                iframe_url = f"{base_url}/player/ac{content_id}"
-
-                published_date = None
-                if publish_time:
-                    try:
-                        published_date = datetime.strptime(publish_time, "%Y-%m-%d")
-                    except (ValueError, TypeError):
-                        pass
-
-                length = None
-                if duration:
-                    try:
-                        timediff = datetime.strptime(duration, "%M:%S")
-                        length = timedelta(minutes=timediff.minute, seconds=timediff.second)
-                    except (ValueError, TypeError):
-                        pass
-
-                if title and url:
-                    results.append(
-                        {
-                            "title": title,
-                            "url": url,
-                            "content": description,
-                            "thumbnail": cover_image,
-                            "length": length,
-                            "publishedDate": published_date,
-                            "iframe_src": iframe_url,
-                        }
-                    )
+                video_info = extract_video_data(video_block)
+                if video_info and video_info["title"] and video_info["url"]:
+                    results.append(video_info)
         except json.JSONDecodeError:
             continue
 
     return results
+
+
+def extract_video_data(video_block):
+    """Extract video data from a single video block."""
+    try:
+        # Extract title and content ID from data-exposure-log
+        exposure_log_match = re.search(r'data-exposure-log=\'({.*?})\'', video_block)
+        if not exposure_log_match:
+            return None
+
+        video_data = json.loads(exposure_log_match.group(1))
+        title = video_data.get("title", "")
+        content_id = video_data.get("content_id", "")
+
+        # Extract description, cover image, publish time, and duration
+        description = re.search(r'<div class="video__main__intro ellipsis2">(.*?)</div>', video_block, re.DOTALL)
+        cover_image = re.search(r'<img src="(.*?)" alt=', video_block)
+        publish_time = re.search(r'<span class="info__create-time">(.*?)</span>', video_block)
+        duration = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
+
+        # Parse url and iframe_url
+        url = f"{base_url}/v/ac{content_id}"
+        iframe_url = f"{base_url}/player/ac{content_id}"
+
+        # Parse publish_time and duration
+        published_date = None
+        if publish_time:
+            try:
+                published_date = datetime.strptime(publish_time.group(1).strip(), "%Y-%m-%d")
+            except (ValueError, TypeError):
+                pass
+
+        length = None
+        if duration:
+            try:
+                timediff = datetime.strptime(duration.group(1).strip(), "%M:%S")
+                length = timedelta(minutes=timediff.minute, seconds=timediff.second)
+            except (ValueError, TypeError):
+                pass
+
+        return {
+            "title": title,
+            "url": url,
+            "content": description.group(1).strip(),
+            "thumbnail": cover_image.group(1),
+            "length": length,
+            "publishedDate": published_date,
+            "iframe_src": iframe_url,
+        }
+    except Exception:
+        return None
