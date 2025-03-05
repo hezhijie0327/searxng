@@ -100,5 +100,5 @@ def extract_video_data(video_block):
             "publishedDate": published_date,
             "iframe_src": iframe_url,
         }
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
         return None
