@@ -2,9 +2,13 @@
 """Acfun search engine for searxng"""
 
 from urllib.parse import urlencode
-import re
 import json
+import re
 from datetime import datetime, timedelta
+
+from lxml import html
+
+from searx.utils import extract_text
 
 # Metadata
 about = {
@@ -24,14 +28,17 @@ base_url = "https://www.acfun.cn"
 
 
 def request(query, params):
+    """Prepare the search request."""
     query_params = {"keyword": query, "pCursor": params["pageno"]}
     params["url"] = f"{base_url}/search?{urlencode(query_params)}"
     return params
 
 
 def response(resp):
+    """Parse the search results."""
     results = []
 
+    # Extract JSON data embedded in JavaScript
     matches = re.findall(r'bigPipe\.onPageletArrive\((\{.*?\})\);', resp.text, re.DOTALL)
     if not matches:
         return results
@@ -43,13 +50,21 @@ def response(resp):
             if not raw_html:
                 continue
 
-            video_blocks = re.findall(r'<div class="search-video".*?</div>\s*</div>', raw_html, re.DOTALL)
+            # Parse HTML content
+            tree = html.fromstring(raw_html)
 
+            # Find all video blocks
+            video_blocks = tree.xpath('//div[contains(@class, "search-video")]')
+
+            # Extract video data from each block
             for video_block in video_blocks:
                 video_info = extract_video_data(video_block)
                 if video_info and video_info["title"] and video_info["url"]:
                     results.append(video_info)
-        except json.JSONDecodeError:
+
+        except (json.JSONDecodeError, Exception) as e:
+            # Log errors but continue processing
+            print(f"Error parsing JSON or extracting video data: {e}")
             continue
 
     return results
@@ -58,20 +73,23 @@ def response(resp):
 def extract_video_data(video_block):
     """Extract video data from a single video block."""
     try:
-        # Extract title and content ID from data-exposure-log
-        exposure_log_match = re.search(r'data-exposure-log=\'({.*?})\'', video_block)
+        # Extract data-exposure-log attribute
+        data_exposure_log = video_block.get('data-exposure-log')
+        if not data_exposure_log:
+            return None
 
-        video_data = json.loads(exposure_log_match.group(1))
+        # Parse JSON data from data-exposure-log
+        video_data = json.loads(data_exposure_log)
         title = video_data.get("title", "")
         content_id = video_data.get("content_id", "")
 
-        # Extract description, cover image, publish time, and duration
-        description = re.search(r'<div class="video__main__intro ellipsis2">(.*?)</div>', video_block, re.DOTALL)
-        cover_image = re.search(r'<img src="(.*?)" alt=', video_block)
-        publish_time = re.search(r'<span class="info__create-time">(.*?)</span>', video_block)
-        duration = re.search(r'<span class="video__duration">(.*?)</span>', video_block)
+        # Extract fields using XPath and extract_text
+        description = extract_text(video_block.xpath('.//div[@class="video__main__intro"]'), allow_none=True)
+        cover_image = video_block.xpath('.//div[@class="video__cover"]/a/img/@src')[0] if video_block.xpath('.//div[@class="video__cover"]/a/img/@src') else None
+        publish_time = extract_text(video_block.xpath('.//span[@class="info__create-time"]'))
+        duration = extract_text(video_block.xpath('.//span[@class="video__duration"]'))
 
-        # Parse url and iframe_url
+        # Parse URL and iframe URL
         url = f"{base_url}/v/ac{content_id}"
         iframe_url = f"{base_url}/player/ac{content_id}"
 
@@ -79,26 +97,30 @@ def extract_video_data(video_block):
         published_date = None
         if publish_time:
             try:
-                published_date = datetime.strptime(publish_time.group(1).strip(), "%Y-%m-%d")
+                published_date = datetime.strptime(publish_time.strip(), "%Y-%m-%d")
             except (ValueError, TypeError):
                 pass
 
         length = None
         if duration:
             try:
-                timediff = datetime.strptime(duration.group(1).strip(), "%M:%S")
+                timediff = datetime.strptime(duration.strip(), "%M:%S")
                 length = timedelta(minutes=timediff.minute, seconds=timediff.second)
             except (ValueError, TypeError):
                 pass
 
+        # Return structured video data
         return {
             "title": title,
             "url": url,
-            "content": description.group(1).strip(),
-            "thumbnail": cover_image.group(1),
+            "content": description,
+            "thumbnail": cover_image,
             "length": length,
             "publishedDate": published_date,
             "iframe_src": iframe_url,
         }
-    except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
+
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError) as e:
+        # Log errors but return None
+        print(f"Error extracting video data: {e}")
         return None
