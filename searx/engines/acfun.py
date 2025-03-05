@@ -72,7 +72,7 @@ def extract_video_data(video_block):
         title = video_data.get("title", "")
 
         url = f"{base_url}/v/ac{content_id}"
-        iframe_url = f"{base_url}/player/ac{content_id}"
+        iframe_src = f"{base_url}/player/ac{content_id}"
 
         create_time = extract_text(video_block.xpath('.//span[@class="info__create-time"]'))
         video_cover = extract_text(video_block.xpath('.//div[@class="video__cover"]/a/img/@src')[0])
@@ -101,7 +101,7 @@ def extract_video_data(video_block):
             "thumbnail": video_cover,
             "length": length,
             "publishedDate": published_date,
-            "iframe_src": iframe_url,
+            "iframe_src": iframe_src,
         }
 
     except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
