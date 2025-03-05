@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# pylint: disable=invalid-name
 """Acfun search engine for searxng"""
 
 from urllib.parse import urlencode
