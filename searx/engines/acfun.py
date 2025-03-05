@@ -57,7 +57,7 @@ def response(resp):
                 if video_info and video_info["title"] and video_info["url"]:
                     results.append(video_info)
 
-        except (json.JSONDecodeError, Exception) as e:
+        except (json.JSONDecodeError, Exception):
             continue
 
     return results
@@ -69,6 +69,8 @@ def extract_video_data(video_block):
         video_data = json.loads(data_exposure_log)
 
         content_id = video_data.get("content_id", "")
+        title = video_data.get("title", "")
+
         url = f"{base_url}/v/ac{content_id}"
         iframe_url = f"{base_url}/player/ac{content_id}"
 
@@ -93,7 +95,7 @@ def extract_video_data(video_block):
                 pass
 
         return {
-            "title": video_data["title"],
+            "title": title,
             "url": url,
             "content": description,
             "thumbnail": cover_image,
@@ -102,5 +104,5 @@ def extract_video_data(video_block):
             "iframe_src": iframe_url,
         }
 
-    except (json.JSONDecodeError, AttributeError, TypeError, ValueError) as e:
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
         return None
