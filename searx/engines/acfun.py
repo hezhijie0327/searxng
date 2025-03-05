@@ -57,7 +57,7 @@ def response(resp):
                 if video_info and video_info["title"] and video_info["url"]:
                     results.append(video_info)
 
-        except (json.JSONDecodeError, Exception):
+        except json.JSONDecodeError:
             continue
 
     return results
@@ -74,22 +74,22 @@ def extract_video_data(video_block):
         url = f"{base_url}/v/ac{content_id}"
         iframe_url = f"{base_url}/player/ac{content_id}"
 
-        description = extract_text(video_block.xpath('.//div[@class="video__main__intro"]'))
-        cover_image = extract_text(video_block.xpath('.//div[@class="video__cover"]/a/img/@src')[0])
+        create_time = extract_text(video_block.xpath('.//span[@class="info__create-time"]'))
+        video_cover = extract_text(video_block.xpath('.//div[@class="video__cover"]/a/img/@src')[0])
+        video_duration = extract_text(video_block.xpath('.//span[@class="video__duration"]'))
+        video_intro = extract_text(video_block.xpath('.//div[@class="video__main__intro"]'))
 
-        publish_time = extract_text(video_block.xpath('.//span[@class="info__create-time"]'))
         published_date = None
-        if publish_time:
+        if create_time:
             try:
-                published_date = datetime.strptime(publish_time.strip(), "%Y-%m-%d")
+                published_date = datetime.strptime(create_time.strip(), "%Y-%m-%d")
             except (ValueError, TypeError):
                 pass
 
-        duration = extract_text(video_block.xpath('.//span[@class="video__duration"]'))
         length = None
-        if duration:
+        if video_duration:
             try:
-                timediff = datetime.strptime(duration.strip(), "%M:%S")
+                timediff = datetime.strptime(video_duration.strip(), "%M:%S")
                 length = timedelta(minutes=timediff.minute, seconds=timediff.second)
             except (ValueError, TypeError):
                 pass
@@ -97,8 +97,8 @@ def extract_video_data(video_block):
         return {
             "title": title,
             "url": url,
-            "content": description,
-            "thumbnail": cover_image,
+            "content": video_intro,
+            "thumbnail": video_cover,
             "length": length,
             "publishedDate": published_date,
             "iframe_src": iframe_url,
