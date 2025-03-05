@@ -60,8 +60,6 @@ def extract_video_data(video_block):
     try:
         # Extract title and content ID from data-exposure-log
         exposure_log_match = re.search(r'data-exposure-log=\'({.*?})\'', video_block)
-        if not exposure_log_match:
-            return None
 
         video_data = json.loads(exposure_log_match.group(1))
         title = video_data.get("title", "")
@@ -102,5 +100,5 @@ def extract_video_data(video_block):
             "publishedDate": published_date,
             "iframe_src": iframe_url,
         }
-    except Exception:
+    except json.JSONDecodeError:
         return None
