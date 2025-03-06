@@ -29,7 +29,7 @@ def request(query, params):
         "tn": "resultjson_com",
         "word": query,
         "pn": (params["pageno"] - 1) * results_per_page,
-        "rn": results_per_page
+        "rn": results_per_page,
     }
 
     params["url"] = f"{base_url}/search/acjson?{urlencode(query_params)}"
