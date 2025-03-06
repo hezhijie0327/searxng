@@ -25,7 +25,12 @@ base_url = "https://image.baidu.com"
 
 
 def request(query, params):
-    query_params = {"tn": "resultjson_com", "word": query, "pn": (params["pageno"] - 1) * results_per_page, "rn": results_per_page}
+    query_params = {
+        "tn": "resultjson_com",
+        "word": query,
+        "pn": (params["pageno"] - 1) * results_per_page,
+        "rn": results_per_page
+    }
 
     params["url"] = f"{base_url}/search/acjson?{urlencode(query_params)}"
     return params
