@@ -54,11 +54,11 @@ def response(resp):
     for section in sec_list:
         news_list = section.get("newsList", [])
         for news in news_list:
-            results.append(parse_news_or_video(news))
+            results.append(parse_news(news))
 
         videos_list = section.get("videoList", [])
         for video in videos_list:
-            results.append(parse_news_or_video(video))
+            results.append(parse_news(video))
 
     return results
 
