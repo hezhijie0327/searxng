@@ -2,7 +2,6 @@
 """Baidu-Images: A search engine for retrieving images from Baidu."""
 
 from urllib.parse import urlencode
-from datetime import datetime
 
 import json
 
