@@ -26,7 +26,7 @@ base_url = "https://i.news.qq.com"
 
 def request(query, params):
     query_params = {
-        "page": params["pageno"] - 1,
+        "page": params["pageno"],
         "query": query,
         "search_type": "all",
         "search_count_limit": results_per_page,
