@@ -45,12 +45,34 @@ def response(resp):
     except json.JSONDecodeError as e:
         raise SearxEngineAPIException(f"Invalid JSON response: {e}") from e
 
-    sec_list = data.get("secList")
+    sec_list = data.get("secList", [])
     if not sec_list:
-        raise SearxEngineCaptchaException(suspended_time=0, message=f"Request is empty or rate-limited by {base_url}, secList not found in response.")
+        raise SearxEngineCaptchaException(
+            suspended_time=0, message=f"Request is empty or rate-limited by {base_url}, secList not found in response."
+        )
 
     for section in sec_list:
-        for news in section.get("newsList", []):
+        news_list = section.get("newsList", [])
+        for news in news_list:
+            images = news.get("thumbnails_qqnews") or news.get("thumbnails_qqnews_photo") or []
+
+            published_date = None
+            timestamp = news.get("timestamp", "")
+            if timestamp:
+                published_date = datetime.fromtimestamp(int(timestamp))
+
+            results.append(
+                {
+                    "title": news.get("title", ""),
+                    "url": news.get("url", ""),
+                    "content": news.get("abstract", ""),
+                    'thumbnail': images[0] if images else None,
+                    "publishedDate": published_date,
+                }
+            )
+
+        videos_list = section.get("videoList", [])
+        for videos in videos_list:
             images = news.get("thumbnails_qqnews") or news.get("thumbnails_qqnews_photo") or []
 
             published_date = None
