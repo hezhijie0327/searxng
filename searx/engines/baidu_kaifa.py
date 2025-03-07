@@ -3,7 +3,6 @@
 
 from urllib.parse import urlencode
 
-import json
 import time
 
 from searx.exceptions import SearxEngineAPIException
