@@ -4,6 +4,7 @@
 from urllib.parse import urlencode
 
 import json
+import time
 
 from searx.exceptions import SearxEngineAPIException
 
@@ -15,8 +16,11 @@ about = {
 }
 
 paging = True
+time_range_support = True
 results_per_page = 10
 categories = ["it"]
+
+time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536000}
 
 base_url = "https://kaifa.baidu.com"
 
@@ -24,9 +28,16 @@ base_url = "https://kaifa.baidu.com"
 def request(query, params):
     query_params = {
         "wd": query,
+        "paramList": f"page_num={params["pageno"]},page_size={results_per_page}",
         "pageNum": params["pageno"],
         "pageSize": results_per_page,
+        "position": 0,
     }
+
+    if params.get("time_range") in time_range_dict:
+        now = int(time.time())
+        past = now - time_range_dict[params["time_range"]]
+        query_params["paramList"] += f",timestamp_range={past}-{now}"
 
     params["url"] = f"{base_url}/rest/v1/search?{urlencode(query_params)}"
     return params
