@@ -140,7 +140,7 @@ def parse_images(data):
                 {
                     "template": "images.html",
                     "url": from_url,
-                    "thumbnail_src": img_src,
+                    "thumbnail_src": item.get("thumbURL", ""),
                     "img_src": img_src,
                     "content": html_to_text(item.get("fromPageTitleEnc", "")),
                     "title": html_to_text(item.get("fromPageTitle", "")),
