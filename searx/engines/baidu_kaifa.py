@@ -26,10 +26,11 @@ base_url = "https://kaifa.baidu.com"
 
 
 def request(query, params):
+    page_num = params["pageno"]
     query_params = {
         "wd": query,
-        "paramList": f"page_num={params["pageno"]},page_size={results_per_page}",
-        "pageNum": params["pageno"],
+        "paramList": f"page_num={page_num},page_size={results_per_page}",
+        "pageNum": page_num,
         "pageSize": results_per_page,
         "position": 0,
     }
