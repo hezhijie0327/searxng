@@ -9,6 +9,7 @@
 
 from urllib.parse import urlencode
 from datetime import datetime
+import time
 
 from searx.exceptions import SearxEngineAPIException
 
@@ -26,6 +27,9 @@ categories = ["general"]
 base_url = "https://www.baidu.com/s"
 results_per_page = 10
 
+time_range_support = True
+time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536000}
+
 
 def request(query, params):
     keyword = query.strip()
@@ -36,6 +40,11 @@ def request(query, params):
         "pn": (params["pageno"] - 1) * results_per_page,
         "tn": "json",
     }
+
+    if params.get("time_range") in time_range_dict:
+        now = int(time.time())
+        past = now - time_range_dict[params["time_range"]]
+        query_params["gpc"] = f"stf={past},{now}|stftype=1"
 
     params["url"] = f"{base_url}?{urlencode(query_params)}"
     return params
