@@ -52,7 +52,7 @@ def response(resp):
                 {
                     "template": "images.html",
                     "url": from_url,
-                    "thumbnail_src": item.get("thumbURL", ""),
+                    "thumbnail_src": img_src,
                     "img_src": img_src,
                     "content": html_to_text(item.get("fromPageTitleEnc", "")),
                     "title": html_to_text(item.get("fromPageTitle", "")),
