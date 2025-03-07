@@ -502,13 +502,21 @@ engines:
     categories: music
 
   - name: baidu
+    categories: [general]
     engine: baidu
-    shortcut: baidu
+    shortcut: bd
     disabled: false
 
   - name: baidu images
-    engine: baidu_images
-    shortcut: baidui
+    categories: [images]
+    engine: baidu
+    shortcut: bdi
+    disabled: true
+
+  - name: baidu kaifa
+    categories: [it]
+    engine: baidu
+    shortcut: bdk
     disabled: true
 
   - name: wikipedia
