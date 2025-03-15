@@ -1625,6 +1625,11 @@ engines:
     shortcut: pypi
     engine: pypi
 
+  - name: quark
+    engine: quark
+    shortcut: qk
+    disabled: true
+
   - name: qwant
     qwant_categ: web
     engine: qwant
