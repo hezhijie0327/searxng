@@ -28,16 +28,21 @@ base_url = "https://m.quark.cn"
 
 time_range_dict = {'day': '4', 'week': '3', 'month': '2', 'year': '1'}
 
-cookie_x5sec = ''
 
+def is_alibaba_captcha(html):
+    """
+    Detects if the response contains an Alibaba X5SEC CAPTCHA page.
 
-def is_quark_captcha(html):
+    Quark may return a CAPTCHA challenge after 9 requests in a short period.
+
+    Typically, the ban duration is around 10 minutes.
+    """
     pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
     match = re.search(pattern, html)
 
     if match:
         captcha_url = match.group(1)
-        raise SearxEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({captcha_url})")
+        raise SearxEngineCaptchaException(suspended_time=600, message=f"Alibaba CAPTCHA: {captcha_url}")
 
 
 def request(query, params):
@@ -47,9 +52,6 @@ def request(query, params):
         query_params["tl_request"] = time_range_dict.get(params['time_range'])
 
     params["url"] = f"{base_url}/s?{urlencode(query_params)}"
-    params["cookies"] = {
-        'x5sec': cookie_x5sec,
-    }
     params["headers"] = {
         "User-Agent": searx_useragent(),
     }
@@ -60,7 +62,7 @@ def response(resp):
     results = []
     html_content = resp.text
 
-    is_quark_captcha(html_content)
+    is_alibaba_captcha(html_content)
 
     pattern = r'<script\s+type="application/json"\s+id="s-data-[^"]+"\s+data-used-by="hydrate">(.*?)</script>'
     matches = re.findall(pattern, html_content, re.DOTALL)
