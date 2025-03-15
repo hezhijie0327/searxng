@@ -1626,8 +1626,6 @@ engines:
     engine: pypi
 
   - name: quark
-    # Set x5sec to avoid CAPTCHA detection, you can get it from Cookie
-    # cookie_x5sec: ''
     engine: quark
     shortcut: qk
     disabled: true
