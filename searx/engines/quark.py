@@ -68,57 +68,45 @@ def response(resp):
     matches = re.findall(pattern, html_content, re.DOTALL)
 
     for match in matches:
-        title = None
-        content = None
-        url = None
-
         data = json.loads(match)
         initial_data = data.get('data', {}).get('initialData', {})
         extra_data = data.get('extraData', {})
 
+        sc = extra_data.get('sc')
+
+        title, content, url = None, None, None
+
         # General
-        if extra_data['sc'] == 'ss_pic' or extra_data['sc'] == 'ss_text':
+        if sc == 'ss_pic' or sc == 'ss_text':
             title = initial_data.get('titleProps', {}).get('content')
             content = initial_data.get('summaryProps', {}).get('content')
             url = initial_data.get('sourceProps', {}).get('dest_url')
 
-        if extra_data['sc'] == 'ss_note':
+        if sc == 'ss_note':
             title = initial_data.get('title', {}).get('content')
             content = initial_data.get('summary', {}).get('content')
             url = initial_data.get('source', {}).get('dest_url')
 
-        if extra_data['sc'] == 'nature_result':
+        if sc == 'nature_result':
             title = initial_data.get('title')
             content = initial_data.get('desc')
             url = initial_data.get('url')
 
-        if extra_data['sc'] == 'addition':
+        if sc == 'addition':
             title = initial_data.get('title', {}).get('content')
             content = initial_data.get('summary', {}).get('content')
             url = initial_data.get('source', {}).get('url')
 
         # Baike (Wiki)
-        if extra_data['sc'] == 'baike_sc':
+        if sc == 'baike_sc':
             title = initial_data.get('data', {}).get('title')
             content = initial_data.get('data', {}).get('abstract')
             url = initial_data.get('data', {}).get('url')
 
-        # News
-        if extra_data['sc'] == 'news_uchq':
-            feed_items = initial_data.get('feed', [])
-            for item in feed_items:
-                title = item.get('title')
-                content = item.get('summary')
-                url = item.get('url')
-
-                if title and content:
-                    results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
-            # skip dups append for news_uchq
-            continue
-
         # Shuidi (Company DB)
-        if extra_data['sc'] == 'finance_shuidi':
-            company_details = [value for value in [
+        if sc == 'finance_shuidi':
+            title = initial_data.get('company_name')
+            content = " | ".join(filter(None, [
                 initial_data.get('establish_time'),
                 initial_data.get('company_status'),
                 initial_data.get('controled_type'),
@@ -126,36 +114,40 @@ def response(resp):
                 initial_data.get('capital'),
                 initial_data.get('address'),
                 initial_data.get('business_scope')
-            ] if value is not None]
-            content = " | ".join(str(value) for value in company_details if value is not None)
-
-            title = initial_data.get('company_name')
+            ]))
             url = initial_data.get('title_url')
 
         # Travel
-        if extra_data['sc'] == 'travel_dest_overview':
+        if sc == 'travel_dest_overview':
             title = initial_data.get('strong', {}).get('title')
             content = initial_data.get('strong', {}).get('baike_text')
             url = initial_data.get('strong', {}).get('baike_url')
 
-        if extra_data['sc'] == 'travel_ranking_list':
+        if sc == 'travel_ranking_list':
             title = initial_data.get('title', {}).get('text')
             content = initial_data.get('title', {}).get('title_tag')
             url = initial_data.get('title', {}).get('url')
 
+        # News
+        if sc == 'news_uchq':
+            for item in initial_data.get('feed', []):
+                results.append({
+                    "title": html_to_text(item.get('title')),
+                    "url": item.get('url'),
+                    "content": html_to_text(item.get('summary'))
+                })
+            # skip dups append for news_uchq
+            continue
+
         # AI Contents
-        if extra_data['sc'] == 'ai_page':
-            list_items = initial_data.get('list', [])
-
-            for item in list_items:
-                content_list = item.get('content', [])
-                content = " | ".join(map(str, content_list)) if isinstance(content_list, list) else str(content_list)
-
-                title = item.get('title')
-                url = item.get('url')
-
-                if title and content:
-                    results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
+        if sc == 'ai_page':
+            for item in initial_data.get('list', []):
+                content = " | ".join(map(str, item.get('content', []))) if isinstance(item.get('content'), list) else str(item.get('content'))
+                results.append({
+                    "title": html_to_text(item.get('title')),
+                    "url": item.get('url'),
+                    "content": html_to_text(content)
+                })
             # skip dups append for ai_page
             continue
 
