@@ -27,7 +27,7 @@ base_url = "https://quark.sm.cn/s"
 
 # Cookies needed for requests
 cookies = {
-    'x5sec': '7b22733b32223a2238336538313064336131336531636562222c2277616762726964676561643b32223a223633336237343538343031396264353265663535333661623261626632353431434d485330373447454d7a513359662f2f2f2f2f2f77456f42444459746475652b502f2f2f2f3842227d'
+    'x5sec': '7b22733b32223a2264643037333165383064613134303931222c2277616762726964676561643b32223a223366306638356463613432316133623963323363373135643966356164306661434b7a76314c3447454e6253707534454b415177324c58626e766a2f2f2f2f2f41513d3d227d'
 }
 
 # Headers for requests
@@ -62,42 +62,21 @@ def response(resp):
         try:
             data = json.loads(match)
             initial_data = data.get('data', {}).get('initialData', {})
-            sc_type = data.get('extraData', {}).get('sc', '')  # 获取搜索结果类型
 
-            # 根据不同结构提取数据
-            if sc_type == 'nature_result':
-                # 处理视频/文章类型
-                title = initial_data.get('title', '')
-                content = initial_data.get('desc', '')
-                link = initial_data.get('url', '')
-            elif sc_type in ['baike', 'ss_text', 'ss_pic']:
-                # 处理百科/文本/图片类型
-                title = initial_data.get('titleProps', {}).get('content', '')
-                content = initial_data.get('summaryProps', {}).get('content', '')
-                link = initial_data.get('nuProps', {}).get('nu', '') or \
-                       initial_data.get('sourceProps', {}).get('dest_url', '')
-            else:
-                # 处理其他类型
-                title = initial_data.get('title', '') or initial_data.get('titleProps', {}).get('content', '')
-                content = initial_data.get('desc', '') or initial_data.get('summaryProps', {}).get('content', '')
-                link = initial_data.get('url', '') or initial_data.get('nuProps', {}).get('nu', '') or \
-                       initial_data.get('sourceProps', {}).get('dest_url', '')
+            title = initial_data.get('title') or initial_data.get('titleProps', {}).get('content')
+            content = initial_data.get('desc') or initial_data.get('summaryProps', {}).get('content')
+            link = initial_data.get('url') or initial_data.get('nuProps', {}).get('nu') or \
+                   initial_data.get('sourceProps', {}).get('dest_url')
 
-            # 清理HTML标签和转义字符
-            clean_title = html_to_text(title)
-            clean_content = html_to_text(content)
-
-            # 过滤无效数据
-            if clean_title and clean_content and link:
+            if title and content:
                 results.append({
-                    "title": clean_title.strip(),
-                    "url": link.strip(),
-                    "content": clean_content.strip()
+                    "title": html_to_text(title),
+                    "url": link,
+                    "content": html_to_text(content)
                 })
         except json.JSONDecodeError:
             continue
         except KeyError as e:
-            # 记录关键字段缺失错误（可选）
             continue
 
     return results
