@@ -22,22 +22,13 @@ categories = ["general"]
 paging = True
 time_range_support = True
 
+# Base URL
+base_url = "https://quark.sm.cn"
+
 time_range_dict = {'day': '4', 'week': '3', 'month': '2', 'year': '1'}
 
 cookie_x5sec = ''
 
-# Base URL
-base_url = "https://quark.sm.cn"
-
-# Cookies needed for requests
-cookies = {
-    'x5sec': cookie_x5sec,
-}
-
-# Headers for requests
-headers = {
-    "User-Agent": searx_useragent(),
-}
 
 def is_quark_captcha(html):
     pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
@@ -46,6 +37,7 @@ def is_quark_captcha(html):
     if match:
         captcha_url = match.group(1)
         raise SearxEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({captcha_url})")
+
 
 def request(query, params):
     query_params = {
@@ -58,9 +50,14 @@ def request(query, params):
         query_params["tl_request"] = time_range_dict.get(params['time_range'])
 
     params["url"] = f"{base_url}/s?{urlencode(query_params)}"
-    params["cookies"] = cookies
-    params["headers"] = headers
+    params["cookies"] = {
+        'x5sec': cookie_x5sec,
+    }
+    params["headers"] = {
+        "User-Agent": searx_useragent(),
+    }
     return params
+
 
 def response(resp):
     results = []
