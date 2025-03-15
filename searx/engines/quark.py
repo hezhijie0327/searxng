@@ -41,11 +41,7 @@ def is_quark_captcha(html):
 
 
 def request(query, params):
-    query_params = {
-        "q": query,
-        "layout": "html",
-        "page": params["pageno"]
-    }
+    query_params = {"q": query, "layout": "html", "page": params["pageno"]}
 
     if time_range_dict.get(params['time_range']):
         query_params["tl_request"] = time_range_dict.get(params['time_range'])
@@ -112,20 +108,12 @@ def response(resp):
                     url = item.get('url')
 
                     if title and content:
-                        results.append({
-                            "title": html_to_text(title),
-                            "url": url,
-                            "content": html_to_text(content)
-                        })
+                        results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
                 # skip dups append for news_uchq
                 continue
 
             if title and content:
-                results.append({
-                    "title": html_to_text(title),
-                    "url": url,
-                    "content": html_to_text(content)
-                })
+                results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
         except json.JSONDecodeError:
             continue
         except KeyError as e:
