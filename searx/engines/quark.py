@@ -10,10 +10,10 @@ from searx.utils import html_to_text, searx_useragent
 # Metadata
 about = {
     "website": "https://quark.sm.cn/",
-    "wikidata_id": None,
+    "wikidata_id": "Q48816502",
     "use_official_api": False,
     "require_api_key": False,
-    "results": "JSON",
+    "results": "HTML",
     "language": "zh",
 }
 
