@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Quark search engine for searxng"""
+"""Quark (Shenma) search engine for searxng"""
 
 from urllib.parse import urlencode
 import re
