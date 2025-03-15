@@ -39,6 +39,14 @@ headers = {
     "User-Agent": searx_useragent(),
 }
 
+def is_quark_captcha(html):
+    pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
+    match = re.search(pattern, html)
+
+    if match:
+        captcha_url = match.group(1)
+        raise SearxEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({captcha_url})")
+
 def request(query, params):
     query_params = {
         "q": query,
@@ -57,6 +65,8 @@ def request(query, params):
 def response(resp):
     results = []
     html_content = resp.text
+
+    is_quark_captcha(html_content)
 
     pattern = r'<script\s+type="application/json"\s+id="s-data-[^"]+"\s+data-used-by="hydrate">(.*?)</script>'
     matches = re.findall(pattern, html_content, re.DOTALL)
