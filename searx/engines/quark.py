@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 import re
 import json
 
-from searx.utils import html_to_text
+from searx.utils import html_to_text, searx_useragent
 
 # Metadata
 about = {
@@ -20,37 +20,41 @@ about = {
 # Engine Configuration
 categories = ["general"]
 paging = True
-time_range_support = False  # Quark暂不支持时间范围过滤
+time_range_support = True
+
+time_range_dict = {'day': '4', 'week': '3', 'month': '2', 'year': '1'}
+
+cookie_x5sec = ''
 
 # Base URL
-base_url = "https://quark.sm.cn/s"
+base_url = "https://quark.sm.cn"
 
 # Cookies needed for requests
 cookies = {
-    'x5sec': '7b22733b32223a2264643037333165383064613134303931222c2277616762726964676561643b32223a223366306638356463613432316133623963323363373135643966356164306661434b7a76314c3447454e6253707534454b415177324c58626e766a2f2f2f2f2f41513d3d227d'
+    'x5sec': cookie_x5sec,
 }
 
 # Headers for requests
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Referer": "https://quark.sm.cn/"
+    "User-Agent": searx_useragent(),
 }
 
 def request(query, params):
-    """Generate search request parameters"""
     query_params = {
         "q": query,
         "layout": "html",
         "page": params["pageno"]
     }
 
-    params["url"] = f"{base_url}?{urlencode(query_params)}"
+    if time_range_dict.get(params['time_range']):
+        query_params["tl_request"] = time_range_dict.get(params['time_range'])
+
+    params["url"] = f"{base_url}/s?{urlencode(query_params)}"
     params["cookies"] = cookies
     params["headers"] = headers
     return params
 
 def response(resp):
-    """Parse search results from Quark"""
     results = []
     html_content = resp.text
 
@@ -61,34 +65,43 @@ def response(resp):
         try:
             data = json.loads(match)
             initial_data = data.get('data', {}).get('initialData', {})
+            extra_data = data.get('extraData', {})
 
-            title = (
-                #initial_data.get('title', {}).get('content') or
-                initial_data.get('title') or
-                initial_data.get('titleProps', {}).get('content') or
-                initial_data.get('props', [{}])[0].get('title')
-            )
+            if extra_data['sc'] == 'ss_note':
+                title = initial_data.get('title', {}).get('content')
+                content = initial_data.get('summary', {}).get('content')
+                url = initial_data.get('source', {}).get('dest_url')
 
-            content = (
-                initial_data.get('desc') or
-                #initial_data.get('summary', {}).get('content') or
-                initial_data.get('summaryProps', {}).get('content') or
-                initial_data.get('props', [{}])[0].get('summary')
-            )
+            if extra_data['sc'] == 'ss_pic' or extra_data['sc'] == 'ss_text':
+                title = initial_data.get('titleProps', {}).get('content')
+                content = initial_data.get('summaryProps', {}).get('content')
+                url = initial_data.get('sourceProps', {}).get('dest_url')
 
-            link = (
-                initial_data.get('url') or
-                initial_data.get('nuProps', {}).get('nu') or
-                #initial_data.get('source', {}).get('dest_url') or
-                initial_data.get('sourceProps', {}).get('dest_url') or
-                initial_data.get('title', {}).get('dest_url') or
-                initial_data.get('props', [{}])[0].get('dest_url')
-            )
+            if extra_data['sc'] == 'nature_result':
+                title = initial_data.get('title')
+                content = initial_data.get('desc')
+                url = initial_data.get('url')
+
+            if extra_data['sc'] == 'news_uchq':
+                feed_items = initial_data.get('feed', [])
+                for item in feed_items:
+                    title = item.get('title')
+                    content = item.get('summary')
+                    url = item.get('url')
+
+                    if title and content:
+                        results.append({
+                            "title": html_to_text(title),
+                            "url": url,
+                            "content": html_to_text(content)
+                        })
+                # skip dups append for news_uchq
+                continue
 
             if title and content:
                 results.append({
                     "title": html_to_text(title),
-                    "url": link,
+                    "url": url,
                     "content": html_to_text(content)
                 })
         except json.JSONDecodeError:
