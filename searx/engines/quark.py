@@ -106,15 +106,20 @@ def response(resp):
         # Shuidi (Company DB)
         if sc == 'finance_shuidi':
             title = initial_data.get('company_name')
-            content = " | ".join(filter(None, [
-                initial_data.get('establish_time'),
-                initial_data.get('company_status'),
-                initial_data.get('controled_type'),
-                initial_data.get('company_type'),
-                initial_data.get('capital'),
-                initial_data.get('address'),
-                initial_data.get('business_scope')
-            ]))
+            content = " | ".join(
+                filter(
+                    None,
+                    [
+                        initial_data.get('establish_time'),
+                        initial_data.get('company_status'),
+                        initial_data.get('controled_type'),
+                        initial_data.get('company_type'),
+                        initial_data.get('capital'),
+                        initial_data.get('address'),
+                        initial_data.get('business_scope'),
+                    ]
+                )
+            )
             url = initial_data.get('title_url')
 
         # Travel
@@ -131,23 +136,27 @@ def response(resp):
         # News
         if sc == 'news_uchq':
             for item in initial_data.get('feed', []):
-                results.append({
-                    "title": html_to_text(item.get('title')),
-                    "url": item.get('url'),
-                    "content": html_to_text(item.get('summary'))
-                })
+                results.append(
+                    {
+                        "title": html_to_text(item.get('title')),
+                        "url": item.get('url'),
+                        "content": html_to_text(item.get('summary')),
+                    }
+                )
             # skip dups append for news_uchq
             continue
 
         # AI Contents
         if sc == 'ai_page':
             for item in initial_data.get('list', []):
-                content = " | ".join(map(str, item.get('content', []))) if isinstance(item.get('content'), list) else str(item.get('content'))
-                results.append({
-                    "title": html_to_text(item.get('title')),
-                    "url": item.get('url'),
-                    "content": html_to_text(content)
-                })
+                content = (
+                    " | ".join(map(str, item.get('content', [])))
+                    if isinstance(item.get('content'), list)
+                    else str(item.get('content'))
+                )
+                results.append(
+                    {"title": html_to_text(item.get('title')), "url": item.get('url'), "content": html_to_text(content)}
+                )
             # skip dups append for ai_page
             continue
 
