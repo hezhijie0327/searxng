@@ -7,10 +7,11 @@
 # There exits a https://github.com/ohblue/baidu-serp-api/
 # but we don't use it here (may we can learn from).
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, unquote
 from datetime import datetime
 import time
 import json
+import re
 
 from searx.exceptions import SearxEngineAPIException
 from searx.utils import html_to_text
@@ -93,7 +94,13 @@ def request(query, params):
 
 def response(resp):
     try:
-        data = json.loads(resp.text, strict=False)
+        text = resp.text
+
+        if baidu_category == 'images':
+            # fix Invalid \escape
+            text = re.sub(r'\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})', r'\\\\', text)
+
+        data = json.loads(text, strict=False)
     except Exception as e:
         raise SearxEngineAPIException(f"Invalid response: {e}") from e
 
@@ -121,7 +128,7 @@ def parse_general(data):
         results.append(
             {
                 "title": entry["title"],
-                "url": entry["url"],
+                "url": unquote(entry["url"]),
                 "content": entry.get("abs", ""),
                 "publishedDate": published_date,
             }
