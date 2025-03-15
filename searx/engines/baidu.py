@@ -7,7 +7,7 @@
 # There exits a https://github.com/ohblue/baidu-serp-api/
 # but we don't use it here (may we can learn from).
 
-from urllib.parse import urlencode, unquote
+from urllib.parse import urlencode
 from datetime import datetime
 import time
 import json
@@ -128,7 +128,7 @@ def parse_general(data):
         results.append(
             {
                 "title": entry["title"],
-                "url": unquote(entry["url"]),
+                "url": entry["url"],
                 "content": entry.get("abs", ""),
                 "publishedDate": published_date,
             }
