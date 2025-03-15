@@ -63,6 +63,10 @@ def response(resp):
 
     for match in matches:
         try:
+            title = None
+            content = None
+            url = None
+
             data = json.loads(match)
             initial_data = data.get('data', {}).get('initialData', {})
             extra_data = data.get('extraData', {})
@@ -76,6 +80,16 @@ def response(resp):
                 title = initial_data.get('titleProps', {}).get('content')
                 content = initial_data.get('summaryProps', {}).get('content')
                 url = initial_data.get('sourceProps', {}).get('dest_url')
+
+            if extra_data['sc'] == 'baike_sc':
+                title = initial_data.get('data', {}).get('title')
+                content = initial_data.get('data', {}).get('abstract')
+                url = initial_data.get('data', {}).get('url')
+
+            if extra_data['sc'] == 'finance_shuidi':
+                title = initial_data.get('company_name')
+                content = initial_data.get('business_scope')
+                url = initial_data.get('title_url')
 
             if extra_data['sc'] == 'nature_result':
                 title = initial_data.get('title')
