@@ -66,57 +66,52 @@ def response(resp):
     matches = re.findall(pattern, html_content, re.DOTALL)
 
     for match in matches:
-        try:
-            title = None
-            content = None
-            url = None
+        title = None
+        content = None
+        url = None
 
-            data = json.loads(match)
-            initial_data = data.get('data', {}).get('initialData', {})
-            extra_data = data.get('extraData', {})
+        data = json.loads(match)
+        initial_data = data.get('data', {}).get('initialData', {})
+        extra_data = data.get('extraData', {})
 
-            if extra_data['sc'] == 'ss_note':
-                title = initial_data.get('title', {}).get('content')
-                content = initial_data.get('summary', {}).get('content')
-                url = initial_data.get('source', {}).get('dest_url')
+        if extra_data['sc'] == 'ss_note':
+            title = initial_data.get('title', {}).get('content')
+            content = initial_data.get('summary', {}).get('content')
+            url = initial_data.get('source', {}).get('dest_url')
 
-            if extra_data['sc'] == 'ss_pic' or extra_data['sc'] == 'ss_text':
-                title = initial_data.get('titleProps', {}).get('content')
-                content = initial_data.get('summaryProps', {}).get('content')
-                url = initial_data.get('sourceProps', {}).get('dest_url')
+        if extra_data['sc'] == 'ss_pic' or extra_data['sc'] == 'ss_text':
+            title = initial_data.get('titleProps', {}).get('content')
+            content = initial_data.get('summaryProps', {}).get('content')
+            url = initial_data.get('sourceProps', {}).get('dest_url')
 
-            if extra_data['sc'] == 'baike_sc':
-                title = initial_data.get('data', {}).get('title')
-                content = initial_data.get('data', {}).get('abstract')
-                url = initial_data.get('data', {}).get('url')
+        if extra_data['sc'] == 'baike_sc':
+            title = initial_data.get('data', {}).get('title')
+            content = initial_data.get('data', {}).get('abstract')
+            url = initial_data.get('data', {}).get('url')
 
-            if extra_data['sc'] == 'finance_shuidi':
-                title = initial_data.get('company_name')
-                content = initial_data.get('business_scope')
-                url = initial_data.get('title_url')
+        if extra_data['sc'] == 'finance_shuidi':
+            title = initial_data.get('company_name')
+            content = initial_data.get('business_scope')
+            url = initial_data.get('title_url')
 
-            if extra_data['sc'] == 'nature_result':
-                title = initial_data.get('title')
-                content = initial_data.get('desc')
-                url = initial_data.get('url')
+        if extra_data['sc'] == 'nature_result':
+            title = initial_data.get('title')
+            content = initial_data.get('desc')
+            url = initial_data.get('url')
 
-            if extra_data['sc'] == 'news_uchq':
-                feed_items = initial_data.get('feed', [])
-                for item in feed_items:
-                    title = item.get('title')
-                    content = item.get('summary')
-                    url = item.get('url')
+        if extra_data['sc'] == 'news_uchq':
+            feed_items = initial_data.get('feed', [])
+            for item in feed_items:
+                title = item.get('title')
+                content = item.get('summary')
+                url = item.get('url')
 
-                    if title and content:
-                        results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
-                # skip dups append for news_uchq
-                continue
-
-            if title and content:
-                results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
-        except json.JSONDecodeError:
+                if title and content:
+                    results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
+            # skip dups append for news_uchq
             continue
-        except KeyError as e:
-            continue
+
+        if title and content:
+            results.append({"title": html_to_text(title), "url": url, "content": html_to_text(content)})
 
     return results
