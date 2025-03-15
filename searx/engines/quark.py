@@ -117,7 +117,7 @@ def response(resp):
                         initial_data.get('capital'),
                         initial_data.get('address'),
                         initial_data.get('business_scope'),
-                    ]
+                    ],
                 )
             )
             url = initial_data.get('title_url')
