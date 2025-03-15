@@ -35,14 +35,14 @@ def is_alibaba_captcha(html):
 
     Quark may return a CAPTCHA challenge after 9 requests in a short period.
 
-    Typically, the ban duration is around 10 minutes.
+    Typically, the ban duration is around 15 minutes.
     """
     pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
     match = re.search(pattern, html)
 
     if match:
         captcha_url = match.group(1)
-        raise SearxEngineCaptchaException(suspended_time=600, message=f"Alibaba CAPTCHA: {captcha_url}")
+        raise SearxEngineCaptchaException(suspended_time=900, message=f"Alibaba CAPTCHA: {captcha_url}")
 
 
 def request(query, params):
