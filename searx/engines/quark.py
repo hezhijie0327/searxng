@@ -54,7 +54,6 @@ def response(resp):
     results = []
     html_content = resp.text
 
-    # 改进的正则表达式匹配
     pattern = r'<script\s+type="application/json"\s+id="s-data-[^"]+"\s+data-used-by="hydrate">(.*?)</script>'
     matches = re.findall(pattern, html_content, re.DOTALL)
 
@@ -63,10 +62,28 @@ def response(resp):
             data = json.loads(match)
             initial_data = data.get('data', {}).get('initialData', {})
 
-            title = initial_data.get('title') or initial_data.get('titleProps', {}).get('content')
-            content = initial_data.get('desc') or initial_data.get('summaryProps', {}).get('content')
-            link = initial_data.get('url') or initial_data.get('nuProps', {}).get('nu') or \
-                   initial_data.get('sourceProps', {}).get('dest_url')
+            title = (
+                #initial_data.get('title', {}).get('content') or
+                initial_data.get('title') or
+                initial_data.get('titleProps', {}).get('content') or
+                initial_data.get('props', [{}])[0].get('title')
+            )
+
+            content = (
+                initial_data.get('desc') or
+                #initial_data.get('summary', {}).get('content') or
+                initial_data.get('summaryProps', {}).get('content') or
+                initial_data.get('props', [{}])[0].get('summary')
+            )
+
+            link = (
+                initial_data.get('url') or
+                initial_data.get('nuProps', {}).get('nu') or
+                #initial_data.get('source', {}).get('dest_url') or
+                initial_data.get('sourceProps', {}).get('dest_url') or
+                initial_data.get('title', {}).get('dest_url') or
+                initial_data.get('props', [{}])[0].get('dest_url')
+            )
 
             if title and content:
                 results.append({
