@@ -6,6 +6,7 @@ import re
 import json
 
 from searx.utils import html_to_text, searx_useragent
+from searx.exceptions import SearxEngineAPIException, SearxEngineCaptchaException
 
 # Metadata
 about = {
@@ -27,16 +28,21 @@ base_url = "https://quark.sm.cn"
 
 time_range_dict = {'day': '4', 'week': '3', 'month': '2', 'year': '1'}
 
+quark_category = 'general'
+"""Quark supports general, news, videos, images, files search.
+
+- ``general``: search for general
+- ``news``: search for news
+- ``video``: search for videos
+- ``picture``: search for images
+- ``library``: search for files
+"""
 cookie_x5sec = ''
 
 
-def is_quark_captcha(html):
-    pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
-    match = re.search(pattern, html)
-
-    if match:
-        captcha_url = match.group(1)
-        raise SearxEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({captcha_url})")
+def init(_):
+    if quark_category not in ('general', 'news', 'video', 'picture', 'library'):
+        raise SearxEngineAPIException(f"Unsupported category: {quark_category}")
 
 
 def request(query, params):
@@ -45,6 +51,9 @@ def request(query, params):
         "layout": "html",
         "page": params["pageno"]
     }
+
+    if quark_category != 'general':
+        query_params["apps"] = quark_category
 
     if time_range_dict.get(params['time_range']):
         query_params["tl_request"] = time_range_dict.get(params['time_range'])
@@ -60,13 +69,40 @@ def request(query, params):
 
 
 def response(resp):
-    results = []
     html_content = resp.text
 
     is_quark_captcha(html_content)
 
+    parsers = {'general': parse_general, 'news': parse_news, 'picture': parse_picture, 'video': parse_video, 'library': parse_library}
+
+    return parsers[quark_category](html_content)
+
+
+def is_quark_captcha(html):
+    pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
+    match = re.search(pattern, html)
+
+    if match:
+        captcha_url = match.group(1)
+        raise SearxEngineCaptchaException(suspended_time=0, message=f"CAPTCHA ({captcha_url})")
+
+def parse_news(html):
+    return []
+
+def parse_picture(html):
+    return []
+
+def parse_video(html):
+    return []
+
+def parse_library(html):
+    return []
+
+def parse_general(html):
+    results = []
+
     pattern = r'<script\s+type="application/json"\s+id="s-data-[^"]+"\s+data-used-by="hydrate">(.*?)</script>'
-    matches = re.findall(pattern, html_content, re.DOTALL)
+    matches = re.findall(pattern, html, re.DOTALL)
 
     for match in matches:
         try:
