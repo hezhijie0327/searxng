@@ -111,7 +111,6 @@ def response(resp):
                     "publishedDate": published_date,
                 }
             )
-        return results
 
     if quark_category == 'general':
         pattern = r'<script\s+type="application/json"\s+id="s-data-[^"]+"\s+data-used-by="hydrate">(.*?)</script>'
@@ -148,7 +147,7 @@ def response(resp):
                     # Append if it's a single result
                     results.append(parsed_results)
 
-        return results
+    return results
 
 
 def parse_addition(data):
