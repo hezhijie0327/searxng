@@ -264,7 +264,7 @@ def parse_ss_note(data):
 
 
 def parse_ss_pic_text(data):
-    time_value = item.get('sourceProps', {}).get('time')
+    time_value = data.get('sourceProps', {}).get('time')
     if time_value is None or int(time_value) == 0:
         # Sometime Quark will return 0, set published_date as None
         published_date = None
