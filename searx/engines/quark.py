@@ -106,7 +106,7 @@ def response(resp):
                     "img_src": item.get("bigPicUrl"),
                     "title": item.get("title"),
                     "source": item.get("site"),
-                    "resolution": f"{width} x {height}",
+                    "resolution": f"{item['width']} x {item['height']}",
                     "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
                 }
             )
@@ -186,18 +186,16 @@ def parse_baike_sc(data):
 
 def parse_finance_shuidi(data):
     content = " | ".join(
-        filter(
-            None,
-            [
-                data.get('establish_time'),
-                data.get('company_status'),
-                data.get('controled_type'),
-                data.get('company_type'),
-                data.get('capital'),
-                data.get('address'),
-                data.get('business_scope'),
-            ],
-        )
+      info for info in [
+            data.get('establish_time'),
+            data.get('company_status'),
+            data.get('controled_type'),
+            data.get('company_type'),
+            data.get('capital'),
+            data.get('address'),
+            data.get('business_scope'),
+        ] if info,
+    )
     )
     return {
         "title": html_to_text(data.get('company_name')),
