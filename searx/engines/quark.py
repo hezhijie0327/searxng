@@ -6,7 +6,7 @@ from datetime import datetime
 import re
 import json
 
-from searx.utils import html_to_text, searx_useragent
+from searx.utils import html_to_text, gen_useragent
 from searx.exceptions import SearxEngineAPIException, SearxEngineCaptchaException
 
 # Metadata
@@ -29,6 +29,8 @@ quark_category = 'general'
 time_range_support = True
 time_range_dict = {'day': '4', 'week': '3', 'month': '2', 'year': '1'}
 
+CAPTCHA_PATTERN = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
+
 
 def is_alibaba_captcha(html):
     """
@@ -38,12 +40,7 @@ def is_alibaba_captcha(html):
 
     Typically, the ban duration is around 15 minutes.
     """
-    pattern = r'\{[^{]*?"action"\s*:\s*"captcha"\s*,\s*"url"\s*:\s*"([^"]+)"[^{]*?\}'
-    match = re.search(pattern, html)
-
-    if match:
-        captcha_url = match.group(1)
-        raise SearxEngineCaptchaException(suspended_time=900, message=f"Alibaba CAPTCHA: {captcha_url}")
+    return bool(re.search(CAPTCHA_PATTERN, html))
 
 
 def init(_):
@@ -81,7 +78,7 @@ def request(query, params):
 
     params["url"] = f"{query_url}?{urlencode(query_params)}"
     params["headers"] = {
-        "User-Agent": searx_useragent(),
+        "User-Agent": gen_useragent(),
     }
     return params
 
@@ -90,14 +87,12 @@ def response(resp):
     results = []
     text = resp.text
 
-    is_alibaba_captcha(text)
+    if is_alibaba_captcha(text):
+        raise SearxEngineCaptchaException(suspended_time=900, message="Alibaba CAPTCHA detected. Please try again later.")
 
     if quark_category == 'images':
         data = json.loads(text)
         for item in data.get('data', {}).get('hit', {}).get('imgInfo', {}).get('item', []):
-            width = item.get("width")
-            height = item.get("height")
-
             results.append(
                 {
                     "template": "images.html",
@@ -207,9 +202,6 @@ def parse_finance_shuidi(data):
 def parse_life_show_general_image(data):
     results = []
     for item in data.get('image', []):
-        width = item.get("width")
-        height = item.get("height")
-
         results.append(
             {
                 "template": "images.html",
@@ -218,7 +210,7 @@ def parse_life_show_general_image(data):
                 "img_src": item.get("bigPicUrl"),
                 "title": item.get("title"),
                 "source": item.get("site"),
-                "resolution": f"{width} x {height}",
+                "resolution": f"{item['width']} x {item['height']}",
                 "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
             }
         )
