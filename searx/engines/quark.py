@@ -191,7 +191,6 @@ def parse_finance_shuidi(data):
             data.get('business_scope'),
         ] if info,
     )
-    )
     return {
         "title": html_to_text(data.get('company_name')),
         "url": data.get('title_url'),
