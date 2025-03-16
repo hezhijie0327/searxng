@@ -104,7 +104,7 @@ def parse_addition(data):
     return {
         "title": html_to_text(data.get('title', {}).get('content')),
         "url": data.get('source', {}).get('url'),
-        "content": html_to_text(data.get('summary', {}).get('content'))
+        "content": html_to_text(data.get('summary', {}).get('content')),
     }
 
 
@@ -117,10 +117,7 @@ def parse_ai_page(data):
             else str(item.get('content'))
         )
         results.append(
-            {
-                "title": html_to_text(item.get('title')),
-                "url": item.get('url'),
-                "content": html_to_text(content)}
+            {"title": html_to_text(item.get('title')), "url": item.get('url'), "content": html_to_text(content)}
         )
     return results
 
@@ -129,7 +126,7 @@ def parse_baike(data):
     return {
         "title": html_to_text(data.get('data', {}).get('title')),
         "url": data.get('data', {}).get('url'),
-        "content": html_to_text(data.get('data', {}).get('abstract'))
+        "content": html_to_text(data.get('data', {}).get('abstract')),
     }
 
 
@@ -151,16 +148,12 @@ def parse_finance_shuidi(data):
     return {
         "title": html_to_text(data.get('company_name')),
         "url": data.get('title_url'),
-        "content": html_to_text(content)
+        "content": html_to_text(content),
     }
 
 
 def parse_nature_result(data):
-    return {
-        "title": html_to_text(data.get('title')),
-        "url": data.get('url'),
-        "content": html_to_text(data.get('desc'))
-    }
+    return {"title": html_to_text(data.get('title')), "url": data.get('url'), "content": html_to_text(data.get('desc'))}
 
 
 def parse_news_uchq(data):
@@ -180,7 +173,7 @@ def parse_ss_note(data):
     return {
         "title": html_to_text(data.get('title', {}).get('content')),
         "url": data.get('source', {}).get('dest_url'),
-        "content": html_to_text(data.get('summary', {}).get('content'))
+        "content": html_to_text(data.get('summary', {}).get('content')),
     }
 
 
@@ -188,7 +181,7 @@ def parse_ss_pic_text(data):
     return {
         "title": html_to_text(data.get('titleProps', {}).get('content')),
         "url": data.get('sourceProps', {}).get('dest_url'),
-        "content": html_to_text(data.get('summaryProps', {}).get('content'))
+        "content": html_to_text(data.get('summaryProps', {}).get('content')),
     }
 
 
@@ -196,7 +189,7 @@ def parse_travel_dest_overview(data):
     return {
         "title": html_to_text(data.get('strong', {}).get('title')),
         "url": data.get('strong', {}).get('baike_url'),
-        "content": html_to_text(data.get('strong', {}).get('baike_text'))
+        "content": html_to_text(data.get('strong', {}).get('baike_text')),
     }
 
 
@@ -204,5 +197,5 @@ def parse_travel_ranking_list(data):
     return {
         "title": html_to_text(data.get('title', {}).get('text')),
         "url": data.get('title', {}).get('url'),
-        "content": html_to_text(data.get('title', {}).get('title_tag'))
+        "content": html_to_text(data.get('title', {}).get('title_tag')),
     }
