@@ -2,6 +2,7 @@
 """Quark (Shenma) search engine for searxng"""
 
 from urllib.parse import urlencode
+from datetime import datetime
 import re
 import json
 
@@ -78,6 +79,7 @@ def response(resp):
             'ai_page': parse_ai_page,
             'baike_sc': parse_baike_sc,
             'finance_shuidi': parse_finance_shuidi,
+            'life_show_general_image': parse_life_show_general_image,
             'nature_result': parse_nature_result,
             'news_uchq': parse_news_uchq,
             'ss_note': parse_ss_note,
@@ -152,6 +154,28 @@ def parse_finance_shuidi(data):
     }
 
 
+def parse_life_show_general_image(data):
+    results = []
+    for item in data.get('image', []):
+        width = item.get("width")
+        height = item.get("height")
+        published_date = datetime.fromtimestamp(int(item.get("publish_time")))
+
+        results.append(
+            {
+                "template": "images.html",
+                "url": item.get("imgUrl"),
+                "thumbnail_src": item.get("img"),
+                "img_src": item.get("bigPicUrl"),
+                "title": item.get("title"),
+                "source": item.get("site"),
+                "resolution": f"{width} x {height}",
+                "publishedDate": published_date,
+            }
+        )
+    return results
+
+
 def parse_nature_result(data):
     return {"title": html_to_text(data.get('title')), "url": data.get('url'), "content": html_to_text(data.get('desc'))}
 
@@ -164,6 +188,7 @@ def parse_news_uchq(data):
                 "title": html_to_text(item.get('title')),
                 "url": item.get('url'),
                 "content": html_to_text(item.get('summary')),
+                "thumbnail": item.get('image'),
             }
         )
     return results
