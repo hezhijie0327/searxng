@@ -97,7 +97,6 @@ def response(resp):
         for item in data.get('data', {}).get('hit', {}).get('imgInfo', {}).get('item', []):
             width = item.get("width")
             height = item.get("height")
-            published_date = datetime.fromtimestamp(int(item.get("publish_time")))
 
             results.append(
                 {
@@ -108,7 +107,7 @@ def response(resp):
                     "title": item.get("title"),
                     "source": item.get("site"),
                     "resolution": f"{width} x {height}",
-                    "publishedDate": published_date,
+                    "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
                 }
             )
 
@@ -212,7 +211,6 @@ def parse_life_show_general_image(data):
     for item in data.get('image', []):
         width = item.get("width")
         height = item.get("height")
-        published_date = datetime.fromtimestamp(int(item.get("publish_time")))
 
         results.append(
             {
@@ -223,7 +221,7 @@ def parse_life_show_general_image(data):
                 "title": item.get("title"),
                 "source": item.get("site"),
                 "resolution": f"{width} x {height}",
-                "publishedDate": published_date,
+                "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
             }
         )
     return results
