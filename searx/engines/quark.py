@@ -171,7 +171,7 @@ def parse_ai_page(data):
                 "title": html_to_text(item.get('title')),
                 "url": item.get('url'),
                 "content": html_to_text(content),
-                "published_date": datetime.fromtimestamp(int(item.get('source', {}).get('time'))),
+                "publishedDate": datetime.fromtimestamp(int(item.get('source', {}).get('time'))),
             }
         )
     return results
@@ -252,7 +252,7 @@ def parse_ss_note(data):
         "title": html_to_text(data.get('title', {}).get('content')),
         "url": data.get('source', {}).get('dest_url'),
         "content": html_to_text(data.get('summary', {}).get('content')),
-        "published_date": datetime.fromtimestamp(int(data.get('source', {}).get('time')))
+        "publishedDate": datetime.fromtimestamp(int(data.get('source', {}).get('time')))
     }
 
 
@@ -261,7 +261,7 @@ def parse_ss_pic_text(data):
         "title": html_to_text(data.get('titleProps', {}).get('content')),
         "url": data.get('sourceProps', {}).get('dest_url'),
         "content": html_to_text(data.get('summaryProps', {}).get('content')),
-        "published_date": datetime.fromtimestamp(int(data.get('sourceProps', {}).get('time')))
+        "publishedDate": datetime.fromtimestamp(int(data.get('sourceProps', {}).get('time')))
     }
 
 
