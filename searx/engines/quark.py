@@ -180,7 +180,7 @@ def parse_baike_sc(data):
 
 
 def parse_finance_shuidi(data):
-    content = " | ".join(  
+    content = " | ".join(
         (info for info in [
             data.get('establish_time'),
             data.get('company_status'),
