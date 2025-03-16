@@ -97,7 +97,6 @@ def response(resp):
         for item in data.get('data', {}).get('hit', {}).get('imgInfo', {}).get('item', []):
             width = item.get("width")
             height = item.get("height")
-            published_date = datetime.fromtimestamp(int(item.get("publish_time")))
 
             results.append(
                 {
@@ -108,7 +107,7 @@ def response(resp):
                     "title": item.get("title"),
                     "source": item.get("site"),
                     "resolution": f"{width} x {height}",
-                    "publishedDate": published_date,
+                    "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
                 }
             )
 
@@ -167,7 +166,12 @@ def parse_ai_page(data):
             else str(item.get('content'))
         )
         results.append(
-            {"title": html_to_text(item.get('title')), "url": item.get('url'), "content": html_to_text(content)}
+            {
+                "title": html_to_text(item.get('title')),
+                "url": item.get('url'),
+                "content": html_to_text(content),
+                "publishedDate": datetime.fromtimestamp(int(item.get('source', {}).get('time'))),
+            }
         )
     return results
 
@@ -207,7 +211,6 @@ def parse_life_show_general_image(data):
     for item in data.get('image', []):
         width = item.get("width")
         height = item.get("height")
-        published_date = datetime.fromtimestamp(int(item.get("publish_time")))
 
         results.append(
             {
@@ -218,7 +221,7 @@ def parse_life_show_general_image(data):
                 "title": item.get("title"),
                 "source": item.get("site"),
                 "resolution": f"{width} x {height}",
-                "publishedDate": published_date,
+                "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
             }
         )
     return results
@@ -231,12 +234,19 @@ def parse_nature_result(data):
 def parse_news_uchq(data):
     results = []
     for item in data.get('feed', []):
+        try:
+            published_date = datetime.strptime(item.get('time'), "%Y-%m-%d")
+        except (ValueError, TypeError):
+            # Sometime Quark will return non-standard format like "1天前", set published_date as None
+            published_date = None
+
         results.append(
             {
                 "title": html_to_text(item.get('title')),
                 "url": item.get('url'),
                 "content": html_to_text(item.get('summary')),
                 "thumbnail": item.get('image'),
+                "publishedDate": published_date,
             }
         )
     return results
@@ -247,14 +257,23 @@ def parse_ss_note(data):
         "title": html_to_text(data.get('title', {}).get('content')),
         "url": data.get('source', {}).get('dest_url'),
         "content": html_to_text(data.get('summary', {}).get('content')),
+        "publishedDate": datetime.fromtimestamp(int(data.get('source', {}).get('time'))),
     }
 
 
 def parse_ss_pic_text(data):
+    time_value = data.get('sourceProps', {}).get('time')
+    if time_value is None or int(time_value) == 0:
+        # Sometime Quark will return 0, set published_date as None
+        published_date = None
+    else:
+        published_date = datetime.fromtimestamp(int(time_value))
+
     return {
         "title": html_to_text(data.get('titleProps', {}).get('content')),
         "url": data.get('sourceProps', {}).get('dest_url'),
         "content": html_to_text(data.get('summaryProps', {}).get('content')),
+        "publishedDate": published_date,
     }
 
 
