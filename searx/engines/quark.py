@@ -236,12 +236,19 @@ def parse_nature_result(data):
 def parse_news_uchq(data):
     results = []
     for item in data.get('feed', []):
+        try:
+            published_date = datetime.strptime(item.get('time'), "%Y-%m-%d")
+        except (ValueError, TypeError):
+            # Sometime Quark will return non-standard format like "1天前", set published_date as None
+            published_date = None
+
         results.append(
             {
                 "title": html_to_text(item.get('title')),
                 "url": item.get('url'),
                 "content": html_to_text(item.get('summary')),
                 "thumbnail": item.get('image'),
+                "publishedDate": published_date,
             }
         )
     return results
@@ -257,11 +264,18 @@ def parse_ss_note(data):
 
 
 def parse_ss_pic_text(data):
+    time_value = item.get('sourceProps', {}).get('time')
+    if time_value is None or int(time_value) == 0:
+        # Sometime Quark will return 0, set published_date as None
+        published_date = None
+    else:
+        published_date = datetime.fromtimestamp(int(time_value))
+
     return {
         "title": html_to_text(data.get('titleProps', {}).get('content')),
         "url": data.get('sourceProps', {}).get('dest_url'),
         "content": html_to_text(data.get('summaryProps', {}).get('content')),
-        "publishedDate": datetime.fromtimestamp(int(data.get('sourceProps', {}).get('time'))),
+        "publishedDate": published_date,
     }
 
 
