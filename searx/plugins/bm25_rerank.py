@@ -33,7 +33,7 @@ class SXNGPlugin(Plugin):
         )
 
     def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
-        results = search.result_container._merged_results
+        results = search.result_container.get_ordered_results()
         query = search.search_query.query
 
         corpus = [
