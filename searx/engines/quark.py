@@ -74,17 +74,17 @@ def response(resp):
 
         source_category = extra_data.get('sc')
         source_category_parsers = {
-            addition: parse_addition,
-            ai_page: parse_ai_page,
-            baike_sc: parse_baike,
-            finance_shuidi: parse_finance_shuidi,
-            nature_result: parse_nature_result,
-            news_uchq: parse_news_uchq,
-            ss_note: parse_ss_note,
-            ss_pic: parse_ss_pic_text,
-            ss_text: parse_ss_pic_text,
-            travel_dest_overview: parse_travel_dest_overview,
-            travel_ranking_list: parse_travel_ranking_list,
+            'addition': parse_addition,
+            'ai_page': parse_ai_page,
+            'baike_sc': parse_baike_sc,
+            'finance_shuidi': parse_finance_shuidi,
+            'nature_result': parse_nature_result,
+            'news_uchq': parse_news_uchq,
+            'ss_note': parse_ss_note,
+            'ss_pic': parse_ss_pic_text,
+            'ss_text': parse_ss_pic_text,
+            'travel_dest_overview': parse_travel_dest_overview,
+            'travel_ranking_list': parse_travel_ranking_list,
         }
 
         parsers = source_category_parsers.get(source_category)
@@ -122,7 +122,7 @@ def parse_ai_page(data):
     return results
 
 
-def parse_baike(data):
+def parse_baike_sc(data):
     return {
         "title": html_to_text(data.get('data', {}).get('title')),
         "url": data.get('data', {}).get('url'),
