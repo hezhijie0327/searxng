@@ -60,7 +60,7 @@ def request(query, params):
             'params': {
                 "q": query,
                 "layout": "html",
-                "page":  page_num,
+                "page": page_num,
             },
         },
         'images': {
@@ -98,7 +98,7 @@ def response(resp):
             width = item.get("width")
             height = item.get("height")
             published_date = datetime.fromtimestamp(int(item.get("publish_time")))
-    
+
             results.append(
                 {
                     "template": "images.html",
@@ -116,12 +116,12 @@ def response(resp):
     if quark_category == 'general':
         pattern = r'<script\s+type="application/json"\s+id="s-data-[^"]+"\s+data-used-by="hydrate">(.*?)</script>'
         matches = re.findall(pattern, text, re.DOTALL)
-    
+
         for match in matches:
             data = json.loads(match)
             initial_data = data.get('data', {}).get('initialData', {})
             extra_data = data.get('extraData', {})
-    
+
             source_category = extra_data.get('sc')
             source_category_parsers = {
                 'addition': parse_addition,
@@ -137,7 +137,7 @@ def response(resp):
                 'travel_dest_overview': parse_travel_dest_overview,
                 'travel_ranking_list': parse_travel_ranking_list,
             }
-    
+
             parsers = source_category_parsers.get(source_category)
             if parsers:
                 parsed_results = parsers(initial_data)
@@ -147,7 +147,7 @@ def response(resp):
                 else:
                     # Append if it's a single result
                     results.append(parsed_results)
-    
+
         return results
 
 
