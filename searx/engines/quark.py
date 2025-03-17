@@ -123,6 +123,7 @@ def response(resp):
                 'ai_page': parse_ai_page,
                 'baike_sc': parse_baike_sc,
                 'finance_shuidi': parse_finance_shuidi,
+                'kk_yidian_all': parse_kk_yidian_all,
                 'life_show_general_image': parse_life_show_general_image,
                 'nature_result': parse_nature_result,
                 'news_uchq': parse_news_uchq,
@@ -201,6 +202,20 @@ def parse_finance_shuidi(data):
         "title": html_to_text(data.get('company_name')),
         "url": data.get('title_url'),
         "content": html_to_text(content),
+    }
+
+
+def parse_kk_yidian_all(data):
+    content_list = []
+    for section in data.get('list_container', []):
+        for item in section.get('list_container', []):
+            if 'dot_text' in item:
+                content_list.append(item['dot_text'])
+
+    return {
+        "title": html_to_text(data.get('title')),
+        "url": data.get('title_url'),
+        "content": html_to_text('\n'.join(content_parts))
     }
 
 
