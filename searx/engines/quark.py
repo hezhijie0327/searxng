@@ -217,7 +217,7 @@ def parse_kk_yidian_all(data):
     return {
         "title": html_to_text(data.get('title')),
         "url": data.get('title_url'),
-        "content": html_to_text('\n'.join(content_list))
+        "content": html_to_text(' | '.join(content_list))
     }
 
 
