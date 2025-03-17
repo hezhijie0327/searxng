@@ -123,13 +123,14 @@ def response(resp):
                 'ai_page': parse_ai_page,
                 'baike_sc': parse_baike_sc,
                 'finance_shuidi': parse_finance_shuidi,
-                'ss_kv': parse_ss_kv,
                 'kk_yidian_all': parse_kk_yidian_all,
                 'life_show_general_image': parse_life_show_general_image,
                 'med_struct': parse_med_struct,
                 'music_new_song': parse_music_new_song,
                 'nature_result': parse_nature_result,
                 'news_uchq': parse_news_uchq,
+                # ss_kv use the same struct as ss_pic
+                'ss_kv': parse_ss_pic,
                 'ss_note': parse_ss_note,
                 'ss_pic': parse_ss_pic,
                 # ss_text use the same struct as ss_pic
@@ -208,14 +209,6 @@ def parse_finance_shuidi(data):
         "title": html_to_text(data.get('company_name')),
         "url": data.get('title_url'),
         "content": html_to_text(content),
-    }
-
-
-def parse_ss_kv(data):
-    return {
-        "title": html_to_text(data.get('title') or data.get('titleProps', {}).get('content')),
-        "url": data.get('normal_url') or data.get('sourceProps', {}).get('dest_url'),
-        "content": html_to_text(data.get('show_body') or data.get('summaryProps', {}).get('content')),
     }
 
 
@@ -321,9 +314,9 @@ def parse_ss_pic(data):
         thumbnail = None
 
     return {
-        "title": html_to_text(data.get('titleProps', {}).get('content')),
-        "url": data.get('sourceProps', {}).get('dest_url'),
-        "content": html_to_text(data.get('summaryProps', {}).get('content')),
+        "title": html_to_text(data.get('titleProps', {}).get('content') or data.get('title')),
+        "url": data.get('sourceProps', {}).get('dest_url') or data.get('normal_url'),
+        "content": html_to_text(data.get('summaryProps', {}).get('content') or data.get('show_body')),
         "publishedDate": published_date,
         "thumbnail": thumbnail,
     }
