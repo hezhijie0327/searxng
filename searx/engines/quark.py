@@ -257,12 +257,11 @@ def parse_ss_note(data):
 
 
 def parse_ss_pic_text(data):
-    time_value = data.get('sourceProps', {}).get('time')
-    if time_value is None or int(time_value) == 0:
+    try:
+        published_date = datetime.fromtimestamp(int(data.get('sourceProps', {}).get('time')))
+    except (ValueError, TypeError):
         # Sometime Quark will return 0, set published_date as None
         published_date = None
-    else:
-        published_date = datetime.fromtimestamp(int(time_value))
 
     return {
         "title": html_to_text(data.get('titleProps', {}).get('content')),
