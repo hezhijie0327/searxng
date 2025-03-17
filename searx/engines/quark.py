@@ -123,6 +123,7 @@ def response(resp):
                 'ai_page': parse_ai_page,
                 'baike_sc': parse_baike_sc,
                 'finance_shuidi': parse_finance_shuidi,
+                'ss_kv': parse_ss_kv,
                 'kk_yidian_all': parse_kk_yidian_all,
                 'life_show_general_image': parse_life_show_general_image,
                 'med_struct': parse_med_struct,
@@ -130,8 +131,11 @@ def response(resp):
                 'nature_result': parse_nature_result,
                 'news_uchq': parse_news_uchq,
                 'ss_note': parse_ss_note,
-                'ss_pic': parse_ss_pic_text,
-                'ss_text': parse_ss_pic_text,
+                'ss_pic': parse_ss_pic,
+                # ss_text use the same struct as ss_pic
+                'ss_text': parse_ss_pic,
+                # structure_web_novel use the same struct as ss_pic
+                'structure_web_novel': parse_ss_pic,
                 'travel_dest_overview': parse_travel_dest_overview,
                 'travel_ranking_list': parse_travel_ranking_list,
             }
@@ -204,6 +208,14 @@ def parse_finance_shuidi(data):
         "title": html_to_text(data.get('company_name')),
         "url": data.get('title_url'),
         "content": html_to_text(content),
+    }
+
+
+def parse_ss_kv(data):
+    return {
+        "title": html_to_text(data.get('title') or data.get('titleProps', {}).get('content')),
+        "url": data.get('normal_url') or data.get('sourceProps', {}).get('dest_url'),
+        "content": html_to_text(data.get('show_body') or data.get('summaryProps', {}).get('content')),
     }
 
 
@@ -296,18 +308,24 @@ def parse_ss_note(data):
     }
 
 
-def parse_ss_pic_text(data):
+def parse_ss_pic(data):
     try:
         published_date = datetime.fromtimestamp(int(data.get('sourceProps', {}).get('time')))
     except (ValueError, TypeError):
         # Sometime Quark will return 0, set published_date as None
         published_date = None
 
+    try:
+        thumbnail = data.get('picListProps', [])[0].get('src')
+    except (ValueError, TypeError, IndexError):
+        thumbnail = None
+
     return {
         "title": html_to_text(data.get('titleProps', {}).get('content')),
         "url": data.get('sourceProps', {}).get('dest_url'),
         "content": html_to_text(data.get('summaryProps', {}).get('content')),
         "publishedDate": published_date,
+        "thumbnail": thumbnail,
     }
 
 
