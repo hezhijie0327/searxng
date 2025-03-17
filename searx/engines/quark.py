@@ -309,22 +309,21 @@ def parse_ss_doc(data):
     return {
         "title": html_to_text(
             data.get('titleProps', {}).get('content')
-            # ss_kv type 1 & 2
+            # ss_kv variant 1 & 2
             or data.get('title')
         ),
-        "url":
-            data.get('sourceProps', {}).get('dest_url')
-            # ss_kv type 1
-            or data.get('normal_url')
-            # ss_kv type 2
-            or data.get('url'),
+        "url": data.get('sourceProps', {}).get('dest_url')
+        # ss_kv variant 1
+        or data.get('normal_url')
+        # ss_kv variant 2
+        or data.get('url'),
         "content": html_to_text(
             data.get('summaryProps', {}).get('content')
-            # ss_doc type 1
+            # ss_doc variant 1
             or data.get('message', {}).get('replyContent')
-            # ss_kv type 1
+            # ss_kv variant 1
             or data.get('show_body')
-            # ss_kv type 2
+            # ss_kv variant 2
             or data.get('desc')
         ),
         "publishedDate": published_date,
