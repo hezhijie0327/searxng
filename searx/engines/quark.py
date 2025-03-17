@@ -125,6 +125,8 @@ def response(resp):
                 'finance_shuidi': parse_finance_shuidi,
                 'kk_yidian_all': parse_kk_yidian_all,
                 'life_show_general_image': parse_life_show_general_image,
+                'med_struct': parse_med_struct,
+                'music_new_song': parse_music_new_song,
                 'nature_result': parse_nature_result,
                 'news_uchq': parse_news_uchq,
                 'ss_note': parse_ss_note,
@@ -232,6 +234,29 @@ def parse_life_show_general_image(data):
                 "source": item.get("site"),
                 "resolution": f"{item['width']} x {item['height']}",
                 "publishedDate": datetime.fromtimestamp(int(item.get("publish_time"))),
+            }
+        )
+    return results
+
+
+def parse_med_struct(data):
+    return {
+        "title": html_to_text(data.get('title')),
+        "url": data.get('message', {}).get('statistics', {}).get('nu'),
+        "content": html_to_text(data.get('message', {}).get('content_text')),
+        "thumbnail": data.get('message', {}).get('video_img'),
+    }
+
+
+def parse_music_new_song(data):
+    results = []
+    for item in data.get('hit3', []):
+        results.append(
+            {
+                "title": f"{item['song_name']} | {item['song_singer']}",
+                "url": item.get("play_url"),
+                "content": html_to_text(item.get("lyrics")),
+                "thumbnail": item.get("image_url"),
             }
         )
     return results
