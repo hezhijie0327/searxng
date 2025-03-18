@@ -617,6 +617,11 @@ engines:
     shortcut: chinasov
     disabled: true
 
+  - name: chinese pharmacopoeia
+    engine: chp
+    shortcut: chp
+    disabled: true
+
   - name: cloudflareai
     engine: cloudflareai
     shortcut: cfai
