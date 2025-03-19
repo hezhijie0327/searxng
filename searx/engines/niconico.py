@@ -22,26 +22,20 @@ categories = ["videos"]
 paging = True
 
 time_range_support = True
-time_range_dict = {'day': '1', 'week': '2', 'month': '3', 'year': '-1'}
+time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536000}
 
 base_url = "https://www.nicovideo.jp"
 
 
 def request(query, params):
-    query_params = {
-        "page": params['pageno'],
-        "sort": "h",
-        "order": "d",
-    }
+    query_params = {"page": params['pageno']}
 
     if time_range_dict.get(params['time_range']):
-        # Niconico doesn"t support year params natively, use start and end params instead
-        if params['time_range'] == -1:
-            now = int(time.time())
-            query_params['start'] = time.strftime('%Y-%m-%d', time.gmtime(now - 31536000))
-            query_params['end'] = time.strftime('%Y-%m-%d', time.gmtime(now))
-        else:
-            query_params['f_range'] = time_range_dict.get(params['time_range'])
+        now = int(time.time())
+        past = now - time_range_dict[params["time_range"]]
+
+        query_params['end'] = time.strftime('%Y-%m-%d', time.gmtime(now))
+        query_params['start'] = time.strftime('%Y-%m-%d', time.gmtime(past))
 
     params['url'] = f"{base_url}/search/{query}?{urlencode(query_params)}"
     return params
