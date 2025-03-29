@@ -32,6 +32,7 @@ def request(query, params):
     params['url'] = f"{base_url}/search?{urlencode(query_params)}"
     return params
 
+
 def response(resp):
     results = []
 
