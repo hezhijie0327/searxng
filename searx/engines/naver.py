@@ -2,9 +2,10 @@
 """Naver search engine for searxng"""
 
 from urllib.parse import urlencode
-from lxml import html
 import re
+from lxml import html
 
+from searx.exceptions import SearxEngineAPIException
 from searx.utils import (
     eval_xpath_getindex,
     eval_xpath_list,
