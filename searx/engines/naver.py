@@ -93,7 +93,9 @@ def parse_general(data):
             {
                 "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
                 "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
-                "content": extract_text(eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")),
+                "content": extract_text(
+                    eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")
+                ),
             }
         )
 
@@ -140,7 +142,11 @@ def parse_news(data):
             {
                 "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'news_tit')]")),
                 "url": eval_xpath_getindex(item, ".//a[contains(@class, 'news_tit')]/@href", 0),
-                "content": html_to_text(extract_text(eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]"))),
+                "content": html_to_text(
+                    extract_text(
+                        eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]")
+                    )
+                ),
                 "thumbnail": thumbnail,
             }
         )
