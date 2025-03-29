@@ -3,6 +3,7 @@
 
 from urllib.parse import urlencode
 from lxml import html
+import json
 import re
 
 from searx.utils import (
@@ -12,6 +13,7 @@ from searx.utils import (
     extract_text,
     html_to_text,
     parse_duration_string,
+    js_variable_to_python,
 )
 
 # engine metadata
@@ -60,6 +62,8 @@ def request(query, params):
         query_params["start"] = (page_num - 1) * 10 + 1
     elif naver_category == 'videos':
         query_params["start"] = (page_num - 1) * 48 + 1
+    elif naver_category == 'images':
+        query_params["start"] = (page_num - 1) * 50 + 1
     else:
         # general
         query_params["start"] = (page_num - 1) * 15 + 1
@@ -75,17 +79,17 @@ def request(query, params):
 
 
 def response(resp):
-    data = html.fromstring(resp.text)
-
     parsers = {'general': parse_general, 'images': parse_images, 'news': parse_news, 'videos': parse_videos}
 
-    return parsers[naver_category](data)
+    return parsers[naver_category](resp.text)
 
 
 def parse_general(data):
     results = []
 
-    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+    dom = html.fromstring(data)
+
+    for item in eval_xpath_list(dom, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
         results.append({
             "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
             "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
@@ -98,12 +102,20 @@ def parse_general(data):
 def parse_images(data):
     results = []
 
-    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
-        results.append({
-            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
-            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
-            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
-        })
+    match = re.search(r'var imageSearchTabData\s*=\s*({.*?})\s*</script>', data, re.DOTALL)
+    if match:
+        data_json = js_variable_to_python(match.group(1))
+        items = data_json.get('content', {}).get('items', [])
+        for item in items:
+            results.append({
+                "template": "images.html",
+                "url": item.get('link', ''),
+                "thumbnail_src": item.get('thumb', ''),
+                "img_src": item.get('originalUrl', ''),
+                "title": html_to_text(item.get('title', '')),
+                "source": item.get('source', ''),
+                "resolution": f"{item.get('orgWidth', 0)} x {item.get('orgHeight', 0)}",
+            })
 
     return results
 
@@ -111,7 +123,9 @@ def parse_images(data):
 def parse_news(data):
     results = []
 
-    for item in eval_xpath_list(data, "//ul[contains(@class, 'list_news')]/li[contains(@class, 'bx')]"):
+    dom = html.fromstring(data)
+
+    for item in eval_xpath_list(dom, "//ul[contains(@class, 'list_news')]/li[contains(@class, 'bx')]"):
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(item, ".//a[contains(@class, 'dsc_thumb')]/img/@data-lazysrc", 0)
@@ -131,7 +145,9 @@ def parse_news(data):
 def parse_videos(data):
     results = []
 
-    for item in eval_xpath_list(data, "//li[contains(@class, 'video_item _svp_item')]"):
+    dom = html.fromstring(data)
+
+    for item in eval_xpath_list(dom, "//li[contains(@class, 'video_item _svp_item')]"):
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(item, ".//img[@class='thumb api_get api_img']/@src", 0)
