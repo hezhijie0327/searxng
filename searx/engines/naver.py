@@ -60,7 +60,7 @@ naver_category_dict = {
     "videos": {
         "start": 48,
         "where": "video",
-    }
+    },
 }
 
 
