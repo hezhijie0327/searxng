@@ -40,15 +40,19 @@ def response(resp):
     for item in eval_xpath_list(dom, results_xpath):
         published_date = None
         try:
-            published_date = datetime.strptime(extract_text(eval_xpath(item, publish_date_xpath)), "%b %d, %Y %I:%M %p %Z")
+            published_date = datetime.strptime(
+                extract_text(eval_xpath(item, publish_date_xpath)), "%b %d, %Y %I:%M %p %Z"
+            )
         except ValueError:
             pass
 
-        results.append({
-            'title': extract_text(eval_xpath(item, title_xpath)),
-            'content': extract_text(eval_xpath(item, content_xpath)),
-            'url': f"{base_url}{eval_xpath_getindex(item, url_xpath, 0)}",
-            'publishedDate': published_date,
-        })
+        results.append(
+            {
+                'title': extract_text(eval_xpath(item, title_xpath)),
+                'content': extract_text(eval_xpath(item, content_xpath)),
+                'url': f"{base_url}{eval_xpath_getindex(item, url_xpath, 0)}",
+                'publishedDate': published_date,
+            }
+        )
 
     return results
