@@ -11,6 +11,7 @@ from searx.utils import (
     eval_xpath,
     extract_text,
     html_to_text,
+    parse_duration_string,
 )
 
 # engine metadata
@@ -57,6 +58,8 @@ def request(query, params):
 
     if naver_category == 'news':
         query_params["start"] = (page_num - 1) * 10 + 1
+    elif naver_category == 'videos':
+        query_params["start"] = (page_num - 1) * 48 + 1
     else:
         # general
         query_params["start"] = (page_num - 1) * 15 + 1
@@ -128,11 +131,25 @@ def parse_news(data):
 def parse_videos(data):
     results = []
 
-    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+    for item in eval_xpath_list(data, "//li[contains(@class, 'video_item _svp_item')]"):
+        thumbnail = None
+        try:
+            thumbnail = eval_xpath_getindex(item, ".//img[@class='thumb api_get api_img']/@src", 0)
+        except (ValueError, TypeError):
+            pass
+
+        length = None
+        try:
+            length = parse_duration_string(extract_text(eval_xpath(item, ".//span[@class='time']")))
+        except (ValueError, TypeError):
+            pass
+
         results.append({
-            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
-            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
-            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
+            "template": "videos.html",
+            "title": extract_text(eval_xpath(item, ".//a[@class='info_title']")),
+            "url": eval_xpath_getindex(item, ".//a[@class='info_title']/@href", 0),
+            "thumbnail": thumbnail,
+            'length': length,
         })
 
     return results
