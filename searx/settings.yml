@@ -2287,9 +2287,30 @@ engines:
     disabled: true
 
   - name: naver
-    shortcut: nvr
     categories: [general, web]
     engine: naver
+    shortcut: nvr
+    disabled: true
+
+  - name: naver images
+    naver_category: images
+    categories: [images]
+    engine: naver
+    shortcut: nvri
+    disabled: true
+
+  - name: naver news
+    naver_category: news
+    categories: [news]
+    engine: naver
+    shortcut: nvrn
+    disabled: true
+
+  - name: naver videos
+    naver_category: videos
+    categories: [videos]
+    engine: naver
+    shortcut: nvrv
     disabled: true
 
   - name: rubygems
