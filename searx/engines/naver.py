@@ -43,7 +43,25 @@ naver_category = "general"
 - ``videos``: search for videos
 """
 
-naver_category_dict = {"general": "web", "images": "image", "news": "news", "videos": "video"}
+# Naver cannot set the number of results on one page, set default value for paging
+naver_category_dict = {
+    "general": {
+        "start": 15,
+        "where": "web",
+    },
+    "images": {
+        "start": 50,
+        "where": "image",
+    },
+    "news": {
+        "start": 10,
+        "where": "news",
+    },
+    "videos": {
+        "start": 48,
+        "where": "video",
+    }
+}
 
 
 def init(_):
@@ -52,24 +70,13 @@ def init(_):
 
 
 def request(query, params):
-    page_num = params["pageno"]
-
     query_params = {
         "query": query,
     }
 
-    if naver_category == 'news':
-        query_params["start"] = (page_num - 1) * 10 + 1
-    elif naver_category == 'videos':
-        query_params["start"] = (page_num - 1) * 48 + 1
-    elif naver_category == 'images':
-        query_params["start"] = (page_num - 1) * 50 + 1
-    else:
-        # general
-        query_params["start"] = (page_num - 1) * 15 + 1
-
     if naver_category in naver_category_dict:
-        query_params["where"] = naver_category_dict[naver_category]
+        query_params["start"] = (params["pageno"] - 1) * naver_category_dict[naver_category]["start"] + 1
+        query_params["where"] = naver_category_dict[naver_category]["where"]
 
     if params["time_range"] in time_range_dict:
         query_params["nso"] = f"p:{time_range_dict[params['time_range']]}"
