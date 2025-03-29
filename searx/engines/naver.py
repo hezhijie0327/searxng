@@ -49,10 +49,17 @@ def init(_):
 
 
 def request(query, params):
+    page_num = params["pageno"]
+
     query_params = {
         "query": query,
-        "start": (params["pageno"] - 1) * 15 + 1,
     }
+
+    if naver_category == 'news':
+        query_params["start"] = (page_num - 1) * 10 + 1
+    else:
+        # general
+        query_params["start"] = (page_num - 1) * 15 + 1
 
     if naver_category in naver_category_dict:
         query_params["where"] = naver_category_dict[naver_category]
@@ -79,7 +86,7 @@ def parse_general(data):
         results.append({
             "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
             "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
-            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
+            "content": extract_text(eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")),
         })
 
     return results
@@ -101,11 +108,18 @@ def parse_images(data):
 def parse_news(data):
     results = []
 
-    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+    for item in eval_xpath_list(data, "//ul[contains(@class, 'list_news')]/li[contains(@class, 'bx')]"):
+        thumbnail = None
+        try:
+            thumbnail = eval_xpath_getindex(item, ".//a[contains(@class, 'dsc_thumb')]/img/@data-lazysrc", 0)
+        except (ValueError, TypeError):
+            pass
+
         results.append({
-            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
-            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
-            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
+            "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'news_tit')]")),
+            "url": eval_xpath_getindex(item, ".//a[contains(@class, 'news_tit')]/@href", 0),
+            "content": html_to_text(extract_text(eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]"))),
+            "thumbnail": thumbnail,
         })
 
     return results
