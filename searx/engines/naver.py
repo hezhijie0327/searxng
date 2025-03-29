@@ -89,11 +89,13 @@ def parse_general(data):
     dom = html.fromstring(data)
 
     for item in eval_xpath_list(dom, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
-        results.append({
-            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
-            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
-            "content": extract_text(eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")),
-        })
+        results.append(
+            {
+                "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
+                "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
+                "content": extract_text(eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")),
+            }
+        )
 
     return results
 
@@ -107,15 +109,17 @@ def parse_images(data):
         items = json.get('content', {}).get('items', [])
 
         for item in items:
-            results.append({
-                "template": "images.html",
-                "url": item.get('link'),
-                "thumbnail_src": item.get('thumb'),
-                "img_src": item.get('originalUrl'),
-                "title": html_to_text(item.get('title')),
-                "source": item.get('source'),
-                "resolution": f"{item.get('orgWidth')} x {item.get('orgHeight')}",
-            })
+            results.append(
+                {
+                    "template": "images.html",
+                    "url": item.get('link'),
+                    "thumbnail_src": item.get('thumb'),
+                    "img_src": item.get('originalUrl'),
+                    "title": html_to_text(item.get('title')),
+                    "source": item.get('source'),
+                    "resolution": f"{item.get('orgWidth')} x {item.get('orgHeight')}",
+                }
+            )
 
     return results
 
@@ -132,12 +136,14 @@ def parse_news(data):
         except (ValueError, TypeError):
             pass
 
-        results.append({
-            "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'news_tit')]")),
-            "url": eval_xpath_getindex(item, ".//a[contains(@class, 'news_tit')]/@href", 0),
-            "content": html_to_text(extract_text(eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]"))),
-            "thumbnail": thumbnail,
-        })
+        results.append(
+            {
+                "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'news_tit')]")),
+                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'news_tit')]/@href", 0),
+                "content": html_to_text(extract_text(eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]"))),
+                "thumbnail": thumbnail,
+            }
+        )
 
     return results
 
@@ -160,12 +166,14 @@ def parse_videos(data):
         except (ValueError, TypeError):
             pass
 
-        results.append({
-            "template": "videos.html",
-            "title": extract_text(eval_xpath(item, ".//a[@class='info_title']")),
-            "url": eval_xpath_getindex(item, ".//a[@class='info_title']/@href", 0),
-            "thumbnail": thumbnail,
-            'length': length,
-        })
+        results.append(
+            {
+                "template": "videos.html",
+                "title": extract_text(eval_xpath(item, ".//a[@class='info_title']")),
+                "url": eval_xpath_getindex(item, ".//a[@class='info_title']/@href", 0),
+                "thumbnail": thumbnail,
+                'length': length,
+            }
+        )
 
     return results
