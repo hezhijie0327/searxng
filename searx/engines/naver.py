@@ -65,11 +65,56 @@ def request(query, params):
 
 
 def response(resp):
+    data = html.fromstring(resp.text)
+
+    parsers = {'general': parse_general, 'images': parse_images, 'news': parse_news, 'videos': parse_videos}
+
+    return parsers[naver_category](data)
+
+
+def parse_general(data):
     results = []
 
-    dom = html.fromstring(resp.text)
+    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+        results.append({
+            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
+            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
+            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
+        })
 
-    for item in eval_xpath_list(dom, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+    return results
+
+
+def parse_images(data):
+    results = []
+
+    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+        results.append({
+            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
+            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
+            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
+        })
+
+    return results
+
+
+def parse_news(data):
+    results = []
+
+    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+        results.append({
+            "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
+            "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
+            "content": html_to_text(extract_text(eval_xpath(item, ".//div[@class='total_dsc']"))),
+        })
+
+    return results
+
+
+def parse_videos(data):
+    results = []
+
+    for item in eval_xpath_list(data, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
         results.append({
             "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
             "url": eval_xpath_getindex(item, ".//a[@class='link_tit']/@href", 0),
