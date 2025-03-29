@@ -19,7 +19,7 @@ from searx.utils import (
 # engine metadata
 about = {
     "website": "https://search.naver.com",
-    "wikidata_id": "Q1046638",
+    "wikidata_id": "Q485639",
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
