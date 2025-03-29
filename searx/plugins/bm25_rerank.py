@@ -12,6 +12,7 @@ from searx.result_types import EngineResults
 if typing.TYPE_CHECKING:
     from searx.search import SearchWithPlugins
     from searx.extended_types import SXNG_Request
+    from searx.plugins import PluginCfg
 
 
 class SXNGPlugin(Plugin):
@@ -19,15 +20,15 @@ class SXNGPlugin(Plugin):
     results are reordered to improve relevance based on the query.
     """
 
-    id = "bm25_rerank_plugin"
+    id = "bm25_rerank"
     default_on = True
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, plg_cfg: "PluginCfg") -> None:
+        super().__init__(plg_cfg)
 
         self.info = PluginInfo(
             id=self.id,
-            name="BM25 Rerank Plugin",
+            name="BM25 Rerank",
             description="Rerank search results using the Okapi BM25 algorithm",
             preference_section="general",
         )
