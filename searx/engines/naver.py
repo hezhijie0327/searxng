@@ -3,7 +3,6 @@
 
 from urllib.parse import urlencode
 from lxml import html
-import json
 import re
 
 from searx.utils import (
@@ -104,17 +103,18 @@ def parse_images(data):
 
     match = re.search(r'var imageSearchTabData\s*=\s*({.*?})\s*</script>', data, re.DOTALL)
     if match:
-        data_json = js_variable_to_python(match.group(1))
-        items = data_json.get('content', {}).get('items', [])
+        json = js_variable_to_python(match.group(1))
+        items = json.get('content', {}).get('items', [])
+
         for item in items:
             results.append({
                 "template": "images.html",
-                "url": item.get('link', ''),
-                "thumbnail_src": item.get('thumb', ''),
-                "img_src": item.get('originalUrl', ''),
-                "title": html_to_text(item.get('title', '')),
-                "source": item.get('source', ''),
-                "resolution": f"{item.get('orgWidth', 0)} x {item.get('orgHeight', 0)}",
+                "url": item.get('link'),
+                "thumbnail_src": item.get('thumb'),
+                "img_src": item.get('originalUrl'),
+                "title": html_to_text(item.get('title')),
+                "source": item.get('source'),
+                "resolution": f"{item.get('orgWidth')} x {item.get('orgHeight')}",
             })
 
     return results
