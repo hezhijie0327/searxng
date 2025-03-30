@@ -164,6 +164,21 @@ def qihu360search(query, _lang):
     return results
 
 
+def quark(query, _lang):
+    # Quark search autocompleter
+    url = f"https://sugs.m.sm.cn/web?{urlencode({'q': query})}"
+    response = get(url)
+
+    results = []
+
+    if response.ok:
+        data = response.json()
+        if 'r' in data:
+            for item in data['r']:
+                results.append(item['w'])
+    return results
+
+
 def seznam(query, _lang):
     # seznam search autocompleter
     url = 'https://suggest.seznam.cz/fulltext/cs?{query}'
@@ -286,6 +301,7 @@ backends = {
     'duckduckgo': duckduckgo,
     'google': google_complete,
     'mwmbl': mwmbl,
+    'quark': quark,
     'qwant': qwant,
     'seznam': seznam,
     'sogou': sogou,
