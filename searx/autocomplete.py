@@ -158,7 +158,7 @@ def naver(query, _lang):
 
     if response.ok:
         data = response.json()
-        if 'items' in data and data['items']:
+        if data.get('items'):
             for item in data['items'][0]:
                 results.append(item[0])
     return results
