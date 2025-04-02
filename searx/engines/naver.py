@@ -96,7 +96,7 @@ def parse_general(data):
 
     dom = html.fromstring(data)
 
-    for item in eval_xpath_list(dom, "//ul[@class='lst_total']/li[contains(@class, 'bx')]"):
+    for item in eval_xpath_list(dom, "//ul[contains(@class, 'lst_total')]/li[contains(@class, 'bx')]"):
         results.append(
             {
                 "title": extract_text(eval_xpath(item, ".//a[@class='link_tit']")),
