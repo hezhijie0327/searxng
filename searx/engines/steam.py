@@ -21,6 +21,17 @@ categories = []
 base_url = "https://store.steampowered.com"
 
 steam_app_details = False
+"""
+Whether to fetch detailed game info (e.g., descriptions) from the Steam API.
+
+When True:
+1. Makes an extra /api/appdetails request for each search result to enrich the data.
+2. May impact performance due to:
+   - Increased response time
+   - Potential API rate limits
+
+Default: False
+"""
 
 
 def request(query, params):
@@ -31,7 +42,7 @@ def request(query, params):
 
 def response(resp):
     results = []
-    search_results = json.loads(resp.text)
+    search_results = resp.json()
 
     for item in search_results.get('items', []):
         app_id = item.get('id')
@@ -41,19 +52,19 @@ def response(resp):
 
         platforms = ', '.join([platform for platform, supported in item.get('platforms', {}).items() if supported])
 
-        content = f'Price: {price:.2f} {currency} | Platforms: {platforms}'
+        content = [f'Price: {price:.2f} {currency}', f'Platforms: {platforms}']
 
         if steam_app_details:
             app_data = get(f'{base_url}/api/appdetails/?appids={app_id}').json().get(str(app_id), {})
 
             description = app_data.get('data', {}).get('short_description') if app_data.get('success') else None
             if description:
-                content += f' | Description: {description}'
+                content.append(f'Description: {description}')
 
         results.append(
             {
                 'title': item.get('name'),
-                'content': html_to_text(content),
+                'content': html_to_text(' | '.join(content)),
                 'url': f'{base_url}/app/{app_id}',
                 'thumbnail': item.get('tiny_image', ''),
             }
