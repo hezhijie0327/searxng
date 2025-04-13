@@ -3,8 +3,6 @@
 
 from urllib.parse import urlencode
 
-import json
-
 from searx.network import get
 from searx.utils import html_to_text
 
