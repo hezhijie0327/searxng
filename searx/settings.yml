@@ -1950,6 +1950,12 @@ engines:
     categories: [images, web]
     shortcut: spi
 
+  - name: steam
+    engine: steam
+    shortcut: stm
+    disabled: true
+    steam_app_details: false
+
   - name: tokyotoshokan
     engine: tokyotoshokan
     shortcut: tt
