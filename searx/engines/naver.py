@@ -4,6 +4,8 @@
 from urllib.parse import urlencode
 from lxml import html
 
+import re
+
 from searx.exceptions import SearxEngineAPIException, SearxEngineXPathException
 from searx.utils import (
     eval_xpath_getindex,
@@ -144,27 +146,27 @@ def parse_images(data):
 def parse_news(data):
     results = []
 
-    dom = html.fromstring(data)
+    pattern = r'e\.bootstrap\(.*?,\s*({[\s\S]*?})\);'
+    match = re.search(pattern, data)
+    if match:
+        json = js_variable_to_python(match.group(1))
+        data = json.body.props.children
 
-    for item in eval_xpath_list(dom, "//ul[contains(@class, 'list_news')]/li[contains(@class, 'bx')]"):
-        thumbnail = None
-        try:
-            thumbnail = eval_xpath_getindex(item, ".//a[contains(@class, 'dsc_thumb')]/img/@data-lazysrc", 0)
-        except (ValueError, TypeError, SearxEngineXPathException):
-            pass
+        for item in data:
+            thumbnail = None
+            try:
+                thumbnail = item.props.imageSrc
+            except (ValueError, TypeError, SearxEngineXPathException):
+                pass
 
-        results.append(
-            {
-                "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'news_tit')]")),
-                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'news_tit')]/@href", 0),
-                "content": html_to_text(
-                    extract_text(
-                        eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]")
-                    )
-                ),
-                "thumbnail": thumbnail,
-            }
-        )
+            results.append(
+                {
+                    "title": item.props.title,
+                    "url": item.props.titleHref,
+                    "content": item.props.content,
+                    "thumbnail": thumbnail,
+                }
+            )
 
     return results
 
