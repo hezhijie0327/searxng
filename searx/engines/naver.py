@@ -147,8 +147,16 @@ def parse_news(data):
     dom = html.fromstring(data)
 
     for item in eval_xpath_list(
-        dom, "//div[contains(@class, 'sds-comps-base-layout') and contains(@class, 'KCTl6C0w4OoJ8NqzXseI')]"
+        dom, "//div[contains(@class, 'sds-comps-base-layout') and contains(@class, 'sds-comps-full-layout')]"
     ):
+        title = extract_text(
+            eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]/text()")
+        )
+
+        url = eval_xpath_getindex(item, ".//a[@href and @nocr='1']/@href", 0)
+
+        content = extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]"))
+
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(
@@ -159,18 +167,15 @@ def parse_news(data):
         except (ValueError, TypeError, SearxEngineXPathException):
             pass
 
-        results.append(
-            {
-                "title": extract_text(
-                    eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]/text()")
-                ),
-                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'bynlPWBHumGsbotLYK9A')]/@href", 0),
-                "content": html_to_text(
-                    extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]"))
-                ),
-                "thumbnail": thumbnail,
-            }
-        )
+        if title and content and url:
+            results.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "content": html_to_text(content),
+                    "thumbnail": thumbnail,
+                }
+            )
 
     return results
 
