@@ -145,28 +145,47 @@ def parse_images(data):
 
 def parse_news(data):
     results = []
+    dom = html.fromstring(data)
 
-    pattern = r'e\.bootstrap\(.*?,\s*({[\s\S]*?})\);'
-    match = re.search(pattern, data)
-    if match:
-        json = js_variable_to_python(match.group(1))
-        data = json.body.props.children
-
-        for item in data:
-            thumbnail = None
-            try:
-                thumbnail = item.props.imageSrc
-            except (ValueError, TypeError, SearxEngineXPathException):
-                pass
-
-            results.append(
-                {
-                    "title": item.props.title,
-                    "url": item.props.titleHref,
-                    "content": item.props.content,
-                    "thumbnail": thumbnail,
-                }
+    for item in eval_xpath_list(dom, "//div[contains(@class, 'sds-comps-base-layout') and contains(@class, 'KCTl6C0w4OoJ8NqzXseI')]"):
+        try:
+            title = extract_text(
+                eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]")
             )
+            
+            content = html_to_text(
+                extract_text(
+                    eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]")
+                )
+            )
+            
+            url = eval_xpath_getindex(
+                item, 
+                ".//a[contains(@class, 'bynlPWBHumGsbotLYK9A') and @href]/@href", 
+                0
+            )
+            
+            thumbnail = None
+            img_container = eval_xpath_getindex(
+                item, 
+                ".//div[contains(@class, 'sds-comps-image') and contains(@class, 'sds-rego-thumb-overlay')]", 
+                0,
+                default=None
+            )
+            if img_container is not None:
+                img_node = eval_xpath_getindex(img_container, ".//img[@src]", 0, default=None)
+                if img_node is not None:
+                    thumbnail = img_node.get('src')
+
+            results.append({
+                "title": title,
+                "url": url,
+                "content": content,
+                "thumbnail": thumbnail
+            })
+
+        except (ValueError, TypeError, SearxEngineXPathException) as e:
+            continue
 
     return results
 
