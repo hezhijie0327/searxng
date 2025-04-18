@@ -6,7 +6,6 @@ from urllib.parse import urlencode
 from lxml import html
 
 from searx.exceptions import SearxEngineAPIException, SearxEngineXPathException
-from searx.result_types import EngineResults, MainResult
 from searx.utils import (
     eval_xpath_getindex,
     eval_xpath_list,
@@ -77,7 +76,7 @@ def request(query, params):
     }
 
     if naver_category in naver_category_dict:
-        query_params["start"] = (params["pageno"] - 1) * naver_category_dict[naver_category]["start"] + 1
+        query_params["start"] = (params["pageno"] - 1) * naver_category_dict[naver_category]["start"]
         query_params["where"] = naver_category_dict[naver_category]["where"]
 
     if params["time_range"] in time_range_dict:
@@ -87,14 +86,14 @@ def request(query, params):
     return params
 
 
-def response(resp) -> EngineResults:
+def response(resp):
     parsers = {'general': parse_general, 'images': parse_images, 'news': parse_news, 'videos': parse_videos}
 
     return parsers[naver_category](resp.text)
 
 
 def parse_general(data):
-    results = EngineResults()
+    results = []
 
     dom = html.fromstring(data)
 
@@ -105,22 +104,22 @@ def parse_general(data):
         except (ValueError, TypeError, SearxEngineXPathException):
             pass
 
-        results.add(
-            MainResult(
-                title=extract_text(eval_xpath(item, ".//a[contains(@class, 'link_tit')]")),
-                url=eval_xpath_getindex(item, ".//a[contains(@class, 'link_tit')]/@href", 0),
-                content=extract_text(
+        results.append(
+            {
+                "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'link_tit')]")),
+                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'link_tit')]/@href", 0),
+                "content": extract_text(
                     eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")
                 ),
-                thumbnail=thumbnail,
-            )
+                "thumbnail": thumbnail,
+            }
         )
 
     return results
 
 
 def parse_images(data):
-    results = EngineResults()
+    results = []
 
     match = extr(data, '<script>var imageSearchTabData=', '</script>')
     if match:
@@ -128,23 +127,23 @@ def parse_images(data):
         items = json.get('content', {}).get('items', [])
 
         for item in items:
-            results.add(
-                MainResult(
-                    template="images.html",
-                    url=item.get('link'),
-                    # thumbnail_src=item.get('thumb'),
-                    img_src=item.get('originalUrl'),
-                    title=html_to_text(item.get('title')),
-                    # source=item.get('source'),
-                    # resolution=f"{item.get('orgWidth')} x {item.get('orgHeight')}",
-                )
+            results.append(
+                {
+                    "template": "images.html",
+                    "url": item.get('link'),
+                    "thumbnail_src": item.get('thumb'),
+                    "img_src": item.get('originalUrl'),
+                    "title": html_to_text(item.get('title')),
+                    "source": item.get('source'),
+                    "resolution": f"{item.get('orgWidth')} x {item.get('orgHeight')}",
+                }
             )
 
     return results
 
 
 def parse_news(data):
-    results = EngineResults()
+    results = []
     dom = html.fromstring(data)
 
     for item in eval_xpath_list(
@@ -167,20 +166,20 @@ def parse_news(data):
             pass
 
         if title and content and url:
-            results.add(
-                MainResult(
-                    title=title,
-                    url=url,
-                    content=content,
-                    thumbnail=thumbnail,
-                )
+            results.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "content": html_to_text(content),
+                    "thumbnail": thumbnail,
+                }
             )
 
     return results
 
 
 def parse_videos(data):
-    results = EngineResults()
+    results = []
 
     dom = html.fromstring(data)
 
@@ -197,14 +196,14 @@ def parse_videos(data):
         except (ValueError, TypeError):
             pass
 
-        results.add(
-            MainResult(
-                template="videos.html",
-                title=extract_text(eval_xpath(item, ".//a[contains(@class, 'info_title')]")),
-                url=eval_xpath_getindex(item, ".//a[contains(@class, 'info_title')]/@href", 0),
-                thumbnail=thumbnail,
-                length=length,
-            )
+        results.append(
+            {
+                "template": "videos.html",
+                "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'info_title')]")),
+                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'info_title')]/@href", 0),
+                "thumbnail": thumbnail,
+                'length': length,
+            }
         )
 
     return results
