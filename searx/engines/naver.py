@@ -4,8 +4,6 @@
 from urllib.parse import urlencode
 from lxml import html
 
-import re
-
 from searx.exceptions import SearxEngineAPIException, SearxEngineXPathException
 from searx.utils import (
     eval_xpath_getindex,
