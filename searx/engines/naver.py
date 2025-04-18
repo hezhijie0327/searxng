@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from lxml import html
 
 from searx.exceptions import SearxEngineAPIException, SearxEngineXPathException
+from searx.result_types import EngineResults, MainResult
 from searx.utils import (
     eval_xpath_getindex,
     eval_xpath_list,
@@ -86,14 +87,14 @@ def request(query, params):
     return params
 
 
-def response(resp):
+def response(resp) -> EngineResults:
     parsers = {'general': parse_general, 'images': parse_images, 'news': parse_news, 'videos': parse_videos}
 
     return parsers[naver_category](resp.text)
 
 
 def parse_general(data):
-    results = []
+    results = EngineResults()
 
     dom = html.fromstring(data)
 
@@ -104,15 +105,15 @@ def parse_general(data):
         except (ValueError, TypeError, SearxEngineXPathException):
             pass
 
-        results.append(
-            {
-                "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'link_tit')]")),
-                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'link_tit')]/@href", 0),
-                "content": extract_text(
+        results.add(
+            MainResult(
+                title=extract_text(eval_xpath(item, ".//a[contains(@class, 'link_tit')]")),
+                url=eval_xpath_getindex(item, ".//a[contains(@class, 'link_tit')]/@href", 0),
+                content=extract_text(
                     eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")
                 ),
-                "thumbnail": thumbnail,
-            }
+                thumbnail=thumbnail,
+            )
         )
 
     return results
@@ -143,7 +144,7 @@ def parse_images(data):
 
 
 def parse_news(data):
-    results = []
+    results = EngineResults()
     dom = html.fromstring(data)
 
     for item in eval_xpath_list(
@@ -166,13 +167,13 @@ def parse_news(data):
             pass
 
         if title and content and url:
-            results.append(
-                {
-                    "title": title,
-                    "url": url,
-                    "content": html_to_text(content),
-                    "thumbnail": thumbnail,
-                }
+            results.add(
+                MainResult(
+                    title=title,
+                    url=url,
+                    content=content,
+                    thumbnail=thumbnail,
+                )
             )
 
     return results
