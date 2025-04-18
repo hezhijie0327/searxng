@@ -147,33 +147,31 @@ def parse_news(data):
     results = []
     dom = html.fromstring(data)
 
-    for item in eval_xpath_list(dom, "//div[contains(@class, 'sds-comps-base-layout') and contains(@class, 'KCTl6C0w4OoJ8NqzXseI')]"):
+    for item in eval_xpath_list(
+        dom, "//div[contains(@class, 'sds-comps-base-layout') and contains(@class, 'KCTl6C0w4OoJ8NqzXseI')]"
+    ):
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(
                 item, 
                 ".//div[contains(@class, 'sds-comps-image') and contains(@class, 'sds-rego-thumb-overlay')]//img[@src]/@src", 
-                0
+                0,
             )
         except (ValueError, TypeError, SearxEngineXPathException):
             pass
 
-        results.append({
-            "title": extract_text(
-                eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]/text()")
-            ),
-            "url": eval_xpath_getindex(
-                item, 
-                ".//a[contains(@class, 'bynlPWBHumGsbotLYK9A')]/@href", 
-                0
-            ),
-            "content": html_to_text(
-                extract_text(
-                    eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]")
-                )
-            ),
-            "thumbnail": thumbnail
-        })
+        results.append(
+            {
+                "title": extract_text(
+                    eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]/text()")
+                ),
+                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'bynlPWBHumGsbotLYK9A')]/@href", 0),
+                "content": html_to_text(
+                    extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]"))
+                ),
+                "thumbnail": thumbnail,
+            }
+        )
 
     return results
 
