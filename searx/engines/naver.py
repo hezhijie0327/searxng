@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# pylint: disable=line-too-long
 """Naver search engine for searxng"""
 
 from urllib.parse import urlencode
@@ -143,28 +144,36 @@ def parse_images(data):
 
 def parse_news(data):
     results = []
-
     dom = html.fromstring(data)
 
-    for item in eval_xpath_list(dom, "//ul[contains(@class, 'list_news')]/li[contains(@class, 'bx')]"):
+    for item in eval_xpath_list(
+        dom, "//div[contains(@class, 'sds-comps-base-layout') and contains(@class, 'sds-comps-full-layout')]"
+    ):
+        title = extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]/text()"))
+
+        url = eval_xpath_getindex(item, ".//a[@href and @nocr='1']/@href", 0)
+
+        content = extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]"))
+
         thumbnail = None
         try:
-            thumbnail = eval_xpath_getindex(item, ".//a[contains(@class, 'dsc_thumb')]/img/@data-lazysrc", 0)
+            thumbnail = eval_xpath_getindex(
+                item,
+                ".//div[contains(@class, 'sds-comps-image') and contains(@class, 'sds-rego-thumb-overlay')]//img[@src]/@src",
+                0,
+            )
         except (ValueError, TypeError, SearxEngineXPathException):
             pass
 
-        results.append(
-            {
-                "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'news_tit')]")),
-                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'news_tit')]/@href", 0),
-                "content": html_to_text(
-                    extract_text(
-                        eval_xpath(item, ".//div[contains(@class, 'news_dsc')]//a[contains(@class, 'api_txt_lines')]")
-                    )
-                ),
-                "thumbnail": thumbnail,
-            }
-        )
+        if title and content and url:
+            results.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "content": html_to_text(content),
+                    "thumbnail": thumbnail,
+                }
+            )
 
     return results
 
