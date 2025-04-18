@@ -132,11 +132,11 @@ def parse_images(data):
                 MainResult(
                     template="images.html",
                     url=item.get('link'),
-                    thumbnail_src=item.get('thumb'),
+                    # thumbnail_src=item.get('thumb'),
                     img_src=item.get('originalUrl'),
                     title=html_to_text(item.get('title')),
-                    source=item.get('source'),
-                    resolution=f"{item.get('orgWidth')} x {item.get('orgHeight')}",
+                    # source=item.get('source'),
+                    # resolution=f"{item.get('orgWidth')} x {item.get('orgHeight')}",
                 )
             )
 
