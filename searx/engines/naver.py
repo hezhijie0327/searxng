@@ -153,8 +153,8 @@ def parse_news(data):
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(
-                item, 
-                ".//div[contains(@class, 'sds-comps-image') and contains(@class, 'sds-rego-thumb-overlay')]//img[@src]/@src", 
+                item,
+                ".//div[contains(@class, 'sds-comps-image') and contains(@class, 'sds-rego-thumb-overlay')]//img[@src]/@src",
                 0,
             )
         except (ValueError, TypeError, SearxEngineXPathException):
