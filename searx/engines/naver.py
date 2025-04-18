@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# pylint: disable=line-too-long
 """Naver search engine for searxng"""
 
 from urllib.parse import urlencode
