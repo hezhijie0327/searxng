@@ -2,6 +2,11 @@
 # pylint: disable=line-too-long
 """XHS (XiaoHongShu) engine for searxng"""
 from json import loads, dumps
+from datetime import datetime, timedelta
+
+import re
+
+from searx.result_types import EngineResults, MainResult
 from searx.utils import gen_useragent
 
 about = {
@@ -46,8 +51,8 @@ def request(query, params):
     return params
 
 
-def response(resp):
-    results = []
+def response(resp) -> EngineResults:
+    results = EngineResults()
     json = loads(resp.text)
 
     if not json.get('success'):
@@ -60,20 +65,48 @@ def response(resp):
         note_card = item.get('note_card', {})
         user = note_card.get('user', {})
         cover = note_card.get('cover', {})
+        corner_tag_info = note_card.get('corner_tag_info', [])
 
-        results.append(
-            {
-                'title': note_card.get('display_title', ''),
-                'content': f"""
+        publish_time = None
+        for tag in corner_tag_info:
+            if tag.get("type") == "publish_time":
+                publish_time_text = tag.get("text").strip()
+
+                if publish_time_text:
+                    days_ago_match = re.match(r'^(\d+)天前$', publish_time_text)
+
+                    if days_ago_match:
+                        days_ago = int(days_ago_match.group(1))
+                        publish_date = datetime.now() - timedelta(days=days_ago)
+                        publish_time = publish_date.strftime("%Y-%m-%d")
+                    elif len(publish_time_text) == 5:
+                        current_year = datetime.now().year
+                        publish_time = f"{current_year}-{publish_time_text}"
+                    else:
+                        publish_time = publish_time_text
+
+                break
+
+        try:
+            published_date = datetime.strptime(publish_time, "%Y-%m-%d")
+        except (ValueError, TypeError):
+            published_date = None
+
+
+        results.add(
+            MainResult(
+                title=note_card.get('display_title', ''),
+                url=f'https://www.xiaohongshu.com/explore/{item.get("id", "")}?xsec_token={item.get("xsec_token", "")}',
+                content=f"""
                     用户: {user.get('nick_name', '')} |
                     点赞: {note_card.get('interact_info', {}).get('liked_count', '0')} |
                     收藏: {note_card.get('interact_info', {}).get('collected_count', '0')} |
                     评论: {note_card.get('interact_info', {}).get('comment_count', '0')} |
                     分享: {note_card.get('interact_info', {}).get('shared_count', '0')}
                 """,
-                'url': f'https://www.xiaohongshu.com/explore/{item.get("id", "")}?xsec_token={item.get("xsec_token", "")}',
-                'thumbnail': cover.get('url_pre', '').replace("http://", "https://"),
-            }
+                thumbnail=cover.get('url_pre', '').replace("http://", "https://"),
+                publishedDate=published_date,
+            )
         )
 
     return results
