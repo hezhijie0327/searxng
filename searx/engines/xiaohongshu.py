@@ -92,7 +92,6 @@ def response(resp) -> EngineResults:
         except (ValueError, TypeError):
             published_date = None
 
-
         results.add(
             MainResult(
                 title=note_card.get('display_title', ''),
