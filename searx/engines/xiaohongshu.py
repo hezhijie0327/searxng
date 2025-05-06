@@ -73,14 +73,25 @@ def response(resp) -> EngineResults:
                 publish_time_text = tag.get("text").strip()
 
                 if publish_time_text:
-                    days_ago_match = re.match(r'^(\d+)天前$', publish_time_text)
+                    time_ago_match = re.match(r'^(\d+)(天|小时|分钟|秒)前$', publish_time_text)
+                    if time_ago_match:
+                        amount = int(time_ago_match.group(1))
+                        unit = time_ago_match.group(2)
 
-                    if days_ago_match:
-                        days_ago = int(days_ago_match.group(1))
-                        publish_date = datetime.now() - timedelta(days=days_ago)
+                        unit_map = {
+                            '天': {'days': amount},
+                            '小时': {'hours': amount},
+                            '分钟': {'minutes': amount},
+                            '秒': {'seconds': amount},
+                        }
+
+                        delta = unit_map.get(unit, {})
+                        publish_date = datetime.now() - timedelta(**delta)
+
                         publish_time = publish_date.strftime("%Y-%m-%d")
                     elif len(publish_time_text) == 5:
                         current_year = datetime.now().year
+
                         publish_time = f"{current_year}-{publish_time_text}"
                     else:
                         publish_time = publish_time_text
