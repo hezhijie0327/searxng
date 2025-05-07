@@ -19,7 +19,7 @@ about = {
 }
 
 paging = True
-categories = ['social_media']
+categories = ['social media']
 results_per_page = 20
 base_url = "https://edith.xiaohongshu.com"
 
