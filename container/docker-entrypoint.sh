@@ -12,8 +12,7 @@ Environment variables:
   INSTANCE_NAME settings.yml : general.instance_name
   AUTOCOMPLETE  settings.yml : search.autocomplete
   BASE_URL      settings.yml : server.base_url
-  MORTY_URL     settings.yml : result_proxy.url
-  MORTY_KEY     settings.yml : result_proxy.key
+
 Volume:
   /etc/searxng  the docker entry point copies settings.yml and uwsgi.ini in
                 this directory (see the -f command line option)"
@@ -43,15 +42,7 @@ do
     esac
 done
 
-get_searxng_version(){
-    su searxng -c \
-       'python3 -c "import six; import searx.version; six.print_(searx.version.VERSION_STRING)"' \
-       2>/dev/null
-}
-
-SEARXNG_VERSION="$(get_searxng_version)"
-export SEARXNG_VERSION
-echo "SearXNG version ${SEARXNG_VERSION}"
+echo "SearXNG version $SEARXNG_VERSION"
 
 # helpers to update the configuration files
 patch_uwsgi_settings() {
@@ -76,24 +67,11 @@ patch_searxng_settings() {
         -e "s|base_url: false|base_url: ${BASE_URL}|g" \
         -e "s/instance_name: \"SearXNG\"/instance_name: \"${INSTANCE_NAME}\"/g" \
         -e "s/autocomplete: \"\"/autocomplete: \"${AUTOCOMPLETE}\"/g" \
-        -e "s/ultrasecretkey/$(openssl rand -hex 32)/g" \
+        -e "s/ultrasecretkey/$(head -c 24 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9')/g" \
         "${CONF}"
-
-    # Morty configuration
-
-    if [ -n "${MORTY_KEY}" ] && [ -n "${MORTY_URL}" ]; then
-        sed -i -e "s/image_proxy: false/image_proxy: true/g" \
-            "${CONF}"
-        cat >> "${CONF}" <<-EOF
-
-# Morty configuration
-result_proxy:
-   url: ${MORTY_URL}
-   key: !!binary "${MORTY_KEY}"
-EOF
-    fi
 }
 
+# FIXME: Always use "searxng:searxng" ownership
 update_conf() {
     FORCE_CONF_UPDATE=$1
     CONF="$2"
@@ -130,32 +108,8 @@ update_conf() {
     fi
 }
 
-# searx compatibility: copy /etc/searx/* to /etc/searxng/*
-SEARX_CONF=0
-if [ -f "/etc/searx/settings.yml" ]; then
-    if  [ ! -f "${SEARXNG_SETTINGS_PATH}" ]; then
-        printf '⚠️  /etc/searx/settings.yml is copied to /etc/searxng\n'
-        cp "/etc/searx/settings.yml" "${SEARXNG_SETTINGS_PATH}"
-    fi
-    SEARX_CONF=1
-fi
-if [ -f "/etc/searx/uwsgi.ini" ]; then
-    printf '⚠️  /etc/searx/uwsgi.ini is ignored. Use the volume /etc/searxng\n'
-    SEARX_CONF=1
-fi
-if [ "$SEARX_CONF" -eq "1" ]; then
-    printf '⚠️  The deprecated volume /etc/searx is mounted. Please update your configuration to use /etc/searxng ⚠️\n'
-    cat << EOF > /etc/searx/deprecated_volume_read_me.txt
-This Docker image uses the volume /etc/searxng
-Update your configuration:
-* remove uwsgi.ini (or very carefully update your existing uwsgi.ini using https://github.com/searxng/searxng/blob/master/dockerfiles/uwsgi.ini )
-* mount /etc/searxng instead of /etc/searx
-EOF
-fi
-# end of searx compatibility
-
 # make sure there are uwsgi settings
-update_conf "${FORCE_CONF_UPDATE}" "${UWSGI_SETTINGS_PATH}" "/usr/local/searxng/dockerfiles/uwsgi.ini" "patch_uwsgi_settings"
+update_conf "${FORCE_CONF_UPDATE}" "${UWSGI_SETTINGS_PATH}" "/usr/local/searxng/container/uwsgi.ini" "patch_uwsgi_settings"
 
 # make sure there are searxng settings
 update_conf "${FORCE_CONF_UPDATE}" "${SEARXNG_SETTINGS_PATH}" "/usr/local/searxng/searx/settings.yml" "patch_searxng_settings"
@@ -166,10 +120,8 @@ if [ $DRY_RUN -eq 1 ]; then
     exit
 fi
 
-unset MORTY_KEY
-
 printf 'Listen on %s\n' "${BIND_ADDRESS}"
 
 # Start uwsgi
 # TODO: "--http-socket" will be removed in the future (see uwsgi.ini.new config file): https://github.com/searxng/searxng/pull/4578
-exec uwsgi --http-socket "${BIND_ADDRESS}" "${UWSGI_SETTINGS_PATH}"
+exec /usr/local/searxng/venv/bin/uwsgi --http-socket "${BIND_ADDRESS}" "${UWSGI_SETTINGS_PATH}"
