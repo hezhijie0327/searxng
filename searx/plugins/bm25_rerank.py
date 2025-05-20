@@ -38,7 +38,7 @@ class SXNGPlugin(Plugin):
         query = search.search_query.query
 
         corpus = [
-            f"{result.get('content', '')} | {result.get('title', '')} | {result.get('url', '')}" for result in results
+            f"{result.content} | {result.title} | {result.url}" for result in results
         ]
 
         stopwords = {
@@ -58,6 +58,6 @@ class SXNGPlugin(Plugin):
 
         for index in documents[0]:
             score = scores[0][index]
-            for i, position in enumerate(results[index].get("positions", [])):
+            for i, position in enumerate(results[index].positions):
                 if isinstance(position, (int, float)):
                     results[index]["positions"][i] = float(position / (score + 1))
