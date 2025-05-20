@@ -37,9 +37,7 @@ class SXNGPlugin(Plugin):
         results = search.result_container.get_ordered_results()
         query = search.search_query.query
 
-        corpus = [
-            f"{result.content} | {result.title} | {result.url}" for result in results
-        ]
+        corpus = [f"{result.content} | {result.title} | {result.url}" for result in results]
 
         stopwords = {
             word
