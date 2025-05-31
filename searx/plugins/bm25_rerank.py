@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # pylint: disable=missing-module-docstring, missing-class-docstring, protected-access
 from __future__ import annotations
+import math
 import typing
 
 import bm25s
@@ -58,4 +59,4 @@ class SXNGPlugin(Plugin):
             score = scores[0][index]
             for i, position in enumerate(results[index].positions):
                 if isinstance(position, (int, float)):
-                    results[index]["positions"][i] = float(position / (score + 1))
+                    results[index]["positions"][i] = position * (1.0 / (1.0 + math.exp(-score)))
