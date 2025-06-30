@@ -45,6 +45,7 @@ def request(query, params):
     offset = (params['pageno'] - 1) * number_of_results
 
     string_args = {
+        'api_key': api_key,
         'query': urlencode({'term': query}),
         'offset': offset,
         'hits': number_of_results,
