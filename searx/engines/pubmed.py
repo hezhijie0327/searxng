@@ -72,7 +72,10 @@ def response(resp):  # pylint: disable=too-many-locals
     for item in pmids:
         pmids_string += item.text + ','
 
-    retrieve_notice_args = {'pmids_string': pmids_string}
+    retrieve_notice_args = {
+        'api_key': api_key,
+        'pmids_string': pmids_string,
+    }
 
     retrieve_url_encoded = pubmed_retrieve_api_url.format(**retrieve_notice_args)
 
