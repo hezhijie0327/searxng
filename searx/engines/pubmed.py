@@ -32,7 +32,7 @@ categories = ['science', 'scientific publications']
 api_key = ''
 base_url = (
     'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi'
-    +'?db=pubmed&{query}&retstart={offset}&retmax={hits}&api_key={api_key}'
+    + '?db=pubmed&{query}&retstart={offset}&retmax={hits}&api_key={api_key}'
 )
 
 # engine dependent config
