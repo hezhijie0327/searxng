@@ -30,7 +30,7 @@ about = {
 categories = ['science', 'scientific publications']
 
 api_key = ''
-base_url = 'https://eutils.ncbi.nlm.nih.gov'
+base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
 # engine dependent config
 number_of_results = 10
@@ -51,7 +51,7 @@ def request(query, params):
     if api_key:
         string_args['api_key'] = api_key
 
-    params['url'] = base_url + '/entrez/eutils/esearch.fcgi?' + urlencode(string_args)
+    params['url'] = base_url + '/esearch.fcgi?' + urlencode(string_args)
 
     return params
 
@@ -75,7 +75,7 @@ def response(resp):  # pylint: disable=too-many-locals
     if api_key:
         retrieve_notice_args['api_key'] = api_key
 
-    retrieve_url_encoded = base_url + '/entrez/eutils/efetch.fcgi?' + urlencode(retrieve_notice_args)
+    retrieve_url_encoded = base_url + '/efetch.fcgi?' + urlencode(retrieve_notice_args)
 
     search_results_response = get(retrieve_url_encoded).content
     search_results = etree.XML(search_results_response)
