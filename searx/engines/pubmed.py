@@ -29,8 +29,9 @@ about = {
 
 categories = ['science', 'scientific publications']
 
+api_key = ''
 base_url = (
-    'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi' + '?db=pubmed&{query}&retstart={offset}&retmax={hits}'
+    'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi' + '?db=pubmed&{query}&retstart={offset}&retmax={hits}&api_key={api_key}'
 )
 
 # engine dependent config
@@ -58,7 +59,7 @@ def response(resp):  # pylint: disable=too-many-locals
 
     # First retrieve notice of each result
     pubmed_retrieve_api_url = (
-        'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?' + 'db=pubmed&retmode=xml&id={pmids_string}'
+        'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?' + 'db=pubmed&retmode=xml&id={pmids_string}&api_key={api_key}'
     )
 
     pmids_results = etree.XML(resp.content)
