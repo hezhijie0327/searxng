@@ -33,12 +33,12 @@ base_url = "https://www.googleapis.com"
 
 def request(query, params):
     query_params = {
-      "cx": engine_id,
-      "key": api_key,
-      "num": results_per_page,
-      "q": query,
-      "safe": 'active' if params['safesearch'] > 0 else 'off',
-      "start": ((params["pageno"] - 1) * results_per_page) + 1,
+        "cx": engine_id,
+        "key": api_key,
+        "num": results_per_page,
+        "q": query,
+        "safe": 'active' if params['safesearch'] > 0 else 'off',
+        "start": ((params["pageno"] - 1) * results_per_page) + 1,
     }
 
     if time_range_dict.get(params['time_range']):
