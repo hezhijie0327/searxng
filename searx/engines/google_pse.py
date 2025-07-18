@@ -64,6 +64,9 @@ def _general_result(item):
 
 
 def _images_result(item):
+    height = item.get('image', {}).get('height')
+    width = item.get('image', {}).get('width')
+
     return {
         'template': 'images.html',
         'url': item.get('image', {}).get('contextLink'),
@@ -72,7 +75,7 @@ def _images_result(item):
         'title': item.get('title'),
         'content': item.get('snippet'),
         "source": item.get('displayLink'),
-        "resolution": f"{item.get('image', {}).get('width')} x {item.get('image', {}).get('height')}",
+        "resolution": f"{width} x {height}",
         "img_format": item.get('fileFormat'),
         "filesize": item.get('byteSize'),
     }
