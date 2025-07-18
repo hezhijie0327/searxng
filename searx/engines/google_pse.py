@@ -55,6 +55,7 @@ def request(query, params):
     params['url'] = f'{base_url}/customsearch/v1?{urlencode(query_params)}'
     return params
 
+
 def _general_result(item):
     return {
         'url': item.get('link'),
