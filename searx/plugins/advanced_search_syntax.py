@@ -1,0 +1,336 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""Advanced search syntax plugin for SearXNG.
+Supports site filtering, exact phrase matching, &&/|| operations, word exclusion,
+positional search, and wildcard matching."""
+
+import typing
+import re
+from urllib.parse import urlparse
+from flask_babel import gettext
+from searx.extended_types import SXNG_Request
+from searx.plugins import Plugin, PluginInfo
+from searx.result_types import Result
+
+if typing.TYPE_CHECKING:
+    from searx.plugins import PluginCfg
+    from searx.search import SearchWithPlugins
+
+
+class SXNGPlugin(Plugin):
+    """Plugin that enhances search with advanced syntax support."""
+
+    id = "advanced_search_syntax"
+
+    def __init__(self, plg_cfg: "PluginCfg") -> None:
+        super().__init__(plg_cfg)
+        self.info = PluginInfo(
+            id=self.id,
+            name=gettext("Advanced Search Syntax"),
+            description=gettext(
+                "Enhanced search with site filtering, exact phrases, &&/|| operations, "
+                "word exclusion, positional search, and wildcards"
+            ),
+            preference_section="general",
+        )
+
+        # Pre-compile regex patterns for better performance
+        self._patterns = {
+            'site_include': re.compile(r'(?:^|\s)site:([^\s]+)', re.IGNORECASE),
+            'site_exclude': re.compile(r'(?:^|\s)-site:([^\s]+)', re.IGNORECASE),
+            'intitle_phrase': re.compile(r'intitle:"([^"]+)"', re.IGNORECASE),
+            'intitle_word': re.compile(r'intitle:([^\s"]+)', re.IGNORECASE),
+            'inurl_word': re.compile(r'inurl:([^\s"]+)', re.IGNORECASE),
+            'intext_phrase': re.compile(r'intext:"([^"]+)"', re.IGNORECASE),
+            'intext_word': re.compile(r'intext:([^\s"]+)', re.IGNORECASE),
+            'exclude_phrase': re.compile(r'-"([^"]+)"'),
+            'exact_phrase': re.compile(r'"([^"]+)"'),
+            'wildcard': re.compile(r'(?:^|\s)(\w+\*)'),
+            'or_group': re.compile(r'(\w+(?:\s*\|\|\s*\w+)+)'),
+            'and_group': re.compile(r'(\w+(?:\s*\&\&\s*\w+)+)'),
+            'exclude_word': re.compile(r'(?:^|\s)-((?!site:)[^\s"]+)'),
+        }
+
+    def _has_advanced_syntax(self, query: str) -> bool:
+        """Check if the query contains any advanced search syntax."""
+        # Quick check using any of our compiled patterns
+        return any(pattern.search(query) for pattern in self._patterns.values())
+
+    def _parse_advanced_syntax(self, query: str) -> tuple[str, dict]:
+        """Parse and extract all advanced syntax patterns from query.
+
+        Returns:
+            tuple: (cleaned_query, syntax_dict)
+        """
+        syntax = {
+            'site_include': [],
+            'site_exclude': [],
+            'exact_phrases': [],
+            'exclude_phrases': [],
+            'or_groups': [],
+            'and_groups': [],
+            'exclude_words': [],
+            'wildcard_terms': [],
+            'intitle_words': [],
+            'intitle_phrases': [],
+            'inurl_words': [],
+            'intext_words': [],
+            'intext_phrases': [],
+            'remaining_terms': [],
+        }
+
+        # Extract patterns in order (most specific first)
+
+        # 1. Site patterns
+        syntax['site_include'] = [m.lower().strip() for m in self._patterns['site_include'].findall(query)]
+        query = self._patterns['site_include'].sub(' ', query)
+
+        syntax['site_exclude'] = [m.lower().strip() for m in self._patterns['site_exclude'].findall(query)]
+        query = self._patterns['site_exclude'].sub(' ', query)
+
+        # 2. Positional patterns (phrases first, then words)
+        syntax['intitle_phrases'] = [m.strip() for m in self._patterns['intitle_phrase'].findall(query)]
+        query = self._patterns['intitle_phrase'].sub(' ', query)
+
+        intitle_words = self._patterns['intitle_word'].findall(query)
+        syntax['intitle_words'] = [
+            w.strip() for w in intitle_words if not any(w in phrase for phrase in syntax['intitle_phrases'])
+        ]
+        query = self._patterns['intitle_word'].sub(' ', query)
+
+        syntax['intext_phrases'] = [m.strip() for m in self._patterns['intext_phrase'].findall(query)]
+        query = self._patterns['intext_phrase'].sub(' ', query)
+
+        intext_words = self._patterns['intext_word'].findall(query)
+        syntax['intext_words'] = [
+            w.strip() for w in intext_words if not any(w in phrase for phrase in syntax['intext_phrases'])
+        ]
+        query = self._patterns['intext_word'].sub(' ', query)
+
+        syntax['inurl_words'] = [m.strip() for m in self._patterns['inurl_word'].findall(query)]
+        query = self._patterns['inurl_word'].sub(' ', query)
+
+        # 3. Phrase patterns (exclude first)
+        syntax['exclude_phrases'] = [m.strip() for m in self._patterns['exclude_phrase'].findall(query)]
+        query = self._patterns['exclude_phrase'].sub(' ', query)
+
+        syntax['exact_phrases'] = [m.strip() for m in self._patterns['exact_phrase'].findall(query)]
+        query = self._patterns['exact_phrase'].sub(' ', query)
+
+        # 4. Logic patterns
+        or_matches = self._patterns['or_group'].findall(query)
+        for or_group in or_matches:
+            terms = [t.strip() for t in re.split(r'\s*\|\|\s*', or_group) if t.strip()]
+            if len(terms) > 1:
+                syntax['or_groups'].append(terms)
+        query = self._patterns['or_group'].sub(' ', query)
+
+        and_matches = self._patterns['and_group'].findall(query)
+        for and_group in and_matches:
+            terms = [t.strip() for t in re.split(r'\s*\&\&\s*', and_group) if t.strip()]
+            if len(terms) > 1:
+                syntax['and_groups'].append(terms)
+        query = self._patterns['and_group'].sub(' ', query)
+
+        # 5. Wildcard and exclude patterns
+        syntax['wildcard_terms'] = [m.strip() for m in self._patterns['wildcard'].findall(query)]
+        query = self._patterns['wildcard'].sub(' ', query)
+
+        syntax['exclude_words'] = [m.strip() for m in self._patterns['exclude_word'].findall(query)]
+        query = self._patterns['exclude_word'].sub(' ', query)
+
+        # 6. Clean and get remaining terms (filter out SearXNG native syntax)
+        cleaned_query = re.sub(r'\s+', ' ', query).strip()
+        remaining_terms = [
+            term for term in cleaned_query.split() if term and not term.startswith(('!', ':')) and term != '!!'
+        ]
+        syntax['remaining_terms'] = remaining_terms
+
+        return cleaned_query, syntax
+
+    def pre_search(self, request: SXNG_Request, search: "SearchWithPlugins") -> bool:
+        """Parse the search query for advanced syntax patterns and modify the query sent to engines."""
+        original_query = request.form.get('q', '')
+
+        # Only process queries that contain advanced syntax
+        if not self._has_advanced_syntax(original_query):
+            request.search_syntax = {'has_advanced_syntax': False, 'original_query': original_query}
+            return True
+
+        # Parse advanced syntax
+        cleaned_query, syntax = self._parse_advanced_syntax(original_query)
+        syntax.update({'has_advanced_syntax': True, 'original_query': original_query, 'cleaned_query': cleaned_query})
+
+        # Update request
+        if hasattr(request, 'form') and 'q' in request.form:
+            request.original_query = original_query
+            request.form['q'] = cleaned_query if cleaned_query else original_query
+
+        request.search_syntax = syntax
+        return True
+
+    def _normalize_domain(self, domain: str) -> str:
+        """Normalize domain by removing protocol and path parts."""
+        if not domain:
+            return ""
+        domain = re.sub(r'^https?://', '', domain).split('/')[0].split(':')[0]
+        return domain.lower().strip()
+
+    def _domain_matches(self, result_domain: str, target_domain: str) -> bool:
+        """Check if result domain matches target domain (exact or subdomain)."""
+        result_domain = self._normalize_domain(result_domain)
+        target_domain = self._normalize_domain(target_domain)
+        if not result_domain or not target_domain:
+            return False
+        return result_domain == target_domain or result_domain.endswith('.' + target_domain)
+
+    def _check_site_filters(self, result_url: str, syntax: dict) -> bool:
+        """Check if result passes site include/exclude filters."""
+        if not result_url:
+            return not syntax['site_include']
+
+        try:
+            result_domain = urlparse(result_url).hostname
+            if not result_domain:
+                return not syntax['site_include']
+
+            # Check exclude filters first
+            if syntax['site_exclude'] and any(self._domain_matches(result_domain, d) for d in syntax['site_exclude']):
+                return False
+
+            # Check include filters
+            if not syntax['site_include']:
+                return True
+            return any(self._domain_matches(result_domain, d) for d in syntax['site_include'])
+
+        except (ValueError, AttributeError):
+            return not syntax['site_include']
+
+    def _text_matches(self, text: str, word: str, exact: bool = False) -> bool:
+        """Check if text contains word/phrase."""
+        if not text or not word:
+            return False
+
+        text_lower = text.lower()
+        word_lower = word.lower()
+
+        if exact:  # Exact phrase match
+            return word_lower in text_lower
+
+        # Whole word match - 修复：去掉不必要的else
+        return bool(re.search(r'\b' + re.escape(word_lower) + r'\b', text_lower))
+
+    def _text_matches_wildcard(self, text: str, wildcard_term: str) -> bool:
+        """Check if text matches wildcard pattern."""
+        if not text or not wildcard_term:
+            return False
+
+        prefix = wildcard_term.rstrip('*').lower()
+        if not prefix:
+            return False
+
+        pattern = r'\b' + re.escape(prefix) + r'\w*'
+        return bool(re.search(pattern, text.lower()))
+
+    def _check_positional_filters(self, title: str, content: str, url: str, syntax: dict) -> bool:
+        """Check positional filters (intitle, intext, inurl)."""
+        # Check intitle filters
+        for word in syntax['intitle_words']:
+            if not self._text_matches(title, word):
+                return False
+        for phrase in syntax['intitle_phrases']:
+            if not self._text_matches(title, phrase, exact=True):
+                return False
+
+        # Check inurl filters
+        for word in syntax['inurl_words']:
+            if not self._text_matches(url, word):
+                return False
+
+        # Check intext filters
+        for word in syntax['intext_words']:
+            if not self._text_matches(content, word):
+                return False
+        for phrase in syntax['intext_phrases']:
+            if not self._text_matches(content, phrase, exact=True):
+                return False
+
+        return True
+
+    def _check_exclusion_filters(self, search_text: str, syntax: dict) -> bool:
+        """Check exclusion filters (excluded phrases and words)."""
+        # Check excluded phrases
+        for phrase in syntax['exclude_phrases']:
+            if self._text_matches(search_text, phrase, exact=True):
+                return False
+
+        # Check excluded words
+        for word in syntax['exclude_words']:
+            if self._text_matches(search_text, word):
+                return False
+
+        return True
+
+    def _check_inclusion_filters(self, search_text: str, syntax: dict) -> bool:
+        """Check inclusion filters (exact phrases, OR/AND groups, wildcards, remaining terms)."""
+        # Check exact phrases
+        for phrase in syntax['exact_phrases']:
+            if not self._text_matches(search_text, phrase, exact=True):
+                return False
+
+        # Check OR groups
+        for or_group in syntax['or_groups']:
+            if not any(self._text_matches(search_text, word) for word in or_group):
+                return False
+
+        # Check AND groups
+        for and_group in syntax['and_groups']:
+            if not all(self._text_matches(search_text, word) for word in and_group):
+                return False
+
+        # Check wildcard terms
+        for wildcard in syntax['wildcard_terms']:
+            if not self._text_matches_wildcard(search_text, wildcard):
+                return False
+
+        # Check remaining terms
+        for term in syntax['remaining_terms']:
+            if not self._text_matches(search_text, term):
+                return False
+
+        return True
+
+    def _apply_filters(self, result: Result, syntax: dict) -> bool:
+        """Apply all filters to a result."""
+        # Get result text components
+        title = getattr(result, 'title', '') or ''
+        content = getattr(result, 'content', '') or ''
+        url = getattr(result, 'url', '') or ''
+        search_text = f"{title} {content}".strip()
+
+        # Apply filters in order: site -> positional -> exclusion -> inclusion
+        filter_checks = [
+            lambda: (
+                self._check_site_filters(url, syntax) if (syntax['site_include'] or syntax['site_exclude']) else True
+            ),
+            lambda: self._check_positional_filters(title, content, url, syntax),
+            lambda: self._check_exclusion_filters(search_text, syntax),
+            lambda: self._check_inclusion_filters(search_text, syntax),
+        ]
+
+        return all(check() for check in filter_checks)
+
+    def on_result(self, request: SXNG_Request, search: "SearchWithPlugins", result: Result) -> bool:
+        """Filter results based on advanced search syntax."""
+        if not hasattr(request, 'search_syntax'):
+            return True
+
+        syntax = request.search_syntax
+        if not syntax.get('has_advanced_syntax', False):
+            return True
+
+        return self._apply_filters(result, syntax)
+
+    def post_search(self, request: SXNG_Request, search: "SearchWithPlugins") -> None:
+        """Restore original query for UI display after search completion."""
+        if hasattr(request, 'original_query') and hasattr(request, 'form'):
+            request.form['q'] = request.original_query
