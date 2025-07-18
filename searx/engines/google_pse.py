@@ -3,6 +3,7 @@
 
 from urllib.parse import urlencode
 
+from searx.exceptions import SearxEngineAPIException
 from searx.utils import html_to_text
 
 about = {
