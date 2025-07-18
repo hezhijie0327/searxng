@@ -4,7 +4,6 @@
 from urllib.parse import urlencode
 
 from searx.utils import html_to_text
-from searx.result_types import EngineResults, MainResult
 
 about = {
     "website": 'https://www.google.com',
@@ -16,6 +15,7 @@ about = {
 }
 
 categories = ['general']
+google_pse_category = 'general'
 
 paging = True
 results_per_page = 10
@@ -31,6 +31,11 @@ time_range_dict = {'day': 'd1', 'week': 'w1', 'month': 'm1', 'year': 'y1'}
 base_url = "https://www.googleapis.com"
 
 
+def init(_):
+    if google_pse_category not in ('general', 'images'):
+        raise SearxEngineAPIException(f"Unsupported category: {google_pse_category}")
+
+
 def request(query, params):
     query_params = {
         "cx": engine_id,
@@ -44,21 +49,43 @@ def request(query, params):
     if time_range_dict.get(params['time_range']):
         query_params["dateRestrict"] = time_range_dict.get(params['time_range'])
 
+    if google_pse_category == "images":
+        query_params["searchType"] = 'image'
+
     params['url'] = f'{base_url}/customsearch/v1?{urlencode(query_params)}'
     return params
 
+def _general_result(item):
+    return {
+        'url': item.get('link'),
+        'title': item.get('title'),
+        'content': html_to_text(item.get('snippet')),
+    }
 
-def response(resp) -> EngineResults:
-    results = EngineResults()
+
+def _images_result(item):
+    return {
+        'template': 'images.html',
+        'url': item.get('image', {}).get('contextLink'),
+        'thumbnail_src': item.get('image', {}).get('thumbnailLink'),
+        'img_src': item.get('link'),
+        'title': item.get('title'),
+        'content': item.get('snippet'),
+        "source": item.get('displayLink'),
+        "resolution": f"{item.get('image', {}).get('width')} x {item.get('image', {}).get('height')}",
+        "img_format": item.get('fileFormat'),
+        "filesize": item.get('byteSize'),
+    }
+
+
+def response(resp):
+    results = []
     search_results = resp.json()
 
     for item in search_results.get('items', []):
-        results.add(
-            MainResult(
-                title=item.get('title'),
-                content=html_to_text(item.get('snippet')),
-                url=item.get('link'),
-            )
-        )
+        if google_pse_category == "images":
+            results.append(_images_result(item))
+        else:
+            results.append(_general_result(item))
 
     return results
