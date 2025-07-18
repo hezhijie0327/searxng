@@ -3,8 +3,8 @@
 
 from urllib.parse import urlencode
 
+from searx.exceptions import SearxEngineAPIException
 from searx.utils import html_to_text
-from searx.result_types import EngineResults, MainResult
 
 about = {
     "website": 'https://search.brave.com/',
@@ -16,6 +16,8 @@ about = {
 }
 
 categories = ['general']
+brave_api_category = 'general'
+brave_api_category_map = {'general': 'web', 'images': 'images', 'videos': 'videos', 'news': 'news'}
 
 paging = True
 results_per_page = 10
@@ -31,11 +33,16 @@ api_key = None
 base_url = "https://api.search.brave.com/res/v1"
 
 
+def init(_):
+    if brave_api_category not in ('general', 'images', 'videos', 'news'):
+        raise SearxEngineAPIException(f"Unsupported category: {brave_api_category}")
+
+
 def request(query, params):
+    brave_api_endpoint = brave_api_category_map.get(brave_api_category)
     query_params = {
         "count": results_per_page,
         "q": query,
-        "result_filter": "web",
         "safesearch": safesearch_map[params['safesearch']],
         "offset": params["pageno"] - 1,
     }
@@ -43,7 +50,7 @@ def request(query, params):
     if time_range_dict.get(params['time_range']):
         query_params["freshness"] = time_range_dict.get(params['time_range'])
 
-    params['url'] = f'{base_url}/web/search?{urlencode(query_params)}'
+    params['url'] = f'{base_url}/{brave_api_endpoint}/search?{urlencode(query_params)}'
 
     params['headers']['Accept'] = 'application/json'
     params['headers']['Accept-Encoding'] = 'gzip'
@@ -51,17 +58,59 @@ def request(query, params):
     return params
 
 
-def response(resp) -> EngineResults:
-    results = EngineResults()
+def _general_result(item):
+    return {
+        'url': item.get('url'),
+        'title': item.get('title'),
+        'content': html_to_text(item.get('description')),
+        'thumbnail_src': item.get('thumbnail', {}).get('src', ''),
+    }
+
+
+def _images_result(item):
+    return {
+        'template': 'images.html',
+        'url': item.get('url'),
+        'thumbnail_src': item.get('thumbnail', {}).get('src', ''),
+        'img_src': item.get('properties', {}).get('url'),
+        'title': item.get('title'),
+        "source": item.get('meta_url', {}).get('netloc'),
+    }
+
+
+def _videos_result(item):
+    return {
+        'url': item.get('url'),
+        'title': item.get('title'),
+        'content': html_to_text(item.get('description')),
+        'length': item.get('video', {}).get('duration'),
+        'thumbnail_src': item.get('thumbnail', {}).get('src', ''),
+    }
+
+
+def _news_result(item):
+    return {
+        'url': item.get('url'),
+        'title': item.get('title'),
+        'content': html_to_text(item.get('description')),
+        'thumbnail_src': item.get('thumbnail', {}).get('src', ''),
+    }
+
+
+def response(resp):
+    results = []
     search_results = resp.json()
 
-    for item in search_results.get('web', {}).get('results', []):
-        results.add(
-            MainResult(
-                title=item.get('title'),
-                content=html_to_text(item.get('description')),
-                url=item.get('url'),
-            )
-        )
+    if brave_api_category == "general":
+        for item in search_results.get('web', {}).get('results', []):
+            results.append(_general_result(item))
+    else:
+        for item in search_results.get('results', []):
+            if brave_api_category == "images":
+                results.append(_images_result(item))
+            elif brave_api_category == "videos":
+                results.append(_videos_result(item))
+            else:
+                results.append(_news_result(item))
 
     return results
