@@ -91,6 +91,7 @@ def get_information():
     git_url = GIT_URL
     git_branch = GIT_BRANCH
 
+    """
     try:
         version_string, version_tag, docker_tag = get_git_version()
     except subprocess.CalledProcessError as ex:
@@ -99,6 +100,7 @@ def get_information():
         git_url, git_branch = get_git_url_and_branch()
     except subprocess.CalledProcessError as ex:
         logger.error("Error while getting the git URL & branch: %s", ex.stderr)
+    """
 
     return version_string, version_tag, docker_tag, git_url, git_branch
 
