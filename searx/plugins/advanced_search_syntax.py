@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Advanced search syntax plugin for SearXNG.
 Supports site filtering, exact phrase matching, &&/|| operations, word exclusion,
-positional search, and wildcard matching."""
+positional search, wildcard matching, and AI-powered query rewriting."""
 
 import typing
 import re
+import asyncio
+import logging
 from urllib.parse import urlparse
 from flask_babel import gettext
 from werkzeug.datastructures import ImmutableMultiDict
@@ -12,13 +14,23 @@ from searx.extended_types import SXNG_Request
 from searx.plugins import Plugin, PluginInfo
 from searx.result_types import Result
 
+# OpenAI SDK import
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
 if typing.TYPE_CHECKING:
     from searx.plugins import PluginCfg
     from searx.search import SearchWithPlugins
 
+# 设置日志
+logger = logging.getLogger(__name__)
+
 
 class SXNGPlugin(Plugin):
-    """Plugin that enhances search with advanced syntax support."""
+    """Plugin that enhances search with advanced syntax support and AI query rewriting."""
 
     id = "advanced_search_syntax"
 
@@ -26,16 +38,42 @@ class SXNGPlugin(Plugin):
         super().__init__(plg_cfg)
         self.info = PluginInfo(
             id=self.id,
-            name=gettext("Advanced Search Syntax"),
+            name=gettext("Advanced Search Syntax with AI"),
             description=gettext(
                 "Enhanced search with site filtering, exact phrases, &&/|| operations, "
-                "word exclusion, positional search, and wildcards"
+                "word exclusion, positional search, wildcards, and AI-powered query rewriting"
             ),
             preference_section="general",
         )
 
+        # OpenAI 配置
+        self.openai_config = {
+            'base_url': plg_cfg.get('openai_base_url', 'https://api.openai.com/v1'),
+            'api_key': plg_cfg.get('openai_api_key', ''),
+            'model_name': plg_cfg.get('openai_model', 'gpt-3.5-turbo'),
+            'max_tokens': plg_cfg.get('openai_max_tokens', 150),
+            'temperature': plg_cfg.get('openai_temperature', 0.7),
+            'timeout': plg_cfg.get('openai_timeout', 10),
+            'enabled': plg_cfg.get('openai_enabled', True) and OPENAI_AVAILABLE
+        }
+
+        # 初始化 OpenAI 客户端
+        self.openai_client = None
+        if self.openai_config['enabled'] and self.openai_config['api_key']:
+            try:
+                self.openai_client = OpenAI(
+                    base_url=self.openai_config['base_url'],
+                    api_key=self.openai_config['api_key'],
+                    timeout=self.openai_config['timeout']
+                )
+                logger.info("OpenAI client initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize OpenAI client: {e}")
+                self.openai_config['enabled'] = False
+
         # Pre-compile regex patterns for better performance
         self._patterns = {
+            'ai_rewrite': re.compile(r'@ai\s+(.+)', re.IGNORECASE | re.DOTALL),
             'site_include': re.compile(r'(?:^|\s)site:([^\s]+)', re.IGNORECASE),
             'site_exclude': re.compile(r'(?:^|\s)-site:([^\s]+)', re.IGNORECASE),
             'intitle_phrase': re.compile(r'intitle:"([^"]+)"', re.IGNORECASE),
@@ -55,6 +93,61 @@ class SXNGPlugin(Plugin):
         """Check if the query contains any advanced search syntax."""
         # Quick check using any of our compiled patterns
         return any(pattern.search(query) for pattern in self._patterns.values())
+
+    def _rewrite_query_with_ai(self, query: str) -> str:
+        """使用 OpenAI API 重写查询语句，优化搜索效果。"""
+        if not self.openai_config['enabled'] or not self.openai_client:
+            logger.warning("OpenAI client not available for query rewriting")
+            return query
+
+        try:
+            # 构建 prompt
+            system_prompt = """You are a search query optimizer. Your task is to rewrite user queries to make them more effective for web search engines.
+
+Guidelines:
+1. Keep the core intent and meaning of the original query
+2. Use more specific and searchable keywords
+3. Remove unnecessary words and filler
+4. Add relevant synonyms or alternative terms when helpful
+5. Structure the query for better search results
+6. Keep it concise and focused
+7. Respond ONLY with the optimized query, no explanations
+
+Examples:
+Input: "how to fix my computer that won't start"
+Output: "computer won't boot troubleshooting startup repair"
+
+Input: "best restaurants near me for date night"
+Output: "romantic restaurants date night dining"
+"""
+
+            user_prompt = f"Optimize this search query: {query}"
+
+            # 调用 OpenAI API
+            response = self.openai_client.chat.completions.create(
+                model=self.openai_config['model_name'],
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                max_tokens=self.openai_config['max_tokens'],
+                temperature=self.openai_config['temperature'],
+                timeout=self.openai_config['timeout']
+            )
+
+            rewritten_query = response.choices[0].message.content.strip()
+
+            # 基本验证重写结果
+            if rewritten_query and len(rewritten_query) > 0 and len(rewritten_query) <= 500:
+                logger.info(f"Query rewritten: '{query}' -> '{rewritten_query}'")
+                return rewritten_query
+            else:
+                logger.warning(f"Invalid rewritten query, using original: {query}")
+                return query
+
+        except Exception as e:
+            logger.error(f"Error rewriting query with AI: {e}")
+            return query
 
     def _clean_query_for_engines(self, query: str) -> str:
         """Clean query by removing ALL advanced syntax patterns for external engines."""
@@ -80,6 +173,8 @@ class SXNGPlugin(Plugin):
             tuple: (cleaned_query, syntax_dict)
         """
         syntax = {
+            'ai_rewrite': False,
+            'ai_query': '',
             'site_include': [],
             'site_exclude': [],
             'exact_phrases': [],
@@ -96,13 +191,27 @@ class SXNGPlugin(Plugin):
             'remaining_terms': [],
         }
 
-        # Extract patterns in order (most specific first)
+        # 1. 首先检查 AI 重写语法
+        ai_match = self._patterns['ai_rewrite'].search(query)
+        if ai_match:
+            syntax['ai_rewrite'] = True
+            syntax['ai_query'] = ai_match.group(1).strip()
+            # 从查询中移除 @ai 部分，继续处理其他高级语法
+            query_without_ai = self._patterns['ai_rewrite'].sub('', query).strip()
 
-        # 1. Site patterns
+            # 如果有AI重写，先重写查询
+            if syntax['ai_query']:
+                rewritten_query = self._rewrite_query_with_ai(syntax['ai_query'])
+                # 将重写的查询与剩余的高级语法结合
+                query = f"{rewritten_query} {query_without_ai}".strip()
+
+        # 2. 继续处理其他高级语法模式
+
+        # Site patterns
         syntax['site_include'] = [m.lower().strip() for m in self._patterns['site_include'].findall(query)]
         syntax['site_exclude'] = [m.lower().strip() for m in self._patterns['site_exclude'].findall(query)]
 
-        # 2. Positional patterns (phrases first, then words)
+        # Positional patterns (phrases first, then words)
         syntax['intitle_phrases'] = [m.strip() for m in self._patterns['intitle_phrase'].findall(query)]
         intitle_words = self._patterns['intitle_word'].findall(query)
         syntax['intitle_words'] = [
@@ -117,11 +226,11 @@ class SXNGPlugin(Plugin):
 
         syntax['inurl_words'] = [m.strip() for m in self._patterns['inurl_word'].findall(query)]
 
-        # 3. Phrase patterns (exclude first)
+        # Phrase patterns (exclude first)
         syntax['exclude_phrases'] = [m.strip() for m in self._patterns['exclude_phrase'].findall(query)]
         syntax['exact_phrases'] = [m.strip() for m in self._patterns['exact_phrase'].findall(query)]
 
-        # 4. Logic patterns
+        # Logic patterns
         or_matches = self._patterns['or_group'].findall(query)
         for or_group in or_matches:
             terms = [t.strip() for t in re.split(r'\s*\|\|\s*', or_group) if t.strip()]
@@ -134,11 +243,11 @@ class SXNGPlugin(Plugin):
             if len(terms) > 1:
                 syntax['and_groups'].append(terms)
 
-        # 5. Wildcard and exclude patterns
+        # Wildcard and exclude patterns
         syntax['wildcard_terms'] = [m.strip() for m in self._patterns['wildcard'].findall(query)]
         syntax['exclude_words'] = [m.strip() for m in self._patterns['exclude_word'].findall(query)]
 
-        # 6. Clean query for engines and extract remaining terms
+        # Clean query for engines and extract remaining terms
         cleaned_query = self._clean_query_for_engines(query)
 
         # Get remaining terms from the cleaned query
@@ -186,7 +295,7 @@ class SXNGPlugin(Plugin):
             request.search_syntax = {'has_advanced_syntax': False, 'original_query': original_query}
             return True
 
-        # Parse advanced syntax
+        # Parse advanced syntax (包括 AI 重写)
         cleaned_query, syntax = self._parse_advanced_syntax(original_query)
         syntax.update({'has_advanced_syntax': True, 'original_query': original_query, 'cleaned_query': cleaned_query})
 
