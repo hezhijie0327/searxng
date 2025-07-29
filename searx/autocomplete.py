@@ -375,7 +375,6 @@ backends = {
     'swisscows': swisscows,
     'wikipedia': wikipedia,
     'yandex': yandex,
-    'all': 'all',
     'custom': 'custom',
 }
 
@@ -494,18 +493,6 @@ def rerank_results(results_list, query):
 
 
 def search_autocomplete(backend_name, query, sxng_locale):
-    excluded_backends = ['all', 'custom']
-
-    if backend_name == 'all':
-        results_list = []
-        for backend_key, backend in backends.items():
-            if backend_key not in excluded_backends:
-                try:
-                    results_list.append(backend(query, sxng_locale))
-                except (HTTPError, SearxEngineResponseException, ValueError):
-                    results_list.append([])
-        return rerank_results(results_list, query)
-
     if backend_name == 'custom':
         custom_backends = settings.get('search', {}).get('autocomplete_engines', [])
 
