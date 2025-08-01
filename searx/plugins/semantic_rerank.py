@@ -254,7 +254,7 @@ class SXNGPlugin(Plugin):
         text = WHITESPACE_RE.sub(' ', text.strip())
 
         if len(text) > self.max_length:
-            return text[:self.max_length]
+            return text[: self.max_length]
         return text
 
     def _compute_embeddings_cpu_optimized(self, texts: list):
@@ -285,7 +285,7 @@ class SXNGPlugin(Plugin):
             batch_size = min(self.cpu_batch_size, len(texts_to_compute))
 
             for i in range(0, len(texts_to_compute), batch_size):
-                batch = texts_to_compute[i:i + batch_size]
+                batch = texts_to_compute[i : i + batch_size]
                 batch_emb = self._model.encode(
                     batch,
                     batch_size=len(batch),
@@ -316,7 +316,7 @@ class SXNGPlugin(Plugin):
 
         # 严格的大小限制
         if corpus_size > self.max_results_limit:
-            corpus = corpus[:self.max_results_limit]
+            corpus = corpus[: self.max_results_limit]
 
         try:
             # 快速预处理
@@ -331,10 +331,7 @@ class SXNGPlugin(Plugin):
             query_embedding = self._semantic_cache.get(processed_query)
             if query_embedding is None:
                 query_embedding = self._model.encode(
-                    [processed_query],
-                    show_progress_bar=False,
-                    convert_to_numpy=True,
-                    normalize_embeddings=True
+                    [processed_query], show_progress_bar=False, convert_to_numpy=True, normalize_embeddings=True
                 )[0]
                 self._semantic_cache.set(processed_query, query_embedding)
 
@@ -371,10 +368,7 @@ class SXNGPlugin(Plugin):
             retriever = bm25s.BM25()
             retriever.index(corpus_tokens)
             documents, bm25_scores = retriever.retrieve(
-                query_tokens,
-                k=len(corpus),
-                return_as="tuple",
-                show_progress=False
+                query_tokens, k=len(corpus), return_as="tuple", show_progress=False
             )
 
             return documents, bm25_scores
@@ -450,7 +444,7 @@ class SXNGPlugin(Plugin):
 
         # 严格限制处理数量
         if len(results) > self.max_results_limit:
-            results = results[:self.max_results_limit]
+            results = results[: self.max_results_limit]
 
         # 快速构建语料库
         corpus = []
