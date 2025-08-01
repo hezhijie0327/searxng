@@ -424,13 +424,12 @@ class SXNGPlugin(Plugin):
         # 创建文档索引映射
         doc_mapping = {doc_idx: rank for rank, doc_idx in enumerate(documents[0])}
 
-        for doc_idx in range(len(results)):
+        for doc_idx, result in enumerate(results):
             if doc_idx in doc_mapping:
                 rank = doc_mapping[doc_idx]
                 if rank < len(combined_scores):
                     score = float(combined_scores[rank])
                     multiplier = self._position_multiplier(score)
-                    result = results[doc_idx]
 
                     if hasattr(result, 'positions') and result.positions:
                         result.positions[0] = float(max(0.01, result.positions[0] * multiplier))
