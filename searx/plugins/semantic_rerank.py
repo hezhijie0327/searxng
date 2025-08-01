@@ -203,7 +203,7 @@ class SXNGPlugin(Plugin):
         text = HTML_TAG_RE.sub(' ', text)
         text = WHITESPACE_RE.sub(' ', text.strip())
 
-        return text[:self.max_length] if len(text) > self.max_length else text
+        return text[: self.max_length] if len(text) > self.max_length else text
 
     def _compute_embeddings_cpu_optimized(self, texts: list) -> np.ndarray | None:
         """CPU优化的嵌入计算"""
@@ -233,7 +233,7 @@ class SXNGPlugin(Plugin):
             batch_size = min(self.cpu_batch_size, len(texts_to_compute))
 
             for i in range(0, len(texts_to_compute), batch_size):
-                batch = texts_to_compute[i:i + batch_size]
+                batch = texts_to_compute[i : i + batch_size]
                 batch_emb = self._model.encode(
                     batch,
                     batch_size=len(batch),
@@ -264,7 +264,7 @@ class SXNGPlugin(Plugin):
 
         # 严格的大小限制
         if corpus_size > self.max_results_limit:
-            corpus = corpus[:self.max_results_limit]
+            corpus = corpus[: self.max_results_limit]
             corpus_size = len(corpus)
 
         try:
@@ -280,10 +280,7 @@ class SXNGPlugin(Plugin):
             query_embedding = self._semantic_cache.get(processed_query)
             if query_embedding is None:
                 query_embedding = self._model.encode(
-                    [processed_query],
-                    show_progress_bar=False,
-                    convert_to_numpy=True,
-                    normalize_embeddings=True
+                    [processed_query], show_progress_bar=False, convert_to_numpy=True, normalize_embeddings=True
                 )[0]
                 self._semantic_cache.set(processed_query, query_embedding)
 
@@ -340,7 +337,7 @@ class SXNGPlugin(Plugin):
 
         # 严格限制处理数量
         if len(results) > self.max_results_limit:
-            results = results[:self.max_results_limit]
+            results = results[: self.max_results_limit]
 
         # 快速构建语料库
         corpus = []
