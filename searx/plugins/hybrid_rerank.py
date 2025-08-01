@@ -25,7 +25,7 @@ torch = None
 
 if typing.TYPE_CHECKING:
     from searx.search import SearchWithPlugins
-    from searx.extended_types import SXNG_REQUEST
+    from searx.extended_types import SXNG_Request
     from searx.plugins import PluginCfg
 
 logger = logging.getLogger(__name__)
