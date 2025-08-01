@@ -153,7 +153,7 @@ class ModelManager:
         }
 
 
-class SemanticPlugin(Plugin):
+class SXNGPlugin(Plugin):
     """语义重排序插件"""
 
     id = "semantic_rerank"
