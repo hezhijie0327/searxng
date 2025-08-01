@@ -26,6 +26,13 @@ try:
 except ImportError:
     torch = None
 
+try:
+    import bm25s
+    import bm25s.stopwords as stopwords_module
+except ImportError:
+    bm25s = None
+    stopwords_module = None
+
 from searx.plugins import Plugin, PluginInfo
 from searx.result_types import EngineResults
 
@@ -154,17 +161,21 @@ class ModelManager:
 
 
 class SXNGPlugin(Plugin):
-    """语义重排序插件"""
+    """混合重排序插件：BM25 + 语义搜索"""
 
-    id = "semantic_rerank"
+    id = "hybrid_rerank"
     default_on = True
 
     def __init__(self, plg_cfg: "PluginCfg") -> None:
         super().__init__(plg_cfg)
 
         # Check if required dependencies are available
-        if np is None or sentence_transformers is None or torch is None:
-            raise ImportError("Required dependencies not available: numpy, sentence_transformers, torch")
+        if np is None or sentence_transformers is None or torch is None or bm25s is None:
+            raise ImportError("Required dependencies not available: numpy, sentence_transformers, torch, bm25s")
+
+        # 混合权重配置：BM25 25%, 语义搜索 75%
+        self.bm25_weight = 0.25
+        self.semantic_weight = 0.75
 
         # 模型管理
         self.model_manager = ModelManager(
@@ -183,12 +194,26 @@ class SXNGPlugin(Plugin):
         self._model_load_failed = False
         self._semantic_cache = FastSemanticCache(max_size=800, ttl=3600)
 
+        # 缓存BM25停用词
+        self._cached_stopwords = None
+
         self.info = PluginInfo(
             id=self.id,
-            name="Semantic Rerank",
-            description="A semantic reranking method using sentence embeddings.",
+            name="Hybrid Rerank",
+            description="A hybrid reranking method combining BM25 (25%) and semantic search (75%).",
             preference_section="general",
         )
+
+    def _get_stopwords(self) -> set:
+        """获取BM25停用词（缓存）"""
+        if self._cached_stopwords is None and stopwords_module is not None:
+            self._cached_stopwords = {
+                word
+                for name, value in stopwords_module.__dict__.items()
+                if name.startswith("STOPWORDS_") and isinstance(value, tuple)
+                for word in value
+            }
+        return self._cached_stopwords or set()
 
     def _lazy_load_model(self) -> bool:
         """优化的模型加载"""
@@ -212,7 +237,7 @@ class SXNGPlugin(Plugin):
             self._model = sentence_transformers.SentenceTransformer(model_path, device='cpu')
 
             # 快速预热
-            _ = self._model.encode(["semantic rerank warmup"], show_progress_bar=False)
+            _ = self._model.encode(["hybrid rerank warmup"], show_progress_bar=False)
 
             return True
 
@@ -229,7 +254,7 @@ class SXNGPlugin(Plugin):
         text = WHITESPACE_RE.sub(' ', text.strip())
 
         if len(text) > self.max_length:
-            return text[: self.max_length]
+            return text[:self.max_length]
         return text
 
     def _compute_embeddings_cpu_optimized(self, texts: list):
@@ -260,7 +285,7 @@ class SXNGPlugin(Plugin):
             batch_size = min(self.cpu_batch_size, len(texts_to_compute))
 
             for i in range(0, len(texts_to_compute), batch_size):
-                batch = texts_to_compute[i : i + batch_size]
+                batch = texts_to_compute[i:i + batch_size]
                 batch_emb = self._model.encode(
                     batch,
                     batch_size=len(batch),
@@ -291,7 +316,7 @@ class SXNGPlugin(Plugin):
 
         # 严格的大小限制
         if corpus_size > self.max_results_limit:
-            corpus = corpus[: self.max_results_limit]
+            corpus = corpus[:self.max_results_limit]
 
         try:
             # 快速预处理
@@ -306,7 +331,10 @@ class SXNGPlugin(Plugin):
             query_embedding = self._semantic_cache.get(processed_query)
             if query_embedding is None:
                 query_embedding = self._model.encode(
-                    [processed_query], show_progress_bar=False, convert_to_numpy=True, normalize_embeddings=True
+                    [processed_query],
+                    show_progress_bar=False,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True
                 )[0]
                 self._semantic_cache.set(processed_query, query_embedding)
 
@@ -327,6 +355,63 @@ class SXNGPlugin(Plugin):
         except (RuntimeError, OSError, ValueError):
             return None
 
+    def _calculate_bm25_scores(self, query: str, corpus: list):
+        """计算BM25分数"""
+        if bm25s is None:
+            return None
+
+        try:
+            # 获取停用词
+            stopwords = self._get_stopwords()
+
+            # BM25处理
+            corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
+            query_tokens = bm25s.tokenize(query, stopwords=stopwords)
+
+            retriever = bm25s.BM25()
+            retriever.index(corpus_tokens)
+            documents, bm25_scores = retriever.retrieve(
+                query_tokens,
+                k=len(corpus),
+                return_as="tuple",
+                show_progress=False
+            )
+
+            return documents, bm25_scores
+
+        except (RuntimeError, OSError, ValueError):
+            return None, None
+
+    def _fast_normalize_scores(self, scores) -> np.ndarray:
+        """快速分数标准化"""
+        scores = np.array(scores)
+        if len(scores) == 0:
+            return scores
+
+        min_val, max_val = np.min(scores), np.max(scores)
+        if max_val > min_val:
+            return (scores - min_val) / (max_val - min_val)
+        return np.full_like(scores, 0.5)
+
+    def _hybrid_score_combination(self, bm25_scores, semantic_scores):
+        """混合分数组合：BM25 25% + 语义搜索 75%"""
+        if semantic_scores is None:
+            # 如果语义分数不可用，仅使用BM25
+            return bm25_scores if bm25_scores is not None else None
+
+        if bm25_scores is None:
+            # 如果BM25分数不可用，仅使用语义分数
+            return semantic_scores
+
+        # 快速标准化
+        bm25_norm = self._fast_normalize_scores(bm25_scores)
+        semantic_norm = self._fast_normalize_scores(semantic_scores)
+
+        # 混合加权组合：BM25 25% + 语义搜索 75%
+        combined = self.bm25_weight * bm25_norm + self.semantic_weight * semantic_norm
+
+        return combined
+
     def _position_multiplier(self, score: float) -> float:
         """位置倍数计算"""
         if score > 0.85:
@@ -337,32 +422,35 @@ class SXNGPlugin(Plugin):
             return 0.3
         return 0.8
 
-    def _apply_semantic_rerank(self, results: list, semantic_scores) -> None:
-        """应用语义重排序"""
-        # 创建结果索引映射
-        score_pairs = list(enumerate(semantic_scores))
-        score_pairs.sort(key=lambda x: x[1], reverse=True)
+    def _apply_hybrid_rerank(self, results: list, documents, combined_scores) -> None:
+        """应用混合重排序"""
+        if documents is None or combined_scores is None:
+            return
 
-        for new_pos, (old_pos, score) in enumerate(score_pairs):
-            if old_pos >= len(results):
-                continue
+        # 创建文档索引映射
+        doc_mapping = {doc_idx: rank for rank, doc_idx in enumerate(documents[0])}
 
-            result = results[old_pos]
-            multiplier = self._position_multiplier(float(score))
+        for doc_idx in range(len(results)):
+            if doc_idx in doc_mapping:
+                rank = doc_mapping[doc_idx]
+                if rank < len(combined_scores):
+                    score = float(combined_scores[rank])
+                    multiplier = self._position_multiplier(score)
+                    result = results[doc_idx]
 
-            if hasattr(result, 'positions') and result.positions:
-                result.positions[0] = float(max(0.01, result.positions[0] * multiplier))
-            else:
-                result.positions = [float((new_pos + 1.0) / len(results) * multiplier)]
+                    if hasattr(result, 'positions') and result.positions:
+                        result.positions[0] = float(max(0.01, result.positions[0] * multiplier))
+                    else:
+                        result.positions = [float((doc_idx + 1.0) / len(results) * multiplier)]
 
-    def _process_semantic_results(self, results: list, query: str) -> None:
-        """语义重排序的结果处理主流程"""
+    def _process_hybrid_results(self, results: list, query: str) -> None:
+        """混合重排序的结果处理主流程"""
         if len(results) < 2:
             return
 
         # 严格限制处理数量
         if len(results) > self.max_results_limit:
-            results = results[: self.max_results_limit]
+            results = results[:self.max_results_limit]
 
         # 快速构建语料库
         corpus = []
@@ -374,24 +462,38 @@ class SXNGPlugin(Plugin):
                 text_parts.append(result.content[:100])
             corpus.append(" ".join(text_parts))
 
+        # 计算BM25分数
+        documents, bm25_scores = self._calculate_bm25_scores(query, corpus)
+        bm25_scores_array = bm25_scores[0] if bm25_scores and len(bm25_scores) > 0 else None
+
         # 计算语义分数
         semantic_scores = self._calculate_semantic_scores(query, corpus)
 
-        if semantic_scores is not None and len(semantic_scores) > 0:
-            # 应用语义重排序
-            self._apply_semantic_rerank(results, semantic_scores)
+        # 混合分数组合
+        combined_scores = self._hybrid_score_combination(bm25_scores_array, semantic_scores)
 
-    def post_search(self, request: "SXNG_REQUEST", search: "SearchWithPlugins") -> EngineResults:
+        if combined_scores is not None:
+            # 标准化最终分数
+            normalized_scores = self._fast_normalize_scores(combined_scores)
+
+            # 应用混合重排序
+            self._apply_hybrid_rerank(results, documents, normalized_scores)
+
+    def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
         results = search.result_container.get_ordered_results()
 
         if len(results) < 2:
             return search.result_container
 
         query = search.search_query.query
-        self._process_semantic_results(results, query)
+        self._process_hybrid_results(results, query)
 
         return search.result_container
 
     def clear_cache(self) -> None:
         """清理缓存"""
         self._semantic_cache.clear()
+
+    def get_model_info(self) -> dict:
+        """获取模型信息"""
+        return self.model_manager.get_model_info()
