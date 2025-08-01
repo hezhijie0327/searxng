@@ -41,9 +41,17 @@ DEFAULT_MODEL_NAME = "all-MiniLM-L6-v2"
 
 class ScoreDetails:
     """轻量级分数详情类"""
-    __slots__ = ['doc_index', 'title', 'bm25_raw', 'bm25_normalized',
-                 'semantic_raw', 'semantic_normalized', 'combined_score',
-                 'final_position', 'position_multiplier']
+    __slots__ = [
+        'doc_index',
+        'title',
+        'bm25_raw',
+        'bm25_normalized',
+        'semantic_raw',
+        'semantic_normalized',
+        'combined_score',
+        'final_position',
+        'position_multiplier',
+    ]
 
     def __init__(self, doc_index: int, title: str = ""):
         self.doc_index = doc_index
@@ -55,6 +63,7 @@ class ScoreDetails:
         self.combined_score = 0.0
         self.final_position = 0.0
         self.position_multiplier = 1.0
+
 
 class FastSemanticCache:
     """高性能语义向量缓存"""
@@ -205,7 +214,7 @@ class ModelManager:
             'model_dir': str(self.model_dir),
             'local_path': str(self.local_model_path),
             'exists': self.local_model_path.exists(),
-            'valid': self._is_model_valid()
+            'valid': self._is_model_valid(),
         }
 
         if self.local_model_path.exists():
@@ -237,24 +246,24 @@ class SXNGPlugin(Plugin):
         # 📁 模型管理 - 使用优化的逻辑
         self.model_manager = ModelManager(
             model_dir=os.environ.get('SEARXNG_MODEL_DIR', DEFAULT_MODEL_DIR),
-            model_name=os.environ.get('SEARXNG_MODEL_NAME', DEFAULT_MODEL_NAME)
+            model_name=os.environ.get('SEARXNG_MODEL_NAME', DEFAULT_MODEL_NAME),
         )
 
         # 🔥 CPU性能优化的批处理配置
-        self.cpu_batch_size = 16        # 降低到CPU友好的大小
-        self.cpu_max_batch_size = 32    # 最大批量限制
-        self.cpu_chunk_size = 8         # 内存友好的块大小
-        self.max_results_limit = 200    # 降低处理限制
-        self.max_length = 200           # 减少文本长度
+        self.cpu_batch_size = 16  # 降低到CPU友好的大小
+        self.cpu_max_batch_size = 32  # 最大批量限制
+        self.cpu_chunk_size = 8  # 内存友好的块大小
+        self.max_results_limit = 200  # 降低处理限制
+        self.max_length = 200  # 减少文本长度
 
         # 🚀 性能控制
-        self.cpu_timeout = 20.0         # 更严格的超时
-        self.performance_threshold = 8.0 # 更严格的性能阈值
-        self.enable_fast_mode = True    # 启用快速模式
+        self.cpu_timeout = 20.0  # 更严格的超时
+        self.performance_threshold = 8.0  # 更严格的性能阈值
+        self.enable_fast_mode = True  # 启用快速模式
 
         # 📊 简化显示配置
         self.show_detailed_scores = True
-        self.show_top_n_scores = 8      # 减少显示数量
+        self.show_top_n_scores = 8  # 减少显示数量
         self.show_score_distribution = False  # 关闭分布统计以节省CPU
         self.enable_debug_logs = False  # 关闭详细调试日志
 
@@ -267,7 +276,7 @@ class SXNGPlugin(Plugin):
             "avg_time": 0,
             "cpu_optimized_calls": 0,
             "fast_mode_calls": 0,
-            "timeout_fallbacks": 0
+            "timeout_fallbacks": 0,
         }
 
         # 显示模型信息
@@ -314,10 +323,7 @@ class SXNGPlugin(Plugin):
 
             logger.info(f"📥 Loading hybrid rerank model from: {model_path}")
 
-            self._model = sentence_transformers.SentenceTransformer(
-                model_path,
-                device='cpu'
-            )
+            self._model = sentence_transformers.SentenceTransformer(model_path, device='cpu')
 
             # 快速预热
             _ = self._model.encode(["hybrid rerank warmup"], show_progress_bar=False)
@@ -340,7 +346,7 @@ class SXNGPlugin(Plugin):
         text = WHITESPACE_RE.sub(' ', text.strip())
 
         # 快速长度限制
-        return text[:self.max_length] if len(text) > self.max_length else text
+        return text[: self.max_length] if len(text) > self.max_length else text
 
     def _compute_embeddings_cpu_optimized(self, texts: list) -> np.ndarray | None:
         """CPU优化的嵌入计算"""
@@ -370,13 +376,13 @@ class SXNGPlugin(Plugin):
             batch_size = min(self.cpu_batch_size, len(texts_to_compute))
 
             for i in range(0, len(texts_to_compute), batch_size):
-                batch = texts_to_compute[i:i + batch_size]
+                batch = texts_to_compute[i : i + batch_size]
                 batch_emb = self._model.encode(
                     batch,
                     batch_size=len(batch),
                     show_progress_bar=False,
                     convert_to_numpy=True,
-                    normalize_embeddings=True  # 预先标准化
+                    normalize_embeddings=True,  # 预先标准化
                 )
                 computed_embeddings.extend(batch_emb)
 
@@ -403,7 +409,7 @@ class SXNGPlugin(Plugin):
         # 严格的大小限制
         if corpus_size > self.max_results_limit:
             logger.warning(f"⚠️ Truncating {corpus_size} to {self.max_results_limit} for CPU performance")
-            corpus = corpus[:self.max_results_limit]
+            corpus = corpus[: self.max_results_limit]
             corpus_size = len(corpus)
 
         try:
@@ -420,10 +426,7 @@ class SXNGPlugin(Plugin):
             query_embedding = self._semantic_cache.get(processed_query)
             if query_embedding is None:
                 query_embedding = self._model.encode(
-                    [processed_query],
-                    show_progress_bar=False,
-                    convert_to_numpy=True,
-                    normalize_embeddings=True
+                    [processed_query], show_progress_bar=False, convert_to_numpy=True, normalize_embeddings=True
                 )[0]
                 self._semantic_cache.set(processed_query, query_embedding)
 
@@ -480,15 +483,22 @@ class SXNGPlugin(Plugin):
         combined = self.bm25_weight * bm25_norm + self.semantic_weight * semantic_norm
 
         if self.enable_debug_logs:
-            logger.info(f"🔄 Hybrid scores: avg={np.mean(combined):.3f}, "
-                       f"BM25_avg={np.mean(bm25_norm):.3f}, "
-                       f"Semantic_avg={np.mean(semantic_norm):.3f}")
+            logger.info(
+                f"🔄 Hybrid scores: avg={np.mean(combined):.3f}, "
+                f"BM25_avg={np.mean(bm25_norm):.3f}, "
+                f"Semantic_avg={np.mean(semantic_norm):.3f}"
+            )
 
         return combined
 
-    def _create_fast_score_details(self, results: list, documents: list,
-                                  bm25_scores: np.ndarray, semantic_scores: np.ndarray,
-                                  combined_scores: np.ndarray) -> list:
+    def _create_fast_score_details(
+        self,
+        results: list,
+        documents: list,
+        bm25_scores: np.ndarray,
+        semantic_scores: np.ndarray,
+        combined_scores: np.ndarray
+    ) -> list:
         """快速创建分数详情"""
         score_details = []
         doc_mapping = {doc_idx: rank for rank, doc_idx in enumerate(documents[0])}
@@ -523,11 +533,13 @@ class SXNGPlugin(Plugin):
         # 快速排序和显示
         sorted_details = sorted(score_details, key=lambda x: x.combined_score, reverse=True)
 
-        for i, detail in enumerate(sorted_details[:self.show_top_n_scores]):
-            logger.info(f"#{i+1:2d}: {detail.title}: "
-                       f"BM25={detail.bm25_raw:.3f}, "
-                       f"Semantic={detail.semantic_raw:.3f}, "
-                       f"Hybrid={detail.combined_score:.3f}")
+        for i, detail in enumerate(sorted_details[: self.show_top_n_scores]):
+            logger.info(
+                f"#{i+1:2d}: {detail.title}: "
+                f"BM25={detail.bm25_raw:.3f}, "
+                f"Semantic={detail.semantic_raw:.3f}, "
+                f"Hybrid={detail.combined_score:.3f}"
+            )
 
     def _cpu_optimized_position_multiplier(self, score: float) -> float:
         """简化的位置倍数计算"""
@@ -542,7 +554,7 @@ class SXNGPlugin(Plugin):
 
     def _apply_hybrid_rerank(self, results: list, documents: list, normalized_scores: list):
         """应用混合重排序"""
-        for idx, doc_index in enumerate(documents[0][:len(results)]):
+        for idx, doc_index in enumerate(documents[0][: len(results)]):
             if doc_index >= len(results):
                 continue
 
@@ -562,7 +574,7 @@ class SXNGPlugin(Plugin):
 
         # 严格限制处理数量
         if len(results) > self.max_results_limit:
-            results = results[:self.max_results_limit]
+            results = results[: self.max_results_limit]
             logger.warning(f"⚠️ Limited to {self.max_results_limit} results for CPU performance")
 
         start_time = time.time()
@@ -580,7 +592,8 @@ class SXNGPlugin(Plugin):
         # 获取停用词（缓存）
         if not hasattr(self, '_cached_stopwords'):
             self._cached_stopwords = {
-                word for name, value in stopwords_module.__dict__.items()
+                word
+                for name, value in stopwords_module.__dict__.items()
                 if name.startswith("STOPWORDS_") and isinstance(value, tuple)
                 for word in value
             }
@@ -592,9 +605,7 @@ class SXNGPlugin(Plugin):
 
         retriever = bm25s.BM25()
         retriever.index(corpus_tokens)
-        documents, bm25_scores = retriever.retrieve(
-            query_tokens, k=len(corpus), return_as="tuple", show_progress=False
-        )
+        documents, bm25_scores = retriever.retrieve(query_tokens, k=len(corpus), return_as="tuple", show_progress=False)
 
         bm25_time = time.time() - start_time
 
@@ -621,8 +632,10 @@ class SXNGPlugin(Plugin):
 
                 total_time = time.time() - start_time
 
-                logger.info(f"🔄 Hybrid rerank processing: {total_time:.2f}s total "
-                           f"(BM25: {bm25_time:.2f}s, Semantic: {semantic_time:.2f}s)")
+                logger.info(
+                    f"🔄 Hybrid rerank processing: {total_time:.2f}s total "
+                    f"(BM25: {bm25_time:.2f}s, Semantic: {semantic_time:.2f}s)"
+                )
 
                 self._performance_stats["cpu_optimized_calls"] += 1
                 if self.enable_fast_mode:
@@ -644,8 +657,10 @@ class SXNGPlugin(Plugin):
         self._performance_stats["total_calls"] += 1
         if self._performance_stats["total_calls"] % 10 == 0:
             hit_rate = self._semantic_cache.get_hit_rate()
-            logger.info(f"📊 Hybrid rerank stats: {self._performance_stats['total_calls']} calls, "
-                       f"cache hit rate: {hit_rate:.1f}%")
+            logger.info(
+                f"📊 Hybrid rerank stats: {self._performance_stats['total_calls']} calls, "
+                f"cache hit rate: {hit_rate:.1f}%"
+            )
 
         return search.result_container
 
