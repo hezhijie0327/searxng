@@ -39,8 +39,10 @@ URL_WORD_RE = re.compile(r'[a-zA-Z]+')
 DEFAULT_MODEL_DIR = os.environ.get('SEARXNG_MODEL_DIR', '/var/cache/searxng/models')
 DEFAULT_MODEL_NAME = "all-MiniLM-L6-v2"
 
+
 class ScoreDetails:
     """轻量级分数详情类"""
+
     __slots__ = [
         'doc_index',
         'title',
@@ -497,7 +499,7 @@ class SXNGPlugin(Plugin):
         documents: list,
         bm25_scores: np.ndarray,
         semantic_scores: np.ndarray,
-        combined_scores: np.ndarray
+        combined_scores: np.ndarray,
     ) -> list:
         """快速创建分数详情"""
         score_details = []
