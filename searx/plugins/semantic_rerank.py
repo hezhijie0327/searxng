@@ -10,14 +10,24 @@ from functools import lru_cache
 from threading import Lock
 from pathlib import Path
 
-import numpy as np
+# Handle optional dependencies with proper error handling
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
+try:
+    import sentence_transformers
+except ImportError:
+    sentence_transformers = None
+
+try:
+    import torch
+except ImportError:
+    torch = None
 
 from searx.plugins import Plugin, PluginInfo
 from searx.result_types import EngineResults
-
-# Lazy import for sentence-transformers to avoid startup overhead
-sentence_transformers = None
-torch = None
 
 if typing.TYPE_CHECKING:
     from searx.search import SearchWithPlugins
@@ -48,7 +58,7 @@ class FastSemanticCache:
         """缓存的键生成"""
         return hashlib.md5(text.encode('utf-8')).hexdigest()[:16]
 
-    def get(self, text: str) -> np.ndarray | None:
+    def get(self, text: str):
         """快速获取缓存的向量"""
         key = self._generate_key(text)
         current_time = time.time()
@@ -58,13 +68,12 @@ class FastSemanticCache:
                 if current_time - self.access_times.get(key, 0) < self.ttl:
                     self.access_times[key] = current_time
                     return self.cache[key]
-                else:
-                    del self.cache[key]
-                    del self.access_times[key]
+                del self.cache[key]
+                del self.access_times[key]
 
         return None
 
-    def set(self, text: str, vector: np.ndarray) -> None:
+    def set(self, text: str, vector) -> None:
         """快速设置缓存"""
         key = self._generate_key(text)
         current_time = time.time()
@@ -79,6 +88,12 @@ class FastSemanticCache:
 
             self.cache[key] = vector
             self.access_times[key] = current_time
+
+    def clear(self) -> None:
+        """清理缓存"""
+        with self.lock:
+            self.cache.clear()
+            self.access_times.clear()
 
 
 class ModelManager:
@@ -101,23 +116,20 @@ class ModelManager:
 
         # 检查模型文件（至少有一个）
         model_files = ['pytorch_model.bin', 'model.safetensors']
-        has_model_file = any((self.local_model_path / f).exists() for f in model_files)
-
-        return has_model_file
+        return any((self.local_model_path / f).exists() for f in model_files)
 
     def _download_model_to_local(self) -> bool:
         """下载模型到本地目录"""
         try:
-            global sentence_transformers
             if sentence_transformers is None:
-                import sentence_transformers
+                return False
 
             model = sentence_transformers.SentenceTransformer(self.model_name)
             model.save(str(self.local_model_path))
 
             return self._is_model_valid()
 
-        except Exception:
+        except (ImportError, OSError, RuntimeError, ValueError):
             return False
 
     def ensure_model_available(self) -> str:
@@ -130,6 +142,16 @@ class ModelManager:
 
         raise RuntimeError(f"Failed to ensure model availability: {self.model_name}")
 
+    def get_model_info(self) -> dict:
+        """获取模型信息"""
+        return {
+            'model_name': self.model_name,
+            'model_dir': str(self.model_dir),
+            'local_path': str(self.local_model_path),
+            'exists': self.local_model_path.exists(),
+            'valid': self._is_model_valid(),
+        }
+
 
 class SXNGPlugin(Plugin):
     """语义重排序插件"""
@@ -139,6 +161,10 @@ class SXNGPlugin(Plugin):
 
     def __init__(self, plg_cfg: "PluginCfg") -> None:
         super().__init__(plg_cfg)
+
+        # Check if required dependencies are available
+        if np is None or sentence_transformers is None or torch is None:
+            raise ImportError("Required dependencies not available: numpy, sentence_transformers, torch")
 
         # 模型管理
         self.model_manager = ModelManager(
@@ -173,10 +199,9 @@ class SXNGPlugin(Plugin):
             return False
 
         try:
-            global sentence_transformers, torch
-            if sentence_transformers is None:
-                import sentence_transformers
-                import torch
+            if sentence_transformers is None or torch is None:
+                self._model_load_failed = True
+                return False
 
             # CPU优化设置
             torch.set_num_threads(2)
@@ -191,7 +216,7 @@ class SXNGPlugin(Plugin):
 
             return True
 
-        except Exception:
+        except (ImportError, OSError, RuntimeError, ValueError):
             self._model_load_failed = True
             return False
 
@@ -203,9 +228,11 @@ class SXNGPlugin(Plugin):
         text = HTML_TAG_RE.sub(' ', text)
         text = WHITESPACE_RE.sub(' ', text.strip())
 
-        return text[: self.max_length] if len(text) > self.max_length else text
+        if len(text) > self.max_length:
+            return text[:self.max_length]
+        return text
 
-    def _compute_embeddings_cpu_optimized(self, texts: list) -> np.ndarray | None:
+    def _compute_embeddings_cpu_optimized(self, texts: list):
         """CPU优化的嵌入计算"""
         if not texts:
             return None
@@ -233,7 +260,7 @@ class SXNGPlugin(Plugin):
             batch_size = min(self.cpu_batch_size, len(texts_to_compute))
 
             for i in range(0, len(texts_to_compute), batch_size):
-                batch = texts_to_compute[i : i + batch_size]
+                batch = texts_to_compute[i:i + batch_size]
                 batch_emb = self._model.encode(
                     batch,
                     batch_size=len(batch),
@@ -251,10 +278,10 @@ class SXNGPlugin(Plugin):
 
             return np.array(embeddings)
 
-        except Exception:
+        except (RuntimeError, OSError, ValueError):
             return None
 
-    def _calculate_semantic_scores(self, query: str, corpus: list) -> np.ndarray | None:
+    def _calculate_semantic_scores(self, query: str, corpus: list):
         """CPU优化的语义分数计算"""
         if not self._lazy_load_model():
             return None
@@ -264,8 +291,7 @@ class SXNGPlugin(Plugin):
 
         # 严格的大小限制
         if corpus_size > self.max_results_limit:
-            corpus = corpus[: self.max_results_limit]
-            corpus_size = len(corpus)
+            corpus = corpus[:self.max_results_limit]
 
         try:
             # 快速预处理
@@ -280,7 +306,10 @@ class SXNGPlugin(Plugin):
             query_embedding = self._semantic_cache.get(processed_query)
             if query_embedding is None:
                 query_embedding = self._model.encode(
-                    [processed_query], show_progress_bar=False, convert_to_numpy=True, normalize_embeddings=True
+                    [processed_query], 
+                    show_progress_bar=False, 
+                    convert_to_numpy=True, 
+                    normalize_embeddings=True
                 )[0]
                 self._semantic_cache.set(processed_query, query_embedding)
 
@@ -298,24 +327,23 @@ class SXNGPlugin(Plugin):
 
             return similarities
 
-        except Exception:
+        except (RuntimeError, OSError, ValueError):
             return None
 
     def _position_multiplier(self, score: float) -> float:
         """位置倍数计算"""
         if score > 0.85:
             return 0.05
-        elif score > 0.7:
+        if score > 0.7:
             return 0.15
-        elif score > 0.5:
+        if score > 0.5:
             return 0.3
-        else:
-            return 0.8
+        return 0.8
 
-    def _apply_semantic_rerank(self, results: list, semantic_scores: np.ndarray):
+    def _apply_semantic_rerank(self, results: list, semantic_scores) -> None:
         """应用语义重排序"""
         # 创建结果索引映射
-        score_pairs = [(i, score) for i, score in enumerate(semantic_scores)]
+        score_pairs = list(enumerate(semantic_scores))
         score_pairs.sort(key=lambda x: x[1], reverse=True)
 
         for new_pos, (old_pos, score) in enumerate(score_pairs):
@@ -337,7 +365,7 @@ class SXNGPlugin(Plugin):
 
         # 严格限制处理数量
         if len(results) > self.max_results_limit:
-            results = results[: self.max_results_limit]
+            results = results[:self.max_results_limit]
 
         # 快速构建语料库
         corpus = []
@@ -369,5 +397,4 @@ class SXNGPlugin(Plugin):
 
     def clear_cache(self) -> None:
         """清理缓存"""
-        self._semantic_cache.cache.clear()
-        self._semantic_cache.access_times.clear()
+        self._semantic_cache.clear()
