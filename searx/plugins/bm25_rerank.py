@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# pylint: disable=missing-module-docstring, missing-class-docstring, protected-access, unused-argument, broad-exception-caught
+# pylint: disable=missing-module-docstring, missing-class-docstring, protected-access
 from __future__ import annotations
 import re
 import typing
@@ -48,7 +48,8 @@ class SXNGPlugin(Plugin):
         """初始化tiktoken编码器"""
         try:
             self.tokenizer = tiktoken.encoding_for_model(PRIMARY_MODEL)
-        except Exception:
+        except (KeyError, ValueError, ImportError):
+            # 捕获更具体的异常：模型不存在、参数错误、导入错误
             self.tokenizer = tiktoken.get_encoding(FALLBACK_ENCODING)
 
     def _preprocess_text(self, text: str) -> str:
@@ -77,13 +78,15 @@ class SXNGPlugin(Plugin):
                     token_str = self.tokenizer.decode([token])
                     if token_str.strip():
                         token_strings.append(token_str.strip())
-                except Exception:
+                except (UnicodeDecodeError, ValueError):
+                    # 捕获解码相关的特定异常
                     continue
             return token_strings
-        except Exception:
+        except (AttributeError, ValueError, TypeError):
+            # 捕获编码相关的特定异常
             return preprocessed_text.split()
 
-    def _extract_result_text(self, result, index: int) -> str:
+    def _extract_result_text(self, result) -> str:
         """提取搜索结果的文本内容"""
         text_parts = []
 
@@ -102,7 +105,7 @@ class SXNGPlugin(Plugin):
 
     def _build_corpus(self, results: list) -> list[str]:
         """构建语料库"""
-        return [self._extract_result_text(result, i) for i, result in enumerate(results)]
+        return [self._extract_result_text(result) for result in results]
 
     def _normalize_scores(self, scores: np.ndarray) -> list[float]:
         """标准化分数到0-1范围"""
@@ -136,7 +139,8 @@ class SXNGPlugin(Plugin):
             try:
                 documents, scores_array = method_func()
                 return documents, scores_array
-            except Exception:
+            except (AttributeError, ValueError, RuntimeError, IndexError):
+                # 捕获BM25检索可能出现的具体异常
                 continue
 
         raise RuntimeError("所有BM25检索方法都失败")
@@ -209,7 +213,8 @@ class SXNGPlugin(Plugin):
                 if normalized_scores:
                     self._apply_rerank(results, documents, normalized_scores)
 
-        except Exception:
+        except (RuntimeError, ValueError, TypeError, AttributeError):
+            # 捕获处理过程中可能出现的具体异常
             pass
 
     def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
@@ -222,7 +227,8 @@ class SXNGPlugin(Plugin):
                 if query:
                     self._process_results(results, query)
 
-        except Exception:
+        except (AttributeError, TypeError):
+            # 捕获访问搜索对象属性时可能出现的具体异常
             pass
 
         return search.result_container

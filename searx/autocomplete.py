@@ -2,7 +2,7 @@
 """This module implements functions needed for the autocompleter.
 
 """
-# pylint: disable=use-dict-literal,too-many-locals,broad-exception-caught,too-many-statements
+# pylint: disable=use-dict-literal,too-many-locals
 
 import json
 import html
@@ -34,7 +34,7 @@ FALLBACK_ENCODING = "o200k_harmony"
 # 初始化 tiktoken 编码器
 try:
     _tokenizer = tiktoken.encoding_for_model(PRIMARY_MODEL)
-except Exception:
+except (KeyError, ImportError, ValueError) as e:
     _tokenizer = tiktoken.get_encoding(FALLBACK_ENCODING)
 
 
@@ -66,7 +66,7 @@ def _tokenize_for_bm25(text: str) -> list[str]:
                 token_str = _tokenizer.decode([token])
                 if token_str.strip():
                     token_strings.append(token_str.strip())
-            except Exception:
+            except (UnicodeDecodeError, ValueError):
                 continue
 
         # 如果 tiktoken 分词失败，回退到简单空格分词
@@ -75,7 +75,7 @@ def _tokenize_for_bm25(text: str) -> list[str]:
 
         return token_strings
 
-    except Exception:
+    except (ValueError, TypeError, AttributeError):
         # 异常情况下使用简单分词
         return preprocessed_text.split()
 
@@ -443,6 +443,78 @@ def deduplicate_results(results):
     return unique_results
 
 
+def _get_strategy_params(query_length):
+    """根据查询长度选择自动补全策略参数"""
+    if query_length <= 2:
+        # 极短查询：强调前缀匹配，降低 BM25 权重
+        return {
+            'prefix_bonus': 2.0,
+            'length_penalty_rate': 0.1,
+            'exact_match_bonus': 3.0,
+            'bm25_weight': 0.3,
+        }
+    # 修复：移除不必要的 elif，改为 if
+    if query_length <= 5:
+        # 中等查询：平衡前缀匹配和语义相关性
+        return {
+            'prefix_bonus': 1.5,
+            'length_penalty_rate': 0.05,
+            'exact_match_bonus': 2.0,
+            'bm25_weight': 0.6,
+        }
+
+    # 长查询：依赖 BM25 语义理解能力
+    return {
+        'prefix_bonus': 1.2,
+        'length_penalty_rate': 0.02,
+        'exact_match_bonus': 1.5,
+        'bm25_weight': 0.8,
+    }
+
+
+def _normalize_bm25_scores(raw_scores):
+    """标准化 BM25 分数到 [0,1] 区间"""
+    if len(raw_scores) == 0:
+        return []
+
+    min_score, max_score = float(np.min(raw_scores)), float(np.max(raw_scores))
+    if max_score > min_score:
+        return ((raw_scores - min_score) / (max_score - min_score)).tolist()
+
+    return [0.5] * len(raw_scores)
+
+
+def _calculate_suggestion_score(suggestion, query_lower, bm25_score, params):
+    """计算单个建议的综合分数"""
+    suggestion_lower = suggestion.lower()
+
+    # 前缀匹配加分：自动补全的核心特性
+    prefix_boost = params['prefix_bonus'] if suggestion_lower.startswith(query_lower) else 1.0
+
+    # 完全匹配加分：用户可能已经知道想要的结果
+    exact_match_boost = params['exact_match_bonus'] if suggestion_lower == query_lower else 1.0
+
+    # 长度惩罚：自动补全偏好简洁的建议
+    length_penalty = 1.0
+    if len(suggestion) > len(query_lower) * 3:
+        excess_length = len(suggestion) - len(query_lower) * 2
+        length_penalty = 1.0 - (excess_length * params['length_penalty_rate'])
+        length_penalty = max(0.1, length_penalty)  # 避免过度惩罚
+
+    # 综合计算最终分数
+    final_score = (
+        (bm25_score * params['bm25_weight'] + (1.0 - params['bm25_weight']))
+        * prefix_boost
+        * exact_match_boost
+        * length_penalty
+    )
+
+    # 添加微小随机因子避免相同分数的不稳定排序
+    final_score += hash(suggestion) % 1000 * 0.000001
+
+    return final_score
+
+
 def rerank_results(results_list, query):
     """使用 BM25 算法和 tiktoken 分词对自动补全结果进行重排
 
@@ -470,36 +542,14 @@ def rerank_results(results_list, query):
 
         # 标准化 BM25 分数到 [0,1] 区间
         raw_scores = scores[0]
-        if len(raw_scores) == 0:
+        normalized_scores = _normalize_bm25_scores(raw_scores)
+
+        if not normalized_scores:
             return corpus
 
-        min_score, max_score = float(np.min(raw_scores)), float(np.max(raw_scores))
-        if max_score > min_score:
-            normalized_scores = ((raw_scores - min_score) / (max_score - min_score)).tolist()
-        else:
-            normalized_scores = [0.5] * len(raw_scores)
-
-        # 根据查询长度选择自动补全策略参数
+        # 获取策略参数
         query_length = len(query.strip())
-
-        if query_length <= 2:
-            # 极短查询：强调前缀匹配，降低 BM25 权重
-            prefix_bonus = 2.0
-            length_penalty_rate = 0.1
-            exact_match_bonus = 3.0
-            bm25_weight = 0.3
-        elif query_length <= 5:
-            # 中等查询：平衡前缀匹配和语义相关性
-            prefix_bonus = 1.5
-            length_penalty_rate = 0.05
-            exact_match_bonus = 2.0
-            bm25_weight = 0.6
-        else:
-            # 长查询：依赖 BM25 语义理解能力
-            prefix_bonus = 1.2
-            length_penalty_rate = 0.02
-            exact_match_bonus = 1.5
-            bm25_weight = 0.8
+        params = _get_strategy_params(query_length)
 
         # 计算每个建议的综合分数
         final_scores = []
@@ -510,31 +560,10 @@ def rerank_results(results_list, query):
                 continue
 
             suggestion = corpus[doc_index]
-            suggestion_lower = suggestion.lower()
             bm25_score = float(normalized_scores[idx])
 
-            # 前缀匹配加分：自动补全的核心特性
-            prefix_boost = prefix_bonus if suggestion_lower.startswith(query_lower) else 1.0
-
-            # 完全匹配加分：用户可能已经知道想要的结果
-            exact_match_boost = exact_match_bonus if suggestion_lower == query_lower else 1.0
-
-            # 长度惩罚：自动补全偏好简洁的建议
-            length_penalty = 1.0
-            if len(suggestion) > len(query) * 3:
-                excess_length = len(suggestion) - len(query) * 2
-                length_penalty = 1.0 - (excess_length * length_penalty_rate)
-                length_penalty = max(0.1, length_penalty)  # 避免过度惩罚
-
-            # 综合计算最终分数
-            final_score = (
-                (bm25_score * bm25_weight + (1.0 - bm25_weight)) * prefix_boost * exact_match_boost * length_penalty
-            )
-
-            # 添加微小随机因子避免相同分数的不稳定排序
-            final_score += hash(suggestion) % 1000 * 0.000001
-
-            final_scores.append((doc_index, float(final_score)))
+            final_score = _calculate_suggestion_score(suggestion, query_lower, bm25_score, params)
+            final_scores.append((doc_index, final_score))
 
         # 按最终分数降序排列
         final_scores.sort(key=lambda x: x[1], reverse=True)
@@ -542,7 +571,7 @@ def rerank_results(results_list, query):
         # 返回重排后的建议列表
         return [corpus[doc_index] for doc_index, _ in final_scores]
 
-    except Exception:
+    except (ValueError, TypeError, AttributeError, ImportError):
         # 异常情况下返回原始结果
         return corpus
 
@@ -565,6 +594,8 @@ def search_autocomplete(backend_name, query, sxng_locale):
     backend = backends.get(backend_name)
     if backend is None:
         return []
+
+    # 修复：移除不必要的 else，直接执行代码
     try:
         return backend(query, sxng_locale)
     except (HTTPError, SearxEngineResponseException, ValueError):
