@@ -128,8 +128,8 @@ class SXNGPlugin(Plugin):
             bm25_scores.append(0.0)
 
         for i, result in enumerate(results):
-            # BM25分数+1避免除零错误
-            position_score = bm25_scores[i] + 1.0
+            # BM25分数
+            position_score = bm25_scores[i]
 
             try:
                 # 获取原有positions
