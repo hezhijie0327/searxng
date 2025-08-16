@@ -40,7 +40,7 @@ class SXNGPlugin(Plugin):
         """初始化tiktoken编码器"""
         try:
             self.tokenizer = tiktoken.encoding_for_model(PRIMARY_MODEL)
-        except Exception:
+        except (KeyError, ValueError):
             self.tokenizer = tiktoken.get_encoding(FALLBACK_ENCODING)
 
     def _preprocess_text(self, text: str) -> str:
@@ -69,10 +69,10 @@ class SXNGPlugin(Plugin):
                     token_str = self.tokenizer.decode([token]).strip()
                     if token_str:
                         token_strings.append(token_str)
-                except Exception:
+                except (ValueError, UnicodeDecodeError):
                     continue
             return token_strings
-        except Exception:
+        except (ValueError, TypeError):
             return preprocessed_text.split()
 
     def _extract_result_text(self, result) -> str:
@@ -115,10 +115,10 @@ class SXNGPlugin(Plugin):
             # 转换为列表格式
             if hasattr(scores, 'tolist'):
                 return scores.tolist()
-            else:
-                return [float(score) for score in scores]
 
-        except Exception:
+            return [float(score) for score in scores]
+
+        except (ValueError, TypeError, AttributeError, ImportError):
             return [0.0] * len(results)
 
     def _update_positions(self, results: list, bm25_scores: list[float]) -> None:
@@ -137,10 +137,10 @@ class SXNGPlugin(Plugin):
 
                 # 将BM25分数插入第一位
                 result.positions = [position_score] + list(original_positions)
-            except Exception:
+            except AttributeError:
                 try:
                     result.positions = [position_score]
-                except Exception:
+                except AttributeError:
                     pass
 
     def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
@@ -158,7 +158,7 @@ class SXNGPlugin(Plugin):
                     bm25_scores = self._get_bm25_scores(results, query)
                     self._update_positions(results, bm25_scores)
 
-        except Exception:
+        except AttributeError:
             pass
 
         return search.result_container
