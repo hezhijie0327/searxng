@@ -18,7 +18,7 @@ def calculate_score(result, priority) -> float:
     positions = result['positions']
     original_positions = positions[1:]
 
-    bm25_score = float(positions[0]) - 1.0
+    bm25_score = float(positions[0])
     weight = 1.0 + bm25_score
 
     for result_engine in result['engines']:
