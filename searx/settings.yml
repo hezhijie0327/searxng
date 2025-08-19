@@ -2501,6 +2501,12 @@ engines:
     disabled: true
     timeout: 5.0
 
+  - name: xiaohongshu
+    engine: xiaohongshu
+    shortcut: xhs
+    xiaohongshu_cookie: ''
+    disabled: true
+
   - name: wordnik
     engine: wordnik
     shortcut: wnik
