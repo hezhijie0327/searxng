@@ -580,3 +580,13 @@ def search_autocomplete(backend_name: str, query: str, sxng_locale: str) -> list
                 except (HTTPError, SearxEngineResponseException, ValueError):
                     results_list.append([])
         return rerank_results(results_list, query)
+
+    backend = backends.get(backend_name)
+    if backend is None:
+        return []
+
+    # 修复：移除不必要的 else，直接执行代码
+    try:
+        return backend(query, sxng_locale)
+    except (HTTPError, SearxEngineResponseException, ValueError):
+        return []
