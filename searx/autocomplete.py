@@ -82,6 +82,7 @@ def _tokenize_for_bm25(text: str) -> list[str]:
         # 异常情况下使用简单分词
         return preprocessed_text.split()
 
+
 def update_kwargs(**kwargs) -> None:  # type: ignore
     if 'timeout' not in kwargs:
         kwargs['timeout'] = settings['outgoing']['request_timeout']
