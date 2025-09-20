@@ -73,7 +73,7 @@ def request(query: str, params: "OnlineParams") -> None:
         }
     )
     if api_key:
-       args['api_key'] = api_key
+        args['api_key'] = api_key
     esearch_url = f"{eutils_api}/esearch.fcgi?{args}"
     # DTD: https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060628/esearch.dtd
     esearch_resp: "SXNG_Response" = get(esearch_url)
@@ -89,7 +89,7 @@ def request(query: str, params: "OnlineParams") -> None:
         }
     )
     if api_key:
-       args['api_key'] = api_key
+        args['api_key'] = api_key
     efetch_url = f"{eutils_api}/efetch.fcgi?{args}"
     params["url"] = efetch_url
 
