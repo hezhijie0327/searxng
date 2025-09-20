@@ -100,8 +100,9 @@ server:
   image_proxy: false
   # 1.0 and 1.1 are supported
   http_protocol_version: "1.0"
-  # POST queries are more secure as they don't show up in history but may cause
-  # problems when using Firefox containers.
+  # POST queries are "more secure!" but are also the source of hard-to-locate
+  # annoyances, which is why GET may be better for end users and their browsers.
+  # see https://github.com/searxng/searxng/pull/3619
   # Is overwritten by ${SEARXNG_METHOD}
   method: "POST"
   default_http_headers:
@@ -110,16 +111,15 @@ server:
     X-Robots-Tag: noindex, nofollow
     Referrer-Policy: no-referrer
 
-redis:
-  # URL to connect redis database. Is overwritten by ${SEARXNG_REDIS_URL}.
-  # https://docs.searxng.org/admin/settings/settings_redis.html#settings-redis
+valkey:
+  # URL to connect valkey database. Is overwritten by ${SEARXNG_VALKEY_URL}.
+  # https://docs.searxng.org/admin/settings/settings_valkey.html#settings-valkey
+  # url: valkey://localhost:6379/0
   url: false
 
 ui:
   # Custom static path - leave it blank if you didn't change
   static_path: ""
-  # Is overwritten by ${SEARXNG_STATIC_USE_HASH}.
-  static_use_hash: false
   # Custom templates path - leave it blank if you didn't change
   templates_path: ""
   # query_in_title: When true, the result page's titles contains the query
@@ -176,7 +176,7 @@ outgoing:
   request_timeout: 3.0
   # the maximum timeout in seconds
   # max_request_timeout: 10.0
-  # suffix of searx_useragent, could contain information like an email address
+  # suffix of searxng_useragent, could contain information like an email address
   # to the administrator
   useragent_suffix: ""
   # The maximum number of concurrent connections that may be established.
@@ -238,6 +238,9 @@ plugins:
   searx.plugins.hostnames.SXNGPlugin:
     active: true
 
+  searx.plugins.time_zone.SXNGPlugin:
+    active: true
+
   searx.plugins.oa_doi_rewrite.SXNGPlugin:
     active: false
 
@@ -278,7 +281,7 @@ checker:
   # disable checker when in debug mode
   off_when_debug: true
 
-  # use "scheduling: false" to disable scheduling
+  # use "scheduling: {}" to disable scheduling
   # scheduling: interval or int
 
   # to activate the scheduler:
@@ -404,13 +407,12 @@ engines:
       require_api_key: false
       results: JSON
 
-  # - name: astrophysics data system
-  #   engine: astrophysics_data_system
-  #   sort: asc
-  #   weight: 5
-  #   categories: [science]
-  #   api_key: your-new-key
-  #   shortcut: ads
+  - name: astrophysics data system
+    engine: astrophysics_data_system
+    shortcut: ads
+    # read https://docs.searxng.org/dev/engines/online/astrophysics_data_system.html
+    api_key: ""
+    inactive: true
 
   - name: alpine linux packages
     engine: alpinelinux
@@ -421,6 +423,7 @@ engines:
     engine: annas_archive
     disabled: true
     shortcut: aa
+    timeout: 5
 
   - name: ansa
     engine: ansa
@@ -487,7 +490,6 @@ engines:
   - name: arxiv
     engine: arxiv
     shortcut: arx
-    timeout: 4.0
 
   - name: ask
     engine: ask
@@ -656,12 +658,12 @@ engines:
     timeout: 30
     disabled: true
 
-  # - name: core.ac.uk
-  #   engine: core
-  #   categories: science
-  #   shortcut: cor
-  #   # get your API key from: https://core.ac.uk/api-keys/register/
-  #   api_key: 'unset'
+  - name: core.ac.uk
+    engine: core
+    shortcut: cor
+    # read https://docs.searxng.org/dev/engines/online/core.html
+    api_key: ""
+    inactive: true
 
   - name: cppreference
     engine: cppreference
@@ -715,7 +717,6 @@ engines:
 
   - name: currency
     engine: currency_convert
-    categories: general
     shortcut: cc
 
   - name: deezer
@@ -984,6 +985,24 @@ engines:
     engine: github
     shortcut: gh
 
+  - name: github code
+    engine: github_code
+    shortcut: ghc
+    disabled: true
+    ghc_auth:
+      # type is one of:
+      # * none
+      # * personal_access_token
+      # * bearer
+      # When none is passed, the token is not requried.
+      type: "none"
+      token: "token"
+    # specify whether to highlight the matching lines to the query
+    ghc_highlight_matching_lines: true
+    ghc_strip_new_lines: true
+    ghc_strip_whitespace: false
+    timeout: 10.0
+
   - name: codeberg
     # https://docs.searxng.org/dev/engines/online/gitea.html
     engine: gitea
@@ -1234,9 +1253,10 @@ engines:
   - name: z-library
     engine: zlibrary
     shortcut: zlib
-    categories: files
     timeout: 7.0
     disabled: true
+    # https://github.com/searxng/searxng/issues/3610
+    inactive: true
 
   - name: library of congress
     engine: loc
@@ -1277,6 +1297,15 @@ engines:
       use_official_api: false
       require_api_key: false
       results: HTML
+
+  - name: marginalia
+    engine: marginalia
+    shortcut: mar
+    # To get an API key, please follow the instructions at
+    # - https://about.marginalia-search.com/article/api/
+    # api_key: ...
+    disabled: true
+    inactive: true
 
   - name: mastodon users
     engine: mastodon
@@ -1469,6 +1498,15 @@ engines:
       require_api_key: false
       results: JSON
 
+  - name: openalex
+    engine: openalex
+    shortcut: oa
+    # https://docs.searxng.org/dev/engines/online/openalex.html
+    # Recommended by OpenAlex: join the polite pool with an email address
+    # mailto: "[email protected]"
+    timeout: 5.0
+    disabled: true
+
   - name: openclipart
     engine: openclipart
     shortcut: ocl
@@ -1479,7 +1517,7 @@ engines:
   - name: openlibrary
     engine: openlibrary
     shortcut: ol
-    timeout: 5
+    timeout: 10
     disabled: true
 
   - name: openmeteo
@@ -1555,17 +1593,14 @@ engines:
     categories: videos
     piped_filter: videos
     timeout: 3.0
+    inactive: true
 
     # URL to use as link and for embeds
     frontend_url: https://srv.piped.video
     # Instance will be selected randomly, for more see https://piped-instances.kavin.rocks/
     backend_url:
-      - https://pipedapi.adminforge.de
-      - https://pipedapi.nosebs.ru
       - https://pipedapi.ducks.party
-      - https://pipedapi.reallyaweso.me
       - https://api.piped.private.coffee
-      - https://pipedapi.darkness.services
 
   - name: piped.music
     engine: piped
@@ -1574,6 +1609,7 @@ engines:
     categories: music
     piped_filter: music_songs
     timeout: 3.0
+    inactive: true
 
   - name: piratebay
     engine: piratebay
@@ -1582,6 +1618,20 @@ engines:
     # country
     url: https://thepiratebay.org/
     timeout: 3.0
+
+  - name: pixabay images
+    engine: pixabay
+    pixabay_type: images
+    categories: images
+    shortcut: pixi
+    disabled: true
+
+  - name: pixabay videos
+    engine: pixabay
+    pixabay_type: videos
+    categories: videos
+    shortcut: pixv
+    disabled: true
 
   - name: pixiv
     shortcut: pv
@@ -1680,11 +1730,11 @@ engines:
   - name: public domain image archive
     engine: public_domain_image_archive
     shortcut: pdia
+    disabled: true
 
   - name: pubmed
     engine: pubmed
     shortcut: pub
-    timeout: 3.0
 
   - name: pypi
     shortcut: pypi
@@ -1795,10 +1845,10 @@ engines:
     shortcut: rt
     disabled: true
 
-  # Required dependency: redis
-  # - name: myredis
+  # Required dependency: valkey
+  # - name: myvalkey
   #   shortcut : rds
-  #   engine: redis_server
+  #   engine: valkey_server
   #   exact_match_only: false
   #   host: '127.0.0.1'
   #   port: 6379
@@ -1829,7 +1879,6 @@ engines:
   - name: selfhst icons
     engine: selfhst
     shortcut: si
-    inactive: true
     disabled: true
 
   - name: sepiasearch
@@ -1903,6 +1952,7 @@ engines:
     engine: searchcode_code
     shortcut: scc
     disabled: true
+    inactive: true
 
   # - name: searx
   #   engine: searx_engine
@@ -1914,7 +1964,6 @@ engines:
 
   - name: semantic scholar
     engine: semantic_scholar
-    disabled: true
     shortcut: se
 
   # Spotify needs API credentials
@@ -1935,13 +1984,13 @@ engines:
   #   query_fields: '' # query fields
   #   enable_http: true
 
-  # - name: springer nature
-  #   engine: springer
-  #   # get your API key from: https://dev.springernature.com/signup
-  #   # working API key, for test & debug: "a69685087d07eca9f13db62f65b8f601"
-  #   api_key: 'unset'
-  #   shortcut: springer
-  #   timeout: 15.0
+  - name: springer nature
+    engine: springer
+    shortcut: springer
+    timeout: 5
+    # read https://docs.searxng.org/dev/engines/online/springer.html
+    api_key: ""
+    inactive: true
 
   - name: startpage
     engine: startpage
@@ -2438,14 +2487,9 @@ engines:
     engine: yacy
     categories: general
     search_type: text
+    # see https://github.com/searxng/searxng/pull/3631#issuecomment-2240903027
     base_url:
       - https://yacy.searchlab.eu
-      # see https://github.com/searxng/searxng/pull/3631#issuecomment-2240903027
-      # - https://search.kyun.li
-      # - https://yacy.securecomcorp.eu
-      # - https://yacy.myserv.ca
-      # - https://yacy.nsupdate.info
-      # - https://yacy.electroncash.de
     shortcut: ya
     disabled: true
     # if you aren't using HTTPS for your local yacy instance disable https
@@ -2472,6 +2516,12 @@ engines:
     categories: videos
     disabled: true
 
+  - name: repology
+    engine: repology
+    shortcut: rep
+    disabled: true
+    inactive: true
+
   - name: livespace
     engine: livespace
     shortcut: ls
@@ -2481,8 +2531,7 @@ engines:
 
   - name: wordnik
     engine: wordnik
-    shortcut: def
-    categories: [dictionaries]
+    shortcut: wnik
     timeout: 5.0
 
   - name: woxikon.de synonyme
@@ -2582,11 +2631,6 @@ engines:
     engine: wttr
     shortcut: wttr
     timeout: 9.0
-
-  - name: yummly
-    engine: yummly
-    shortcut: yum
-    disabled: true
 
   - name: brave
     engine: brave

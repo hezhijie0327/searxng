@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Implementations used for weather conditions and forecast."""
 # pylint: disable=too-few-public-methods
-from __future__ import annotations
 
 __all__ = [
     "symbol_url",
@@ -20,6 +19,7 @@ import typing
 import base64
 import datetime
 import dataclasses
+import zoneinfo
 
 from urllib.parse import quote_plus
 
@@ -27,13 +27,14 @@ import babel
 import babel.numbers
 import babel.dates
 import babel.languages
+import flask_babel
 
 from searx import network
 from searx.cache import ExpireCache, ExpireCacheCfg
 from searx.extended_types import sxng_request
 from searx.wikidata_units import convert_to_si, convert_from_si
 
-WEATHER_DATA_CACHE: ExpireCache = None  # type: ignore
+WEATHER_DATA_CACHE: ExpireCache | None = None
 """A simple cache for weather data (geo-locations, icons, ..)"""
 
 YR_WEATHER_SYMBOL_URL = "https://raw.githubusercontent.com/nrkno/yr-weather-symbols/refs/heads/master/symbols/outline"
@@ -89,7 +90,7 @@ def _get_sxng_locale_tag() -> str:
     return "en"
 
 
-def symbol_url(condition: WeatherConditionType) -> str | None:
+def symbol_url(condition: "WeatherConditionType") -> str | None:
     """Returns ``data:`` URL for the weather condition symbol or ``None`` if
     the condition is not of type :py:obj:`WeatherConditionType`.
 
@@ -137,6 +138,10 @@ class GeoLocation:
     country_code: str  # 2-Character ISO-3166-1 alpha2 country code. E.g. DE for Germany
     timezone: str  # Time zone using time zone database definitions
 
+    @property
+    def zoneinfo(self) -> zoneinfo.ZoneInfo:
+        return zoneinfo.ZoneInfo(self.timezone)
+
     def __str__(self):
         return self.name
 
@@ -163,7 +168,7 @@ class GeoLocation:
         return babel.Locale("en", territory="DE")
 
     @classmethod
-    def by_query(cls, search_term: str) -> GeoLocation:
+    def by_query(cls, search_term: str) -> "GeoLocation":
         """Factory method to get a GeoLocation object by a search term.  If no
         location can be determined for the search term, a :py:obj:`ValueError`
         is thrown.
@@ -177,10 +182,10 @@ class GeoLocation:
             geo_props = cls._query_open_meteo(search_term=search_term)
             cache.set(key=search_term, value=geo_props, expire=None, ctx=ctx)
 
-        return cls(**geo_props)
+        return cls(**geo_props)  # type: ignore
 
     @classmethod
-    def _query_open_meteo(cls, search_term: str) -> dict:
+    def _query_open_meteo(cls, search_term: str) -> dict[str, str]:
         url = f"https://geocoding-api.open-meteo.com/v1/search?name={quote_plus(search_term)}"
         resp = network.get(url, timeout=3)
         if resp.status_code != 200:
@@ -193,13 +198,22 @@ class GeoLocation:
 
 
 DateTimeFormats = typing.Literal["full", "long", "medium", "short"]
+DateTimeLocaleTypes = typing.Literal["UI"]
 
 
+@typing.final
 class DateTime:
     """Class to represent date & time.  Essentially, it is a wrapper that
     conveniently combines :py:obj:`datetime.datetime` and
     :py:obj:`babel.dates.format_datetime`.  A conversion of time zones is not
     provided (in the current version).
+
+    The localized string representation can be obtained via the
+    :py:obj:`DateTime.l10n` and :py:obj:`DateTime.l10n_date` methods, where the
+    ``locale`` parameter defaults to the search language.  Alternatively, a
+    :py:obj:`GeoLocation` or a :py:obj:`babel.Locale` instance can be passed
+    directly. If the UI language is to be used, the string ``UI`` can be passed
+    as the value for the ``locale``.
     """
 
     def __init__(self, time: datetime.datetime):
@@ -211,16 +225,34 @@ class DateTime:
     def l10n(
         self,
         fmt: DateTimeFormats | str = "medium",
-        locale: babel.Locale | GeoLocation | None = None,
+        locale: DateTimeLocaleTypes | babel.Locale | GeoLocation | None = None,
     ) -> str:
         """Localized representation of date & time."""
-        if isinstance(locale, GeoLocation):
+        if isinstance(locale, str) and locale == "UI":
+            locale = flask_babel.get_locale()
+        elif isinstance(locale, GeoLocation):
             locale = locale.locale()
         elif locale is None:
             locale = babel.Locale.parse(_get_sxng_locale_tag(), sep='-')
         return babel.dates.format_datetime(self.datetime, format=fmt, locale=locale)
 
+    def l10n_date(
+        self,
+        fmt: DateTimeFormats | str = "medium",
+        locale: DateTimeLocaleTypes | babel.Locale | GeoLocation | None = None,
+    ) -> str:
+        """Localized representation of date."""
 
+        if isinstance(locale, str) and locale == "UI":
+            locale = flask_babel.get_locale()
+        elif isinstance(locale, GeoLocation):
+            locale = locale.locale()
+        elif locale is None:
+            locale = babel.Locale.parse(_get_sxng_locale_tag(), sep='-')
+        return babel.dates.format_date(self.datetime, format=fmt, locale=locale)
+
+
+@typing.final
 class Temperature:
     """Class for converting temperature units and for string representation of
     measured values."""
@@ -288,6 +320,7 @@ class Temperature:
         return template.format(value=val_str, unit=unit)
 
 
+@typing.final
 class Pressure:
     """Class for converting pressure units and for string representation of
     measured values."""
@@ -330,6 +363,7 @@ class Pressure:
         return template.format(value=val_str, unit=unit)
 
 
+@typing.final
 class WindSpeed:
     """Class for converting speed or velocity units and for string
     representation of measured values.
@@ -379,6 +413,7 @@ class WindSpeed:
         return template.format(value=val_str, unit=unit)
 
 
+@typing.final
 class RelativeHumidity:
     """Amount of relative humidity in the air. The unit is ``%``"""
 
@@ -412,6 +447,7 @@ class RelativeHumidity:
         return template.format(value=val_str, unit=unit)
 
 
+@typing.final
 class Compass:
     """Class for converting compass points and azimuth values (360°)"""
 
@@ -481,46 +517,49 @@ class Compass:
 WeatherConditionType = typing.Literal[
     # The capitalized string goes into to i18n/l10n (en: "Clear sky" -> de: "wolkenloser Himmel")
     "clear sky",
+    "partly cloudy",
     "cloudy",
     "fair",
     "fog",
-    "heavy rain and thunder",
-    "heavy rain showers and thunder",
-    "heavy rain showers",
-    "heavy rain",
-    "heavy sleet and thunder",
-    "heavy sleet showers and thunder",
-    "heavy sleet showers",
-    "heavy sleet",
-    "heavy snow and thunder",
-    "heavy snow showers and thunder",
-    "heavy snow showers",
-    "heavy snow",
+    # rain
     "light rain and thunder",
     "light rain showers and thunder",
     "light rain showers",
     "light rain",
-    "light sleet and thunder",
-    "light sleet showers and thunder",
-    "light sleet showers",
-    "light sleet",
-    "light snow and thunder",
-    "light snow showers and thunder",
-    "light snow showers",
-    "light snow",
-    "partly cloudy",
     "rain and thunder",
     "rain showers and thunder",
     "rain showers",
     "rain",
+    "heavy rain and thunder",
+    "heavy rain showers and thunder",
+    "heavy rain showers",
+    "heavy rain",
+    # sleet
+    "light sleet and thunder",
+    "light sleet showers and thunder",
+    "light sleet showers",
+    "light sleet",
     "sleet and thunder",
     "sleet showers and thunder",
     "sleet showers",
     "sleet",
+    "heavy sleet and thunder",
+    "heavy sleet showers and thunder",
+    "heavy sleet showers",
+    "heavy sleet",
+    # snow
+    "light snow and thunder",
+    "light snow showers and thunder",
+    "light snow showers",
+    "light snow",
     "snow and thunder",
     "snow showers and thunder",
     "snow showers",
     "snow",
+    "heavy snow and thunder",
+    "heavy snow showers and thunder",
+    "heavy snow showers",
+    "heavy snow",
 ]
 """Standardized designations for weather conditions.  The designators were
 taken from a collaboration between NRK and Norwegian Meteorological Institute
@@ -535,46 +574,49 @@ taken from a collaboration between NRK and Norwegian Meteorological Institute
 
 YR_WEATHER_SYMBOL_MAP = {
     "clear sky": "01d",  # 01d clearsky_day
-    "fair": "02d",  # 02d fair_day
     "partly cloudy": "03d",  # 03d partlycloudy_day
     "cloudy": "04",  # 04 cloudy
-    "light rain showers": "40d",  # 40d lightrainshowers_day
-    "rain showers": "05d",  # 05d rainshowers_day
-    "heavy rain showers": "41d",  # 41d heavyrainshowers_day
-    "light rain showers and thunder": "24d",  # 24d lightrainshowersandthunder_day
-    "rain showers and thunder": "06d",  # 06d rainshowersandthunder_day
-    "heavy rain showers and thunder": "25d",  # 25d heavyrainshowersandthunder_day
-    "light sleet showers": "42d",  # 42d lightsleetshowers_day
-    "sleet showers": "07d",  # 07d sleetshowers_day
-    "heavy sleet showers": "43d",  # 43d heavysleetshowers_day
-    "light sleet showers and thunder": "26d",  # 26d lightssleetshowersandthunder_day
-    "sleet showers and thunder": "20d",  # 20d sleetshowersandthunder_day
-    "heavy sleet showers and thunder": "27d",  # 27d heavysleetshowersandthunder_day
-    "light snow showers": "44d",  # 44d lightsnowshowers_day
-    "snow showers": "08d",  # 08d snowshowers_day
-    "heavy snow showers": "45d",  # 45d heavysnowshowers_day
-    "light snow showers and thunder": "28d",  # 28d lightssnowshowersandthunder_day
-    "snow showers and thunder": "21d",  # 21d snowshowersandthunder_day
-    "heavy snow showers and thunder": "29d",  # 29d heavysnowshowersandthunder_day
-    "light rain": "46",  # 46 lightrain
-    "rain": "09",  # 09 rain
-    "heavy rain": "10",  # 10 heavyrain
-    "light rain and thunder": "30",  # 30 lightrainandthunder
-    "rain and thunder": "22",  # 22 rainandthunder
-    "heavy rain and thunder": "11",  # 11 heavyrainandthunder
-    "light sleet": "47",  # 47 lightsleet
-    "sleet": "12",  # 12 sleet
-    "heavy sleet": "48",  # 48 heavysleet
-    "light sleet and thunder": "31",  # 31 lightsleetandthunder
-    "sleet and thunder": "23",  # 23 sleetandthunder
-    "heavy sleet and thunder": "32",  # 32 heavysleetandthunder
-    "light snow": "49",  # 49 lightsnow
-    "snow": "13",  # 13 snow
-    "heavy snow": "50",  # 50 heavysnow
-    "light snow and thunder": "33",  # 33 lightsnowandthunder
-    "snow and thunder": "14",  # 14 snowandthunder
-    "heavy snow and thunder": "34",  # 34 heavysnowandthunder
+    "fair": "02d",  # 02d fair_day
     "fog": "15",  # 15 fog
+    # rain
+    "light rain and thunder": "30",  # 30 lightrainandthunder
+    "light rain showers and thunder": "24d",  # 24d lightrainshowersandthunder_day
+    "light rain showers": "40d",  # 40d lightrainshowers_day
+    "light rain": "46",  # 46 lightrain
+    "rain and thunder": "22",  # 22 rainandthunder
+    "rain showers and thunder": "06d",  # 06d rainshowersandthunder_day
+    "rain showers": "05d",  # 05d rainshowers_day
+    "rain": "09",  # 09 rain
+    "heavy rain and thunder": "11",  # 11 heavyrainandthunder
+    "heavy rain showers and thunder": "25d",  # 25d heavyrainshowersandthunder_day
+    "heavy rain showers": "41d",  # 41d heavyrainshowers_day
+    "heavy rain": "10",  # 10 heavyrain
+    # sleet
+    "light sleet and thunder": "31",  # 31 lightsleetandthunder
+    "light sleet showers and thunder": "26d",  # 26d lightssleetshowersandthunder_day
+    "light sleet showers": "42d",  # 42d lightsleetshowers_day
+    "light sleet": "47",  # 47 lightsleet
+    "sleet and thunder": "23",  # 23 sleetandthunder
+    "sleet showers and thunder": "20d",  # 20d sleetshowersandthunder_day
+    "sleet showers": "07d",  # 07d sleetshowers_day
+    "sleet": "12",  # 12 sleet
+    "heavy sleet and thunder": "32",  # 32 heavysleetandthunder
+    "heavy sleet showers and thunder": "27d",  # 27d heavysleetshowersandthunder_day
+    "heavy sleet showers": "43d",  # 43d heavysleetshowers_day
+    "heavy sleet": "48",  # 48 heavysleet
+    # snow
+    "light snow and thunder": "33",  # 33 lightsnowandthunder
+    "light snow showers and thunder": "28d",  # 28d lightssnowshowersandthunder_day
+    "light snow showers": "44d",  # 44d lightsnowshowers_day
+    "light snow": "49",  # 49 lightsnow
+    "snow and thunder": "14",  # 14 snowandthunder
+    "snow showers and thunder": "21d",  # 21d snowshowersandthunder_day
+    "snow showers": "08d",  # 08d snowshowers_day
+    "snow": "13",  # 13 snow
+    "heavy snow and thunder": "34",  # 34 heavysnowandthunder
+    "heavy snow showers and thunder": "29d",  # 29d heavysnowshowersandthunder_day
+    "heavy snow showers": "45d",  # 45d heavysnowshowers_day
+    "heavy snow": "50",  # 50 heavysnow
 }
 """Map a :py:obj:`WeatherConditionType` to a `YR weather symbol`_
 

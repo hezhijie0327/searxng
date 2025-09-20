@@ -1,8 +1,4 @@
-/*
-* SearXNG, A privacy-respecting, hackable metasearch engine
-*
-* To convert "style.less" to "style.css" run: $make styles
-*/
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 // stylelint-disable no-descending-specificity
 
@@ -313,11 +309,11 @@ article[data-vim-selected].category-social {
   }
 }
 
-.result-paper,
 .result-packages {
   .attributes {
     display: table;
     border-spacing: 0.125rem;
+    margin-top: 0.3rem;
 
     div {
       display: table-row;
@@ -354,12 +350,6 @@ article[data-vim-selected].category-social {
     word-wrap: break-word;
     line-height: 1.24;
     font-style: italic;
-  }
-}
-
-.result-packages {
-  .attributes {
-    margin-top: 0.3rem;
   }
 }
 
@@ -1122,7 +1112,6 @@ summary.title {
     display: none;
   }
 
-  .result-paper,
   .result-packages {
     .attributes {
       display: block;
@@ -1168,3 +1157,4 @@ pre code {
 
 // import layouts of the Result types
 @import "result_types/keyvalue.less";
+@import "result_types/paper.less";
