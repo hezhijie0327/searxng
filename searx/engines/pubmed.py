@@ -22,7 +22,7 @@ Implementations
 import typing as t
 
 from datetime import datetime
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 
 from lxml import etree
 
@@ -72,9 +72,9 @@ def request(query: str, params: "OnlineParams") -> None:
             "hits": number_of_results,
         }
     )
-    if api_key:
-        args['api_key'] = api_key
     esearch_url = f"{eutils_api}/esearch.fcgi?{args}"
+    if api_key:
+        esearch_url += f"&api_key={quote(api_key)}"
     # DTD: https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060628/esearch.dtd
     esearch_resp: "SXNG_Response" = get(esearch_url)
     pmids_results = etree.XML(esearch_resp.content)
@@ -88,9 +88,9 @@ def request(query: str, params: "OnlineParams") -> None:
             "id": ",".join(pmids),
         }
     )
-    if api_key:
-        args['api_key'] = api_key
     efetch_url = f"{eutils_api}/efetch.fcgi?{args}"
+    if api_key:
+        efetch_url += f"&api_key={quote(api_key)}"
     params["url"] = efetch_url
 
 
