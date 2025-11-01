@@ -23,11 +23,11 @@ typing-extensions==4.15.0
 
 
 bm25s
-charset-normalizer==3.4.3
-idna==3.10
+charset-normalizer==3.4.4
+idna==3.11
 numpy==2.0.2; python_version < '3.10'
-regex==2025.7.34
-requests==2.32.4
+regex==2025.10.23
+requests==2.32.5
 scipy==1.13.1; python_version < '3.10'
-tiktoken==0.11.0
+tiktoken==0.12.0
 urllib3==2.5.0
