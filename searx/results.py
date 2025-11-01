@@ -18,16 +18,20 @@ def calculate_score(
     result: MainResult | LegacyResult,
     priority: MainResult.PriorityType,
 ) -> float:
-    weight = 1.0
+    positions = result['positions']
+    original_positions = positions[1:]
+
+    bm25_score = float(positions[0])
+    weight = 1.0 + bm25_score
 
     for result_engine in result['engines']:
         if hasattr(searx.engines.engines.get(result_engine), 'weight'):
             weight *= float(searx.engines.engines[result_engine].weight)
 
-    weight *= len(result['positions'])
+    weight *= len(original_positions)
     score = 0
 
-    for position in result['positions']:
+    for position in result[original_positions]:
         if priority == 'low':
             continue
         if priority == 'high':
