@@ -1,24 +1,23 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.7/schema.json",
   "files": {
-    "includes": ["**", "!dist", "!node_modules"],
-    "ignoreUnknown": true
-  },
-  "vcs": {
-    "clientKind": "git",
-    "enabled": false,
-    "useIgnoreFile": true
+    "ignoreUnknown": true,
+    "includes": ["**", "!node_modules"]
   },
   "assist": {
     "enabled": true,
     "actions": {
-      "recommended": true
+      "recommended": true,
+      "source": {
+        "useSortedAttributes": "on",
+        "useSortedProperties": "on"
+      }
     }
   },
   "formatter": {
+    "enabled": true,
     "bracketSameLine": false,
     "bracketSpacing": true,
-    "enabled": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
@@ -47,10 +46,19 @@
         "useSingleJsDocAsterisk": "error"
       },
       "nursery": {
+        "noContinue": "warn",
+        "noDeprecatedImports": "warn",
+        "noFloatingPromises": "warn",
+        "noForIn": "warn",
+        "noImportCycles": "warn",
+        "noIncrementDecrement": "warn",
         "noMisusedPromises": "warn",
+        "noParametersOnlyUsedInRecursion": "warn",
+        "noUselessCatchBinding": "warn",
         "noUselessUndefined": "warn",
         "useExhaustiveSwitchCases": "warn",
-        "useExplicitType": "warn"
+        "useExplicitType": "warn",
+        "useFind": "warn"
       },
       "performance": {
         "noAwaitInLoops": "error",
@@ -63,6 +71,7 @@
       "style": {
         "noCommonJs": "error",
         "noEnum": "error",
+        "noImplicitBoolean": "error",
         "noInferrableTypes": "error",
         "noNamespace": "error",
         "noNegationElse": "error",
@@ -107,6 +116,12 @@
             "syntax": "explicit"
           }
         },
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": {
+            "style": "type"
+          }
+        },
         "useDefaultSwitchClause": "error",
         "useExplicitLengthCheck": "error",
         "useForOf": "error",
@@ -115,6 +130,7 @@
         "useNumericSeparators": "error",
         "useObjectSpread": "error",
         "useReadonlyClassProperties": "error",
+        "useSelfClosingElements": "error",
         "useShorthandAssign": "error",
         "useSingleVarDeclarator": "error",
         "useThrowNewError": "error",
@@ -143,6 +159,16 @@
       "quoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "none"
+    }
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": {
+      "attributePosition": "auto",
+      "bracketSameLine": false,
+      "indentScriptAndStyle": true,
+      "selfCloseVoidElements": "always",
+      "whitespaceSensitivity": "ignore"
     }
   }
 }

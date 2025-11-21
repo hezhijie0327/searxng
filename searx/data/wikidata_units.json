@@ -3279,6 +3279,11 @@
         "symbol": "kgf/cm²",
         "to_si_factor": 98066.5
     },
+    "Q136039973": {
+        "si_name": null,
+        "symbol": "FPS",
+        "to_si_factor": null
+    },
     "Q1361854": {
         "si_name": "Q11570",
         "symbol": "dwt",
@@ -3288,6 +3293,16 @@
         "si_name": "Q11570",
         "symbol": "slug",
         "to_si_factor": 14.593903
+    },
+    "Q136416965": {
+        "si_name": null,
+        "symbol": "GT/S",
+        "to_si_factor": null
+    },
+    "Q136417074": {
+        "si_name": null,
+        "symbol": "MT/S",
+        "to_si_factor": null
     },
     "Q1374438": {
         "si_name": "Q11574",
@@ -6370,9 +6385,9 @@
         "to_si_factor": 86400.0
     },
     "Q577": {
-        "si_name": null,
+        "si_name": "Q11574",
         "symbol": "a",
-        "to_si_factor": null
+        "to_si_factor": 31557600.0
     },
     "Q57899268": {
         "si_name": "Q3332095",
@@ -7463,11 +7478,6 @@
         "si_name": "Q25517",
         "symbol": "bu (UK)",
         "to_si_factor": 0.03636872
-    },
-    "Q896543": {
-        "si_name": null,
-        "symbol": "Gya",
-        "to_si_factor": null
     },
     "Q89662131": {
         "si_name": "Q25517",
