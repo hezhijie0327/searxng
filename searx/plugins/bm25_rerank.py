@@ -122,7 +122,7 @@ class SXNGPlugin(Plugin):
             return [0.0] * len(results)
 
     def _update_positions(self, results: list, bm25_scores: list[float]) -> None:
-        """将BM25分数转换为可用于 SearXNG positions 的值"""
+        """将BM25分数映射到每个 SearXNG position，而不是只插入第一个"""
 
         # 补齐分数长度
         while len(bm25_scores) < len(results):
@@ -131,16 +131,23 @@ class SXNGPlugin(Plugin):
         for i, result in enumerate(results):
             bm25 = bm25_scores[i]
 
-            # 将 BM25 分数映射到一个严格大于 0 的 position
-            # 避免 division by zero
-            safe_position = 1.0 / (1.0 + bm25)
+            # BM25 映射为一个缩放因子，严格 > 0
+            bm25_factor = 1.0 / (1.0 + bm25)
 
             try:
+                # 获取原有 positions
                 original_positions = getattr(result, 'positions', [])
-                result.positions = [safe_position] + list(original_positions)
+
+                # 对每个 position 施加 BM25 的印象
+                result.positions = [pos * bm25_factor if pos > 0 else bm25_factor for pos in original_positions]
+
+                # 如果原本没有 positions，直接使用 bm25_factor
+                if not result.positions:
+                    result.positions = [bm25_factor]
+
             except AttributeError:
                 try:
-                    result.positions = [safe_position]
+                    result.positions = [bm25_factor]
                 except AttributeError:
                     pass
 
