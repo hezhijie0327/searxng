@@ -122,24 +122,25 @@ class SXNGPlugin(Plugin):
             return [0.0] * len(results)
 
     def _update_positions(self, results: list, bm25_scores: list[float]) -> None:
-        """将BM25分数更新到结果的positions中"""
-        # 确保分数数量与结果数量一致
+        """将BM25分数转换为可用于 SearXNG positions 的值"""
+
+        # 补齐分数长度
         while len(bm25_scores) < len(results):
             bm25_scores.append(0.0)
 
         for i, result in enumerate(results):
-            # BM25分数
-            position_score = bm25_scores[i]
+            bm25 = bm25_scores[i]
+
+            # 将 BM25 分数映射到一个严格大于 0 的 position
+            # 避免 division by zero
+            safe_position = 1.0 / (1.0 + bm25)
 
             try:
-                # 获取原有positions
                 original_positions = getattr(result, 'positions', [])
-
-                # 将BM25分数插入第一位
-                result.positions = [position_score] + list(original_positions)
+                result.positions = [safe_position] + list(original_positions)
             except AttributeError:
                 try:
-                    result.positions = [position_score]
+                    result.positions = [safe_position]
                 except AttributeError:
                     pass
 
