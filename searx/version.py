@@ -12,8 +12,8 @@ import subprocess
 VERSION_STRING: str = "1.0.0"
 VERSION_TAG: str = "1.0.0"
 DOCKER_TAG: str = "1.0.0"
-GIT_URL: str = "unknown"
-GIT_BRANCH: str = "unknown"
+GIT_URL: str = "https://github.com/hezhijie0327/searxng"
+GIT_BRANCH: str = "master"
 
 logger = logging.getLogger("searx")
 
