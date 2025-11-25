@@ -28,6 +28,7 @@ from searx.utils import extr, gen_useragent
 if t.TYPE_CHECKING:
     from searx.extended_types import SXNG_Response
 
+
 def update_kwargs(**kwargs) -> None:  # type: ignore
     if 'timeout' not in kwargs:
         kwargs['timeout'] = settings['outgoing']['request_timeout']
