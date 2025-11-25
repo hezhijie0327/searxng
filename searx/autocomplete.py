@@ -4,7 +4,6 @@
 
 import json
 import html
-import re
 import typing as t
 from urllib.parse import urlencode, quote_plus
 
