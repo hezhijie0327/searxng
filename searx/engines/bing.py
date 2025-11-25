@@ -90,6 +90,17 @@ def request(query, params):
         'pq': query,
     }
 
+    # https://github.com/searxng/searxng/issues/5461
+    # Add explicit language and market parameters
+    if engine_language and engine_language != 'clear':
+        # Convert zh-hans to zh-cn as Bing doesn't handle zh-hans well
+        if engine_language == 'zh-hans':
+            engine_language = 'zh-cn'
+
+        query_params['setlang'] = engine_language
+    if engine_region and engine_region != 'clear':
+        query_params['mkt'] = engine_region
+
     # To get correct page, arg first and this arg FORM is needed, the value PERE
     # is on page 2, on page 3 its PERE1 and on page 4 its PERE2 .. and so forth.
     # The 'first' arg should never send on page 1.
