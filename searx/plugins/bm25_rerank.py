@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # pylint: disable=missing-module-docstring, missing-class-docstring, protected-access
 from __future__ import annotations
+import math
 import re
 import typing
 
+import numpy as np
 import bm25s
-import tiktoken
+import bm25s.stopwords as stopwords_module
 
 from searx.plugins import Plugin, PluginInfo
 from searx.result_types import EngineResults
@@ -15,158 +17,255 @@ if typing.TYPE_CHECKING:
     from searx.extended_types import SXNG_Request
     from searx.plugins import PluginCfg
 
-# 常量定义
-PRIMARY_MODEL = "gpt-oss-120b"
-FALLBACK_ENCODING = "o200k_harmony"
-
 
 class SXNGPlugin(Plugin):
-    """Rerank search results using BM25 algorithm with tiktoken tokenizer."""
+    """Rerank search results using the Okapi BM25 algorithm with adaptive strategies.
+    Optimized for large-scale result sets from multiple search engines.
+    """
 
     id = "bm25_rerank"
     default_on = True
 
     def __init__(self, plg_cfg: "PluginCfg") -> None:
         super().__init__(plg_cfg)
+
         self.info = PluginInfo(
             id=self.id,
-            name="BM25 Rerank",
-            description="Rerank search results using BM25 algorithm with tiktoken tokenizer",
+            name="Adaptive BM25 Rerank",
+            description="Intelligently rerank search results using adaptive BM25 algorithm",
             preference_section="general",
         )
-        self._init_tokenizer()
 
-    def _init_tokenizer(self) -> None:
-        """初始化tiktoken编码器"""
-        try:
-            self.tokenizer = tiktoken.encoding_for_model(PRIMARY_MODEL)
-        except (KeyError, ValueError):
-            self.tokenizer = tiktoken.get_encoding(FALLBACK_ENCODING)
+    def _select_adaptive_strategy(self, results_count: int) -> tuple[str, dict]:
+        """基于结果数量自适应选择重排策略"""
 
-    def _preprocess_text(self, text: str) -> str:
-        """文本预处理"""
-        if not text:
-            return ""
-        text = text.lower()
-        text = re.sub(r'\s+', ' ', text)
-        text = re.sub(r'[^\w\s\u4e00-\u9fff]', ' ', text)
-        return text.strip()
+        # 定义策略配置映射
+        strategy_configs = [
+            (
+                1000000,
+                "ultra_aggressive",
+                {
+                    'scaling_strength': 2.0,
+                    'boost_factor': 5.0,
+                    'top_tier_threshold': 0.95,
+                    'mid_tier_threshold': 0.8,
+                    'low_tier_threshold': 0.5,
+                },
+            ),
+            (
+                500000,
+                "mega_aggressive",
+                {'scaling_strength': 1.8, 'boost_factor': 4.0, 'top_tier_threshold': 0.9, 'mid_tier_threshold': 0.75},
+            ),
+            (
+                100000,
+                "super_aggressive",
+                {'scaling_strength': 1.6, 'boost_factor': 3.5, 'top_tier_threshold': 0.85, 'mid_tier_threshold': 0.7},
+            ),
+            (
+                50000,
+                "rank_based_aggressive",
+                {'scaling_strength': 1.5, 'boost_factor': 3.0, 'top_tier_threshold': 0.9, 'mid_tier_threshold': 0.7},
+            ),
+            (10000, "exponential_capped", {'scaling_strength': 1.2, 'boost_factor': 2.5, 'cap_threshold': 0.8}),
+            (1000, "exponential", {'scaling_strength': 1.0, 'boost_factor': 2.0, 'decay_rate': 0.1}),
+            (100, "power", {'scaling_strength': 1.1, 'boost_factor': 2.0}),
+            (0, "linear_boosted", {'scaling_strength': 0.8, 'boost_factor': 1.5}),
+        ]
 
-    def _tokenize_text(self, text: str) -> list[str]:
-        """使用tiktoken进行分词"""
-        if not text:
-            return []
+        # 选择合适的策略
+        for threshold, strategy, params in strategy_configs:
+            if results_count > threshold:
+                return strategy, params
 
-        preprocessed_text = self._preprocess_text(text)
-        if not preprocessed_text:
-            return []
+        # 默认返回（理论上不会到达这里）
+        return "linear_boosted", {'scaling_strength': 0.8, 'boost_factor': 1.5}
 
-        try:
-            tokens = self.tokenizer.encode(preprocessed_text)
-            token_strings = []
-            for token in tokens:
-                try:
-                    token_str = self.tokenizer.decode([token]).strip()
-                    if token_str:
-                        token_strings.append(token_str)
-                except (ValueError, UnicodeDecodeError):
-                    continue
-            return token_strings
-        except (ValueError, TypeError):
-            return preprocessed_text.split()
+    def _calculate_position_multiplier(self, bm25_score: float, strategy: str, params: dict) -> float:
+        """根据策略和参数计算位置调整倍数"""
 
-    def _extract_result_text(self, result) -> str:
-        """提取搜索结果的文本内容"""
-        text_parts = []
+        # 定义策略计算器映射
+        strategy_calculators = {
+            "ultra_aggressive": self._calc_ultra_aggressive,
+            "mega_aggressive": self._calc_mega_aggressive,
+            "super_aggressive": self._calc_super_aggressive,
+            "rank_based_aggressive": self._calc_rank_based_aggressive,
+            "exponential_capped": self._calc_exponential_capped,
+            "power": self._calc_power,
+            "linear_boosted": self._calc_linear_boosted,
+            "exponential": self._calc_exponential,
+        }
 
-        for attr in ['title', 'content']:
-            if hasattr(result, attr) and getattr(result, attr):
-                text_parts.append(str(getattr(result, attr)))
+        calculator = strategy_calculators.get(strategy, self._calc_exponential)
+        return calculator(bm25_score, params)
 
-        if hasattr(result, 'url') and result.url:
-            url_words = re.findall(r'[a-zA-Z\u4e00-\u9fff]+', str(result.url))
-            if url_words:
+    def _calc_ultra_aggressive(self, bm25_score: float, params: dict) -> float:
+        """百万级数据的极致重排策略"""
+        thresholds = [
+            (params.get('top_tier_threshold', 0.95), 0.05),
+            (params.get('mid_tier_threshold', 0.8), 0.15),
+            (params.get('low_tier_threshold', 0.5), 0.4),
+        ]
+
+        for threshold, multiplier in thresholds:
+            if bm25_score > threshold:
+                return multiplier
+        return 1.5
+
+    def _calc_mega_aggressive(self, bm25_score: float, params: dict) -> float:
+        """50万级数据策略"""
+        thresholds = [
+            (params.get('top_tier_threshold', 0.9), 0.08),
+            (params.get('mid_tier_threshold', 0.75), 0.2),
+            (0.5, 0.5),
+        ]
+
+        for threshold, multiplier in thresholds:
+            if bm25_score > threshold:
+                return multiplier
+        return 1.3
+
+    def _calc_super_aggressive(self, bm25_score: float, params: dict) -> float:
+        """10万级数据策略"""
+        thresholds = [
+            (params.get('top_tier_threshold', 0.85), 0.1),
+            (params.get('mid_tier_threshold', 0.7), 0.25),
+            (0.5, 0.6),
+        ]
+
+        for threshold, multiplier in thresholds:
+            if bm25_score > threshold:
+                return multiplier
+        return 1.2
+
+    def _calc_rank_based_aggressive(self, bm25_score: float, params: dict) -> float:
+        """5万级数据策略"""
+        thresholds = [
+            (params.get('top_tier_threshold', 0.9), 0.1),
+            (params.get('mid_tier_threshold', 0.7), 0.3),
+            (0.5, 0.7),
+        ]
+
+        for threshold, multiplier in thresholds:
+            if bm25_score > threshold:
+                return multiplier
+        return 1.2
+
+    def _calc_exponential_capped(self, bm25_score: float, params: dict) -> float:
+        """带上限的指数策略"""
+        cap = params.get('cap_threshold', 0.8)
+        boost = params.get('boost_factor', 2.5)
+
+        if bm25_score > cap:
+            return 0.2
+        return 1.0 - boost * math.exp(-3.0 * bm25_score)
+
+    def _calc_power(self, bm25_score: float, params: dict) -> float:
+        """幂函数策略"""
+        power = 1.5 + params.get('scaling_strength', 1.0) * 0.5
+        return 0.2 + 0.8 * (bm25_score**power)
+
+    def _calc_linear_boosted(self, bm25_score: float, params: dict) -> float:
+        """增强线性策略"""
+        boost = params.get('scaling_strength', 0.8)
+        return 0.4 + 0.6 * bm25_score * boost
+
+    def _calc_exponential(self, bm25_score: float, params: dict) -> float:
+        """指数策略"""
+        decay = params.get('decay_rate', 0.1)
+        boost = params.get('boost_factor', 2.0)
+        return 1.0 - boost * math.exp(-3.0 * bm25_score) * (1.0 + decay)
+
+    def _build_corpus(self, results: list) -> list:
+        """构建语料库"""
+        corpus = []
+        for result in results:
+            text_parts = []
+
+            if hasattr(result, 'title') and result.title:
+                text_parts.append(result.title)
+            if hasattr(result, 'content') and result.content:
+                text_parts.append(result.content)
+            if hasattr(result, 'url') and result.url:
+                url_words = re.findall(r'[a-zA-Z]+', result.url)
                 text_parts.append(' '.join(url_words))
 
-        return " ".join(text_parts)
+            corpus.append(" ".join(text_parts))
+        return corpus
 
-    def _get_bm25_scores(self, results: list, query: str) -> list[float]:
-        """获取所有文档的BM25分数"""
-        if not results or not query:
-            return [0.0] * len(results)
+    def _get_stopwords(self) -> set:
+        """获取停用词集合"""
+        return {
+            word
+            for name, value in stopwords_module.__dict__.items()
+            if name.startswith("STOPWORDS_") and isinstance(value, tuple)
+            for word in value
+        }
 
-        try:
-            # 构建语料库和分词
-            corpus_tokens = []
-            for result in results:
-                text = self._extract_result_text(result)
-                tokens = self._tokenize_text(text)
-                corpus_tokens.append(tokens)
+    def _normalize_scores(self, raw_scores: np.ndarray) -> list:
+        """标准化分数"""
+        if len(raw_scores) == 0:
+            return []
 
-            query_tokens = self._tokenize_text(query)
-            if not query_tokens or not any(corpus_tokens):
-                return [0.0] * len(results)
+        min_score, max_score = float(np.min(raw_scores)), float(np.max(raw_scores))
+        if max_score > min_score:
+            return ((raw_scores - min_score) / (max_score - min_score)).tolist()
+        return [0.5] * len(raw_scores)
 
-            # 计算BM25分数
-            retriever = bm25s.BM25()
-            retriever.index(corpus_tokens)
-            scores = retriever.get_scores(query_tokens)
+    def _apply_rerank(
+        self, results: list, documents: list, normalized_scores: list, strategy: str, params: dict
+    ) -> None:
+        """应用重排序"""
+        for idx, doc_index in enumerate(documents[0]):
+            if doc_index >= len(results):
+                continue
 
-            # 转换为列表格式
-            if hasattr(scores, 'tolist'):
-                return scores.tolist()
+            score = float(normalized_scores[idx])
+            multiplier = self._calculate_position_multiplier(score, strategy, params)
+            result = results[doc_index]
 
-            return [float(score) for score in scores]
+            if hasattr(result, 'positions') and result.positions:
+                for i, position in enumerate(result.positions):
+                    if isinstance(position, (int, float)):
+                        position_boost = float(max(0.01, position * multiplier))
+                        result.positions[i] = position_boost
+            else:
+                initial_position = float(doc_index + 1.0) / len(results)
+                bm25_position = float(initial_position * multiplier)
+                result.positions = [bm25_position]
 
-        except (ValueError, TypeError, AttributeError, ImportError):
-            return [0.0] * len(results)
+    def _process_results(self, results: list, query: str, strategy: str, params: dict) -> None:
+        """处理搜索结果并重新排序"""
+        if len(results) < 2:
+            return
 
-    def _update_positions(self, results: list, bm25_scores: list[float]) -> None:
-        """将BM25分数映射到每个 SearXNG position，而不是只插入第一个"""
+        # 构建语料库和获取停用词
+        corpus = self._build_corpus(results)
+        stopwords = self._get_stopwords()
 
-        # 补齐分数长度
-        while len(bm25_scores) < len(results):
-            bm25_scores.append(0.0)
+        # 分词
+        corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
+        query_tokens = bm25s.tokenize(query, stopwords=stopwords)
 
-        for i, result in enumerate(results):
-            bm25 = bm25_scores[i]
+        # BM25检索
+        retriever = bm25s.BM25()
+        retriever.index(corpus_tokens)
 
-            # BM25 映射为一个缩放因子，严格 > 0
-            bm25_factor = 1.0 / (1.0 + bm25)
+        documents, scores = retriever.retrieve(query_tokens, k=len(corpus), return_as="tuple", show_progress=False)
 
-            try:
-                # 获取原有 positions
-                original_positions = getattr(result, 'positions', [])
-
-                # 对每个 position 施加 BM25 的印象
-                result.positions = [pos * bm25_factor if pos > 0 else bm25_factor for pos in original_positions]
-
-                # 如果原本没有 positions，直接使用 bm25_factor
-                if not result.positions:
-                    result.positions = [bm25_factor]
-
-            except AttributeError:
-                try:
-                    result.positions = [bm25_factor]
-                except AttributeError:
-                    pass
+        # 标准化分数并应用重排
+        normalized_scores = self._normalize_scores(scores[0])
+        if normalized_scores:
+            self._apply_rerank(results, documents, normalized_scores, strategy, params)
 
     def post_search(self, request: "SXNG_Request", search: "SearchWithPlugins") -> EngineResults:
-        """搜索后处理钩子"""
-        try:
-            # 获取搜索结果
-            results = getattr(search.result_container, 'results', None)
-            if not results and hasattr(search.result_container, 'get_ordered_results'):
-                results = search.result_container.get_ordered_results()
+        results = search.result_container.get_ordered_results()
 
-            if results and len(results) > 0:
-                query = search.search_query.query
-                if query:
-                    # 计算BM25分数并更新positions
-                    bm25_scores = self._get_bm25_scores(results, query)
-                    self._update_positions(results, bm25_scores)
+        if len(results) < 2:
+            return search.result_container
 
-        except AttributeError:
-            pass
+        query = search.search_query.query
+        strategy, strategy_params = self._select_adaptive_strategy(len(results))
+        self._process_results(results, query, strategy, strategy_params)
 
         return search.result_container
