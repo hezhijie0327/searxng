@@ -22,7 +22,7 @@ about = {
 }
 
 # Engine Configuration
-categories = ["science"]
+categories = ["news"]
 paging = True
 
 # Base URL
