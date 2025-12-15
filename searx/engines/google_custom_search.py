@@ -1,10 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Google (Programable Search Engine & Custom Search Engine) for SearXNG.
+Google Custom Search JSON API for SearXNG.
 
-Configure with base_url parameter:
-- PSE: https://www.googleapis.com (100 free queries/day)
-- CSE: https://customsearch.googleapis.com (10,000 free queries/day)
+Quota: 100 free queries/day, paid up to 10,000 queries/day ($5 per 1000 queries)
 """
 
 from urllib.parse import urlencode
@@ -22,7 +20,7 @@ about = {
 }
 
 categories = ['general']
-google_api_category = 'general'
+custom_search_category = 'general'
 
 paging = True
 results_per_page = 10
@@ -31,18 +29,15 @@ safesearch = True
 time_range_support = True
 
 api_key = None
-engine_id = None
-# Configure base_url directly:
-# - PSE (100 free/day, then paid): https://www.googleapis.com
-# - CSE (10,000 free/day): https://customsearch.googleapis.com
 base_url = "https://customsearch.googleapis.com"
+engine_id = None
 
 time_range_dict = {'day': 'd1', 'week': 'w1', 'month': 'm1', 'year': 'y1'}
 
 
 def init(_):
-    if google_api_category not in ('general', 'images'):
-        raise SearxEngineAPIException(f"Unsupported category: {google_api_category}")
+    if custom_search_category not in ('general', 'images'):
+        raise SearxEngineAPIException(f"Unsupported category: {custom_search_category}")
 
 
 def request(query, params):
@@ -58,7 +53,7 @@ def request(query, params):
     if time_range_dict.get(params['time_range']):
         query_params["dateRestrict"] = time_range_dict.get(params['time_range'])
 
-    if google_api_category == "images":
+    if custom_search_category == "images":
         query_params["searchType"] = 'image'
 
     params['url'] = f'{base_url}/customsearch/v1?{urlencode(query_params)}'
@@ -96,7 +91,7 @@ def response(resp):
     search_results = resp.json()
 
     for item in search_results.get('items', []):
-        if google_api_category == "images":
+        if custom_search_category == "images":
             results.append(_images_result(item))
         else:
             results.append(_general_result(item))
