@@ -2,13 +2,9 @@
 """
 Google (Programable Search Engine & Custom Search Engine) for SearXNG.
 
-This engine supports both:
-- PSE (Programable Search Engine): Free 100 queries/day, then paid
-- CSE (Custom Search Engine): Free 10,000 queries/day
-
-Configure with endpoint_type parameter:
-- 'pse': Uses www.googleapis.com (legacy endpoint)
-- 'cse': Uses customsearch.googleapis.com (new endpoint)
+Configure with base_url parameter:
+- PSE: https://www.googleapis.com (100 free queries/day)
+- CSE: https://customsearch.googleapis.com (10,000 free queries/day)
 """
 
 from urllib.parse import urlencode
@@ -26,7 +22,7 @@ about = {
 }
 
 categories = ['general']
-google_search_category = 'general'
+google_api_category = 'general'
 
 paging = True
 results_per_page = 10
@@ -36,30 +32,20 @@ time_range_support = True
 
 api_key = None
 engine_id = None
-# endpoint_type: 'pse' for Programable Search Engine (100 free/day, then paid)
-#                'cse' for Custom Search Engine (10,000 free/day)
-endpoint_type = 'cse'
+# Configure base_url directly:
+# - PSE (100 free/day, then paid): https://www.googleapis.com
+# - CSE (10,000 free/day): https://customsearch.googleapis.com
+base_url = "https://customsearch.googleapis.com"
 
 time_range_dict = {'day': 'd1', 'week': 'w1', 'month': 'm1', 'year': 'y1'}
 
-# Base URLs for different endpoint types
-BASE_URLS = {
-    'pse': "https://www.googleapis.com",
-    'cse': "https://customsearch.googleapis.com"
-}
-
 
 def init(_):
-    if google_search_category not in ('general', 'images'):
-        raise SearxEngineAPIException(f"Unsupported category: {google_search_category}")
-
-    if endpoint_type not in BASE_URLS:
-        raise SearxEngineAPIException(f"Unsupported endpoint_type: {endpoint_type}. Use 'pse' or 'cse'")
+    if google_api_category not in ('general', 'images'):
+        raise SearxEngineAPIException(f"Unsupported category: {google_api_category}")
 
 
 def request(query, params):
-    base_url = BASE_URLS[endpoint_type]
-
     query_params = {
         "cx": engine_id,
         "key": api_key,
@@ -72,7 +58,7 @@ def request(query, params):
     if time_range_dict.get(params['time_range']):
         query_params["dateRestrict"] = time_range_dict.get(params['time_range'])
 
-    if google_search_category == "images":
+    if google_api_category == "images":
         query_params["searchType"] = 'image'
 
     params['url'] = f'{base_url}/customsearch/v1?{urlencode(query_params)}'
@@ -110,7 +96,7 @@ def response(resp):
     search_results = resp.json()
 
     for item in search_results.get('items', []):
-        if google_search_category == "images":
+        if google_api_category == "images":
             results.append(_images_result(item))
         else:
             results.append(_general_result(item))
