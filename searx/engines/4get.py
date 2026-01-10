@@ -147,17 +147,19 @@ def request(query: str, params: dict[str, t.Any]) -> None:
         args["s"] = query
     else:
         # Subsequent pages: use the npt token from the previous page
-        prev_page_key = _get_cache_key(query, pageno - 1, search_type)
+        logger.debug("4get request: search_type=%s, pageno=%d", search_type, pageno)
+        prev_page_key = _get_cache_key(query, pageno, search_type)
         npt_token: str | None = CACHE.get(prev_page_key)
+        logger.debug("4get looking for npt token with key: %s", prev_page_key)
 
         if npt_token:
             args["npt"] = npt_token
             logger.debug("4get using npt token from cache for page %d", pageno)
         else:
-            # Token not found or expired, fall back to first page
-            logger.warning("4get npt token not found for page %d, falling back to page 1", pageno)
-            args["s"] = query
-            params["pageno"] = 1
+            # Token not found or expired - cannot fetch this page
+            # Mark the request to return empty results
+            logger.debug("4get npt token not found for page %d (key: %s), returning empty results", pageno, prev_page_key)
+            params["engine_data"]["npt_missing"] = True
 
     params["url"] = f"{instance_url}/{endpoint}?{urlencode(args)}"
     logger.debug("4get query URL: %s", params["url"])
@@ -166,6 +168,12 @@ def request(query: str, params: dict[str, t.Any]) -> None:
 def response(resp: SXNG_Response) -> EngineResults:
     """Parse the JSON response from 4get."""
     results = EngineResults()
+
+    # Check if npt token was missing (pagination not possible)
+    engine_data = resp.search_params.get("engine_data", {})
+    if engine_data.get("npt_missing"):
+        logger.debug("4get returning empty results due to missing npt token")
+        return results
 
     try:
         data = json.loads(resp.text)
@@ -179,8 +187,8 @@ def response(resp: SXNG_Response) -> EngineResults:
         return results
 
     # Get search_type from engine_data (stored in request())
-    engine_data = resp.search_params.get("engine_data", {})
     current_search_type = engine_data.get("search_type", search_type)
+    logger.debug("4get response: search_type=%s, current_search_type=%s", search_type, current_search_type)
 
     # Store the npt token for the next page
     npt_token = data.get("npt")
@@ -189,7 +197,7 @@ def response(resp: SXNG_Response) -> EngineResults:
         pageno = resp.search_params.get("pageno", 1)
         next_page_key = _get_cache_key(query, pageno + 1, current_search_type)
         CACHE.set(key=next_page_key, value=npt_token, expire=NPT_CACHE_EXPIRATION_SECONDS)
-        logger.debug("4get cached npt token for page %d", pageno + 1)
+        logger.debug("4get cached npt token for page %d (key: %s)", pageno + 1, next_page_key)
 
     # Parse results based on search_type
     if current_search_type == "web":
