@@ -192,9 +192,7 @@ def request(query: str, params: dict[str, t.Any]) -> None:
     # and add as cookie if configured
     if scraper:
         scraper_key = f"scraper_{search_type}"
-        params["cookies"] = {
-            scraper_key: scraper
-        }
+        params["cookies"] = {scraper_key: scraper}
         logger.debug("4get adding cookie: %s=%s", scraper_key, scraper)
 
     params["url"] = f"{instance_url}/{endpoint}?{urlencode(args)}"
