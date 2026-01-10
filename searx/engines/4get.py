@@ -10,6 +10,7 @@ Configured ``4get`` engines:
     engine: 4get
     shortcut: 4get
     search_type: web
+    # get available instances from https://4get.ca/instances
     base_url:
       - https://4get.ca
 
