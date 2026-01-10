@@ -401,6 +401,7 @@ def _parse_news(data: dict[str, t.Any], results: EngineResults) -> EngineResults
         if date:
             try:
                 from datetime import datetime
+
                 publishedDate = datetime.fromtimestamp(int(date))
             except (ValueError, TypeError):
                 pass
