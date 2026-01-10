@@ -145,6 +145,8 @@ def request(query: str, params: dict[str, t.Any]) -> None:
     if pageno == 1:
         # First page: use the 's' parameter with the query
         args["s"] = query
+        # Enable rich answer data from additional sources like StackOverflow, music lyrics sites, etc.
+        args["extendedsearch"] = "true"
     else:
         # Subsequent pages: use the npt token from the previous page
         logger.debug("4get request: search_type=%s, pageno=%d", search_type, pageno)
