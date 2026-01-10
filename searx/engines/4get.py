@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# pylint: disable=invalid-name,too-many-return-statements
+# pylint: disable=invalid-name,too-many-return-statements,line-too-long
 """4get is a metasearch engine that supports multiple search categories.
 
 Configured ``4get`` engines:
