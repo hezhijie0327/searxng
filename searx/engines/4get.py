@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,too-many-return-statements
 """4get is a metasearch engine that supports multiple search categories.
 
 Configured ``4get`` engines:
@@ -60,11 +60,13 @@ import hashlib
 import json
 import random
 import typing as t
+from datetime import datetime
 from urllib.parse import urlencode
 
 from searx.enginelib import EngineCache
 from searx.result_types import EngineResults
 from searx.extended_types import SXNG_Response
+from searx.utils import searxng_useragent
 
 about = {
     "website": "https://4get.ca",
@@ -124,6 +126,8 @@ def _get_cache_key(query: str, pageno: int, search_type_key: str) -> str:
 
 def request(query: str, params: dict[str, t.Any]) -> None:
     """Build a 4get API request."""
+    # Set user agent
+    params['headers']['User-Agent'] = searxng_useragent()
     # Store search_type in engine_data for use in response()
     params["engine_data"]["search_type"] = search_type
 
@@ -400,8 +404,6 @@ def _parse_news(data: dict[str, t.Any], results: EngineResults) -> EngineResults
         publishedDate = None
         if date:
             try:
-                from datetime import datetime
-
                 publishedDate = datetime.fromtimestamp(int(date))
             except (ValueError, TypeError):
                 pass
