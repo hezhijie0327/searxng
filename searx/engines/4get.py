@@ -158,7 +158,9 @@ def request(query: str, params: dict[str, t.Any]) -> None:
         else:
             # Token not found or expired - cannot fetch this page
             # Mark the request to return empty results
-            logger.debug("4get npt token not found for page %d (key: %s), returning empty results", pageno, prev_page_key)
+            logger.debug(
+                "4get npt token not found for page %d (key: %s), returning empty results", pageno, prev_page_key
+            )
             params["engine_data"]["npt_missing"] = True
 
     params["url"] = f"{instance_url}/{endpoint}?{urlencode(args)}"
