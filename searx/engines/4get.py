@@ -170,12 +170,12 @@ def response(resp: SXNG_Response) -> EngineResults:
     try:
         data = json.loads(resp.text)
     except json.JSONDecodeError as e:
-        logger.error("Failed to parse 4get JSON response: %s", e)
+        logger.debug("Failed to parse 4get JSON response: %s", e)
         return results
 
     # Check if the request was successful
     if data.get("status") != "ok":
-        logger.error("4get API returned error status: %s", data.get("status"))
+        logger.debug("4get API returned error status: %s", data.get("status"))
         return results
 
     # Get search_type from engine_data (stored in request())
