@@ -13,6 +13,7 @@ Configured ``4get`` engines:
     # get available instances from https://4get.ca/instances
     base_url:
       - https://4get.ca
+    scraper: google
 
   - name: 4get images
     engine: 4get
@@ -37,6 +38,20 @@ Configured ``4get`` engines:
     shortcut: 4news
     categories: news
     search_type: news
+
+Scraper Configuration
+=====================
+
+The ``scraper`` option allows you to specify a default search engine:
+
+.. code:: yaml
+
+  scraper: google  # or 'ddg', 'brave', 'bing', etc.
+
+Defaults to empty (uses 4get's default engine).
+
+Internally maps to ``scraper_web``, ``scraper_images``, ``scraper_videos``,
+``scraper_music``, ``scraper_news`` based on the search type.
 
 The ``network: 4get`` option makes all 4get engines share the same network
 configuration (proxies, local addresses, connection pool, etc.). Note that the
@@ -95,6 +110,14 @@ search_type: t.Literal["web", "images", "videos", "music", "news"] = "web"
 """
 
 paging = True
+
+scraper: str = ""
+"""Default search engine to use for scraping. Common values: ``'google'``, ``'ddg'`` (DuckDuckGo), ``'brave'``, ``'bing'``
+
+Internally maps to ``scraper_web``, ``scraper_images``, etc. based on search type.
+
+Defaults to empty (uses 4get's default engine).
+"""
 
 
 # NPT token cache configuration
@@ -164,6 +187,15 @@ def request(query: str, params: dict[str, t.Any]) -> None:
                 "4get npt token not found for page %d (key: %s), returning empty results", pageno, prev_page_key
             )
             params["engine_data"]["npt_missing"] = True
+
+    # Map scraper to scraper_web, scraper_images, etc. based on search_type
+    # and add as cookie if configured
+    if scraper:
+        scraper_key = f"scraper_{search_type}"
+        params["cookies"] = {
+            scraper_key: scraper
+        }
+        logger.debug("4get adding cookie: %s=%s", scraper_key, scraper)
 
     params["url"] = f"{instance_url}/{endpoint}?{urlencode(args)}"
     logger.debug("4get query URL: %s", params["url"])
