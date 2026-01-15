@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """This module implements functions needed for the autocompleter."""
-# pylint: disable=use-dict-literal
+# pylint: disable=use-dict-literal,too-many-locals
 
 import json
 import html
 import typing as t
 from urllib.parse import urlencode, quote_plus
+
+import numpy as np
+import bm25s
+import bm25s.stopwords as stopwords_module
 
 import lxml.etree
 import lxml.html
@@ -359,14 +363,144 @@ backends: dict[str, t.Callable[[str, str], list[str]]] = {
     'swisscows': swisscows,
     'wikipedia': wikipedia,
     'yandex': yandex,
+    'custom': 'custom',
 }
 
 
+def deduplicate_results(results):
+    """去除重复的自动补全结果"""
+    seen = set()
+    unique_results = []
+    for result in results:
+        if result not in seen:
+            unique_results.append(result)
+            seen.add(result)
+    return unique_results
+
+
+def rerank_results(results_list, query):
+    """使用BM25算法对自动补全结果进行重排"""
+    # 合并并去重结果
+    corpus = deduplicate_results([result for results in results_list for result in results])
+
+    if len(corpus) < 2:
+        return corpus
+
+    # 获取停用词
+    stopwords = {
+        word
+        for name, value in stopwords_module.__dict__.items()
+        if name.startswith("STOPWORDS_") and isinstance(value, tuple)
+        for word in value
+    }
+
+    # 分词
+    corpus_tokens = bm25s.tokenize(corpus, stopwords=stopwords)
+    query_tokens = bm25s.tokenize(query, stopwords=stopwords)
+
+    # BM25检索
+    retriever = bm25s.BM25()
+    retriever.index(corpus_tokens)
+
+    documents, scores = retriever.retrieve(query_tokens, k=len(corpus), return_as='tuple', show_progress=False)
+
+    # 标准化分数并转换为Python原生类型
+    raw_scores = scores[0]
+    if len(raw_scores) == 0:
+        return corpus
+
+    min_score, max_score = float(np.min(raw_scores)), float(np.max(raw_scores))
+    if max_score > min_score:
+        normalized_scores = ((raw_scores - min_score) / (max_score - min_score)).tolist()
+    else:
+        normalized_scores = [0.5] * len(raw_scores)
+
+    # 选择自动补全策略参数（根据查询长度）
+    query_length = len(query.strip())
+
+    if query_length <= 2:
+        # 极短查询：优先考虑前缀匹配
+        prefix_bonus = 2.0
+        length_penalty_rate = 0.1
+        exact_match_bonus = 3.0
+        bm25_weight = 0.3
+    elif query_length <= 5:
+        # 短查询：平衡前缀和相关性
+        prefix_bonus = 1.5
+        length_penalty_rate = 0.05
+        exact_match_bonus = 2.0
+        bm25_weight = 0.6
+    else:
+        # 长查询：主要依靠BM25相关性
+        prefix_bonus = 1.2
+        length_penalty_rate = 0.02
+        exact_match_bonus = 1.5
+        bm25_weight = 0.8
+
+    # 计算最终分数并重排
+    final_scores = []
+    query_lower = query.lower()
+
+    for idx, doc_index in enumerate(documents[0]):
+        if doc_index >= len(corpus):
+            continue
+
+        suggestion = corpus[doc_index]
+        suggestion_lower = suggestion.lower()
+        bm25_score = float(normalized_scores[idx])
+
+        # 计算各种加成
+        # 前缀匹配加成
+        prefix_boost = prefix_bonus if suggestion_lower.startswith(query_lower) else 1.0
+
+        # 完全匹配巨大加成
+        exact_match_boost = exact_match_bonus if suggestion_lower == query_lower else 1.0
+
+        # 长度惩罚（自动补全倾向于简短的结果）
+        length_penalty = 1.0
+        if len(suggestion) > len(query) * 3:  # 如果建议比查询长太多
+            excess_length = len(suggestion) - len(query) * 2
+            length_penalty = 1.0 - (excess_length * length_penalty_rate)
+            length_penalty = max(0.1, length_penalty)  # 不要过度惩罚
+
+        # 计算最终分数
+        final_score = (
+            (bm25_score * bm25_weight + (1.0 - bm25_weight)) * prefix_boost * exact_match_boost * length_penalty
+        )
+
+        # 添加微小随机因子避免相同分数结果的不稳定排序
+        final_score += hash(suggestion) % 1000 * 0.000001
+
+        final_scores.append((doc_index, float(final_score)))
+
+    # 按最终分数排序
+    final_scores.sort(key=lambda x: x[1], reverse=True)
+
+    # 返回重排后的结果
+    return [corpus[doc_index] for doc_index, _ in final_scores]
+
+
 def search_autocomplete(backend_name: str, query: str, sxng_locale: str) -> list[str]:
+    if backend_name == 'custom':
+        custom_backends = settings.get('search', {}).get('autocomplete_engines', [])
+        custom_backends = [backend.strip() for backend in custom_backends if backend.strip() in backends]
+
+        results_list = []
+        for backend_key in custom_backends:
+            backend = backends.get(backend_key)
+            if backend is not None:
+                try:
+                    results_list.append(backend(query, sxng_locale))
+                except (HTTPError, SearxEngineResponseException, ValueError):
+                    results_list.append([])
+        return rerank_results(results_list, query)
+
     backend = backends.get(backend_name)
     if backend is None:
         return []
+
+    # 修复：移除不必要的 else，直接执行代码
     try:
         return backend(query, sxng_locale)
-    except (HTTPError, SearxEngineResponseException):
+    except (HTTPError, SearxEngineResponseException, ValueError):
         return []

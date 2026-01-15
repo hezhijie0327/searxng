@@ -19,3 +19,7 @@ typer-slim==0.21.1
 isodate==0.7.2
 whitenoise==6.11.0
 typing-extensions==4.15.0
+
+bm25s
+numpy==2.0.2; python_version < '3.10'
+scipy==1.13.1; python_version < '3.10'
