@@ -116,7 +116,4 @@ def init(engine_settings: dict[str, t.Any]):
         logger.error("missing api_key: see https://about.marginalia-search.com/article/api")
         return False
 
-    if _api_key == "public":
-        logger.error("invalid api_key (%s): see https://about.marginalia-search.com/article/api", api_key)
-
     return True
