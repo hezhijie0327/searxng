@@ -635,6 +635,11 @@ engines:
     disabled: true
     inactive: true
 
+  - name: chinese pharmacopoeia
+    engine: chp
+    shortcut: chp
+    disabled: true
+
   - name: cloudflareai
     engine: cloudflareai
     shortcut: cfai
