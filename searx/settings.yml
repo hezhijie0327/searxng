@@ -676,6 +676,12 @@ engines:
     engine: currency_convert
     shortcut: cc
 
+  - name: alpha vantage
+    engine: alphavantage
+    api_key: "..."
+    shortcut: av
+    disabled: true
+
   - name: deezer
     engine: deezer
     shortcut: dz
