@@ -47,6 +47,9 @@ ENGINE_DEFAULT_ARGS: dict[str, t.Any] = {
     "disabled": False,
     "inactive": False,
     "about": EngineAbout(),
+    # When True, skip stripping the User-Agent header in impersonate mode.
+    # Engines that set a custom UA (e.g. Google's gen_gsa_useragent) need this.
+    "keep_user_agent": False,
     "using_tor_proxy": False,
     "send_accept_language_header": True,
     "tokens": [],
