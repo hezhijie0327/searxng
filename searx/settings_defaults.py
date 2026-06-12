@@ -264,6 +264,12 @@ SCHEMA: dict[str, t.Any] = {
         # Tor configuration
         'using_tor_proxy': SettingsValue(bool, False),
         'extra_proxy_timeout': SettingsValue(int, 0),
+        # curl_cffi TLS fingerprint impersonation target.
+        # When set (e.g. "chrome", "firefox", "edge", "safari"), HTTPS requests are
+        # routed through curl_cffi instead of httpx.  HTTP/3 is enabled automatically
+        # when enable_http2 is True.  Requires: pip install httpx_curl_cffi
+        # See https://github.com/lexiforest/curl_cffi for the full list of targets.
+        'impersonate': SettingsValue((None, str), None),
         'networks': {},
     },
     'plugins': SettingsValue(dict, {}),

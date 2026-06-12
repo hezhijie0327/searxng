@@ -14,7 +14,18 @@ import httpx
 from httpx_socks import AsyncProxyTransport
 from python_socks import parse_proxy_url, ProxyConnectionError, ProxyTimeoutError, ProxyError
 
-from searx import logger
+from searx import logger, get_setting
+
+try:
+    from httpx_curl_cffi import AsyncCurlTransport, CurlOpt
+    from curl_cffi.const import CurlHttpVersion
+
+    HAS_CURL_CFFI = True
+except ImportError:
+    HAS_CURL_CFFI = False
+    AsyncCurlTransport = None  # type: ignore
+    CurlOpt = None  # type: ignore
+    CurlHttpVersion = None  # type: ignore
 
 CertTypes = str | tuple[str, str] | tuple[str, str, str]
 SslContextKeyType = tuple[str | None, CertTypes | None, bool, bool]
@@ -112,7 +123,7 @@ class AsyncProxyTransportFixed(AsyncProxyTransport):
 
 
 def get_transport_for_socks_proxy(
-    verify: bool, http2: bool, local_address: str, proxy_url: str, limit: httpx.Limits, retries: int
+    verify: bool, http2: bool, local_address: str | None, proxy_url: str, limit: httpx.Limits, retries: int
 ):
     # support socks5h (requests compatibility):
     # https://requests.readthedocs.io/en/master/user/advanced/#socks
@@ -143,8 +154,46 @@ def get_transport_for_socks_proxy(
 
 
 def get_transport(
-    verify: bool, http2: bool, local_address: str, proxy_url: str | None, limit: httpx.Limits, retries: int
+    verify: bool,
+    http2: bool,
+    local_address: str | None,
+    proxy_url: str | None,
+    limit: httpx.Limits,
+    retries: int,
+    impersonate: str | None = None,
 ):
+    if impersonate and HAS_CURL_CFFI:
+        # Use curl_cffi transport for browser TLS fingerprint impersonation.
+        # curl_cffi manages TLS internally (BoringSSL/NSS), so SSLContext and
+        # cipher shuffling are bypassed entirely.
+        _http_version = CurlHttpVersion.V3 if http2 else CurlHttpVersion.V1_1
+        logger.debug(
+            "using curl_cffi transport impersonating %s (proxy=%s, http_version=%s)",
+            impersonate,
+            proxy_url,
+            _http_version,
+        )
+        return AsyncCurlTransport(
+            impersonate=impersonate,
+            verify=verify,
+            proxy=proxy_url,
+            http_version=_http_version,
+            default_headers=True,
+            local_address=local_address,
+            debug=get_setting("general.debug"),
+            # FRESH_CONNECT avoids connection reuse issues in async parallel
+            # requests by giving each request a fresh curl handle.
+            curl_options={CurlOpt.FRESH_CONNECT: True},
+        )
+
+    if impersonate and not HAS_CURL_CFFI:
+        logger.warning(
+            "impersonate is set to '%s' but httpx_curl_cffi is not installed. "
+            "Falling back to standard httpx transport. "
+            "Install it with: pip install httpx_curl_cffi",
+            impersonate,
+        )
+
     _verify = get_sslcontexts(None, None, verify, True) if verify is True else verify
     return httpx.AsyncHTTPTransport(
         # pylint: disable=protected-access
@@ -166,10 +215,11 @@ def new_client(
     max_keepalive_connections: int,
     keepalive_expiry: float,
     proxies: dict[str, str],
-    local_address: str,
+    local_address: str | None,
     retries: int,
     max_redirects: int,
     hook_log_response: t.Callable[..., t.Any] | None,
+    impersonate: str | None = None,
 ) -> httpx.AsyncClient:
     limit = httpx.Limits(
         max_connections=max_connections,
@@ -182,7 +232,22 @@ def new_client(
     for pattern, proxy_url in proxies.items():
         if not enable_http and pattern.startswith('http://'):
             continue
-        if proxy_url.startswith('socks4://') or proxy_url.startswith('socks5://') or proxy_url.startswith('socks5h://'):
+        if impersonate and HAS_CURL_CFFI:
+            # curl_cffi (libcurl) natively supports http, https, socks4,
+            # socks5 and socks5h proxies, so route ALL proxy types through
+            # AsyncCurlTransport when impersonation is enabled.
+            mounts[pattern] = get_transport(
+                verify,
+                enable_http2,
+                local_address,
+                proxy_url,
+                limit,
+                retries,
+                impersonate=impersonate,
+            )
+        elif (
+            proxy_url.startswith('socks4://') or proxy_url.startswith('socks5://') or proxy_url.startswith('socks5h://')
+        ):
             mounts[pattern] = get_transport_for_socks_proxy(
                 verify, enable_http2, local_address, proxy_url, limit, retries
             )
@@ -192,7 +257,15 @@ def new_client(
     if not enable_http:
         mounts['http://'] = AsyncHTTPTransportNoHttp()
 
-    transport = get_transport(verify, enable_http2, local_address, None, limit, retries)
+    transport = get_transport(
+        verify,
+        enable_http2,
+        local_address,
+        None,
+        limit,
+        retries,
+        impersonate=impersonate,
+    )
 
     event_hooks = None
     if hook_log_response:
