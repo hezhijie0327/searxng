@@ -119,6 +119,7 @@ search_url = "https://api.openalex.org/works"
 # engines: - name: openalex; engine: openalex; mailto: "[email protected]"
 mailto = ""
 
+api_key = ""
 
 def request(query: str, params: "OnlineParams") -> None:
     # Build OpenAlex query using search parameter and paging
@@ -145,6 +146,9 @@ def request(query: str, params: "OnlineParams") -> None:
     # include mailto if configured for polite pool (engine module setting)
     if isinstance(mailto, str) and mailto != "":
         args["mailto"] = mailto
+
+    if isinstance(api_key, str) and api_key != "":
+        args["api_key"] = api_key
 
     params["url"] = f"{search_url}?{urlencode(args)}"
 
