@@ -2020,6 +2020,11 @@ engines:
     engine: soundcloud
     shortcut: sc
 
+  - name: sov2ex
+    engine: sov2ex
+    shortcut: v2ex
+    disabled: true
+
   - name: stackoverflow
     engine: stackexchange
     shortcut: st
