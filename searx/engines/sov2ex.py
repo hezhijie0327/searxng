@@ -75,7 +75,6 @@ def response(resp: "SXNG_Response") -> EngineResults:
                 content=source.get("content", ""),
                 author=source.get("member", ""),
                 publishedDate=created,
-                metadata=f"replies: {source.get('replies', 0)}",
             )
         )
 
