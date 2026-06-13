@@ -33,7 +33,7 @@ about = {
 }
 
 base_url = "https://www.sov2ex.com/api/search"
-categories = ["general", "it"]
+categories = ["it", "social media"]
 
 paging = True
 page_size = 20

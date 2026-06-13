@@ -2022,17 +2022,8 @@ engines:
 
   - name: sov2ex
     engine: sov2ex
-    shortcut: sov2ex
-    categories: [general, it]
-    paging: true
-    page_size: 20
-    time_range_support: true
-    about:
-      website: https://www.sov2ex.com/
-      official_api_documentation: https://www.sov2ex.com/
-      use_official_api: true
-      require_api_key: false
-      results: JSON
+    shortcut: v2ex
+    disabled: true
 
   - name: stackoverflow
     engine: stackexchange
