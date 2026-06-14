@@ -58,6 +58,8 @@ max_page = 50
 """
 time_range_support = True
 safesearch = True
+# Google requires the GSA User-Agent set in request(); impersonate must not strip it.
+keep_user_agent = True
 
 time_range_dict = {"day": "d", "week": "w", "month": "m", "year": "y"}
 

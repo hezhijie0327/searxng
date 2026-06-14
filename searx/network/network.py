@@ -58,6 +58,7 @@ class Network:
         'retries',
         'retry_on_http_error',
         'impersonate',
+        'keep_user_agent',
         '_local_addresses_cycle',
         '_proxies_cycle',
         '_clients',
@@ -83,6 +84,7 @@ class Network:
         max_redirects: int = 30,
         logger_name: str = None,  # pyright: ignore[reportArgumentType]
         impersonate: str | None = None,
+        keep_user_agent: bool = False,
     ):
 
         self.enable_http = enable_http
@@ -98,6 +100,7 @@ class Network:
         self.retry_on_http_error = retry_on_http_error
         self.max_redirects = max_redirects
         self.impersonate = impersonate
+        self.keep_user_agent = keep_user_agent
         self._local_addresses_cycle = self.get_ipaddress_cycle()
         self._proxies_cycle = self.get_proxy_cycles()
         self._clients = {}
@@ -195,7 +198,7 @@ class Network:
         max_redirects = self.max_redirects if max_redirects is None else max_redirects
         local_address: str | None = next(self._local_addresses_cycle)
         proxies = next(self._proxies_cycle)  # is a tuple so it can be part of the key
-        key = (verify, max_redirects, local_address, proxies, self.impersonate)
+        key = (verify, max_redirects, local_address, proxies, self.impersonate, self.keep_user_agent)
         hook_log_response = self.log_response if sxng_debug else None
         if key not in self._clients or self._clients[key].is_closed:
             client = new_client(
@@ -281,11 +284,13 @@ class Network:
 
         cookies = kwargs.pop("cookies", None)
 
-        if self.impersonate:
+        if self.impersonate and not self.keep_user_agent:
             # In impersonate mode, prevent the application's User-Agent from
             # overwriting the impersonated browser's default User-Agent.
             # Normalize header keys to lowercase first so pop("user-agent")
             # matches regardless of the original casing.
+            # Engines with keep_user_agent=True (e.g. Google) set their own
+            # required UA and skip this stripping.
             # See https://curl-cffi.readthedocs.io/en/latest/api.html#curl_cffi.Curl.impersonate
             kwargs["headers"] = {k.lower(): v for k, v in kwargs.get("headers", {}).items()}
             kwargs["headers"].pop("user-agent", None)
@@ -366,6 +371,7 @@ def get_default_network_params() -> dict[str, t.Any]:
         'retries': s['retries'],
         'retry_on_http_error': False,
         'impersonate': s.get('impersonate'),
+        'keep_user_agent': False,
     }
 
 
