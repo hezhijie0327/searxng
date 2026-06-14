@@ -15,7 +15,7 @@ from itertools import cycle
 
 import httpx
 
-from searx import logger, sxng_debug
+from searx import logger, sxng_debug, get_setting
 from searx.extended_types import SXNG_Response
 from .client import new_client, get_loop, AsyncHTTPTransportNoHttp
 from .raise_for_httperror import raise_for_httperror
@@ -57,6 +57,8 @@ class Network:
         'max_redirects',
         'retries',
         'retry_on_http_error',
+        'impersonate',
+        'keep_user_agent',
         '_local_addresses_cycle',
         '_proxies_cycle',
         '_clients',
@@ -66,7 +68,7 @@ class Network:
     _TOR_CHECK_RESULT = {}
 
     def __init__(
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         enable_http: bool = True,
         verify: bool = True,
@@ -81,6 +83,8 @@ class Network:
         retry_on_http_error: bool = False,
         max_redirects: int = 30,
         logger_name: str = None,  # pyright: ignore[reportArgumentType]
+        impersonate: str | None = None,
+        keep_user_agent: bool = False,
     ):
 
         self.enable_http = enable_http
@@ -95,6 +99,8 @@ class Network:
         self.retries = retries
         self.retry_on_http_error = retry_on_http_error
         self.max_redirects = max_redirects
+        self.impersonate = impersonate
+        self.keep_user_agent = keep_user_agent
         self._local_addresses_cycle = self.get_ipaddress_cycle()
         self._proxies_cycle = self.get_proxy_cycles()
         self._clients = {}
@@ -190,9 +196,9 @@ class Network:
     async def get_client(self, verify: bool | None = None, max_redirects: int | None = None) -> httpx.AsyncClient:
         verify = self.verify if verify is None else verify
         max_redirects = self.max_redirects if max_redirects is None else max_redirects
-        local_address = next(self._local_addresses_cycle)
+        local_address: str | None = next(self._local_addresses_cycle)
         proxies = next(self._proxies_cycle)  # is a tuple so it can be part of the key
-        key = (verify, max_redirects, local_address, proxies)
+        key = (verify, max_redirects, local_address, proxies, self.impersonate, self.keep_user_agent)
         hook_log_response = self.log_response if sxng_debug else None
         if key not in self._clients or self._clients[key].is_closed:
             client = new_client(
@@ -207,6 +213,7 @@ class Network:
                 0,
                 max_redirects,
                 hook_log_response,
+                impersonate=self.impersonate,
             )
             if self.using_tor_proxy and not await self.check_tor_proxy(client, proxies):
                 await client.aclose()
@@ -274,9 +281,22 @@ class Network:
         was_disconnected = False
         do_raise_for_httperror = Network.extract_do_raise_for_httperror(kwargs)
         kwargs_clients = Network.extract_kwargs_clients(kwargs)
+
+        cookies = kwargs.pop("cookies", None)
+
+        if self.impersonate and not self.keep_user_agent:
+            # In impersonate mode, prevent the application's User-Agent from
+            # overwriting the impersonated browser's default User-Agent.
+            # Normalize header keys to lowercase first so pop("user-agent")
+            # matches regardless of the original casing.
+            # Engines with keep_user_agent=True (e.g. Google) set their own
+            # required UA and skip this stripping.
+            # See https://curl-cffi.readthedocs.io/en/latest/api.html#curl_cffi.Curl.impersonate
+            kwargs["headers"] = {k.lower(): v for k, v in kwargs.get("headers", {}).items()}
+            kwargs["headers"].pop("user-agent", None)
+
         while retries >= 0:  # pragma: no cover
             client = await self.get_client(**kwargs_clients)
-            cookies = kwargs.pop("cookies", None)
             client.cookies = httpx.Cookies(cookies)
             try:
                 if stream:
@@ -333,9 +353,30 @@ def check_network_configuration():
         raise RuntimeError("Invalid network configuration")
 
 
+def get_default_network_params() -> dict[str, t.Any]:
+    """Return default parameters for :py:obj:`Network` from the ``outgoing`` settings."""
+    # see https://github.com/encode/httpx/blob/e05a5372eb6172287458b37447c30f650047e1b8/httpx/_transports/default.py#L108-L121  # pylint: disable=line-too-long
+    s: dict[str, t.Any] = get_setting("outgoing")
+    return {
+        'enable_http': False,
+        'verify': s['verify'],
+        'enable_http2': s['enable_http2'],
+        'max_connections': s['pool_connections'],
+        'max_keepalive_connections': s['pool_maxsize'],
+        'keepalive_expiry': s['keepalive_expiry'],
+        'local_addresses': s['source_ips'],
+        'using_tor_proxy': s['using_tor_proxy'],
+        'proxies': s['proxies'],
+        'max_redirects': s['max_redirects'],
+        'retries': s['retries'],
+        'retry_on_http_error': False,
+        'impersonate': s.get('impersonate'),
+        'keep_user_agent': False,
+    }
+
+
 def initialize(
     settings_engines: list[dict[str, t.Any]] = None,  # pyright: ignore[reportArgumentType]
-    settings_outgoing: dict[str, t.Any] = None,  # pyright: ignore[reportArgumentType]
 ) -> None:
     # pylint: disable=import-outside-toplevel)
     from searx.engines import engines
@@ -344,30 +385,13 @@ def initialize(
     # pylint: enable=import-outside-toplevel)
 
     settings_engines = settings_engines or settings['engines']
-    settings_outgoing = settings_outgoing or settings['outgoing']
+    default_params = get_default_network_params()
 
-    # default parameters for AsyncHTTPTransport
-    # see https://github.com/encode/httpx/blob/e05a5372eb6172287458b37447c30f650047e1b8/httpx/_transports/default.py#L108-L121  # pylint: disable=line-too-long
-    default_params: dict[str, t.Any] = {
-        'enable_http': False,
-        'verify': settings_outgoing['verify'],
-        'enable_http2': settings_outgoing['enable_http2'],
-        'max_connections': settings_outgoing['pool_connections'],
-        'max_keepalive_connections': settings_outgoing['pool_maxsize'],
-        'keepalive_expiry': settings_outgoing['keepalive_expiry'],
-        'local_addresses': settings_outgoing['source_ips'],
-        'using_tor_proxy': settings_outgoing['using_tor_proxy'],
-        'proxies': settings_outgoing['proxies'],
-        'max_redirects': settings_outgoing['max_redirects'],
-        'retries': settings_outgoing['retries'],
-        'retry_on_http_error': False,
-    }
-
-    def new_network(params: dict[str, t.Any], logger_name: str | None = None):
+    def new_network(network_params: dict[str, t.Any], logger_name: str | None = None):
         nonlocal default_params
         result = {}
         result.update(default_params)  # pyright: ignore[reportUnknownMemberType]
-        result.update(params)  # pyright: ignore[reportUnknownMemberType]
+        result.update(network_params)  # pyright: ignore[reportUnknownMemberType]
         if logger_name:
             result['logger_name'] = logger_name
         return Network(**result)  # type: ignore
@@ -390,19 +414,19 @@ def initialize(
     NETWORKS['ipv6'] = new_network({'local_addresses': '::'}, logger_name='ipv6')
 
     # define networks from outgoing.networks
-    for network_name, network in settings_outgoing['networks'].items():
-        NETWORKS[network_name] = new_network(network, logger_name=network_name)
+    for network_name, network_params in get_setting("outgoing.networks").items():
+        NETWORKS[network_name] = new_network(network_params, logger_name=network_name)
 
     # define networks from engines.[i].network (except references)
     for engine_name, engine, network in iter_networks():
         if network is None:
-            network = {}
+            network_params: dict[str, t.Any] = {}
             for attribute_name, attribute_value in default_params.items():
                 if hasattr(engine, attribute_name):
-                    network[attribute_name] = getattr(engine, attribute_name)
+                    network_params[attribute_name] = getattr(engine, attribute_name)
                 else:
-                    network[attribute_name] = attribute_value
-            NETWORKS[engine_name] = new_network(network, logger_name=engine_name)
+                    network_params[attribute_name] = attribute_value
+            NETWORKS[engine_name] = new_network(network_params, logger_name=engine_name)
         elif isinstance(network, dict):
             NETWORKS[engine_name] = new_network(network, logger_name=engine_name)
 
@@ -415,7 +439,7 @@ def initialize(
     # same parameters than the default network, but HTTP/2 is disabled.
     # It decreases the CPU load average, and the total time is more or less the same
     if 'image_proxy' not in NETWORKS:
-        image_proxy_params = default_params.copy()
+        image_proxy_params = get_default_network_params()
         image_proxy_params['enable_http2'] = False
         NETWORKS['image_proxy'] = new_network(image_proxy_params, logger_name='image_proxy')
 

@@ -37,7 +37,7 @@ def initialize(
 ):
     settings_engines = settings_engines or settings['engines']
     load_engines(settings_engines)
-    initialize_network(settings_engines, settings['outgoing'])
+    initialize_network(settings_engines)
     if check_network:
         check_network_configuration()
     initialize_metrics([engine['name'] for engine in settings_engines], enable_metrics)
