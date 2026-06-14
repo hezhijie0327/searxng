@@ -28,8 +28,8 @@ about = {
 
 categories = []
 paging = True
-time_range_support = True
-time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536000}
+# time_range_support = True
+# time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536000}
 
 base_url = "https://so.toutiao.com/search"
 
@@ -102,12 +102,12 @@ def _search_url(query: str, page_num: int, time_range: str = "") -> str:
         "keyword": query,
         "page_num": page_num,
     }
-    if time_range and time_range in time_range_dict:
-        now = int(time.time())
-        past = now - time_range_dict[time_range]
-        args["filter_period"] = time_range
-        args["min_time"] = past
-        args["max_time"] = now
+    # if time_range and time_range in time_range_dict:
+    #     now = int(time.time())
+    #     past = now - time_range_dict[time_range]
+    #     args["filter_period"] = time_range
+    #     args["min_time"] = past
+    #     args["max_time"] = now
     return f"{base_url}?{urlencode(args)}"
 
 
