@@ -3135,6 +3135,34 @@ engines:
     base_url: https://search.infospace.com
     disabled: true
 
+  - name: toutiao
+    engine: toutiao
+    shortcut: tt
+    disabled: false
+    categories: general
+    toutiao_categ: search
+
+  - name: toutiao news
+    engine: toutiao
+    shortcut: ttn
+    disabled: false
+    categories: news
+    toutiao_categ: news
+
+  - name: toutiao images
+    engine: toutiao
+    shortcut: tti
+    disabled: false
+    categories: images
+    toutiao_categ: images
+
+  - name: toutiao videos
+    engine: toutiao
+    shortcut: ttv
+    disabled: false
+    categories: videos
+    toutiao_categ: video
+
 # Doku engine lets you access to any Doku wiki instance:
 # A public one or a privete/corporate one.
 #  - name: ubuntuwiki
