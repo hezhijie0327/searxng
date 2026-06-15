@@ -34,7 +34,7 @@ about = {
 
 base_url = "https://www.sov2ex.com/api/search"
 categories = ["it", "social media"]
-
+language = "zh"
 paging = True
 page_size = 20
 time_range_support = True
