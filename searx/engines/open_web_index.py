@@ -13,9 +13,9 @@ about = {
     "use_official_api": True,
     "require_api_key": False,
     "results": "JSON",
-    "language": "en",
 }
 
+language = "en"
 paging = True
 time_range_support = True
 categories = ["general"]
