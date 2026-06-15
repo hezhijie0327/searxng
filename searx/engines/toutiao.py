@@ -27,6 +27,7 @@ about = {
 }
 
 categories = []
+language = "zh"
 paging = True
 time_range_support = True
 time_range_dict = {"day": 86400, "week": 604800, "month": 2592000, "year": 31536000}
