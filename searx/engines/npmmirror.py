@@ -52,6 +52,12 @@ def response(resp):
         links = package.get("links", {})
         package_name = package.get("name", "")
 
+        author = package.get("author")
+        if isinstance(author, dict):
+            maintainer = author.get("name")
+        else:
+            maintainer = author
+
         results.append(
             {
                 "template": "packages.html",
@@ -60,7 +66,7 @@ def response(resp):
                 "package_name": package_name,
                 "content": package.get("description", ""),
                 "version": package.get("version"),
-                "maintainer": package.get("author", {}).get("name"),
+                "maintainer": maintainer,
                 "publishedDate": published_date,
                 "tags": tags,
                 "homepage": links.get("homepage"),
