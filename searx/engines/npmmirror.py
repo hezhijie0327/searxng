@@ -55,7 +55,7 @@ def response(resp):
         results.append(
             {
                 "template": "packages.html",
-                "url": links.get("npm") or f"https://www.npmjs.com/package/{package_name}",
+                "url": f"https://npmmirror.com/package/{package_name}",
                 "title": package_name,
                 "package_name": package_name,
                 "content": package.get("description", ""),
