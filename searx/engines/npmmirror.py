@@ -8,7 +8,7 @@ from dateutil import parser
 about = {
     "website": "https://npmmirror.com/",
     "official_api_documentation": "https://registry.npmmirror.com/-/v1/search",
-    "use_official_api": False,
+    "use_official_api": True,
     "require_api_key": False,
     "results": "JSON",
 }
@@ -44,7 +44,11 @@ def response(resp):
         if published_date:
             published_date = parser.parse(published_date)
 
-        tags = list(entry.get("flags", {}).keys()) + (package.get("keywords") or [])
+        keywords = package.get("keywords")
+        if not isinstance(keywords, list):
+            keywords = []
+
+        tags = list(entry.get("flags", {}).keys()) + keywords
         links = package.get("links", {})
         package_name = package.get("name", "")
 
