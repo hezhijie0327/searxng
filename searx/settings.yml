@@ -674,6 +674,11 @@ engines:
       description: "Open source network for searching domains"
       results: JSON
 
+  - name: chinese pharmacopoeia
+    engine: chp
+    shortcut: chp
+    disabled: true
+
   - name: cloudflareai
     engine: cloudflareai
     shortcut: cfai
