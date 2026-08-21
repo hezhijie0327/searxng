@@ -17,7 +17,6 @@ help:
 	@echo 'install        - developer install of SearxNG into virtualenv'
 	@echo 'uninstall      - uninstall developer installation'
 	@echo 'clean          - clean up working tree'
-	@echo 'search.checker - check search engines'
 	@echo 'test           - run shell & CI tests'
 	@echo 'test.shell     - test shell scripts'
 	@echo 'ci.test        - run CI tests'
@@ -39,15 +38,9 @@ clean: py.clean docs.clean node.clean nvm.clean go.clean test.clean
 	$(Q)find . -name '*~' -exec rm -f {} +
 	$(Q)find . -name '*.bak' -exec rm -f {} +
 
-PHONY += search.checker search.checker.%
-search.checker: install
-	$(Q)./manage pyenv.cmd searxng-checker -v
-
-search.checker.%: install
-	$(Q)./manage pyenv.cmd searxng-checker -v "$(subst _, ,$(patsubst search.checker.%,%,$@))"
 
 PHONY += test ci.test test.shell
-test:    test.yamllint test.black test.pyright test.pylint test.unit test.robot test.rst test.shell test.shfmt
+test:    test.yamllint test.black test.pyright_modified test.pylint test.unit test.robot test.rst test.shell test.shfmt
 ci.test: test test.pybabel
 test.shell:
 	$(Q)shellcheck -x -s dash \
@@ -80,8 +73,8 @@ MANAGE += node.env node.env.dev node.clean
 MANAGE += py.build py.clean
 MANAGE += pyenv pyenv.install pyenv.uninstall
 MANAGE += format.python format.shell
-MANAGE += test.yamllint test.pylint test.black test.pybabel test.unit test.coverage test.robot test.rst test.clean test.themes test.pyright test.shfmt
-MANAGE += themes.all themes.simple themes.fix themes.lint themes.test
+MANAGE += test.yamllint test.pylint test.black test.pybabel test.unit test.coverage test.robot test.rst test.clean test.themes test.pyright test.pyright_modified test.shfmt
+MANAGE += themes.all themes.simple themes.simple.analyze themes.fix themes.lint themes.test
 MANAGE += static.build.commit static.build.drop static.build.restore
 MANAGE += nvm.install nvm.clean nvm.status nvm.nodejs
 MANAGE += go.env.dev go.clean

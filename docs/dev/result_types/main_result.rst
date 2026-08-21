@@ -15,18 +15,18 @@ following types have been implemented so far ..
 
    main/mainresult
    main/keyvalue
+   main/code
+   main/paper
+   main/file
+   main/image
 
 The :ref:`LegacyResult <LegacyResult>` is used internally for the results that
 have not yet been typed.  The templates can be used as orientation until the
 final typing is complete.
 
 - :ref:`template default` / :py:obj:`Result`
-- :ref:`template images`
 - :ref:`template videos`
 - :ref:`template torrent`
 - :ref:`template map`
-- :ref:`template paper`
 - :ref:`template packages`
-- :ref:`template code`
-- :ref:`template files`
 - :ref:`template products`

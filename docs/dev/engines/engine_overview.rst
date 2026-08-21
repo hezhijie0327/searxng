@@ -4,11 +4,6 @@
 Engine Overview
 ===============
 
-.. contents::
-   :depth: 3
-   :local:
-   :backlinks: entry
-
 .. _metasearch-engine: https://en.wikipedia.org/wiki/Metasearch_engine
 
 .. sidebar:: Further reading ..
@@ -112,7 +107,7 @@ module:
    ======================= =========== ===========================================
    base_url                string      base-url, can be overwritten to use same
                                        engine on other URL
-   number_of_results       int         maximum number of results per request
+   page_size               int         maximum number of results per request
    language                string      ISO code of language and country like en_US
    api_key                 string      api-key if required by engine
    ======================= =========== ===========================================
@@ -144,9 +139,9 @@ parameters with default value can be redefined for special purposes.
    ====================== ============== ========================================================================
    url                    str            ``''``
    method                 str            ``'GET'``
-   headers                set            ``{}``
-   data                   set            ``{}``
-   cookies                set            ``{}``
+   headers                dict           ``{}``
+   data                   dict           ``{}``
+   cookies                dict           ``{}``
    verify                 bool           ``True``
    headers.User-Agent     str            a random User-Agent
    category               str            current category, like ``'general'``
@@ -226,9 +221,9 @@ following parameters can be used to specify a search request:
    =================== =========== ==========================================================================
    url                 str         requested url
    method              str         HTTP request method
-   headers             set         HTTP header information
-   data                set         HTTP data information
-   cookies             set         HTTP cookies
+   headers             dict        HTTP header information
+   data                dict        HTTP data information
+   cookies             dict        HTTP cookies
    verify              bool        Performing SSL-Validity check
    allow_redirects     bool        Follow redirects
    max_redirects       int         maximum redirects, hard limit
@@ -249,6 +244,3 @@ by templates.  For more details read section:
 
 - :ref:`simple theme templates`
 - :ref:`result types`
-
-
-

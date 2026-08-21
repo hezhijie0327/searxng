@@ -7,7 +7,6 @@ No public instance offer a public API now
 - https://github.com/searxng/searxng/issues/2722#issuecomment-2884993248
 
 """
-from __future__ import annotations
 
 import time
 import random
@@ -32,7 +31,7 @@ paging = True
 time_range_support = True
 
 # base_url can be overwritten by a list of URLs in the settings.yml
-base_url: list | str = []
+base_url: list[str] | str = []
 
 
 def init(_):

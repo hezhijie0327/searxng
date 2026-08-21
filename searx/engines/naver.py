@@ -15,7 +15,8 @@ from searx.utils import (
     extr,
     html_to_text,
     parse_duration_string,
-    js_variable_to_python,
+    js_obj_str_to_python,
+    get_embeded_stream_url,
 )
 
 # engine metadata
@@ -25,8 +26,8 @@ about = {
     "use_official_api": False,
     "require_api_key": False,
     "results": "HTML",
-    "language": "ko",
 }
+language = "ko"
 
 categories = []
 paging = True
@@ -98,23 +99,35 @@ def parse_general(data):
 
     dom = html.fromstring(data)
 
-    for item in eval_xpath_list(dom, "//ul[contains(@class, 'lst_total')]/li[contains(@class, 'bx')]"):
-        thumbnail = None
+    for item in eval_xpath_list(dom, "//div[contains(@class, 'fds-web-normal-doc-root')]"):
+        thumbnail = extract_text(
+            eval_xpath(
+                item,
+                ".//div[contains(@class, 'sds-comps-image') and not(contains(@class, 'sds-comps-image-circle'))]/img/@src",
+            )
+        )
+
+        title = extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-headline1')]"))
+
+        url = None
         try:
-            thumbnail = eval_xpath_getindex(item, ".//div[contains(@class, 'thumb_single')]//img/@data-lazysrc", 0)
+            url = eval_xpath_getindex(
+                item, ".//a[starts-with(@href, 'http') and not(contains(@href, 'keep.naver.com'))]/@href", 0
+            )
         except (ValueError, TypeError, SearxEngineXPathException):
             pass
 
-        results.add(
-            MainResult(
-                title=extract_text(eval_xpath(item, ".//a[contains(@class, 'link_tit')]")),
-                url=eval_xpath_getindex(item, ".//a[contains(@class, 'link_tit')]/@href", 0),
-                content=extract_text(
-                    eval_xpath(item, ".//div[contains(@class, 'total_dsc_wrap')]//a[contains(@class, 'api_txt_lines')]")
-                ),
-                thumbnail=thumbnail,
+        content = extract_text(eval_xpath(item, ".//span[contains(@class, 'sds-comps-text-type-body1')]"))
+
+        if title and url:
+            results.add(
+                MainResult(
+                    title=title,
+                    url=url,
+                    content=content or "",
+                    thumbnail=thumbnail or "",
+                )
             )
-        )
 
     return results
 
@@ -124,7 +137,7 @@ def parse_images(data):
 
     match = extr(data, '<script>var imageSearchTabData=', '</script>')
     if match:
-        json = js_variable_to_python(match.strip())
+        json = js_obj_str_to_python(match.strip())
         items = json.get('content', {}).get('items', [])
 
         for item in items:
@@ -172,7 +185,7 @@ def parse_news(data):
                     title=title,
                     url=url,
                     content=content,
-                    thumbnail=thumbnail,
+                    thumbnail=thumbnail or "",
                 )
             )
 
@@ -185,6 +198,8 @@ def parse_videos(data):
     dom = html.fromstring(data)
 
     for item in eval_xpath_list(dom, "//li[contains(@class, 'video_item')]"):
+        url = eval_xpath_getindex(item, ".//a[contains(@class, 'info_title')]/@href", 0)
+
         thumbnail = None
         try:
             thumbnail = eval_xpath_getindex(item, ".//img[contains(@class, 'thumb')]/@src", 0)
@@ -193,7 +208,7 @@ def parse_videos(data):
 
         length = None
         try:
-            length = parse_duration_string(extract_text(eval_xpath(item, ".//span[contains(@class, 'time')]")))
+            length = parse_duration_string(extract_text(eval_xpath(item, ".//span[contains(@class, 'time')]")) or "")
         except (ValueError, TypeError):
             pass
 
@@ -201,9 +216,10 @@ def parse_videos(data):
             {
                 "template": "videos.html",
                 "title": extract_text(eval_xpath(item, ".//a[contains(@class, 'info_title')]")),
-                "url": eval_xpath_getindex(item, ".//a[contains(@class, 'info_title')]/@href", 0),
+                "url": url,
                 "thumbnail": thumbnail,
-                'length': length,
+                "length": length,
+                "iframe_src": get_embeded_stream_url(url),
             }
         )
 
