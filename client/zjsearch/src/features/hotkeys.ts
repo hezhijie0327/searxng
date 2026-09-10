@@ -20,7 +20,7 @@ export interface HotkeyTarget {
   focusSearch: () => void;
 }
 
-const INTERACTIVE = new Set(["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]);
+const TEXT_ENTRY = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 
 export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHelp: () => void) {
   const [selected, setSelected] = useState(-1);
@@ -47,11 +47,12 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
       if (event.ctrlKey || event.altKey || event.metaKey) {
         return;
       }
-      const tag = (event.target as HTMLElement | null)?.tagName ?? "";
-      if (INTERACTIVE.has(tag)) {
-        // inside inputs only Escape means "leave the field"
+      const el = event.target as HTMLElement | null;
+      const tag = el?.tagName ?? "";
+      if (el?.isContentEditable || TEXT_ENTRY.has(tag)) {
+        // inside text fields only Escape means "leave the field"
         if (event.key === "Escape" && tag === "INPUT") {
-          (event.target as HTMLElement).blur();
+          (el as HTMLInputElement).blur();
         }
         return;
       }

@@ -13,7 +13,6 @@ import { InfoPage } from "../pages/InfoPage.tsx";
 import { PreferencesPage } from "../pages/PreferencesPage.tsx";
 import { StatsPage } from "../pages/StatsPage.tsx";
 import { extractPageData } from "./pageData.ts";
-import { useRouter } from "./router.tsx";
 import type { AnyPageData } from "./types.ts";
 import { isInfoPageData, isPreferencesPageData, isStatsPageData } from "./types.ts";
 
@@ -42,7 +41,6 @@ export function useOverlay(): OverlayContextValue {
 
 export function OverlayProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OverlayState | null>(null);
-  const { href } = useRouter();
 
   const closeOverlay = useCallback(() => {
     setState(null);
@@ -50,6 +48,17 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
 
   const openOverlay = useCallback((url: string, title: string) => {
     setState({ url, title, data: null, loading: true, error: null });
+  }, []);
+
+  // navigate the panel to another URL, keeping it open
+  const openPanel = useCallback((url: string, title: string) => {
+    setState((prev) => ({
+      url,
+      title: title || prev?.title || "",
+      data: null,
+      loading: true,
+      error: null,
+    }));
   }, []);
 
   // fetch the payload when a panel is requested
@@ -78,14 +87,6 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
       controller.abort();
     };
   }, [state]);
-
-  const closeOverlayRef = useRef(closeOverlay);
-  closeOverlayRef.current = closeOverlay;
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger, the callback is read via ref
-  useEffect(() => {
-    closeOverlayRef.current();
-  }, [href]);
 
   const onKeyDown = useCallback((event: globalThis.KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -126,7 +127,26 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
                 <CloseIcon className="size-5" />
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div
+              className="min-h-0 flex-1 overflow-y-auto"
+              onClickCapture={(event) => {
+                const anchor = (event.target as HTMLElement).closest("a");
+                const href = anchor?.getAttribute("href");
+                if (
+                  !anchor ||
+                  !href?.startsWith("/") ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
+                event.preventDefault();
+                event.stopPropagation();
+                openPanel(href, state?.title ?? "");
+              }}
+            >
               {state.loading ? (
                 <div aria-busy="true" className="space-y-3 p-6">
                   {Array.from({ length: 6 }, (_, i) => (

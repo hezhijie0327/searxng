@@ -380,6 +380,14 @@ export const RefreshIcon = makeIcon(
   </>,
 );
 
+export const LightbulbIcon = makeIcon(
+  <>
+    <path d="M9 18h6" />
+    <path d="M10 22h4" />
+    <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z" />
+  </>,
+);
+
 export const MonitorIcon = makeIcon(
   <>
     <rect height="14" rx="2" width="20" x="2" y="3" />
