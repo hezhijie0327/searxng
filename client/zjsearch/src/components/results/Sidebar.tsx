@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
-import { DownloadIcon, ExternalLinkIcon , SearchIcon } from "../icons.tsx";
+import { DownloadIcon, ExternalLinkIcon, SearchIcon } from "../icons.tsx";
 import { Link } from "../Shell.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {

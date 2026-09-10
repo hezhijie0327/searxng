@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { HelpModal } from "../components/HelpModal.tsx";
 import { ArrowUpIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import { ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
@@ -10,10 +11,12 @@ import { Sidebar } from "../components/results/Sidebar.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
+import { tryEvaluateExpression } from "../features/calculator.ts";
+import { useHotkeys } from "../features/hotkeys.ts";
 import { useT } from "../lib/i18n.ts";
 import { extractPageData } from "../lib/pageData.ts";
 import { parseSearchUrl, useRouter } from "../lib/router.tsx";
-import { useHasPlugin } from "../lib/settings.ts";
+import { useHasPlugin, useSettings } from "../lib/settings.ts";
 import type { ResultItem, SearchPageData } from "../lib/types.ts";
 
 function BackToTop() {
@@ -202,6 +205,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     });
   }, [href]);
 
+  const settings = useSettings();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [hotkeysSelected, setHotkeysSelected] = useState(-1);
+  const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
   const [appendState, setAppendState] = useState<"idle" | "loading" | "error" | "done">("idle");
   const appendedHref = useRef(href);
@@ -258,6 +265,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const onPage = (pageno: number) => {
     search(buildParams({ pageno }));
   };
+  const onPageRef = useRef(onPage);
+  onPageRef.current = onPage;
 
   const loadNextPage = useRef(() => {});
   loadNextPage.current = () => {
@@ -300,7 +309,63 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
       });
   };
 
+  // ----- keyboard navigation (default / vim layouts) -----
+  const selectedCard = () => {
+    const cards = listRef.current ? Array.from(listRef.current.querySelectorAll("article")) : [];
+    return hotkeysSelected >= 0 ? (cards[hotkeysSelected] as HTMLElement | undefined) : undefined;
+  };
+  const hotkeyTarget = {
+    move: (delta: number) => {
+      const cards = listRef.current ? Array.from(listRef.current.querySelectorAll("article")) : [];
+      if (cards.length === 0) {
+        return;
+      }
+      setHotkeysSelected((prev) => {
+        const next = Math.min(cards.length - 1, Math.max(0, prev + delta));
+        cards[next]?.scrollIntoView({ block: "center", behavior: "smooth" });
+        return next;
+      });
+    },
+    open: (newTab: boolean) => {
+      const href = selectedCard()?.querySelector("a[href]")?.getAttribute("href");
+      if (href) {
+        if (newTab) {
+          window.open(href, "_blank", "noopener");
+        } else {
+          window.location.assign(href);
+        }
+      }
+    },
+    yank: () => selectedCard()?.querySelector("a[href]")?.getAttribute("href") ?? null,
+    page: (delta: number) => {
+      const next = data.pageno + delta;
+      if (next >= 1 && (delta < 0 || data.paging)) {
+        onPageRef.current(next);
+      }
+    },
+    focusSearch: () => {
+      (document.querySelector('input[name="q"]') as HTMLInputElement | null)?.focus();
+    },
+  };
+  useHotkeys(settings.hotkeys, hotkeyTarget, () => {
+    setHelpOpen(true);
+  });
+
   const allResults = useMemo(() => [...data.results, ...appended], [data.results, appended]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
+  useEffect(() => {
+    setHotkeysSelected(-1);
+  }, [href]);
+
+  // client-side calculator answer (server plugin "calculator" enabled)
+  const calcAnswer = useMemo(() => {
+    if (!hasPlugin("calculator")) {
+      return null;
+    }
+    const calc = tryEvaluateExpression(data.q);
+    return calc ? ({ template: "answer/legacy.html", answer: `${calc.expr} = ${calc.value}`, url: "" } as const) : null;
+  }, [data.q, hasPlugin]);
   const isImageOnly = data.only_template === "images" && appended.every((result) => result.template === "images");
   const isVideoOnly = data.only_template === "videos" && appended.every((result) => result.template === "videos");
   const showSkeletons = loading && !error;
@@ -331,7 +396,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6">
+      <main className="zjs-results-main mx-auto w-full flex-1 px-4 sm:px-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
           <div className="min-w-0 flex-1 pt-4">
             {error ? (
@@ -353,7 +418,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               <>
                 <Corrections data={data} onSearch={submitQuery} />
                 <div className="mt-3 space-y-3">
-                  <Answers answers={data.answers} />
+                  <Answers answers={calcAnswer ? [calcAnswer, ...data.answers] : data.answers} />
                 </div>
 
                 {allResults.length === 0 && data.answers.length === 0 ? (
@@ -369,7 +434,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                     <VideoGrid globals={globals} results={allResults} />
                   </div>
                 ) : (
-                  <div className="mt-2">
+                  <div className="mt-2" ref={listRef}>
                     {groupResults(allResults).map((group, groupIndex) =>
                       group.template === "images" ? (
                         <div className="grid grid-cols-2 gap-3 py-2 sm:grid-cols-3 lg:grid-cols-4" key={groupIndex}>
@@ -386,7 +451,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                         <div key={groupIndex}>
                           {group.items.map(({ result, index }) => (
                             <div
-                              className="animate-fade-up"
+                              className={`animate-fade-up rounded-2xl ${
+                                index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                              }`}
                               key={index}
                               style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                             >
@@ -423,6 +490,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
       </main>
 
       <BackToTop />
+      {helpOpen ? <HelpModal layout={settings.hotkeys} onClose={() => setHelpOpen(false)} /> : null}
     </Shell>
   );
 }

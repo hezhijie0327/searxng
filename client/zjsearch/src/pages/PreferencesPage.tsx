@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import type { DropdownOption } from "../components/Dropdown.tsx";
 import { Dropdown } from "../components/Dropdown.tsx";
 import {
   AlertIcon,
   BookIcon,
   CategoryIcon,
+  CenterIcon,
   CheckIcon,
   ChevronLeftIcon,
   CloseIcon,
@@ -35,7 +36,7 @@ import { loadEngineDescriptions } from "../lib/engineDescriptions.ts";
 import { useT } from "../lib/i18n.ts";
 import { useRouter } from "../lib/router.tsx";
 import type { ThemeStyle } from "../lib/theme.ts";
-import { applyThemeStyle } from "../lib/theme.ts";
+import { applyCenterAlignment, applyThemeStyle } from "../lib/theme.ts";
 import type { EngineEntry, PreferencesPageData } from "../lib/types.ts";
 
 // ------------------------------------------------------------ layout blocks
@@ -385,14 +386,12 @@ function EnginesTab({
 
 export function PreferencesPage({ data, embedded = false }: { data: PreferencesPageData; embedded?: boolean }) {
   const t = useT();
-  const { navigate } = useRouter();
   const globals = data.globals;
   const kv = data.kv;
   const locked = useMemo(() => new Set(data.locked_preferences), [data.locked_preferences]);
 
   const [tab, setTab] = useState<"general" | "ui" | "privacy" | "engines" | "query" | "cookies">("general");
   const [engineTab, setEngineTab] = useState(0);
-  const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(0);
 
   // form state
@@ -407,7 +406,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   );
   const [locale, setLocale] = useState(kv.locale);
   const [theme, setTheme] = useState(kv.theme);
-  const [themeStyle, setThemeStyle] = useState(kv.simple_style);
+  const [themeStyle, setThemeStyle] = useState<string>(kv.simple_style);
   const [resultsOnNewTab, setResultsOnNewTab] = useState(kv.results_on_new_tab);
   const [searchOnCategorySelect, setSearchOnCategorySelect] = useState(kv.search_on_category_select);
   const [hotkeys, setHotkeys] = useState(kv.hotkeys);
@@ -415,6 +414,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   const [method, setMethod] = useState<"GET" | "POST">(kv.method);
   const [imageProxy, setImageProxy] = useState(kv.image_proxy);
   const [queryInTitle, setQueryInTitle] = useState(kv.query_in_title);
+  const [centerAlignment, setCenterAlignment] = useState(kv.center_alignment);
   const [engines, setEngines] = useState<Record<string, boolean>>(() => {
     const map: Record<string, boolean> = {};
     for (const tabInfo of data.engine_tabs) {
@@ -453,64 +453,100 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
     });
   };
 
-  const save = async () => {
-    setSaving(true);
-    const fd = new FormData();
-    // selects (always sent)
-    fd.set("language", language);
-    fd.set("autocomplete", autocomplete);
-    fd.set("favicon_resolver", faviconResolver);
-    fd.set("safesearch", safesearch);
-    fd.set("locale", locale);
-    fd.set("theme", theme);
-    fd.set("simple_style", themeStyle);
-    fd.set("hotkeys", hotkeys);
-    fd.set("url_formatting", urlFormatting);
-    fd.set("method", method);
-    fd.set("doi_resolver", doiResolver);
-    fd.set("tokens", tokens);
-    // booleans: absent means false (server parse_form semantics)
-    if (resultsOnNewTab) {
-      fd.set("results_on_new_tab", "on");
-    }
-    if (searchOnCategorySelect) {
-      fd.set("search_on_category_select", "on");
-    }
-    if (imageProxy) {
-      fd.set("image_proxy", "on");
-    }
-    if (queryInTitle) {
-      fd.set("query_in_title", "on");
-    }
-    // categories: only the selected ones
-    for (const category of categories) {
-      fd.append(`category_${category}`, "on");
-    }
-    // engines: checked = allowed (reversed checkbox semantics)
-    for (const [key, allowed] of Object.entries(engines)) {
-      if (allowed) {
-        fd.set(`engine_${key.replaceAll(" ", "_")}`, "on");
-      }
-    }
-    // plugins: checked = enabled
-    for (const [id, enabled] of Object.entries(plugins)) {
-      if (enabled) {
-        fd.set(`plugin_${id}`, "on");
-      }
-    }
-    if (pastedHash.trim()) {
-      fd.set("preferences", pastedHash.trim());
-    }
+  // snapshot of every saved field, used to detect changes
+  const formSignature = JSON.stringify([
+    categories,
+    language,
+    autocomplete,
+    faviconResolver,
+    safesearch,
+    tokens,
+    doiResolver,
+    locale,
+    theme,
+    themeStyle,
+    hotkeys,
+    urlFormatting,
+    method,
+    imageProxy,
+    queryInTitle,
+    centerAlignment,
+    resultsOnNewTab,
+    searchOnCategorySelect,
+    engines,
+    plugins,
+    pastedHash,
+  ]);
 
-    try {
-      await fetch("/preferences", { method: "POST", body: fd, redirect: "follow" });
-      applyThemeStyle(themeStyle === "black" ? "dark" : (themeStyle as ThemeStyle));
-      setSavedAt(Date.now());
-      navigate("/");
-    } finally {
-      setSaving(false);
+  const initialized = useRef(false);
+
+  // live-apply: every change is debounced and POSTed with the exact form
+  // live-apply: every change is debounced and POSTed with the exact form
+  // semantics of upstream /preferences (absent boolean = false, checked
+  // engine_<name>__<category> = allowed, plugin_<id> = enabled)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: formSignature covers all saved fields
+  useEffect(() => {
+    if (initialized.current) {
+      initialized.current = true;
+      return;
     }
-  };
+    const timer = window.setTimeout(() => {
+      const fd = new FormData();
+      fd.set("language", language);
+      fd.set("autocomplete", autocomplete);
+      fd.set("favicon_resolver", faviconResolver);
+      fd.set("safesearch", safesearch);
+      fd.set("locale", locale);
+      fd.set("theme", theme);
+      fd.set("simple_style", themeStyle);
+      fd.set("hotkeys", hotkeys);
+      fd.set("url_formatting", urlFormatting);
+      fd.set("method", method);
+      fd.set("doi_resolver", doiResolver);
+      fd.set("tokens", tokens);
+      if (resultsOnNewTab) {
+        fd.set("results_on_new_tab", "on");
+      }
+      if (searchOnCategorySelect) {
+        fd.set("search_on_category_select", "on");
+      }
+      if (imageProxy) {
+        fd.set("image_proxy", "on");
+      }
+      if (queryInTitle) {
+        fd.set("query_in_title", "on");
+      }
+      if (centerAlignment) {
+        fd.set("center_alignment", "on");
+      }
+      for (const category of categories) {
+        fd.append(`category_${category}`, "on");
+      }
+      for (const [key, allowed] of Object.entries(engines)) {
+        if (allowed) {
+          fd.set(`engine_${key.replaceAll(" ", "_")}`, "on");
+        }
+      }
+      for (const [id, enabled] of Object.entries(plugins)) {
+        if (enabled) {
+          fd.set(`plugin_${id}`, "on");
+        }
+      }
+      if (pastedHash.trim()) {
+        fd.set("preferences", pastedHash.trim());
+      }
+      void fetch("/preferences", { method: "POST", body: fd, redirect: "follow" })
+        .then(() => {
+          setSavedAt(Date.now());
+        })
+        .catch(() => {
+          /* keep the UI state; changing any setting retries */
+        });
+    }, 600);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [formSignature]);
 
   const pluginSections = (section: string) => data.plugins.filter((plugin) => plugin.section === section);
   const shareOrigin = window.location.origin;
@@ -536,15 +572,6 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 {t("saved")}
               </span>
             ) : null}
-            <button
-              className="inline-flex items-center gap-2 rounded-full bg-accent-strong px-5 py-2 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-strong-hover disabled:opacity-60"
-              disabled={saving}
-              onClick={() => void save()}
-              type="button"
-            >
-              <CheckIcon className="size-4" />
-              {t("save")}
-            </button>
           </div>
         </div>
 
@@ -794,6 +821,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                       ["auto", t("auto"), <SunIcon className="size-4" key="a" />],
                       ["light", t("light"), <SunIcon className="size-4" key="l" />],
                       ["dark", t("dark"), <MoonIcon className="size-4" key="d" />],
+                      ["black", t("black"), <MoonIcon className="size-4" key="b" />],
                     ] as const
                   ).map(([value, label, icon]) => (
                     <button
@@ -817,6 +845,22 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   ))}
                 </div>
               </SettingRow>
+              {!locked.has("center_alignment") ? (
+                <SettingRow
+                  description={t("center_alignment_desc")}
+                  icon={<CenterIcon className="size-4.5" />}
+                  title={t("center_alignment")}
+                >
+                  <Switch
+                    checked={centerAlignment}
+                    label={t("center_alignment")}
+                    onChange={(value) => {
+                      setCenterAlignment(value);
+                      applyCenterAlignment(value);
+                    }}
+                  />
+                </SettingRow>
+              ) : null}
               {!locked.has("results_on_new_tab") ? (
                 <SettingRow
                   description={t("open_result_new_tabs")}
@@ -1141,15 +1185,6 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
         </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-3 text-sm">
-          <button
-            className="inline-flex items-center gap-2 rounded-full bg-accent-strong px-6 py-2.5 font-medium text-accent-contrast transition-colors hover:bg-accent-strong-hover disabled:opacity-60"
-            disabled={saving}
-            onClick={() => void save()}
-            type="button"
-          >
-            <CheckIcon className="size-4" />
-            {t("save")}
-          </button>
           <Link
             className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-ink-2 transition-colors hover:border-danger hover:text-danger"
             href="/clear_cookies"

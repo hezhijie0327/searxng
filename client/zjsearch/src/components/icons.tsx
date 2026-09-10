@@ -398,6 +398,13 @@ export const BarChartIcon = makeIcon(
   </>,
 );
 
+export const CenterIcon = makeIcon(
+  <>
+    <rect height="18" rx="2" width="18" x="3" y="3" />
+    <rect fill="currentColor" height="6" rx="1" stroke="none" width="8" x="8" y="9" />
+  </>,
+);
+
 export const TerminalIcon = makeIcon(
   <>
     <polyline points="4 17 10 11 4 5" />

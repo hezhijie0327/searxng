@@ -205,17 +205,16 @@ export function SearchBox({
       </form>
 
       {showDropdown ? (
-        <div className="absolute inset-x-0 top-full z-30 mt-2 max-h-96 overflow-auto animate-fade-in" role="listbox">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {suggestions.map((suggestion, index) => (
+        <ul
+          className="absolute inset-x-0 top-full z-30 mt-2 max-h-80 overflow-auto rounded-2xl border border-line bg-surface py-1.5 shadow-pop animate-fade-in"
+          role="listbox"
+        >
+          {suggestions.map((suggestion, index) => (
+            <li aria-selected={index === active} key={suggestion.text} role="option">
               <button
-                aria-selected={index === active}
-                className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-[15px] transition-colors ${
-                  index === active
-                    ? "border-accent bg-accent-soft text-ink"
-                    : "border-line bg-surface-2 text-ink-2 hover:text-ink"
-                }`}
-                key={suggestion.text}
+                className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm ${
+                  index === active ? "bg-surface-2" : ""
+                } hover:bg-surface-2/70`}
                 onMouseDown={(event) => {
                   // prevent blur before submit
                   event.preventDefault();
@@ -225,17 +224,16 @@ export function SearchBox({
                 onMouseEnter={() => {
                   setActive(index);
                 }}
-                role="option"
                 type="button"
               >
-                <SearchIcon className="size-4 shrink-0 text-ink-3" />
+                <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
                 <span className="truncate" dir="auto">
                   {suggestion.text}
                 </span>
               </button>
-            ))}
-          </div>
-        </div>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   );

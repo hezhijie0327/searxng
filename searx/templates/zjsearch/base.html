@@ -5,7 +5,7 @@ boots the React application (``zjsearch.min.js``) and hands it the full page
 payload as JSON (``#page-data``) plus the base64 ``client_settings`` blob on the
 module script tag.  See ``client/zjsearch/`` for the UI implementation. -#}
 <!DOCTYPE html>
-<html lang="{{ locale_rfc5646 }}"{{ ' dir="rtl"' if rtl }}>
+<html lang="{{ locale_rfc5646 }}"{{ ' dir="rtl"' if rtl }}{{ ' class="centered"' if preferences.get_value('center_alignment') }}>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,6 +28,7 @@ module script tag.  See ``client/zjsearch/`` for the UI implementation. -#}
       var dark = style === "dark" || style === "black" ||
         (!style && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.classList.toggle("dark", dark);
+      document.documentElement.classList.toggle("black", style === "black");
     })();
   </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='zjsearch.min.css') }}" type="text/css">

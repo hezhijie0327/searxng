@@ -53,6 +53,20 @@
   color-scheme: dark;
 }
 
+/* Black (OLED): even deeper surfaces, applied on top of .dark */
+.black {
+  --bg: #000000;
+  --surface: #0b0b0c;
+  --surface-2: #161617;
+  --line: #242426;
+  --ink: #ececec;
+  --ink-2: #9a9a9a;
+  --ink-3: #6c6c6c;
+  --accent-soft: #292413;
+  --highlight-bg: #3d3617;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.6), 0 4px 16px rgb(0 0 0 / 0.5);
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -203,6 +217,14 @@
 
   .zjs-noscript a {
     color: var(--accent);
+  }
+
+  /* center_alignment preference: constrain the results column */
+  .zjs-results-main {
+    max-width: var(--results-max, 72rem);
+  }
+  html.centered {
+    --results-max: 56rem;
   }
 
   .zjs-skeleton {
