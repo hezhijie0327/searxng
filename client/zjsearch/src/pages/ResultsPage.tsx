@@ -364,6 +364,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const isProductPage = (data.only_template === "products" || singleCategory === "products") && !isVideoPage;
   const isNewsPage = singleCategory === "news" && !isImagePage && !isVideoPage;
   const isMapPage = singleCategory === "map" && !isImagePage && !isVideoPage;
+  const isMusicPage = singleCategory === "music" && !isImagePage && !isVideoPage;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
   useEffect(() => {
@@ -439,6 +440,20 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 ) : isVideoPage ? (
                   <div className="mt-4">
                     <VideoGrid globals={globals} results={allResults} />
+                  </div>
+                ) : isMusicPage ? (
+                  <div className="mt-2 space-y-1">
+                    {allResults.map((result, index) => (
+                      <div
+                        className={`animate-fade-up rounded-2xl ${
+                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                        }`}
+                        key={index}
+                        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                      >
+                        <ResultCard globals={globals} mediaOpen result={result} />
+                      </div>
+                    ))}
                   </div>
                 ) : isProductPage ? (
                   <div className="mt-4">

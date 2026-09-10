@@ -12,6 +12,7 @@ import {
   FileIcon,
   FilmIcon,
   MagnetIcon,
+  MusicIcon,
   PackageIcon,
   PlayIcon,
 } from "../icons.tsx";
@@ -221,7 +222,15 @@ function ResultArticle({ children, priority, id }: { children: ReactNode; priori
   );
 }
 
-function MediaCollapse({ label, children }: { label: string; children: (open: boolean) => ReactNode }) {
+function MediaCollapse({
+  showLabel,
+  hideLabel,
+  children,
+}: {
+  showLabel: string;
+  hideLabel: string;
+  children: (open: boolean) => ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div>
@@ -233,7 +242,7 @@ function MediaCollapse({ label, children }: { label: string; children: (open: bo
         type="button"
       >
         <PlayIcon className="size-3" />
-        {label}
+        {open ? hideLabel : showLabel}
       </button>
       {open ? <div className="mt-2 animate-fade-in">{children(open)}</div> : null}
     </div>
@@ -242,8 +251,33 @@ function MediaCollapse({ label, children }: { label: string; children: (open: bo
 
 function EmbedFrame({ src }: { src: string }) {
   return (
-    <div className="aspect-video w-full overflow-hidden rounded-xl border border-line bg-black">
+    <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-black">
       <iframe allowFullScreen className="size-full" referrerPolicy="origin" src={src} title="embedded content" />
+    </div>
+  );
+}
+
+/** Always-visible preview (music intent): prefer our own audio player for
+    stream URLs; when the source is not raw audio fall back to the embed. */
+function MediaPreview({ src, video = false }: { src: string; video?: boolean }) {
+  const [audioFailed, setAudioFailed] = useState(false);
+  if (video || audioFailed) {
+    return <EmbedFrame src={src} />;
+  }
+  return (
+    <div className="flex max-w-3xl items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
+        <MusicIcon className="size-4" />
+      </span>
+      <audio
+        className="h-9 w-full"
+        controls
+        onError={() => {
+          setAudioFailed(true);
+        }}
+        preload="none"
+        src={src}
+      />
     </div>
   );
 }
@@ -255,9 +289,11 @@ interface CardProps {
   globals: GlobalData;
   /** map-intent pages open the inline OSM map automatically (upstream simple behaviour) */
   autoOpenMap?: boolean;
+  /** music-intent pages show the media preview expanded with our own player */
+  mediaOpen?: boolean;
 }
 
-export function DefaultCard({ result, globals }: CardProps) {
+export function DefaultCard({ result, globals, mediaOpen }: CardProps) {
   const t = useT();
   return (
     <ResultArticle priority={result.priority}>
@@ -272,9 +308,13 @@ export function DefaultCard({ result, globals }: CardProps) {
           </div>
           {result.iframe_src ? (
             <div className="mt-2">
-              <MediaCollapse label={t("show_media")}>
-                {() => <EmbedFrame src={result.iframe_src ?? ""} />}
-              </MediaCollapse>
+              {mediaOpen ? (
+                <MediaPreview src={result.iframe_src} />
+              ) : (
+                <MediaCollapse hideLabel={t("hide_media")} showLabel={t("show_media")}>
+                  {() => <EmbedFrame src={result.iframe_src ?? ""} />}
+                </MediaCollapse>
+              )}
             </div>
           ) : null}
           <p
@@ -304,7 +344,7 @@ export function DefaultCard({ result, globals }: CardProps) {
   );
 }
 
-export function VideoCard({ result, globals }: CardProps) {
+export function VideoCard({ result, globals, mediaOpen }: CardProps) {
   const t = useT();
   return (
     <ResultArticle priority={result.priority}>
@@ -319,9 +359,13 @@ export function VideoCard({ result, globals }: CardProps) {
           </div>
           {result.iframe_src ? (
             <div className="mt-2">
-              <MediaCollapse label={t("show_video")}>
-                {() => <EmbedFrame src={result.iframe_src ?? ""} />}
-              </MediaCollapse>
+              {mediaOpen ? (
+                <MediaPreview src={result.iframe_src} video />
+              ) : (
+                <MediaCollapse hideLabel={t("hide_video")} showLabel={t("show_video")}>
+                  {() => <EmbedFrame src={result.iframe_src ?? ""} />}
+                </MediaCollapse>
+              )}
             </div>
           ) : null}
           <p
@@ -346,43 +390,22 @@ export function VideoCard({ result, globals }: CardProps) {
   );
 }
 
-/** News-intent layout: source + relative date up top, compact snippet, 16:9 thumb. */
+/** News-intent layout: same link style as every card, compact snippet, 16:9 thumb. */
 export function NewsCard({ result, globals }: CardProps) {
-  const source = result.netloc || result.engines[0] || "";
   return (
     <ResultArticle priority={result.priority}>
-      <div className="flex gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
-            <Favicon result={result} />
-            <span className="truncate font-medium text-ink-2" dir="ltr">
-              {source}
-            </span>
-            {result.published_date ? (
-              <>
-                <span aria-hidden="true">·</span>
-                <span className="inline-flex items-center gap-1">
-                  <CalendarIcon className="size-3" />
-                  <time dateTime={result.published_date}>{formatDate(result.published_date)}</time>
-                </span>
-              </>
-            ) : null}
-          </div>
-          <div className="mt-1">
-            <Title globals={globals} result={result} />
-          </div>
-          <p
-            className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
-            dangerouslySetInnerHTML={{ __html: result.content_html }}
-            dir="auto"
-          />
-        </div>
-        {result.thumbnail ? (
-          <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
-            <Thumb alt={result.title_text} className="aspect-video h-auto w-40 sm:w-44" src={result.thumbnail} />
-          </ResultLink>
-        ) : null}
+      <PrettyUrl globals={globals} result={result} />
+      <div className="mt-1">
+        <Title globals={globals} result={result} />
       </div>
+      <div className="mt-1">
+        <MetaLine result={result} />
+      </div>
+      <p
+        className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
+        dangerouslySetInnerHTML={{ __html: result.content_html }}
+        dir="auto"
+      />
       <EnginesLine globals={globals} result={result} />
     </ResultArticle>
   );
@@ -654,7 +677,7 @@ export function FileCard({ result, globals }: CardProps) {
       {result.embedded ? (
         isMedia ? (
           result.mtype === "video" ? (
-            <MediaCollapse label={t("show_media")}>
+            <MediaCollapse hideLabel={t("hide_media")} showLabel={t("show_media")}>
               {() => (
                 <video
                   className="w-full max-w-lg rounded-xl"
@@ -1026,51 +1049,83 @@ export function ImageListCard({ result, globals, onOpen }: CardProps & { onOpen:
   );
 }
 
-/** Kagi-style video tiles for video-only result pages. */
+/** Kagi-style video tiles for video-only result pages.  Tiles with an
+    embeddable source get a Spotify-style hover play button that expands the
+    player in place. */
 export function VideoGrid({ results, globals }: { results: ResultItem[]; globals: GlobalData }) {
+  const t = useT();
+  const [playing, setPlaying] = useState<number | null>(null);
   return (
     <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {results.map((result, index) => {
         const length = formatLength(result.length_display, result.length_seconds);
+        const isPlaying = playing === index;
         return (
           <article className="group" key={`${result.url}-${index}`}>
-            <ResultLink
-              className="relative block aspect-video overflow-hidden rounded-xl bg-surface-2"
-              globals={globals}
-              result={result}
-            >
-              {result.thumbnail ? (
-                <img
-                  alt={result.title_text}
-                  className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                  loading="lazy"
-                  onError={(event) => {
-                    event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
-                  }}
-                  src={result.thumbnail}
-                />
-              ) : (
-                <span className="grid size-full place-items-center text-ink-3">
-                  <PlayIcon className="size-8" />
-                </span>
-              )}
-              {length ? (
-                <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
-                  {length}
-                </span>
+            <div className="relative">
+              <ResultLink
+                className="relative block aspect-video overflow-hidden rounded-xl bg-surface-2"
+                globals={globals}
+                result={result}
+              >
+                {result.thumbnail ? (
+                  <img
+                    alt={result.title_text}
+                    className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    loading="lazy"
+                    onError={(event) => {
+                      event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
+                    }}
+                    src={result.thumbnail}
+                  />
+                ) : (
+                  <span className="grid size-full place-items-center text-ink-3">
+                    <PlayIcon className="size-8" />
+                  </span>
+                )}
+                {length ? (
+                  <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
+                    {length}
+                  </span>
+                ) : null}
+                {result.favicon ? (
+                  <img
+                    alt=""
+                    className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
+                    loading="lazy"
+                    onError={(event) => {
+                      event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
+                    }}
+                    src={result.favicon}
+                  />
+                ) : null}
+              </ResultLink>
+              {result.iframe_src ? (
+                isPlaying ? (
+                  <div className="absolute inset-0 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
+                    <iframe
+                      allowFullScreen
+                      className="size-full"
+                      referrerPolicy="origin"
+                      src={result.iframe_src ?? ""}
+                      title={result.title_text}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    aria-label={t("show_video")}
+                    className="absolute bottom-2 end-2 grid size-12 place-items-center rounded-full bg-accent-strong text-accent-contrast opacity-0 shadow-pop transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+                    onClick={() => {
+                      setPlaying(index);
+                    }}
+                    title={t("show_video")}
+                    type="button"
+                  >
+                    <PlayIcon className="size-5 translate-x-px" />
+                  </button>
+                )
               ) : null}
-              {result.favicon ? (
-                <img
-                  alt=""
-                  className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
-                  loading="lazy"
-                  onError={(event) => {
-                    event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
-                  }}
-                  src={result.favicon}
-                />
-              ) : null}
-            </ResultLink>
+            </div>
             <h3 className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-snug">
               <ResultLink
                 className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
