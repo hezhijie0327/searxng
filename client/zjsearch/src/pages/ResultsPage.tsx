@@ -395,10 +395,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
           </div>
           <HeaderActions globals={globals} />
         </div>
-        <div className="zjs-results-header-row mx-auto border-t border-line px-4 pt-1 sm:px-6">
+        <div className="zjs-results-header-row mx-auto px-4 pt-1 sm:px-6">
           <CategoryTabs globals={globals} onSearch={onSearchCategories} selected={selectedCategories} />
         </div>
-        <div className="zjs-results-header-row mx-auto border-t border-line/60 px-4 sm:px-6">
+        <div className="zjs-results-header-row mx-auto px-4 pb-1 sm:px-6">
           <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
         </div>
       </header>
