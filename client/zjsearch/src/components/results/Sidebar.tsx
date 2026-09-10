@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
-import { DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
+import { DownloadIcon, ExternalLinkIcon , SearchIcon } from "../icons.tsx";
 import { Link } from "../Shell.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
@@ -143,22 +143,22 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
 
       {hasSuggestions ? (
         <Box title={t("suggestions")}>
-          <ul className="space-y-0.5">
+          <div className="grid grid-cols-2 gap-2">
             {data.suggestions.map((suggestion) => (
-              <li key={suggestion.q}>
-                <button
-                  className="w-full truncate rounded-lg px-2 py-1.5 text-left text-[13px] text-ink-2 transition-colors hover:bg-surface-2 hover:text-accent"
-                  dir="auto"
-                  onClick={() => {
-                    onSearch(suggestion.q);
-                  }}
-                  type="button"
-                >
-                  {suggestion.title}
-                </button>
-              </li>
+              <button
+                className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-left text-[13px] text-ink-2 transition-colors hover:border-accent hover:text-ink"
+                dir="auto"
+                key={suggestion.q}
+                onClick={() => {
+                  onSearch(suggestion.q);
+                }}
+                type="button"
+              >
+                <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
+                <span className="truncate">{suggestion.title}</span>
+              </button>
             ))}
-          </ul>
+          </div>
         </Box>
       ) : null}
 
