@@ -1,0 +1,23 @@
+# zjsearch theme dev instance settings (not tracked by git).
+# Run with:
+#   SEARXNG_SETTINGS_PATH=client/zjsearch/dev-settings.yml ./manage webapp.run
+use_default_settings: true
+
+general:
+  instance_name: ZJSearch
+  debug: false
+
+search:
+  formats:
+    - html
+    - csv
+    - json
+    - rss
+
+ui:
+  default_theme: zjsearch
+
+server:
+  secret_key: "zjsearch-local-dev-secret-key"
+  limiter: false
+  image_proxy: true

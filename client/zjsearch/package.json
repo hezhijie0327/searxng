@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@zjsearch/theme-zjsearch",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "clean": "rm -Rf node_modules",
+    "fix": "biome check --write",
+    "lint": "npm run lint:biome && npm run lint:tsc",
+    "lint:biome": "biome check",
+    "lint:tsc": "tsc --noEmit"
+  },
+  "browserslist": [
+    "baseline 2022",
+    "not dead"
+  ],
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "ol": "^10.10.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.11",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "browserslist": "^4.28.8",
+    "browserslist-to-esbuild": "^2.1.1",
+    "sharp": "~0.35.4",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.9.3",
+    "vite": "^8.2.2"
+  }
+}

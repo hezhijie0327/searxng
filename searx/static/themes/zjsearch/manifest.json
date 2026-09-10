@@ -1,0 +1,357 @@
+{
+  "_B0GutmSW.min.js": {
+    "file": "chunk/B0GutmSW.min.js",
+    "name": "tilecoord",
+    "imports": [
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_tX7xXwrc.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_BirBLo4L.min.js",
+      "_slNj3mCm.min.js"
+    ]
+  },
+  "_BGvuF8Ew.min.js": {
+    "file": "chunk/BGvuF8Ew.min.js",
+    "name": "length"
+  },
+  "_BNLDYGCi.min.js": {
+    "file": "chunk/BNLDYGCi.min.js",
+    "name": "proj",
+    "imports": [
+      "src/main.tsx",
+      "_bj8l8ipM.min.js"
+    ]
+  },
+  "_BbgLKO5N.min.js": {
+    "file": "chunk/BbgLKO5N.min.js",
+    "name": "asserts",
+    "imports": [
+      "_CBoY7qIt.min.js"
+    ]
+  },
+  "_BirBLo4L.min.js": {
+    "file": "chunk/BirBLo4L.min.js",
+    "name": "easing"
+  },
+  "_BuN9ET-E.min.js": {
+    "file": "chunk/BuN9ET-E.min.js",
+    "name": "Source",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_BNLDYGCi.min.js"
+    ]
+  },
+  "_CBoY7qIt.min.js": {
+    "file": "chunk/CBoY7qIt.min.js",
+    "name": "util"
+  },
+  "_CEWlAnJk.min.js": {
+    "file": "chunk/CEWlAnJk.min.js",
+    "name": "orient",
+    "imports": [
+      "_CBoY7qIt.min.js",
+      "_bj8l8ipM.min.js",
+      "_slNj3mCm.min.js"
+    ]
+  },
+  "_CJxNlrwC.min.js": {
+    "file": "chunk/CJxNlrwC.min.js",
+    "name": "View",
+    "imports": [
+      "src/main.tsx",
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_BirBLo4L.min.js",
+      "_Ciqlvu02.min.js"
+    ]
+  },
+  "_CKrB1uw9.min.js": {
+    "file": "chunk/CKrB1uw9.min.js",
+    "name": "Image",
+    "imports": [
+      "_CBoY7qIt.min.js"
+    ]
+  },
+  "_CP17ewYW.min.js": {
+    "file": "chunk/CP17ewYW.min.js",
+    "name": "ImageState",
+    "imports": [
+      "_CKrB1uw9.min.js",
+      "_bj8l8ipM.min.js"
+    ]
+  },
+  "_CaohfFwn.min.js": {
+    "file": "chunk/CaohfFwn.min.js",
+    "name": "rbush"
+  },
+  "_Ciqlvu02.min.js": {
+    "file": "chunk/Ciqlvu02.min.js",
+    "name": "Polygon",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js",
+      "_CEWlAnJk.min.js",
+      "_DFJXbV8q.min.js"
+    ]
+  },
+  "_Cono3Mwt.min.js": {
+    "file": "chunk/Cono3Mwt.min.js",
+    "name": "size"
+  },
+  "_DFJXbV8q.min.js": {
+    "file": "chunk/DFJXbV8q.min.js",
+    "name": "intersectsextent",
+    "imports": [
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js"
+    ]
+  },
+  "_DLYrKV4k.min.js": {
+    "file": "chunk/DLYrKV4k.min.js",
+    "name": "Stroke",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_DStX1x9n.min.js": {
+    "file": "chunk/DStX1x9n.min.js",
+    "name": "Event",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_CJxNlrwC.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js"
+    ]
+  },
+  "_DaRMdJ1d.min.js": {
+    "file": "chunk/DaRMdJ1d.min.js",
+    "name": "Fill",
+    "imports": [
+      "src/main.tsx",
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_CP17ewYW.min.js"
+    ]
+  },
+  "_DveM9HsK.min.js": {
+    "file": "chunk/DveM9HsK.min.js",
+    "name": "Style",
+    "imports": [
+      "src/main.tsx",
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_CP17ewYW.min.js",
+      "_Cono3Mwt.min.js",
+      "_DaRMdJ1d.min.js",
+      "_DLYrKV4k.min.js"
+    ]
+  },
+  "_JeO8j4Cm.min.js": {
+    "file": "chunk/JeO8j4Cm.min.js",
+    "name": "BaseVector",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_DveM9HsK.min.js",
+      "_DStX1x9n.min.js",
+      "_CaohfFwn.min.js",
+      "_CP17ewYW.min.js",
+      "_Cono3Mwt.min.js",
+      "_DaRMdJ1d.min.js",
+      "_DLYrKV4k.min.js"
+    ]
+  },
+  "_QwMsTcEW.min.js": {
+    "file": "chunk/QwMsTcEW.min.js",
+    "name": "Layer",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js",
+      "_DStX1x9n.min.js",
+      "_CP17ewYW.min.js"
+    ]
+  },
+  "_aIcsP2kH.min.js": {
+    "file": "chunk/aIcsP2kH.min.js",
+    "name": "Feature",
+    "imports": [
+      "_CBoY7qIt.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js",
+      "_CEWlAnJk.min.js"
+    ]
+  },
+  "_bj8l8ipM.min.js": {
+    "file": "chunk/bj8l8ipM.min.js",
+    "name": "math"
+  },
+  "_msXMIqzh.min.js": {
+    "file": "chunk/msXMIqzh.min.js",
+    "name": "Collection",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js"
+    ]
+  },
+  "_slNj3mCm.min.js": {
+    "file": "chunk/slNj3mCm.min.js",
+    "name": "contains",
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_BNLDYGCi.min.js"
+    ]
+  },
+  "_tX7xXwrc.min.js": {
+    "file": "chunk/tX7xXwrc.min.js",
+    "name": "TileState"
+  },
+  "node_modules/ol/Map.js": {
+    "file": "chunk/_a7wtVBM.min.js",
+    "name": "Map",
+    "src": "node_modules/ol/Map.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_msXMIqzh.min.js",
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_tX7xXwrc.min.js",
+      "_CJxNlrwC.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_BirBLo4L.min.js",
+      "_slNj3mCm.min.js",
+      "_Ciqlvu02.min.js",
+      "_DveM9HsK.min.js",
+      "_DStX1x9n.min.js",
+      "_Cono3Mwt.min.js",
+      "_JeO8j4Cm.min.js",
+      "_DaRMdJ1d.min.js"
+    ]
+  },
+  "node_modules/ol/format/GeoJSON.js": {
+    "file": "chunk/BhLF-ZQQ.min.js",
+    "name": "GeoJSON",
+    "src": "node_modules/ol/format/GeoJSON.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js",
+      "_CEWlAnJk.min.js",
+      "_Ciqlvu02.min.js",
+      "_DFJXbV8q.min.js",
+      "_aIcsP2kH.min.js",
+      "_BGvuF8Ew.min.js"
+    ]
+  },
+  "node_modules/ol/layer/Tile.js": {
+    "file": "chunk/DUCV-qj1.min.js",
+    "name": "Tile",
+    "src": "node_modules/ol/layer/Tile.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_tX7xXwrc.min.js",
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js",
+      "_DStX1x9n.min.js",
+      "_Cono3Mwt.min.js",
+      "_B0GutmSW.min.js",
+      "_QwMsTcEW.min.js"
+    ]
+  },
+  "node_modules/ol/layer/Vector.js": {
+    "file": "chunk/_6nY0z0Q.min.js",
+    "name": "Vector",
+    "src": "node_modules/ol/layer/Vector.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_CJxNlrwC.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_slNj3mCm.min.js",
+      "_CEWlAnJk.min.js",
+      "_Ciqlvu02.min.js",
+      "_DveM9HsK.min.js",
+      "_DStX1x9n.min.js",
+      "_CP17ewYW.min.js",
+      "_JeO8j4Cm.min.js",
+      "_BGvuF8Ew.min.js",
+      "_QwMsTcEW.min.js"
+    ]
+  },
+  "node_modules/ol/source/OSM.js": {
+    "file": "chunk/DGpKqpcp.min.js",
+    "name": "OSM",
+    "src": "node_modules/ol/source/OSM.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_CKrB1uw9.min.js",
+      "_tX7xXwrc.min.js",
+      "_bj8l8ipM.min.js",
+      "_BNLDYGCi.min.js",
+      "_DFJXbV8q.min.js",
+      "_Cono3Mwt.min.js",
+      "_B0GutmSW.min.js",
+      "_BuN9ET-E.min.js"
+    ]
+  },
+  "node_modules/ol/source/Vector.js": {
+    "file": "chunk/DtHad7KY.min.js",
+    "name": "Vector",
+    "src": "node_modules/ol/source/Vector.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_msXMIqzh.min.js",
+      "_BbgLKO5N.min.js",
+      "_CBoY7qIt.min.js",
+      "_BNLDYGCi.min.js",
+      "_CaohfFwn.min.js",
+      "_aIcsP2kH.min.js",
+      "_BuN9ET-E.min.js"
+    ]
+  },
+  "src/main.tsx": {
+    "file": "zjsearch.min.js",
+    "name": "app",
+    "src": "src/main.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/ol/Map.js",
+      "_CJxNlrwC.min.js",
+      "node_modules/ol/layer/Tile.js",
+      "node_modules/ol/source/OSM.js",
+      "_BNLDYGCi.min.js",
+      "node_modules/ol/layer/Vector.js",
+      "node_modules/ol/source/Vector.js",
+      "node_modules/ol/format/GeoJSON.js",
+      "_DLYrKV4k.min.js",
+      "_DaRMdJ1d.min.js",
+      "_DveM9HsK.min.js"
+    ],
+    "css": [
+      "zjsearch.min.css"
+    ]
+  }
+}
