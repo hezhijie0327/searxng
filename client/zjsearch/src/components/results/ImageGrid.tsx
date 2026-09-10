@@ -104,17 +104,23 @@ function Lightbox({
 
   useEffect(() => {
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape" && event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+      // capture phase so the results-page hotkeys (arrows paginate) don't
+      // also fire while the viewer is open
+      event.stopPropagation();
       if (event.key === "Escape") {
         close(true);
       } else if (event.key === "ArrowLeft") {
         nav(-1);
-      } else if (event.key === "ArrowRight") {
+      } else {
         nav(1);
       }
     };
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", onKeyDown, { capture: true });
     };
   }, [close, nav]);
 
