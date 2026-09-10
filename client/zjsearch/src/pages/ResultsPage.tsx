@@ -308,17 +308,19 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   return (
     <Shell globals={globals} hideTopNav>
       <header className="border-b border-line">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 pt-3 sm:px-6">
+        {/* top bar: brand left, actions right */}
+        <div className="flex items-center justify-between px-4 py-2.5 sm:px-6">
           <Link ariaLabel={globals.instance_name} className="shrink-0 select-none" href="/">
             <span className="text-xl font-extrabold tracking-tight text-ink">
               {globals.instance_name}
               <span className="text-accent-strong">.</span>
             </span>
           </Link>
-          <div className="min-w-0 flex-1">
-            <SearchBox initialQuery={data.q} onSubmitQuery={submitQuery} />
-          </div>
           <HeaderActions globals={globals} />
+        </div>
+        {/* search row */}
+        <div className="mx-auto w-full max-w-6xl px-4 pb-3 sm:px-6">
+          <SearchBox initialQuery={data.q} onSubmitQuery={submitQuery} />
         </div>
         <div className="border-t border-line px-4 pt-1 sm:px-6">
           <div className="mx-auto w-full max-w-6xl">
