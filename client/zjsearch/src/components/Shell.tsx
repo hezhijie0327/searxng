@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type { MouseEvent, ReactNode } from "react";
-import { useState } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useOverlay } from "../lib/overlay.tsx";
 import { useRouter } from "../lib/router.tsx";
-import type { ThemeStyle } from "../lib/theme.ts";
-import { applyThemeStyle, readThemeStyle, writeThemeStyle } from "../lib/theme.ts";
 import type { GlobalData } from "../lib/types.ts";
-import { BarChartIcon, HeartIcon, InfoIcon, MonitorIcon, MoonIcon, SlidersIcon, SunIcon } from "./icons.tsx";
+import { BarChartIcon, HeartIcon, InfoIcon, SlidersIcon } from "./icons.tsx";
 
 /** Anchor that performs SPA navigation for internal URLs. */
 export function Link({
@@ -62,39 +59,6 @@ function ProgressBar({ active }: { active: boolean }) {
   );
 }
 
-/** Quick light/dark toggle: flips the html class and persists the choice in
-    the same cookie the server shell reads (simple_style). */
-function ThemeToggle() {
-  const t = useT();
-  const [style, setStyle] = useState<ThemeStyle>(() => readThemeStyle());
-
-  const onClick = () => {
-    const next: ThemeStyle = style === "auto" ? "light" : style === "light" ? "dark" : "auto";
-    setStyle(next);
-    writeThemeStyle(next);
-    applyThemeStyle(next);
-  };
-
-  const label = `${t("theme_style")}: ${style === "auto" ? t("auto") : style === "light" ? t("light") : t("dark")}`;
-  return (
-    <button
-      aria-label={label}
-      className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
-      onClick={onClick}
-      title={label}
-      type="button"
-    >
-      {style === "auto" ? (
-        <MonitorIcon className="size-[18px]" />
-      ) : style === "light" ? (
-        <SunIcon className="size-[18px]" />
-      ) : (
-        <MoonIcon className="size-[18px]" />
-      )}
-    </button>
-  );
-}
-
 const iconBtn =
   "grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
 
@@ -140,7 +104,6 @@ export function HeaderActions({ globals }: { globals: GlobalData }) {
           <BarChartIcon className="size-[18px]" />
         </button>
       ) : null}
-      <ThemeToggle />
       <button
         aria-label={t("preferences")}
         className={iconBtn}
