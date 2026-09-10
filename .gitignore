@@ -27,3 +27,9 @@ searx/version_frozen.py
 .dir-locals.el
 
 .python-version
+
+.zcode
+searx/static/themes/zjsearch/
+Makefile
+utils/lib_sxng_themes.sh
+utils/lib_sxng_vite.sh
