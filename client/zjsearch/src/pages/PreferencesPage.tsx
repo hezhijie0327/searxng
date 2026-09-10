@@ -483,12 +483,15 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   const initialized = useRef(false);
 
   // live-apply: every change is debounced and POSTed with the exact form
-  // live-apply: every change is debounced and POSTed with the exact form
-  // semantics of upstream /preferences (absent boolean = false, checked
-  // engine_<name>__<category> = allowed, plugin_<id> = enabled)
+  // semantics of upstream /preferences: absent booleans are false, and the
+  // `engine_*` / `plugin_*` keys are REVERSED — a posted key marks that engine
+  // or plugin as disabled, so we send exactly the disabled set (omitted keys
+  // are re-enabled by the server).
   // biome-ignore lint/correctness/useExhaustiveDependencies: formSignature covers all saved fields
   useEffect(() => {
-    if (initialized.current) {
+    // skip the initial mount: nothing changed yet, posting would corrupt
+    // the reversed engine/plugin sets
+    if (!initialized.current) {
       initialized.current = true;
       return;
     }
@@ -525,12 +528,12 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
         fd.append(`category_${category}`, "on");
       }
       for (const [key, allowed] of Object.entries(engines)) {
-        if (allowed) {
+        if (!allowed) {
           fd.set(`engine_${key.replaceAll(" ", "_")}`, "on");
         }
       }
       for (const [id, enabled] of Object.entries(plugins)) {
-        if (enabled) {
+        if (!enabled) {
           fd.set(`plugin_${id}`, "on");
         }
       }
