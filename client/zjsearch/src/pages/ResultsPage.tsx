@@ -373,7 +373,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   return (
     <Shell globals={globals} hideTopNav>
       <header className="border-b border-line">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 pt-3 sm:px-6">
+        <div className="zjs-results-header-row mx-auto flex w-full items-center gap-4 px-4 pt-3 sm:px-6">
           {/* brand mark only - no home link needed, everything opens as a drawer */}
           <span className="shrink-0 select-none text-xl font-extrabold tracking-tight text-ink">
             {globals.instance_name}
@@ -384,15 +384,11 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
           </div>
           <HeaderActions globals={globals} />
         </div>
-        <div className="border-t border-line px-4 pt-1 sm:px-6">
-          <div className="mx-auto w-full max-w-6xl">
-            <CategoryTabs globals={globals} onSearch={onSearchCategories} selected={selectedCategories} />
-          </div>
+        <div className="zjs-results-header-row border-t border-line px-4 pt-1 sm:px-6">
+          <CategoryTabs globals={globals} onSearch={onSearchCategories} selected={selectedCategories} />
         </div>
-        <div className="border-t border-line/60 px-4 sm:px-6">
-          <div className="mx-auto w-full max-w-6xl py-0.5">
-            <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
-          </div>
+        <div className="zjs-results-header-row border-t border-line/60 px-4 sm:px-6">
+          <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
         </div>
       </header>
 

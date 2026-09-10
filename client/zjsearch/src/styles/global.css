@@ -219,14 +219,6 @@
     color: var(--accent);
   }
 
-  /* center_alignment preference: constrain the results column */
-  .zjs-results-main {
-    max-width: var(--results-max, 72rem);
-  }
-  html.centered {
-    --results-max: 56rem;
-  }
-
   .zjs-skeleton {
     position: relative;
     overflow: hidden;
@@ -356,4 +348,15 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* results width: wide by default (capped for readability), narrow + centered
+   when the center_alignment preference is on */
+.zjs-results-main,
+.zjs-results-header-row {
+  max-width: var(--results-max, 90rem);
+}
+
+html.centered {
+  --results-max: 72rem;
 }

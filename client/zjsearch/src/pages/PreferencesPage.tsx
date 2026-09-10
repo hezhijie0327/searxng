@@ -33,7 +33,6 @@ import {
 import { Link, Shell } from "../components/Shell.tsx";
 import { loadEngineDescriptions } from "../lib/engineDescriptions.ts";
 import { useT } from "../lib/i18n.ts";
-import { useRouter } from "../lib/router.tsx";
 import type { ThemeStyle } from "../lib/theme.ts";
 import { applyCenterAlignment, applyThemeStyle } from "../lib/theme.ts";
 import type { EngineEntry, PreferencesPageData } from "../lib/types.ts";

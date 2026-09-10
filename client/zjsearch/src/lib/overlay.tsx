@@ -7,7 +7,7 @@
  * that a direct visit would use.
  */
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { CloseIcon } from "../components/icons.tsx";
 import { InfoPage } from "../pages/InfoPage.tsx";
 import { PreferencesPage } from "../pages/PreferencesPage.tsx";

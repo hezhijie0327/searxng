@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
 import { LightbulbIcon } from "../components/icons.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
