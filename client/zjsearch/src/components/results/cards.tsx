@@ -287,7 +287,6 @@ export function DefaultCard({ result, globals }: CardProps) {
           {result.audio_src ? (
             <audio className="mt-2 w-full max-w-md" controls preload="none" src={result.audio_src} />
           ) : null}
-          <EnginesLine globals={globals} result={result} />
         </div>
         {result.thumbnail ? (
           <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
@@ -300,6 +299,7 @@ export function DefaultCard({ result, globals }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
+      <EnginesLine globals={globals} result={result} />
     </ResultArticle>
   );
 }
@@ -329,7 +329,6 @@ export function VideoCard({ result, globals }: CardProps) {
             dangerouslySetInnerHTML={{ __html: result.content_html || t("no_description") }}
             dir="auto"
           />
-          <EnginesLine globals={globals} result={result} />
         </div>
         {result.thumbnail ? (
           <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
@@ -342,6 +341,7 @@ export function VideoCard({ result, globals }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
+      <EnginesLine globals={globals} result={result} />
     </ResultArticle>
   );
 }
@@ -376,7 +376,6 @@ export function NewsCard({ result, globals }: CardProps) {
             dangerouslySetInnerHTML={{ __html: result.content_html }}
             dir="auto"
           />
-          <EnginesLine globals={globals} result={result} />
         </div>
         {result.thumbnail ? (
           <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
@@ -384,6 +383,7 @@ export function NewsCard({ result, globals }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
+      <EnginesLine globals={globals} result={result} />
     </ResultArticle>
   );
 }
@@ -478,7 +478,6 @@ export function ProductCard({ result, globals }: CardProps) {
               dir="auto"
             />
           ) : null}
-          <EnginesLine globals={globals} result={result} />
         </div>
         {result.thumbnail ? (
           <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
@@ -486,6 +485,7 @@ export function ProductCard({ result, globals }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
+      <EnginesLine globals={globals} result={result} />
     </ResultArticle>
   );
 }
