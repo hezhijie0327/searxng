@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { type MouseEvent, type ReactNode, useState } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useOverlay } from "../lib/overlay.tsx";
 import { useRouter } from "../lib/router.tsx";
-import { applyThemeStyle, readThemeStyle, type ThemeStyle, writeThemeStyle } from "../lib/theme.ts";
 import type { GlobalData } from "../lib/types.ts";
-import { BarChartIcon, HeartIcon, InfoIcon, MonitorIcon, MoonIcon, SlidersIcon, SunIcon } from "./icons.tsx";
+import { BarChartIcon, HeartIcon, InfoIcon, SlidersIcon } from "./icons.tsx";
 
 /** Anchor that performs SPA navigation for internal URLs. */
 export function Link({
@@ -63,52 +62,13 @@ function ProgressBar({ active }: { active: boolean }) {
 const iconBtn =
   "grid size-8 sm:size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
 
-const THEME_CYCLE: ThemeStyle[] = ["auto", "light", "dark", "black"];
-
-function nextThemeStyle(style: ThemeStyle): ThemeStyle {
-  const index = THEME_CYCLE.indexOf(style);
-  return THEME_CYCLE[(index + 1) % THEME_CYCLE.length] ?? "auto";
-}
-
-/** Quick theme toggle: cycles auto → light → dark → black, persisting in the
-    same `simple_style` cookie the server preferences write. */
-function ThemeToggle() {
-  const t = useT();
-  const [style, setStyle] = useState<ThemeStyle>(readThemeStyle);
-  const next = () => {
-    const nextStyle = nextThemeStyle(style);
-    setStyle(nextStyle);
-    writeThemeStyle(nextStyle);
-    applyThemeStyle(nextStyle);
-  };
-  const label = t(style === "auto" ? "auto" : style);
-  return (
-    <button
-      aria-label={`${t("theme_style")}: ${label}`}
-      className={iconBtn}
-      onClick={next}
-      title={`${t("theme_style")}: ${label}`}
-      type="button"
-    >
-      {style === "auto" ? (
-        <MonitorIcon className="size-[18px]" />
-      ) : style === "light" ? (
-        <SunIcon className="size-[18px]" />
-      ) : (
-        <MoonIcon className="size-[18px]" />
-      )}
-    </button>
-  );
-}
-
 /** Right-side icon group: About / Stats / Preferences open as slide-in
-    panels (URL unchanged), theme toggle switches auto/light/dark/black. */
+    panels (URL unchanged); theme style lives in the preferences panel. */
 export function HeaderActions({ globals }: { globals: GlobalData }) {
   const t = useT();
   const { openOverlay } = useOverlay();
   return (
     <div className="flex items-center gap-0.5 sm:gap-1">
-      <ThemeToggle />
       <button
         aria-label={t("about")}
         className={iconBtn}
