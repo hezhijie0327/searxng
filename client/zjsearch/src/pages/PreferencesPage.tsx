@@ -40,6 +40,10 @@ import type { EngineEntry, PreferencesPageData } from "../lib/types.ts";
 
 // ------------------------------------------------------------ layout blocks
 
+function cap(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 function IconTile({ children }: { children: ReactNode }) {
   return (
     <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent">{children}</span>
@@ -817,10 +821,10 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
                   {(
                     [
-                      ["auto", t("auto"), <SunIcon className="size-4" key="a" />],
-                      ["light", t("light"), <SunIcon className="size-4" key="l" />],
-                      ["dark", t("dark"), <MoonIcon className="size-4" key="d" />],
-                      ["black", t("black"), <MoonIcon className="size-4" key="b" />],
+                      ["auto", cap(t("auto")), <SunIcon className="size-4" key="a" />],
+                      ["light", cap(t("light")), <SunIcon className="size-4" key="l" />],
+                      ["dark", cap(t("dark")), <MoonIcon className="size-4" key="d" />],
+                      ["black", cap(t("black")), <MoonIcon className="size-4" key="b" />],
                     ] as const
                   ).map(([value, label, icon]) => (
                     <button
