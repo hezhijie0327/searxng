@@ -9,7 +9,6 @@ import {
   CategoryIcon,
   CenterIcon,
   CheckIcon,
-  ChevronLeftIcon,
   CloseIcon,
   CookieIcon,
   ExternalLinkIcon,
@@ -1191,13 +1190,6 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           >
             <RefreshIcon className="size-4" />
             {t("reset_defaults")}
-          </Link>
-          <Link
-            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-ink-2 transition-colors hover:border-accent hover:text-accent"
-            href="/"
-          >
-            <ChevronLeftIcon className="size-4" />
-            {t("back")}
           </Link>
         </div>
         <p className="mt-4 text-xs leading-relaxed text-ink-3">
