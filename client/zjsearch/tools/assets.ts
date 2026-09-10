@@ -28,14 +28,11 @@ export function plgAssets(PATH: { brand: string; dist: string }): import("vite")
         ["favicon.png", 512],
         ["apple-touch-icon.png", 180],
         ["192.png", 192],
-        ["512.png", 512]
+        ["512.png", 512],
       ];
       for (const [file, size] of sizes) {
-        await sharp(src, { density: 300 })
-          .resize(size, size)
-          .png()
-          .toFile(path.join(imgDir, file));
+        await sharp(src, { density: 300 }).resize(size, size).png().toFile(path.join(imgDir, file));
       }
-    }
+    },
   };
 }

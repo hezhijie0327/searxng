@@ -6,6 +6,7 @@ import { LightbulbIcon } from "../components/icons.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, defaultFilterValues } from "../components/SearchControls.tsx";
 import { Shell } from "../components/Shell.tsx";
+import { useT } from "../lib/i18n.ts";
 import { useRouter } from "../lib/router.tsx";
 import { useSettings } from "../lib/settings.ts";
 import type { BasicPageData } from "../lib/types.ts";
@@ -44,6 +45,7 @@ export function IndexPage({ data }: { data: IndexData }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [hintHidden, setHintHidden] = useState(() => window.localStorage.getItem("zjs-hint-hidden") === "1");
   const settings = useSettings();
+  const t = useT();
 
   return (
     <Shell globals={globals} variant="hero">
@@ -71,6 +73,7 @@ export function IndexPage({ data }: { data: IndexData }) {
               submitSearch(query, categories);
             }}
             selected={selected}
+            wrap
           />
         </div>
       </main>
@@ -85,11 +88,10 @@ export function IndexPage({ data }: { data: IndexData }) {
               }}
               type="button"
             >
-              Press <kbd className="rounded border border-line bg-surface-2 px-1.5 font-mono text-xs">?</kbd> anytime
-              for keyboard shortcuts
+              {t("hotkeys_hint")}
             </button>
             <button
-              aria-label="Close"
+              aria-label={t("close")}
               className="shrink-0 rounded-lg px-2 py-1 text-xs text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
               onClick={() => {
                 window.localStorage.setItem("zjs-hint-hidden", "1");
@@ -97,7 +99,7 @@ export function IndexPage({ data }: { data: IndexData }) {
               }}
               type="button"
             >
-              Close
+              {t("close")}
             </button>
           </div>
         </div>

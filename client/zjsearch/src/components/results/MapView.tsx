@@ -10,6 +10,7 @@ import type BaseLayer from "ol/layer/Base.js";
 import type { default as OlMap } from "ol/Map.js";
 import type VectorSource from "ol/source/Vector.js";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "../../lib/i18n.ts";
 import { LocationIcon } from "../icons.tsx";
 
 interface MapResultProps {
@@ -18,10 +19,13 @@ interface MapResultProps {
   boundingbox?: number[];
   geojson?: unknown;
   label: string;
+  /** render the map expanded from the start (map-intent searches) */
+  autoOpen?: boolean;
 }
 
-export function MapResult({ longitude, latitude, boundingbox, geojson, label }: MapResultProps) {
-  const [open, setOpen] = useState(false);
+export function MapResult({ longitude, latitude, boundingbox, geojson, label, autoOpen = false }: MapResultProps) {
+  const [open, setOpen] = useState(autoOpen);
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const hasMap = Boolean(longitude && latitude) || Boolean(boundingbox?.length) || Boolean(geojson);
 
@@ -129,7 +133,7 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label }: 
         type="button"
       >
         <LocationIcon className="size-3.5" />
-        {label}
+        {open ? t("hide_map") : label}
       </button>
       {open ? (
         <div

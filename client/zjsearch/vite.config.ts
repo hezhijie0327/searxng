@@ -9,8 +9,8 @@
  */
 
 import { resolve } from "node:path";
-import browserslistToEsbuild from "browserslist-to-esbuild";
 import tailwindcss from "@tailwindcss/vite";
+import browserslistToEsbuild from "browserslist-to-esbuild";
 import manifest from "./package.json" with { type: "json" };
 import { plgAssets } from "./tools/assets.ts";
 
@@ -19,7 +19,7 @@ const ROOT = "../../"; // root of the git repository
 const PATH = {
   brand: "src/brand/",
   dist: resolve(ROOT, "searx/static/themes/zjsearch/"),
-  src: "src/"
+  src: "src/",
 } as const;
 
 // local SearXNG instance used by `npm run dev` (start it with: make run)
@@ -50,9 +50,9 @@ export default {
         "/manifest.json",
         "/client",
         "/favicon.ico",
-        "/logo"
-      ].map((path) => [path, { target: DEV_BACKEND, changeOrigin: true }])
-    )
+        "/logo",
+      ].map((path) => [path, { target: DEV_BACKEND, changeOrigin: true }]),
+    ),
   },
 
   build: {
@@ -64,7 +64,7 @@ export default {
     sourcemap: true,
     rollupOptions: {
       input: {
-        app: `${PATH.src}/main.tsx`
+        app: `${PATH.src}/main.tsx`,
       },
       output: {
         entryFileNames: "zjsearch.min.js",
@@ -75,10 +75,10 @@ export default {
             return "zjsearch.min[extname]";
           }
           return "assets/[name][extname]";
-        }
-      }
-    }
+        },
+      },
+    },
   },
 
-  plugins: [tailwindcss(), plgAssets(PATH)]
+  plugins: [tailwindcss(), plgAssets(PATH)],
 } satisfies import("vite").UserConfig;

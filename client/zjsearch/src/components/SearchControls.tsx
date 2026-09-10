@@ -12,6 +12,8 @@ interface CategoryTabsProps {
   globals: GlobalData;
   selected: string[];
   onSearch: (categories: string[]) => void;
+  /** wrap onto multiple lines (index hero) instead of scrolling one row */
+  wrap?: boolean;
 }
 
 /**
@@ -19,7 +21,7 @@ interface CategoryTabsProps {
  * searches the clicked category, shift+click toggles multi-selection.
  * Otherwise it behaves like toggling checkboxes and the magnifier submits.
  */
-export function CategoryTabs({ globals, selected, onSearch }: CategoryTabsProps) {
+export function CategoryTabs({ globals, selected, onSearch, wrap = false }: CategoryTabsProps) {
   const t = useT();
   const settings = useSettings();
   const [selection, setSelection] = useState<string[]>(selected);
@@ -49,7 +51,13 @@ export function CategoryTabs({ globals, selected, onSearch }: CategoryTabsProps)
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
 
   return (
-    <div className="flex items-center gap-0.5 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div
+      className={`flex items-center gap-0.5 py-1 ${
+        wrap
+          ? "flex-wrap justify-center gap-y-0.5"
+          : "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      }`}
+    >
       {tabs.map((category) => {
         const isSelected = selection.includes(category);
         return (

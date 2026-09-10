@@ -281,9 +281,25 @@ function ImageTile({
 }) {
   const [loaded, setLoaded] = useState(false);
   const result = results[index];
+  // a hung image request must not pulse forever - fall back to the
+  // error placeholder after a grace period
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    if (loaded) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setTimedOut(true);
+      setLoaded(true);
+    }, 12000);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loaded]);
   if (!result) {
     return null;
   }
+  const src = timedOut ? `${THEME_STATIC}/img/img_load_error.svg` : thumbSrc;
   return (
     <button
       className={`group relative block w-full break-inside-avoid overflow-hidden rounded-lg bg-surface-2 transition-opacity ${
@@ -307,7 +323,7 @@ function ImageTile({
         onLoad={() => {
           setLoaded(true);
         }}
-        src={thumbSrc}
+        src={src}
       />
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       <span className="pointer-events-none absolute inset-x-2 bottom-2 line-clamp-2 text-[11px] leading-4 text-white opacity-0 transition-opacity group-hover:opacity-100">

@@ -253,6 +253,8 @@ function EmbedFrame({ src }: { src: string }) {
 interface CardProps {
   result: ResultItem;
   globals: GlobalData;
+  /** map-intent pages open the inline OSM map automatically (upstream simple behaviour) */
+  autoOpenMap?: boolean;
 }
 
 export function DefaultCard({ result, globals }: CardProps) {
@@ -337,6 +339,48 @@ export function VideoCard({ result, globals }: CardProps) {
               lengthDisplay={formatLength(result.length_display, result.length_seconds)}
               src={result.thumbnail}
             />
+          </ResultLink>
+        ) : null}
+      </div>
+    </ResultArticle>
+  );
+}
+
+/** News-intent layout: source + relative date up top, compact snippet, 16:9 thumb. */
+export function NewsCard({ result, globals }: CardProps) {
+  const source = result.netloc || result.engines[0] || "";
+  return (
+    <ResultArticle priority={result.priority}>
+      <div className="flex gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+            <Favicon result={result} />
+            <span className="truncate font-medium text-ink-2" dir="ltr">
+              {source}
+            </span>
+            {result.published_date ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <CalendarIcon className="size-3" />
+                  <time dateTime={result.published_date}>{formatDate(result.published_date)}</time>
+                </span>
+              </>
+            ) : null}
+          </div>
+          <div className="mt-1">
+            <Title globals={globals} result={result} />
+          </div>
+          <p
+            className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
+            dangerouslySetInnerHTML={{ __html: result.content_html }}
+            dir="auto"
+          />
+          <EnginesLine globals={globals} result={result} />
+        </div>
+        {result.thumbnail ? (
+          <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
+            <Thumb alt={result.title_text} className="aspect-video h-auto w-40 sm:w-44" src={result.thumbnail} />
           </ResultLink>
         ) : null}
       </div>
@@ -443,6 +487,54 @@ export function ProductCard({ result, globals }: CardProps) {
         ) : null}
       </div>
     </ResultArticle>
+  );
+}
+
+/** Kagi-shopping style tiles for product-only result pages. */
+export function ProductGrid({ results, globals }: { results: ResultItem[]; globals: GlobalData }) {
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {results.map((result, index) => (
+        <article className="group flex flex-col" key={`${result.url}-${index}`}>
+          <ResultLink
+            className="relative block aspect-square overflow-hidden rounded-xl bg-surface-2"
+            globals={globals}
+            result={result}
+          >
+            {result.thumbnail ? (
+              <img
+                alt={result.title_text}
+                className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
+                }}
+                src={result.thumbnail}
+              />
+            ) : (
+              <span className="grid size-full place-items-center text-ink-3">
+                <PackageIcon className="size-8" />
+              </span>
+            )}
+          </ResultLink>
+          <h3 className="mt-2.5 line-clamp-2 text-[14px] font-medium leading-snug">
+            <ResultLink
+              className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
+              globals={globals}
+              result={result}
+            >
+              <span dangerouslySetInnerHTML={{ __html: result.title_html }} dir="auto" />
+            </ResultLink>
+          </h3>
+          {result.price ? <p className="mt-1 text-sm font-semibold text-ink">{result.price}</p> : null}
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink-3">
+            {result.shipping ? <span>{result.shipping}</span> : null}
+            {result.source_country ? <span>{result.source_country}</span> : null}
+            <span className="truncate">{result.engines[0]}</span>
+          </div>
+        </article>
+      ))}
+    </div>
   );
 }
 
@@ -561,9 +653,9 @@ export function FileCard({ result, globals }: CardProps) {
       </dl>
       {result.embedded ? (
         isMedia ? (
-          <MediaCollapse label={t("show_media")}>
-            {() =>
-              result.mtype === "video" ? (
+          result.mtype === "video" ? (
+            <MediaCollapse label={t("show_media")}>
+              {() => (
                 <video
                   className="w-full max-w-lg rounded-xl"
                   controls
@@ -571,11 +663,13 @@ export function FileCard({ result, globals }: CardProps) {
                   preload="metadata"
                   src={result.embedded}
                 />
-              ) : (
-                <audio className="w-full max-w-md" controls preload="metadata" src={result.embedded} />
-              )
-            }
-          </MediaCollapse>
+              )}
+            </MediaCollapse>
+          ) : (
+            // audio: inline player, no collapse - music results should be
+            // playable in one click (preload="none" keeps it cheap)
+            <audio className="mt-2 w-full max-w-md" controls preload="none" src={result.embedded} />
+          )
         ) : (
           <a
             className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 hover:text-ink"
@@ -825,7 +919,7 @@ export function PackageCard({ result, globals }: CardProps) {
   );
 }
 
-export function MapCard({ result, globals }: CardProps) {
+export function MapCard({ result, globals, autoOpenMap }: CardProps) {
   const t = useT();
   const address = result.address;
   const addressLine = address
@@ -862,6 +956,7 @@ export function MapCard({ result, globals }: CardProps) {
         </dl>
       ) : null}
       <MapResult
+        autoOpen={autoOpenMap}
         boundingbox={result.boundingbox}
         geojson={result.geojson}
         label={t("show_map")}

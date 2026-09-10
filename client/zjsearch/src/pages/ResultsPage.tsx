@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
 import { ArrowUpIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
-import { ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
+import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
 import { Sidebar } from "../components/results/Sidebar.tsx";
@@ -353,6 +353,18 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
   const allResults = useMemo(() => [...data.results, ...appended], [data.results, appended]);
 
+  // Page-level layout intent (Kagi-style per-category presentation): a single
+  // selected category signals intent, `only_template` additionally catches
+  // bang-limited searches where every result shares one template.
+  const singleCategory = selectedCategories.length === 1 ? selectedCategories[0] : null;
+  const isImagePage =
+    (data.only_template === "images" || singleCategory === "images") &&
+    allResults.every((result) => result.template === "images" || result.thumbnail_src || result.img_src);
+  const isVideoPage = data.only_template === "videos" || singleCategory === "videos";
+  const isProductPage = (data.only_template === "products" || singleCategory === "products") && !isVideoPage;
+  const isNewsPage = singleCategory === "news" && !isImagePage && !isVideoPage;
+  const isMapPage = singleCategory === "map" && !isImagePage && !isVideoPage;
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
   useEffect(() => {
     setHotkeysSelected(-1);
@@ -366,16 +378,15 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     const calc = tryEvaluateExpression(data.q);
     return calc ? ({ template: "answer/legacy.html", answer: `${calc.expr} = ${calc.value}`, url: "" } as const) : null;
   }, [data.q, hasPlugin]);
-  const isImageOnly = data.only_template === "images" && appended.every((result) => result.template === "images");
-  const isVideoOnly = data.only_template === "videos" && appended.every((result) => result.template === "videos");
   const showSkeletons = loading && !error;
 
   return (
     <Shell globals={globals} hideTopNav>
       <header className="border-b border-line">
         <div className="zjs-results-header-row mx-auto flex w-full items-center gap-4 px-4 pt-3 sm:px-6">
-          {/* brand mark only - no home link needed, everything opens as a drawer */}
-          <span className="shrink-0 select-none text-xl font-extrabold tracking-tight text-ink">
+          {/* brand mark only - no home link needed, everything opens as a drawer;
+              hidden on small screens so the query box keeps enough width */}
+          <span className="hidden min-[480px]:block shrink-0 select-none text-xl font-extrabold tracking-tight text-ink">
             {globals.instance_name}
             <span className="text-accent-strong">.</span>
           </span>
@@ -421,13 +432,31 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-6">
                     <NoResults pageno={data.pageno} />
                   </div>
-                ) : isImageOnly ? (
+                ) : isImagePage ? (
                   <div className="mt-4">
                     <ImageGrid results={allResults} />
                   </div>
-                ) : isVideoOnly ? (
+                ) : isVideoPage ? (
                   <div className="mt-4">
                     <VideoGrid globals={globals} results={allResults} />
+                  </div>
+                ) : isProductPage ? (
+                  <div className="mt-4">
+                    <ProductGrid globals={globals} results={allResults} />
+                  </div>
+                ) : isNewsPage ? (
+                  <div className="mt-2 space-y-1">
+                    {allResults.map((result, index) => (
+                      <div
+                        className={`animate-fade-up rounded-2xl ${
+                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                        }`}
+                        key={index}
+                        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                      >
+                        <NewsCard globals={globals} result={result} />
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="mt-2" ref={listRef}>
@@ -453,7 +482,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                               key={index}
                               style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                             >
-                              <ResultCard globals={globals} result={result} />
+                              <ResultCard autoOpenMap={isMapPage} globals={globals} result={result} />
                             </div>
                           ))}
                         </div>
@@ -477,7 +506,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          {!isImageOnly && !isVideoOnly ? (
+          {!isImagePage && !isVideoPage && !isProductPage ? (
             <div className="w-full shrink-0 pt-4 lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
               <Sidebar data={data} onSearch={submitQuery} />
             </div>
