@@ -142,9 +142,10 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
       ) : null}
 
       {hasSuggestions ? (
-        <Box title={t("suggestions")}>
+        <Box open title={t("suggestions")}>
           <div className="grid grid-cols-2 gap-2">
-            {data.suggestions.map((suggestion) => (
+            {/* cap the list: more than 8 chips turns the sidebar into noise */}
+            {data.suggestions.slice(0, 8).map((suggestion) => (
               <button
                 className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-left text-[13px] text-ink-2 transition-colors hover:border-accent hover:text-ink"
                 dir="auto"
