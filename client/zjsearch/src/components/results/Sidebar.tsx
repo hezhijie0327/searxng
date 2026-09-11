@@ -254,8 +254,6 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
         </section>
       ) : null}
 
-      <DebugPanels data={data} />
-
       {globals.method === "POST" ? (
         <Box title={t("search_url")}>
           <div className="flex items-start gap-2">

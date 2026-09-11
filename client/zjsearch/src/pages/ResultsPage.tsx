@@ -14,7 +14,7 @@ import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
-import { Infobox, Sidebar } from "../components/results/Sidebar.tsx";
+import { DebugPanels, Infobox, Sidebar } from "../components/results/Sidebar.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
@@ -506,9 +506,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             </div>
             {!showSkeletons && !error ? (
               <p className="mt-2 ps-3.5 text-xs text-ink-3">
-                {t("meta_found")} {allResults.length} {t("meta_results")} · {t("meta_in")}{" "}
-                {Math.round((data.max_response_time ?? 0) * 10) / 10} {t("seconds")}
+                {t("meta_found")} {allResults.length} {t("meta_results")}
               </p>
+            ) : null}
+            {!showSkeletons ? (
+              <div className="mt-2 flex flex-col gap-3 lg:hidden">
+                <DebugPanels data={data} />
+              </div>
             ) : null}
             {!showSkeletons && data.suggestions.length > 0 ? (
               <div className="mt-2.5 flex items-center gap-2">
@@ -719,10 +723,15 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          <div className="hidden w-full shrink-0 pt-4 lg:block lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
-            {/* keep the column reserved but blank while the new query loads -
-                  stale infoboxes from the previous query must not linger */}
-            {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
+          <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 lg:self-start lg:h-[calc(100dvh-9rem)] lg:overflow-hidden lg:pb-6">
+            {!showSkeletons && (data.infoboxes.length > 0 || globals.method === "POST") ? (
+              <div className="min-h-0 flex-1 overflow-y-auto pb-1 [scrollbar-width:thin]">
+                {/* keep the area reserved but blank while the new query loads -
+                    stale infoboxes from the previous query must not linger */}
+                <Sidebar data={data} onSearch={submitQuery} />
+              </div>
+            ) : null}
+            {showSkeletons ? null : <DebugPanels data={data} />}
           </div>
         </div>
       </main>
