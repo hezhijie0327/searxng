@@ -145,33 +145,20 @@ function MetaLine({ result }: { result: ResultItem }) {
 
 const MAX_ENGINES_SHOWN = 8;
 
-function EnginesLine({ result, globals }: { result: ResultItem; globals: GlobalData }) {
-  const t = useT();
+function EnginesLine({ result }: { result: ResultItem }) {
   const shown = result.engines.slice(0, MAX_ENGINES_SHOWN);
   const hidden = result.engines.length - shown.length;
   return (
-    <div className="mt-2 flex items-start justify-between gap-3 text-[11px] text-ink-3">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-        {shown.map((engine) => (
-          <span className="rounded-full bg-surface-2 px-2 py-0.5" key={engine}>
-            {engine}
-          </span>
-        ))}
-        {hidden > 0 ? (
-          <span className="rounded-full bg-surface-2 px-2 py-0.5" title={result.engines.join(", ")}>
-            +{hidden}
-          </span>
-        ) : null}
-      </div>
-      {globals.cache_url && result.url ? (
-        <a
-          className="shrink-0 whitespace-nowrap rounded-full bg-surface-2 px-2 py-0.5 underline-offset-2 transition-colors hover:text-ink-2 hover:underline"
-          href={globals.cache_url + result.url}
-          rel="noreferrer"
-          target="_blank"
-        >
-          {t("cached")}
-        </a>
+    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-ink-3">
+      {shown.map((engine) => (
+        <span className="rounded-full bg-surface-2 px-2 py-0.5" key={engine}>
+          {engine}
+        </span>
+      ))}
+      {hidden > 0 ? (
+        <span className="rounded-full bg-surface-2 px-2 py-0.5" title={result.engines.join(", ")}>
+          +{hidden}
+        </span>
       ) : null}
     </div>
   );
@@ -339,7 +326,7 @@ export function DefaultCard({ result, globals, mediaOpen }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -385,7 +372,7 @@ export function VideoCard({ result, globals, mediaOpen }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -406,7 +393,7 @@ export function NewsCard({ result, globals }: CardProps) {
         dangerouslySetInnerHTML={{ __html: result.content_html }}
         dir="auto"
       />
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -472,7 +459,7 @@ export function TorrentCard({ result, globals }: CardProps) {
           dir="auto"
         />
       ) : null}
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -508,7 +495,7 @@ export function ProductCard({ result, globals }: CardProps) {
           </ResultLink>
         ) : null}
       </div>
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -561,7 +548,7 @@ export function ProductGrid({ results, globals }: { results: ResultItem[]; globa
   );
 }
 
-export function KeyValueCard({ result, globals }: CardProps) {
+export function KeyValueCard({ result }: CardProps) {
   return (
     <ResultArticle priority={result.priority}>
       <div className="overflow-hidden rounded-xl border border-line">
@@ -593,7 +580,7 @@ export function KeyValueCard({ result, globals }: CardProps) {
           </tbody>
         </table>
       </div>
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -629,7 +616,7 @@ export function CodeCard({ result, globals }: CardProps) {
           dir="ltr"
         />
       ) : null}
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -706,7 +693,7 @@ export function FileCard({ result, globals }: CardProps) {
           </a>
         )
       ) : null}
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -832,7 +819,7 @@ export function PaperCard({ result, globals }: CardProps) {
           ))}
         </div>
       ) : null}
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -937,7 +924,7 @@ export function PackageCard({ result, globals }: CardProps) {
           ))}
         </div>
       ) : null}
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -1002,7 +989,7 @@ export function MapCard({ result, globals, autoOpenMap }: CardProps) {
           ))}
         </div>
       ) : null}
-      <EnginesLine globals={globals} result={result} />
+      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -1042,7 +1029,7 @@ export function ImageListCard({ result, globals, onOpen }: CardProps & { onOpen:
             {result.filesize ? <span>{result.filesize}</span> : null}
             {result.source ? <span>{result.source}</span> : null}
           </div>
-          <EnginesLine globals={globals} result={result} />
+          <EnginesLine result={result} />
         </div>
       </div>
     </ResultArticle>
