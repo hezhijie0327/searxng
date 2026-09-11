@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { CloseIcon, LightbulbIcon, SlidersIcon } from "../components/icons.tsx";
+import { LightbulbIcon, SlidersIcon } from "../components/icons.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { Shell } from "../components/Shell.tsx";
@@ -84,30 +84,38 @@ export function IndexPage({ data }: { data: IndexData }) {
             variant="hero"
           />
         </div>
+        {/* single stable toggle: opens the tabs + filter rows, highlights
+            while expanded, clicks again to collapse */}
+        <div className="mt-1 flex w-full justify-end animate-fade-up [animation-delay:120ms]">
+          <button
+            aria-expanded={optionsOpen}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
+              optionsOpen ? "bg-surface-2 text-ink" : "text-ink-3 hover:bg-surface-2 hover:text-ink"
+            }`}
+            onClick={() => {
+              setOptionsOpen((open) => !open);
+            }}
+            type="button"
+          >
+            <SlidersIcon className="size-3.5" />
+            {t("search_options")}
+          </button>
+        </div>
         {optionsOpen ? (
           <>
-            <div className="mt-3 flex max-w-full items-start justify-between gap-2 animate-fade-up [animation-delay:120ms]">
-              <div className="min-w-0 flex-1">
-                <CategoryTabs
-                  globals={globals}
-                  onSearch={(categories) => {
-                    setSelected(categories);
-                    submitSearch(query, categories);
-                  }}
-                  onSelectionChange={setSelected}
-                  selected={selected}
-                />
-              </div>
-              <button
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-                onClick={() => {
-                  setOptionsOpen(false);
+            {/* raised stacking level: the kebab menu must paint over the
+                filter row below (fade-up leaves a residual transform on
+                siblings, which would bury this row's z-40 menu) */}
+            <div className="relative z-10 mt-3 max-w-full animate-fade-up [animation-delay:120ms]">
+              <CategoryTabs
+                globals={globals}
+                onSearch={(categories) => {
+                  setSelected(categories);
+                  submitSearch(query, categories);
                 }}
-                type="button"
-              >
-                <CloseIcon className="size-3.5" />
-                {t("close")}
-              </button>
+                onSelectionChange={setSelected}
+                selected={selected}
+              />
             </div>
             <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 animate-fade-in">
               <SearchFilters
@@ -119,20 +127,7 @@ export function IndexPage({ data }: { data: IndexData }) {
               />
             </div>
           </>
-        ) : (
-          <div className="mt-1 flex w-full justify-end animate-fade-up [animation-delay:120ms]">
-            <button
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink`}
-              onClick={() => {
-                setOptionsOpen(true);
-              }}
-              type="button"
-            >
-              <SlidersIcon className="size-3.5" />
-              {t("search_options")}
-            </button>
-          </div>
-        )}
+        ) : null}
       </main>
       {hintHidden ? null : (
         <div className="mx-auto mb-10 w-full max-w-xl px-4">
