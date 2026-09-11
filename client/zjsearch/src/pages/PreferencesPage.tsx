@@ -1091,7 +1091,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           ) : null}
 
           {tab === "cookies" ? (
-            <>
+            <div className="space-y-4">
               <Card>
                 <SettingRow
                   description={t("cookies_list_desc")}
@@ -1104,7 +1104,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 </SettingRow>
               </Card>
               {data.cookies.length > 0 ? (
-                <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
+                <div className="overflow-hidden rounded-2xl border border-line bg-surface">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-surface-2 text-ink-3">
                       <tr>
@@ -1116,7 +1116,12 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                       {data.cookies.map((cookie) => (
                         <tr className="border-t border-line" key={cookie.name}>
                           <td className="px-4 py-1.5 font-mono">{cookie.name}</td>
-                          <td className="px-4 py-1.5 break-all">{cookie.value}</td>
+                          <td
+                            className="px-4 py-1.5 break-all"
+                            title={cookie.value.length > 64 ? cookie.value : undefined}
+                          >
+                            {cookie.value.length > 64 ? `${cookie.value.slice(0, 64)}…` : cookie.value}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1186,24 +1191,25 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   />
                 </SettingRow>
               </Card>
-            </>
+              <Card>
+                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5">
+                  <p className="min-w-0 flex-1 text-xs leading-relaxed text-ink-3">
+                    {t("settings_in_cookies")}
+                    <br />
+                    {t("cookies_convenience")}
+                  </p>
+                  <Link
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink-2 transition-colors hover:border-danger hover:text-danger"
+                    href="/clear_cookies"
+                  >
+                    <RefreshIcon className="size-4" />
+                    {t("reset_defaults")}
+                  </Link>
+                </div>
+              </Card>
+            </div>
           ) : null}
         </div>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3 text-sm">
-          <Link
-            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-ink-2 transition-colors hover:border-danger hover:text-danger"
-            href="/clear_cookies"
-          >
-            <RefreshIcon className="size-4" />
-            {t("reset_defaults")}
-          </Link>
-        </div>
-        <p className="mt-4 text-xs leading-relaxed text-ink-3">
-          {t("settings_in_cookies")}
-          <br />
-          {t("cookies_convenience")}
-        </p>
       </main>
     </Shell>
   );
