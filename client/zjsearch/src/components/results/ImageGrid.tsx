@@ -201,7 +201,7 @@ function Lightbox({
       <div className="flex items-center justify-between p-3">
         <span className="text-xs text-zinc-500" dir="ltr">
           {index + 1} / {results.length}
-          {zoom > 1 ? <span className="ms-2 opacity-80">{Math.round(zoom * 100)}%</span> : null}
+          {zoom !== 1 ? <span className="ms-2 opacity-80">{Math.round(zoom * 100)}%</span> : null}
         </span>
         <button
           aria-label={t("close")}
