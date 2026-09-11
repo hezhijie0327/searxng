@@ -8,7 +8,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   InfoIcon,
-  SearchIcon,
 } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
@@ -511,6 +510,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             ) : null}
             {!showSkeletons ? (
               <div className="mt-2 flex flex-col gap-3 lg:hidden">
+                <SuggestionsBox data={data} onSearch={submitQuery} />
                 <DebugPanels data={data} />
               </div>
             ) : null}
