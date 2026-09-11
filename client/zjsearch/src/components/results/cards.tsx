@@ -1160,6 +1160,8 @@ export function ResultCard(props: CardProps & { onOpenImage?: () => void }) {
       return props.onOpenImage ? <ImageListCard {...props} onOpen={props.onOpenImage} /> : <DefaultCard {...props} />;
     case "videos":
       return <VideoCard {...props} />;
+    case "news":
+      return <NewsCard globals={props.globals} result={props.result} />;
     case "torrent":
       return <TorrentCard {...props} />;
     case "map":

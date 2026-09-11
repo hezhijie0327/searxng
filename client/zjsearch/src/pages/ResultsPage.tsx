@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronRightIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
@@ -129,6 +129,69 @@ function groupResults(
     }
   }
   return groups;
+}
+
+/** Sections that get a Kagi/Google-style header.  Special-typed results
+    interleave heavily in mixed searches (one group per engine), so each
+    section type is consolidated into a single group at its first position. */
+const SECTION_TEMPLATES = new Set(["images", "videos", "news"]);
+
+function consolidateGroups(
+  groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
+): Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> {
+  const first: Map<string, { template: string; items: Array<{ result: ResultItem; index: number }> }> = new Map();
+  const out: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> = [];
+  for (const group of groups) {
+    if (!SECTION_TEMPLATES.has(group.template)) {
+      out.push(group);
+      continue;
+    }
+    const merged = first.get(group.template);
+    if (merged) {
+      merged.items.push(...group.items);
+    } else {
+      const created = { template: group.template, items: [...group.items] };
+      first.set(group.template, created);
+      out.push(created);
+    }
+  }
+  return out;
+}
+
+/** Kagi/Google-style section header for a same-type result group: category
+    icon + translated label + count, and a chevron that switches to the
+    dedicated single-category search. */
+function GroupHeader({
+  category,
+  label,
+  count,
+  onAll,
+}: {
+  category: string;
+  label: string;
+  count: number;
+  onAll: (categories: string[]) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 pb-1 pt-5 first:pt-1">
+      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+        <CategoryIcon category={category} className="size-4 text-accent" />
+        {label}
+        <span className="font-normal text-ink-3">{count}</span>
+      </h2>
+      <button
+        aria-label={label}
+        className="grid size-7 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+        onClick={() => {
+          onAll([category]);
+        }}
+        title={label}
+        type="button"
+      >
+        <ChevronRightIcon className="size-4" />
+      </button>
+    </div>
+  );
 }
 
 function InfiniteScrollSentinel({ onNext, error, loading }: { onNext: () => void; error: boolean; loading: boolean }) {
@@ -402,7 +465,12 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
           <HeaderActions globals={globals} />
         </div>
         <div className="zjs-results-header-row mx-auto px-4 pt-1 sm:px-6">
-          <CategoryTabs globals={globals} onSearch={onSearchCategories} selected={selectedCategories} />
+          <CategoryTabs
+            globals={globals}
+            onSearch={onSearchCategories}
+            onSelectionChange={setSelectedCategories}
+            selected={selectedCategories}
+          />
         </div>
         <div className="zjs-results-header-row mx-auto px-4 pb-1 sm:px-6">
           <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
@@ -480,19 +548,67 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   </div>
                 ) : (
                   <div className="mt-2" ref={listRef}>
-                    {groupResults(allResults).map((group, groupIndex) =>
-                      group.template === "images" ? (
-                        <div className="grid grid-cols-2 gap-3 py-2 sm:grid-cols-3 lg:grid-cols-4" key={groupIndex}>
-                          {group.items.map(({ result, index }) => (
-                            <ResultCard
-                              globals={globals}
-                              key={index}
-                              onOpenImage={() => window.open(result.img_src ?? result.url, "_blank", "noopener")}
-                              result={result}
+                    {consolidateGroups(groupResults(allResults)).map((group, groupIndex) => {
+                      const label = globals.category_labels[group.template] ?? group.template;
+                      if (group.template === "images") {
+                        return (
+                          <section key={`${group.template}-${groupIndex}`}>
+                            <GroupHeader
+                              category="images"
+                              count={group.items.length}
+                              label={label}
+                              onAll={onSearchCategories}
                             />
-                          ))}
-                        </div>
-                      ) : (
+                            <div className="mt-1">
+                              <ImageGrid results={group.items.slice(0, 8).map(({ result }) => result)} />
+                            </div>
+                          </section>
+                        );
+                      }
+                      if (group.template === "videos") {
+                        return (
+                          <section key={`${group.template}-${groupIndex}`}>
+                            <GroupHeader
+                              category="videos"
+                              count={group.items.length}
+                              label={label}
+                              onAll={onSearchCategories}
+                            />
+                            <div className="mt-1">
+                              <VideoGrid
+                                globals={globals}
+                                results={group.items.slice(0, 6).map(({ result }) => result)}
+                              />
+                            </div>
+                          </section>
+                        );
+                      }
+                      if (group.template === "news") {
+                        return (
+                          <section key={`${group.template}-${groupIndex}`}>
+                            <GroupHeader
+                              category="news"
+                              count={group.items.length}
+                              label={label}
+                              onAll={onSearchCategories}
+                            />
+                            <div className="mt-1 space-y-1">
+                              {group.items.slice(0, 6).map(({ result, index }) => (
+                                <div
+                                  className={`animate-fade-up rounded-2xl ${
+                                    index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                                  }`}
+                                  key={index}
+                                  style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                                >
+                                  <NewsCard globals={globals} result={result} />
+                                </div>
+                              ))}
+                            </div>
+                          </section>
+                        );
+                      }
+                      return (
                         <div key={groupIndex}>
                           {group.items.map(({ result, index }) => (
                             <div
@@ -506,8 +622,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                             </div>
                           ))}
                         </div>
-                      ),
-                    )}
+                      );
+                    })}
                   </div>
                 )}
 
