@@ -106,7 +106,7 @@ export function IndexPage({ data }: { data: IndexData }) {
             {/* raised stacking level: the kebab menu must paint over the
                 filter row below (fade-up leaves a residual transform on
                 siblings, which would bury this row's z-40 menu) */}
-            <div className="relative z-10 mt-3 max-w-full animate-fade-up [animation-delay:120ms]">
+            <div className="relative z-10 mt-3 w-full animate-fade-up [animation-delay:120ms]">
               <CategoryTabs
                 globals={globals}
                 onSearch={(categories) => {
