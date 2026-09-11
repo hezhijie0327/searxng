@@ -5,7 +5,6 @@ import { useT } from "../../lib/i18n.ts";
 import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
 import { ChevronDownIcon, DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
-import { Link } from "../Shell.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
   return (
@@ -61,6 +60,9 @@ export function Infobox({
                       className="inline-block max-h-24 rounded-lg align-middle"
                       decoding="async"
                       loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
                       src={attribute.image_src}
                     />
                   ) : (

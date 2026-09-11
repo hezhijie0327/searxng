@@ -564,7 +564,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               </div>
             ) : null}
             {!showSkeletons && data.infoboxes.length > 0 ? (
-              <div className="mt-3 lg:hidden">
+              <div className="mt-3 flex flex-col gap-3 lg:hidden">
                 {data.infoboxes.map((infobox, index) => (
                   <Infobox globals={globals} infobox={infobox} key={index} onSearch={submitQuery} />
                 ))}
