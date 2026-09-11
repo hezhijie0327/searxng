@@ -1145,7 +1145,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                     {t("search_url_of_prefs")}
                   </h4>
                   <pre
-                    className="mt-2 min-w-0 overflow-x-auto rounded-xl bg-surface-2 p-2.5 font-mono text-[11px] break-all whitespace-pre-wrap text-ink-2"
+                    className="mt-2 min-w-0 overflow-x-auto rounded-xl bg-surface-2 p-2.5 font-mono text-xs break-all whitespace-pre-wrap text-ink-2"
                     dir="ltr"
                   >
                     {shareOrigin}/?preferences={data.preferences_url_params}&amp;q=%s
@@ -1158,7 +1158,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                     {t("url_to_restore")}
                   </h4>
                   <pre
-                    className="mt-2 min-w-0 overflow-x-auto rounded-xl bg-surface-2 p-2.5 font-mono text-[11px] break-all whitespace-pre-wrap text-ink-2"
+                    className="mt-2 min-w-0 overflow-x-auto rounded-xl bg-surface-2 p-2.5 font-mono text-xs break-all whitespace-pre-wrap text-ink-2"
                     dir="ltr"
                   >
                     {shareOrigin}/preferences?preferences={data.preferences_url_params}
@@ -1172,7 +1172,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   </h4>
                   <div className="mt-2 flex items-start gap-2">
                     <pre
-                      className="min-w-0 flex-1 overflow-x-auto rounded-xl bg-surface-2 p-2.5 font-mono text-[11px] break-all whitespace-pre-wrap text-ink-2"
+                      className="min-w-0 flex-1 overflow-x-auto rounded-xl bg-surface-2 p-2.5 font-mono text-xs break-all whitespace-pre-wrap text-ink-2"
                       dir="ltr"
                     >
                       {data.preferences_url_params}

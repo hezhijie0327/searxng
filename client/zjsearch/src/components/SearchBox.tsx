@@ -165,7 +165,7 @@ export function SearchBox({
           autoCapitalize="none"
           autoComplete="off"
           className={`min-w-0 flex-1 bg-transparent outline-none placeholder:text-ink-3 ${
-            variant === "hero" ? "text-lg" : "text-[15px]"
+            variant === "hero" ? "text-lg" : "text-base"
           }`}
           dir="auto"
           name="q"

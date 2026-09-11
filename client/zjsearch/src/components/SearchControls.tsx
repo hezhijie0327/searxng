@@ -64,7 +64,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
             return (
               <button
                 aria-pressed={isSelected}
-                className={`relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-[13.5px] transition-colors ${
+                className={`relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-[13px] transition-colors ${
                   isSelected ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
                 }`}
                 key={category}

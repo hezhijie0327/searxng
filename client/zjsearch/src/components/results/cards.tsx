@@ -85,7 +85,7 @@ function PrettyUrl({ result, globals }: { result: ResultItem; globals: GlobalDat
 
 function Title({ result, globals }: { result: ResultItem; globals: GlobalData }) {
   return (
-    <h3 className="text-[17px] font-medium leading-snug">
+    <h3 className="text-base font-medium leading-snug">
       <ResultLink
         className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
         globals={globals}
@@ -149,7 +149,7 @@ function EnginesLine({ result }: { result: ResultItem }) {
   const shown = result.engines.slice(0, MAX_ENGINES_SHOWN);
   const hidden = result.engines.length - shown.length;
   return (
-    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-ink-3">
+    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
       {shown.map((engine) => (
         <span className="rounded-full bg-surface-2 px-2 py-0.5" key={engine}>
           {engine}
@@ -187,7 +187,7 @@ function Thumb({
         src={src}
       />
       {lengthDisplay ? (
-        <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+        <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-white">
           {lengthDisplay}
         </span>
       ) : null}
@@ -527,7 +527,7 @@ export function ProductGrid({ results, globals }: { results: ResultItem[]; globa
               </span>
             )}
           </ResultLink>
-          <h3 className="mt-2.5 line-clamp-2 text-[14px] font-medium leading-snug">
+          <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
             <ResultLink
               className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
               globals={globals}
@@ -813,7 +813,7 @@ export function PaperCard({ result, globals }: CardProps) {
       {result.tags && result.tags.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {result.tags.map((tag) => (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] text-ink-3" key={tag}>
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-3" key={tag}>
               {tag}
             </span>
           ))}
@@ -918,7 +918,7 @@ export function PackageCard({ result, globals }: CardProps) {
       {result.tags && result.tags.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {result.tags.map((tag) => (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] text-ink-3" key={tag}>
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-3" key={tag}>
               {tag}
             </span>
           ))}
@@ -1113,7 +1113,7 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
                 )
               ) : null}
             </div>
-            <h3 className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-snug">
+            <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
               <ResultLink
                 className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
                 globals={globals}

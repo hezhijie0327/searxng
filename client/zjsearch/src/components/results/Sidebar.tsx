@@ -39,7 +39,7 @@ export function Infobox({
             src={infobox.img_src}
           />
         ) : null}
-        <h3 className="min-w-0 text-2xl font-semibold leading-tight tracking-tight text-ink" dir="auto">
+        <h3 className="min-w-0 text-xl font-semibold leading-tight tracking-tight text-ink" dir="auto">
           {infobox.title}
         </h3>
       </div>
@@ -229,7 +229,7 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
         <Box title={t("search_url")}>
           <div className="flex items-start gap-2">
             <pre
-              className="min-w-0 flex-1 overflow-x-auto rounded-lg bg-surface-2 p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-ink-2"
+              className="min-w-0 flex-1 overflow-x-auto rounded-lg bg-surface-2 p-2 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap text-ink-2"
               dir="ltr"
             >
               {searchUrl}

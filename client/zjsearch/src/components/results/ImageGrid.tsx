@@ -332,7 +332,7 @@ function ImageTile({
         src={src}
       />
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <span className="pointer-events-none absolute inset-x-2 bottom-2 line-clamp-2 text-[11px] leading-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+      <span className="pointer-events-none absolute inset-x-2 bottom-2 line-clamp-2 text-[11px] font-medium leading-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
         {result.title_text}
       </span>
     </button>

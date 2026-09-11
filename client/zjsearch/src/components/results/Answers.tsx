@@ -65,7 +65,7 @@ function WeatherAnswer({ answer }: { answer: Extract<AnswerData, { template: "an
           </div>
         </details>
       ) : null}
-      {answer.service ? <p className="mt-2 text-[11px] text-ink-3">{answer.service}</p> : null}
+      {answer.service ? <p className="mt-2 text-xs text-ink-3">{answer.service}</p> : null}
     </div>
   );
 }
@@ -136,7 +136,7 @@ function TranslationsAnswer({ answer }: { answer: Extract<AnswerData, { template
           </div>
         </details>
       ) : null}
-      {answer.engine ? <p className="mt-1.5 text-[11px] text-ink-3">{answer.engine}</p> : null}
+      {answer.engine ? <p className="mt-1.5 text-xs text-ink-3">{answer.engine}</p> : null}
     </div>
   );
 }
