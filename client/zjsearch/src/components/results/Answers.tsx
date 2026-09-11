@@ -176,42 +176,17 @@ export function Answers({ answers }: { answers: AnswerData[] }) {
   }
   return (
     <section aria-label={t("answers")} className="space-y-2">
-      {answers.map((answer, index) => {
-        // instant values (calculator, time, ip, hash, …) have no source url:
-        // render them Google-style, big and uncarded (Kagi/Google)
-        if (answer.template === "answer/legacy.html" && !answer.url) {
-          const parts = answer.answer.split(/\s+=\s+/);
-          return (
-            <div className="animate-fade-up border-b border-line pb-3" key={index}>
-              {parts.length > 1 ? (
-                <>
-                  <p className="text-sm text-ink-3" dir="auto">
-                    {parts.slice(0, -1).join(" = ")} =
-                  </p>
-                  <p className="mt-0.5 text-4xl font-medium tracking-tight text-ink" dir="auto">
-                    {parts[parts.length - 1]}
-                  </p>
-                </>
-              ) : (
-                <p className="text-2xl font-medium tracking-tight text-ink" dir="auto">
-                  {answer.answer}
-                </p>
-              )}
-            </div>
-          );
-        }
-        return (
-          <div className="rounded-2xl border border-accent/25 bg-accent-soft/50 px-4 py-3 animate-fade-up" key={index}>
-            {answer.template === "answer/translations.html" ? (
-              <TranslationsAnswer answer={answer} />
-            ) : answer.template === "answer/weather.html" ? (
-              <WeatherAnswer answer={answer} />
-            ) : (
-              <LegacyAnswer answer={answer} />
-            )}
-          </div>
-        );
-      })}
+      {answers.map((answer, index) => (
+        <div className="rounded-2xl border border-accent/25 bg-accent-soft/50 px-4 py-3 animate-fade-up" key={index}>
+          {answer.template === "answer/translations.html" ? (
+            <TranslationsAnswer answer={answer} />
+          ) : answer.template === "answer/weather.html" ? (
+            <WeatherAnswer answer={answer} />
+          ) : (
+            <LegacyAnswer answer={answer} />
+          )}
+        </div>
+      ))}
     </section>
   );
 }
