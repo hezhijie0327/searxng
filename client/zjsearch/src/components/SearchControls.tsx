@@ -41,10 +41,6 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
     onSearch([category]);
   };
 
-  const submitSelection = () => {
-    onSearch(selected.length > 0 ? selected : [globals.default_category]);
-  };
-
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
 
   return (
@@ -80,16 +76,6 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
           </button>
         );
       })}
-      {!settings.search_on_category_select ? (
-        <button
-          aria-label={t("search")}
-          className="ms-1 grid size-7 shrink-0 place-items-center rounded-full bg-accent-strong text-accent-contrast transition-colors hover:bg-accent-strong-hover"
-          onClick={submitSelection}
-          type="button"
-        >
-          <CategoryIcon category="general" className="size-3.5" />
-        </button>
-      ) : null}
     </div>
   );
 }
