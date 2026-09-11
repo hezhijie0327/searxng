@@ -12,6 +12,8 @@ import { CheckIcon } from "./icons.tsx";
 export interface DropdownOption {
   value: string;
   label: string;
+  /** optional icon rendered before the label in the menu */
+  icon?: ReactNode;
 }
 
 export function Dropdown({
@@ -23,6 +25,7 @@ export function Dropdown({
   variant = "bare",
   menuClassName = "",
   icon,
+  iconOnly = false,
 }: {
   value: string;
   options: DropdownOption[];
@@ -35,6 +38,8 @@ export function Dropdown({
   menuClassName?: string;
   /** optional icon shown before the label in the trigger */
   icon?: ReactNode;
+  /** trigger renders only the icon (kebab-style menus) */
+  iconOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
@@ -110,13 +115,17 @@ export function Dropdown({
         aria-haspopup="listbox"
         aria-label={ariaLabel}
         className={
-          variant === "bare"
-            ? `flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] transition-colors ${
+          iconOnly
+            ? `flex size-8 items-center justify-center rounded-full transition-colors ${
                 open ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink"
               }`
-            : `flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 text-sm transition-colors ${
-                open ? "border-ink-3" : "border-line hover:border-ink-3"
-              } bg-surface text-ink`
+            : variant === "bare"
+              ? `flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] transition-colors ${
+                  open ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink"
+                }`
+              : `flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 text-sm transition-colors ${
+                  open ? "border-ink-3" : "border-line hover:border-ink-3"
+                } bg-surface text-ink`
         }
         onClick={() => {
           if (open) {
@@ -130,17 +139,19 @@ export function Dropdown({
         type="button"
       >
         {icon}
-        <span className="truncate">{current?.label ?? value}</span>
-        <svg
-          aria-hidden="true"
-          className={`size-3 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        {iconOnly ? null : <span className="truncate">{current?.label ?? value}</span>}
+        {iconOnly ? null : (
+          <svg
+            aria-hidden="true"
+            className={`size-3 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
       </button>
 
       {open ? (
@@ -167,7 +178,12 @@ export function Dropdown({
                   }}
                   type="button"
                 >
-                  <span className={`truncate ${selected ? "font-medium text-ink" : "text-ink-2"}`}>{option.label}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    {option.icon ? <span className="shrink-0 text-ink-3">{option.icon}</span> : null}
+                    <span className={`truncate ${selected ? "font-medium text-ink" : "text-ink-2"}`}>
+                      {option.label}
+                    </span>
+                  </span>
                   {selected ? <CheckIcon className="size-4 shrink-0 text-accent-strong" /> : null}
                 </button>
               </li>

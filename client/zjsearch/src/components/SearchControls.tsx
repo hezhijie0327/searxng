@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
 import type { GlobalData, SearchPageData } from "../lib/types.ts";
 import type { DropdownOption } from "./Dropdown.tsx";
 import { Dropdown } from "./Dropdown.tsx";
-import { CategoryIcon, ClockIcon, LanguagesIcon, ShieldIcon } from "./icons.tsx";
+import { CategoryIcon, ClockIcon, EllipsisIcon, LanguagesIcon, ShieldIcon } from "./icons.tsx";
 
 interface CategoryTabsProps {
   globals: GlobalData;
@@ -42,6 +43,9 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   };
 
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
+  // Kagi-style: the common categories stay in the row, the rest live in a
+  // kebab menu
+  const overflowTabs = tabs.filter((category) => !PRIMARY_CATEGORIES.has(category));
 
   return (
     <div
@@ -51,35 +55,62 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
           : "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       }`}
     >
-      {tabs.map((category) => {
-        const isSelected = selected.includes(category);
-        return (
-          <button
-            aria-pressed={isSelected}
-            className={`relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-[13.5px] transition-colors ${
-              isSelected ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
-            }`}
-            key={category}
-            onClick={(event) => {
-              onClick(category, event);
-            }}
-            title={settings.search_on_category_select ? undefined : t("search")}
-            type="button"
-          >
-            <CategoryIcon category={category} className="size-3.5 shrink-0" />
-            <span>{globals.category_labels[category] ?? category}</span>
-            <span
-              aria-hidden="true"
-              className={`absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full transition-opacity ${
-                isSelected ? "bg-accent-strong opacity-100" : "opacity-0"
+      {tabs
+        .filter((category) => PRIMARY_CATEGORIES.has(category))
+        .map((category) => {
+          const isSelected = selected.includes(category);
+          return (
+            <button
+              aria-pressed={isSelected}
+              className={`relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-[13.5px] transition-colors ${
+                isSelected ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
               }`}
+              key={category}
+              onClick={(event) => {
+                onClick(category, event);
+              }}
+              title={settings.search_on_category_select ? undefined : t("search")}
+              type="button"
+            >
+              <CategoryIcon category={category} className="size-3.5 shrink-0" />
+              <span>{globals.category_labels[category] ?? category}</span>
+              <span
+                aria-hidden="true"
+                className={`absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full transition-opacity ${
+                  isSelected ? "bg-accent-strong opacity-100" : "opacity-0"
+                }`}
+              />
+            </button>
+          );
+        })}
+      {overflowTabs.length > 0 ? (
+        <Dropdown
+          align={wrap ? "end" : "start"}
+          ariaLabel={overflowTabs.map((category) => globals.category_labels[category] ?? category).join(", ")}
+          icon={
+            <EllipsisIcon
+              className={`size-4 ${overflowTabs.some((category) => selected.includes(category)) ? "text-accent" : ""}`}
             />
-          </button>
-        );
-      })}
+          }
+          iconOnly
+          onChange={(category) => {
+            onClick(category, { shiftKey: false } as React.MouseEvent);
+          }}
+          options={overflowTabs.map((category) => ({
+            value: category,
+            label: globals.category_labels[category] ?? category,
+            icon: <CategoryIcon category={category} className="size-3.5" />,
+          }))}
+          value={overflowTabs.find((category) => selected.includes(category)) ?? ""}
+        />
+      ) : null}
     </div>
   );
 }
+
+/** categories that stay in the tab row; everything else folds into the
+    kebab menu (Kagi-style) */
+const PRIMARY_CATEGORIES = new Set(["general", "images", "videos", "news", "music", "map"]);
 
 export interface FilterValues {
   language: string;
