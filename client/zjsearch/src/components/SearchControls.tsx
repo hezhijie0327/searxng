@@ -11,6 +11,9 @@ import { CategoryIcon } from "./icons.tsx";
 interface CategoryTabsProps {
   globals: GlobalData;
   selected: string[];
+  /** multi-selection changes (toggle) must reach the parent so that
+      query submits (Enter / search box) use the up-to-date selection */
+  onSelectionChange?: (categories: string[]) => void;
   onSearch: (categories: string[]) => void;
   /** wrap onto multiple lines (index hero) instead of scrolling one row */
   wrap?: boolean;
@@ -21,18 +24,13 @@ interface CategoryTabsProps {
  * searches the clicked category, shift+click toggles multi-selection.
  * Otherwise it behaves like toggling checkboxes and the magnifier submits.
  */
-export function CategoryTabs({ globals, selected, onSearch, wrap = false }: CategoryTabsProps) {
+export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, wrap = false }: CategoryTabsProps) {
   const t = useT();
   const settings = useSettings();
-  const [selection, setSelection] = useState<string[]>(selected);
-
-  // re-sync when the server payload changes (back/forward navigation)
-  useEffect(() => {
-    setSelection(selected);
-  }, [selected]);
 
   const toggle = (category: string) => {
-    setSelection((prev) => (prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category]));
+    const next = selected.includes(category) ? selected.filter((item) => item !== category) : [...selected, category];
+    onSelectionChange?.(next.length > 0 ? next : [globals.default_category]);
   };
 
   const onClick = (category: string, event: React.MouseEvent) => {
@@ -44,8 +42,7 @@ export function CategoryTabs({ globals, selected, onSearch, wrap = false }: Cate
   };
 
   const submitSelection = () => {
-    const categories = selection.length > 0 ? selection : [globals.default_category];
-    onSearch(categories);
+    onSearch(selected.length > 0 ? selected : [globals.default_category]);
   };
 
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
@@ -59,7 +56,7 @@ export function CategoryTabs({ globals, selected, onSearch, wrap = false }: Cate
       }`}
     >
       {tabs.map((category) => {
-        const isSelected = selection.includes(category);
+        const isSelected = selected.includes(category);
         return (
           <button
             aria-pressed={isSelected}

@@ -75,6 +75,7 @@ export function IndexPage({ data }: { data: IndexData }) {
               setSelected(categories);
               submitSearch(query, categories);
             }}
+            onSelectionChange={setSelected}
             selected={selected}
             wrap
           />
