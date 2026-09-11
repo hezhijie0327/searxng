@@ -29,7 +29,7 @@ export function Infobox({
   onSearch: (q: string) => void;
 }) {
   return (
-    <div className="px-1 py-1">
+    <div className="rounded-2xl border border-line bg-surface p-3">
       <div className={infobox.img_src ? "flex items-start gap-4" : ""}>
         {infobox.img_src ? (
           <img
@@ -134,7 +134,7 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
   return (
     <aside className="flex flex-col gap-3">
       {hasInfobox ? (
-        <section aria-label={t("info")} className="rounded-2xl bg-surface/60 px-2 py-2">
+        <section aria-label={t("info")} className="flex flex-col gap-3">
           {data.infoboxes.map((infobox, index) => (
             <Infobox globals={globals} infobox={infobox} key={index} onSearch={onSearch} />
           ))}
