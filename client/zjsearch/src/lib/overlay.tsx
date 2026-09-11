@@ -130,7 +130,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
               </button>
             </div>
             <div
-              className="min-h-0 flex-1 overflow-y-auto"
+              className="min-h-0 flex-1 overflow-y-auto pt-4"
               onClickCapture={(event) => {
                 const anchor = (event.target as HTMLElement).closest("a");
                 const href = anchor?.getAttribute("href");
