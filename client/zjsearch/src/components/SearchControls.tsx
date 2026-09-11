@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import type { ReactNode } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
 import type { GlobalData, SearchPageData } from "../lib/types.ts";
 import type { DropdownOption } from "./Dropdown.tsx";
 import { Dropdown } from "./Dropdown.tsx";
-import { CategoryIcon } from "./icons.tsx";
+import { CategoryIcon, ClockIcon, LanguagesIcon, ShieldIcon } from "./icons.tsx";
 
 interface CategoryTabsProps {
   globals: GlobalData;
@@ -89,16 +90,18 @@ export interface FilterValues {
 
 function SelectField({
   label,
+  icon,
   value,
   options,
   onChange,
 }: {
   label: string;
+  icon?: ReactNode;
   value: string;
   options: DropdownOption[];
   onChange: (value: string) => void;
 }) {
-  return <Dropdown ariaLabel={label} onChange={onChange} options={options} value={value} />;
+  return <Dropdown ariaLabel={label} icon={icon} onChange={onChange} options={options} value={value} />;
 }
 
 export function SearchFilters({
@@ -116,6 +119,7 @@ export function SearchFilters({
   return (
     <div className="flex flex-wrap items-center gap-1">
       <SelectField
+        icon={<LanguagesIcon className="size-3.5 shrink-0" />}
         label={t("search_language")}
         onChange={(language) => onChange({ language })}
         options={[
@@ -133,6 +137,7 @@ export function SearchFilters({
       />
 
       <SelectField
+        icon={<ClockIcon className="size-3.5 shrink-0" />}
         label={t("time_range")}
         onChange={(time_range) => {
           onChange({ time_range });
@@ -148,6 +153,7 @@ export function SearchFilters({
       />
 
       <SelectField
+        icon={<ShieldIcon className="size-3.5 shrink-0" />}
         label={t("safesearch")}
         onChange={(value) => {
           onChange({ safesearch: Number(value) });

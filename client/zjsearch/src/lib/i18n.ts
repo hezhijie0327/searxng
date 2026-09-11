@@ -207,6 +207,7 @@ const EN: Record<string, string> = {
   publisher: "Publisher",
   center_alignment: "Center Alignment",
   center_alignment_desc: "Display results in the center of the page (Oscar layout).",
+  search_options: "Search options",
   hotkeys_hint: "Press ? anytime for keyboard shortcuts",
   hotkeys_desc:
     'Navigate search results with hotkeys (JavaScript required). Press "?" on the main or results page to get help.',
@@ -455,6 +456,7 @@ const ZH_CN: Record<string, string> = {
   publisher: "出版方",
   center_alignment: "居中布局",
   center_alignment_desc: "在页面中央显示结果(仿 Oscar 布局)。",
+  search_options: "搜索选项",
   hotkeys_hint: "随时按 ? 查看键盘快捷键",
   hotkeys_desc: "使用快捷键导航搜索结果(需要 JavaScript)。在主页或结果页按 ? 查看帮助。",
   hotkeys_default: "默认",

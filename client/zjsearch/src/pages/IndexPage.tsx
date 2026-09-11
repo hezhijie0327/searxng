@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { LightbulbIcon } from "../components/icons.tsx";
+import { LightbulbIcon, SlidersIcon } from "../components/icons.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
-import { CategoryTabs, defaultFilterValues } from "../components/SearchControls.tsx";
+import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { Shell } from "../components/Shell.tsx";
 import { type HotkeyTarget, useHotkeys } from "../features/hotkeys.ts";
 import { useT } from "../lib/i18n.ts";
@@ -25,8 +25,8 @@ export function IndexPage({ data }: { data: IndexData }) {
       ? data.selected_categories
       : [globals.default_category],
   );
-
-  const filters = defaultFilterValues(globals);
+  const [filters, setFilters] = useState<FilterValues>(() => defaultFilterValues(globals));
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   const submitSearch = (q: string, categories = selected) => {
     const trimmed = q.trim();
@@ -83,6 +83,32 @@ export function IndexPage({ data }: { data: IndexData }) {
             query={query}
             variant="hero"
           />
+          <div className="mt-1 flex w-full justify-end">
+            <button
+              aria-expanded={optionsOpen}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
+                optionsOpen ? "bg-surface-2 text-ink" : "text-ink-3 hover:bg-surface-2 hover:text-ink"
+              }`}
+              onClick={() => {
+                setOptionsOpen((open) => !open);
+              }}
+              type="button"
+            >
+              <SlidersIcon className="size-3.5" />
+              {t("search_options")}
+            </button>
+          </div>
+          {optionsOpen ? (
+            <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 animate-fade-in">
+              <SearchFilters
+                globals={globals}
+                onChange={(next) => {
+                  setFilters((prev) => ({ ...prev, ...next }));
+                }}
+                values={filters}
+              />
+            </div>
+          ) : null}
         </div>
         <div className="mt-3 max-w-full animate-fade-up [animation-delay:120ms]">
           <CategoryTabs
