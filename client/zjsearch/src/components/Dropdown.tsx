@@ -111,10 +111,8 @@ export function Dropdown({
         aria-label={ariaLabel}
         className={
           variant === "bare"
-            ? `flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
-                open
-                  ? "border-ink-3 bg-surface-2 text-ink"
-                  : "border-line bg-surface text-ink-2 hover:border-ink-3 hover:text-ink"
+            ? `flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] transition-colors ${
+                open ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink"
               }`
             : `flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 text-sm transition-colors ${
                 open ? "border-ink-3" : "border-line hover:border-ink-3"
