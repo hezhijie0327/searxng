@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon, SearchIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
@@ -502,6 +502,24 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 {Math.round((data.max_response_time ?? 0) * 10) / 10} {t("seconds")}
               </p>
             ) : null}
+            {!showSkeletons && data.suggestions.length > 0 ? (
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                {data.suggestions.slice(0, 8).map((suggestion) => (
+                  <button
+                    className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
+                    dir="auto"
+                    key={suggestion.q}
+                    onClick={() => {
+                      submitQuery(suggestion.q);
+                    }}
+                    type="button"
+                  >
+                    <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
+                    <span className="truncate">{suggestion.title}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
             {error ? (
               <div
                 className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
@@ -655,7 +673,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          {!isImagePage && !isVideoPage && !isProductPage ? (
+          {!isImagePage && !isVideoPage && !isProductPage && (data.infoboxes.length > 0 || globals.method === "POST") ? (
             <div className="w-full shrink-0 pt-4 lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
               <Sidebar data={data} onSearch={submitQuery} />
             </div>
