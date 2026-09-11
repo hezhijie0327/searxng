@@ -405,8 +405,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     open: (newTab: boolean) => {
       const href = selectedCard()?.querySelector("a[href]")?.getAttribute("href");
       if (href) {
-        if (newTab) {
-          window.open(href, "_blank", "noopener");
+        // o/Enter follows the "results in new tabs" preference, t/v forces it
+        if (newTab || globals.results_on_new_tab) {
+          window.open(href, "_blank", "noopener,noreferrer");
         } else {
           window.location.assign(href);
         }
