@@ -108,10 +108,10 @@ pipeline features without any Python changes. -#}
   {%- elif result.template == 'torrent.html' %}
     {%- if result.magnetlink %}"magnetlink": {{ result.magnetlink|tojson }},{% endif %}
     {%- if result.torrentfile %}"torrentfile": {{ result.torrentfile|tojson }},{% endif %}
-    {%- if result.seed is defined %}"seed": {{ result.seed or 0 }},{% endif %}
+    {%- if result.seed is defined %}"seed": {{ result.seed | int or 0 }},{% endif %}
     {%- if result.leech is defined %}"leech": {{ result.leech or 0 }},{% endif %}
     {%- if result.filesize %}"filesize": {{ result.filesize|tojson }},{% endif %}
-    {%- if result.files %}"files": {{ result.files or 0 }},{% endif %}
+    {%- if result.files %}"files": {{ result.files | int or 0 }},{% endif %}
   {%- elif result.template == 'map.html' %}
     {%- if result.address %}
     {%- set a = result.address %}

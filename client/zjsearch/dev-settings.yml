@@ -21,3 +21,10 @@ server:
   secret_key: "zjsearch-local-dev-secret-key"
   limiter: false
   image_proxy: true
+
+# proxy so region-blocked engines are reachable from this network
+outgoing:
+  request_timeout: 5.0
+  proxies:
+    all://:
+      - http://10.192.7.1:7890
