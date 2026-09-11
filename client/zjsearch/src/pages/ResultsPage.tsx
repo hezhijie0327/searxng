@@ -385,12 +385,17 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     <Shell globals={globals} hideTopNav>
       <header className="border-b border-line">
         <div className="zjs-results-header-row mx-auto flex w-full items-center gap-4 px-4 pt-3 sm:px-6">
-          {/* brand mark only - no home link needed, everything opens as a drawer;
+          {/* brand links back to the home page (SPA navigation);
               hidden on small screens so the query box keeps enough width */}
-          <span className="hidden min-[480px]:block shrink-0 select-none text-xl font-extrabold tracking-tight text-ink">
+          <Link
+            ariaLabel={globals.instance_name}
+            className="hidden min-[480px]:block shrink-0 select-none text-xl font-extrabold tracking-tight text-ink"
+            href="/"
+            title={globals.instance_name}
+          >
             {globals.instance_name}
             <span className="text-accent-strong">.</span>
-          </span>
+          </Link>
           <div className="min-w-0 flex-1">
             <SearchBox initialQuery={data.q} onSubmitQuery={submitQuery} />
           </div>
