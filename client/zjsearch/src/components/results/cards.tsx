@@ -10,6 +10,7 @@ import {
   CloseIcon,
   DownloadIcon,
   ExternalLinkIcon,
+  EyeIcon,
   FileIcon,
   FilmIcon,
   MagnetIcon,
@@ -1112,30 +1113,29 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
                   />
                 ) : null}
               </ResultLink>
+              {result.iframe_src && isPlaying ? (
+                <div className="absolute inset-0 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
+                  <iframe
+                    allowFullScreen
+                    className="size-full"
+                    referrerPolicy="origin"
+                    src={result.iframe_src ?? ""}
+                    title={result.title_text}
+                  />
+                </div>
+              ) : null}
               {result.iframe_src ? (
-                isPlaying ? (
-                  <div className="absolute inset-0 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
-                    <iframe
-                      allowFullScreen
-                      className="size-full"
-                      referrerPolicy="origin"
-                      src={result.iframe_src ?? ""}
-                      title={result.title_text}
-                    />
-                  </div>
-                ) : (
-                  <button
-                    aria-label={t("show_video")}
-                    className="absolute bottom-2 end-2 grid size-12 place-items-center rounded-full bg-accent-strong text-accent-contrast opacity-0 shadow-pop transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-                    onClick={() => {
-                      setPlaying(index);
-                    }}
-                    title={t("show_video")}
-                    type="button"
-                  >
-                    <PlayIcon className="size-5 translate-x-px" />
-                  </button>
-                )
+                <button
+                  aria-label={isPlaying ? t("hide_video") : t("show_video")}
+                  className="absolute end-2 top-2 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong"
+                  onClick={() => {
+                    setPlaying(isPlaying ? null : index);
+                  }}
+                  title={isPlaying ? t("hide_video") : t("show_video")}
+                  type="button"
+                >
+                  {isPlaying ? <CloseIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
+                </button>
               ) : null}
             </div>
             <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">

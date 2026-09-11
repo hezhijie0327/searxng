@@ -420,6 +420,13 @@ export const TerminalIcon = makeIcon(
   </>,
 );
 
+export const EyeIcon = makeIcon(
+  <>
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </>,
+);
+
 export const EllipsisIcon = makeIcon(
   <>
     <circle cx="5" cy="12" r="1" />
