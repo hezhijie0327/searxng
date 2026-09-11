@@ -156,7 +156,7 @@ export function SearchBox({
         className={`flex w-full items-center gap-1 rounded-full border border-line bg-surface transition-shadow ${
           variant === "hero"
             ? "h-14 ps-6 pe-2.5 shadow-card focus-within:shadow-pop focus-within:border-ink-3/40"
-            : "h-11 ps-5 pe-2 focus-within:shadow-card"
+            : "h-12 ps-5 pe-2 focus-within:shadow-card"
         }`}
         onSubmit={onSubmit}
         role="search"

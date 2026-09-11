@@ -460,7 +460,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
   return (
     <Shell globals={globals} hideTopNav>
-      <header className="border-b border-line">
+      <header>
         <div className="zjs-results-header-row mx-auto flex w-full items-center gap-4 px-4 pt-3 sm:px-6">
           {/* brand links back to the home page (SPA navigation);
               hidden on small screens so the query box keeps enough width */}
@@ -473,27 +473,35 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             {globals.instance_name}
             <span className="text-accent-strong">.</span>
           </Link>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 max-w-2xl">
             <SearchBox initialQuery={data.q} onSubmitQuery={submitQuery} />
           </div>
-          <HeaderActions globals={globals} />
-        </div>
-        <div className="zjs-results-header-row mx-auto px-4 pt-1 sm:px-6">
-          <CategoryTabs
-            globals={globals}
-            onSearch={onSearchCategories}
-            onSelectionChange={setSelectedCategories}
-            selected={selectedCategories}
-          />
-        </div>
-        <div className="zjs-results-header-row mx-auto px-4 pb-1 sm:px-6">
-          <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
+          <div className="ms-auto">
+            <HeaderActions globals={globals} />
+          </div>
         </div>
       </header>
 
       <main className="zjs-results-main mx-auto w-full flex-1 px-4 sm:px-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
           <div className="min-w-0 flex-1 pt-4" ref={listRef}>
+            {/* Kagi layout: the tabs and filters live in the results column so
+                the infobox sidebar rises to the top of the page */}
+            <CategoryTabs
+              globals={globals}
+              onSearch={onSearchCategories}
+              onSelectionChange={setSelectedCategories}
+              selected={selectedCategories}
+            />
+            <div className="mt-1">
+              <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
+            </div>
+            {!showSkeletons && !error ? (
+              <p className="mt-2 ps-3.5 text-xs text-ink-3">
+                {t("meta_found")} {allResults.length} {t("meta_results")} · {t("meta_in")}{" "}
+                {Math.round((data.max_response_time ?? 0) * 10) / 10} {t("seconds")}
+              </p>
+            ) : null}
             {error ? (
               <div
                 className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
