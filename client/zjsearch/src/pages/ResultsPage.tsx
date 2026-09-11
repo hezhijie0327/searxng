@@ -723,14 +723,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 lg:self-start lg:h-[calc(100dvh-9rem)] lg:overflow-hidden lg:pb-6">
-            {!showSkeletons && (data.infoboxes.length > 0 || globals.method === "POST") ? (
-              <div className="min-h-0 flex-1 overflow-y-auto pb-1 [scrollbar-width:thin]">
-                {/* keep the area reserved but blank while the new query loads -
-                    stale infoboxes from the previous query must not linger */}
-                <Sidebar data={data} onSearch={submitQuery} />
-              </div>
-            ) : null}
+          <div className="hidden w-full shrink-0 pt-4 lg:block lg:w-80 lg:pb-6">
+            {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
             {showSkeletons ? null : <DebugPanels data={data} />}
           </div>
         </div>
