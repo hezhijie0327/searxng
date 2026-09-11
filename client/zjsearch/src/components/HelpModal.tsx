@@ -57,10 +57,11 @@ function operatorRows(t: Translate): Array<[string, string]> {
 function bangRows(t: Translate): Array<[string, string]> {
   return [
     ["!bang", t("bang_all")],
-    ["!images !i", t("bang_images")],
-    ["!videos !v", t("bang_videos")],
-    ["!news !n", t("bang_news")],
-    ["!maps !m", t("bang_maps")],
+    ["!images", t("bang_images")],
+    ["!videos", t("bang_videos")],
+    ["!news", t("bang_news")],
+    ["!map", t("bang_map")],
+    ["!music", t("bang_music")],
     ["random", t("widget_random")],
     ["min max avg sum", t("widget_stats")],
     ["1+2", t("widget_calc")],
