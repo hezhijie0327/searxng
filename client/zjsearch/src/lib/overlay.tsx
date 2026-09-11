@@ -12,6 +12,7 @@ import { CloseIcon } from "../components/icons.tsx";
 import { InfoPage } from "../pages/InfoPage.tsx";
 import { PreferencesPage } from "../pages/PreferencesPage.tsx";
 import { StatsPage } from "../pages/StatsPage.tsx";
+import { useT } from "./i18n.ts";
 import { extractPageData } from "./pageData.ts";
 import type { AnyPageData } from "./types.ts";
 import { isInfoPageData, isPreferencesPageData, isStatsPageData } from "./types.ts";
@@ -40,6 +41,7 @@ export function useOverlay(): OverlayContextValue {
 }
 
 export function OverlayProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [state, setState] = useState<OverlayState | null>(null);
 
   const closeOverlay = useCallback(() => {
@@ -110,7 +112,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
       {state ? (
         <div aria-label={state.title} aria-modal="true" className="fixed inset-0 z-50" role="dialog">
           <button
-            aria-label="Close"
+            aria-label={t("close")}
             className="absolute inset-0 cursor-default bg-black/60 animate-fade-in"
             onClick={closeOverlay}
             type="button"
@@ -119,7 +121,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
             <div className="flex items-center justify-between border-b border-line px-5 py-3">
               <span className="text-sm font-semibold text-ink">{state.title}</span>
               <button
-                aria-label="Close"
+                aria-label={t("close")}
                 className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
                 onClick={closeOverlay}
                 type="button"

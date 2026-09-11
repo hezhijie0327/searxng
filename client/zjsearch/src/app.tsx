@@ -2,7 +2,7 @@
 
 import { BrandMark } from "./components/icons.tsx";
 import { Shell } from "./components/Shell.tsx";
-import { I18nContext } from "./lib/i18n.ts";
+import { I18nContext, useT } from "./lib/i18n.ts";
 import { OverlayProvider } from "./lib/overlay.tsx";
 import { RouterProvider, useRouter } from "./lib/router.tsx";
 import type { ClientSettings } from "./lib/settings.ts";
@@ -17,6 +17,7 @@ import { StatsPage } from "./pages/StatsPage.tsx";
 
 function Pages() {
   const { data, error } = useRouter();
+  const t = useT();
 
   if (!data) {
     return (
@@ -50,7 +51,7 @@ function Pages() {
           <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 px-4 pb-24 text-center animate-fade-up">
             <BrandMark className="size-14 rounded-[22%]" />
             <h1 className="text-5xl font-bold tracking-tight text-ink">404</h1>
-            <p className="text-sm text-ink-2">{globals.strings.page_not_found}</p>
+            <p className="text-sm text-ink-2">{t("page_not_found")}</p>
           </main>
         </Shell>
       );
@@ -58,10 +59,10 @@ function Pages() {
 }
 
 export function App({ initialData, settings }: { initialData: AnyPageData | null; settings: ClientSettings }) {
-  const strings = initialData?.globals.strings ?? {};
+  const locale = initialData?.globals.locale ?? "en";
   return (
     <SettingsContext.Provider value={settings}>
-      <I18nContext.Provider value={strings}>
+      <I18nContext.Provider value={locale}>
         <RouterProvider initialData={initialData}>
           <OverlayProvider>
             <Pages />

@@ -5,7 +5,7 @@ import { useT } from "../lib/i18n.ts";
 import { useOverlay } from "../lib/overlay.tsx";
 import { useRouter } from "../lib/router.tsx";
 import type { GlobalData } from "../lib/types.ts";
-import { BarChartIcon, HeartIcon, InfoIcon, SlidersIcon } from "./icons.tsx";
+import { BarChartIcon, HeartIcon, SlidersIcon } from "./icons.tsx";
 
 /** Anchor that performs SPA navigation for internal URLs. */
 export function Link({
@@ -62,24 +62,13 @@ function ProgressBar({ active }: { active: boolean }) {
 const iconBtn =
   "grid size-8 sm:size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
 
-/** Right-side icon group: About / Stats / Preferences open as slide-in
+/** Right-side icon group: Stats / Preferences open as slide-in
     panels (URL unchanged); theme style lives in the preferences panel. */
 export function HeaderActions({ globals }: { globals: GlobalData }) {
   const t = useT();
   const { openOverlay } = useOverlay();
   return (
     <div className="flex items-center gap-0.5 sm:gap-1">
-      <button
-        aria-label={t("about")}
-        className={iconBtn}
-        onClick={() => {
-          openOverlay(globals.about_url, t("about"));
-        }}
-        title={t("about")}
-        type="button"
-      >
-        <InfoIcon className="size-[18px]" />
-      </button>
       {globals.donation_url ? (
         <a
           aria-label={t("donate")}

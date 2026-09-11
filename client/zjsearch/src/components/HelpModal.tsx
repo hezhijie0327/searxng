@@ -3,7 +3,7 @@
 /** Keyboard shortcuts help dialog (opened with "?"). */
 
 import { useEffect } from "react";
-import { useT } from "../lib/i18n.ts";
+import { type Translate, useT } from "../lib/i18n.ts";
 import { CloseIcon } from "./icons.tsx";
 
 interface HelpColumn {
@@ -11,47 +11,62 @@ interface HelpColumn {
   rows: Array<[string, string]>;
 }
 
-const SHORTCUT_ROWS: Array<[string, string]> = [
-  ["? / ?", "Show / hide this help"],
-  ["↓ ↑", "Focus next / previous result"],
-  ["→ ←", "Next / previous page"],
-  ["n p", "Next / previous page"],
-  ["o ⏎", "Open focused result"],
-  ["t", "Open in a new tab"],
-  ["y", "Copy URL of the focused result"],
-  ["i /", "Focus the search box"],
-  ["Esc", "Close panels, blur the search box"],
-];
+function shortcutRows(layout: "default" | "vim", t: Translate): Array<[string, string]> {
+  if (layout === "vim") {
+    return [
+      ["?", t("help_show_hide")],
+      ["j", t("help_focus_next")],
+      ["k", t("help_focus_prev")],
+      ["n", t("help_page_next")],
+      ["p", t("help_page_prev")],
+      ["o ⏎", t("help_open")],
+      ["v", t("help_open_new_tab")],
+      ["y", t("help_yank")],
+      ["i", t("help_focus_search")],
+      ["Esc", t("help_esc")],
+    ];
+  }
+  return [
+    ["? / ?", t("help_show_hide")],
+    ["↓", t("help_focus_next")],
+    ["↑", t("help_focus_prev")],
+    ["→", t("help_page_next")],
+    ["←", t("help_page_prev")],
+    ["o ⏎", t("help_open")],
+    ["t", t("help_open_new_tab")],
+    ["y", t("help_yank")],
+    ["i /", t("help_focus_search")],
+    ["Esc", t("help_esc")],
+  ];
+}
 
-const OPERATOR_ROWS: Array<[string, string]> = [
-  ["filetype:", "Limit results to a file extension"],
-  ["site:", "Limit results to a specific site"],
-  ["inurl:", "Word or phrase in the URL"],
-  ["intitle:", "Word or phrase in the title"],
-  ['"words"', "Exact phrase"],
-  ["AND", "Both terms: cats AND dogs"],
-  ["OR", "Either term: cats OR dogs"],
-  ["+ -", "Force include / exclude a term"],
-  ["*", "Wildcard within a phrase"],
-];
+function operatorRows(t: Translate): Array<[string, string]> {
+  return [
+    ["filetype:", t("op_filetype")],
+    ["site:", t("op_site")],
+    ["inurl:", t("op_inurl")],
+    ["intitle:", t("op_intitle")],
+    ['"words"', t("op_exact")],
+    ["AND", t("op_and")],
+    ["OR", t("op_or")],
+    ["+ -", t("op_inclexc")],
+    ["*", t("op_wildcard")],
+  ];
+}
 
-const BANG_ROWS: Array<[string, string]> = [
-  ["!bang", "All DuckDuckGo bangs work here"],
-  ["!images !i", "Image search bang"],
-  ["!videos !v", "Video search bang"],
-  ["!news !n", "News search bang"],
-  ["!maps !m", "Map search bang"],
-  ["keyword", "Open the first result"],
-  ["ip", "Show your IP address"],
-  ["hash md5 …", "Hash a string (enable the plugin)"],
-  ["random", "Random values generator"],
-];
-
-const COLUMNS: HelpColumn[] = [
-  { title: "Keyboard shortcuts", rows: SHORTCUT_ROWS },
-  { title: "Search operators", rows: OPERATOR_ROWS },
-  { title: "Bangs & widgets", rows: BANG_ROWS },
-];
+function bangRows(t: Translate): Array<[string, string]> {
+  return [
+    ["!bang", t("bang_all")],
+    ["!images !i", t("bang_images")],
+    ["!videos !v", t("bang_videos")],
+    ["!news !n", t("bang_news")],
+    ["!maps !m", t("bang_maps")],
+    ["keyword", t("bang_keyword")],
+    ["ip", t("widget_ip")],
+    ["hash md5 …", t("widget_hash")],
+    ["random", t("widget_random")],
+  ];
+}
 
 export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onClose: () => void }) {
   const t = useT();
@@ -68,33 +83,16 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
     };
   }, [onClose]);
 
-  // the vim column labels differ slightly from the default ones
-  const columns = COLUMNS.map((column) => {
-    if (column.title !== "Keyboard shortcuts") {
-      return column;
-    }
-    const rows: Array<[string, string]> =
-      layout === "vim"
-        ? [
-            ["?", "Show / hide this help"],
-            ["j", "Focus next result"],
-            ["k", "Focus previous result"],
-            ["n", "Next page"],
-            ["p", "Previous page"],
-            ["o ⏎", "Open focused result"],
-            ["v", "Open in a new tab"],
-            ["y", "Copy URL of the focused result"],
-            ["i", "Focus the search box"],
-            ["Esc", "Close panels, blur the search box"],
-          ]
-        : column.rows;
-    return { title: column.title, rows };
-  });
+  const columns: HelpColumn[] = [
+    { title: t("help_shortcuts"), rows: shortcutRows(layout, t) },
+    { title: t("help_operators"), rows: operatorRows(t) },
+    { title: t("help_bangs"), rows: bangRows(t) },
+  ];
 
   return (
     <div aria-modal="true" className="fixed inset-0 z-50 animate-fade-in" role="dialog">
       <button
-        aria-label="Close"
+        aria-label={t("close")}
         className="absolute inset-0 cursor-default bg-black/60"
         onClick={onClose}
         type="button"

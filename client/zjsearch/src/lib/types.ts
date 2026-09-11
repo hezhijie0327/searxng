@@ -54,7 +54,6 @@ export interface GlobalData {
   about_url: string;
   search_syntax_url: string;
   rtl: boolean;
-  strings: Record<string, string>;
 }
 
 // ------------------------------------------------------------------ results

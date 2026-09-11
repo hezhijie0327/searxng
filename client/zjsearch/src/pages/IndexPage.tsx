@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
+import { LightbulbIcon } from "../components/icons.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, defaultFilterValues } from "../components/SearchControls.tsx";
 import { Shell } from "../components/Shell.tsx";
 import { type HotkeyTarget, useHotkeys } from "../features/hotkeys.ts";
+import { useT } from "../lib/i18n.ts";
 import { useRouter } from "../lib/router.tsx";
 import { useSettings } from "../lib/settings.ts";
 import type { BasicPageData } from "../lib/types.ts";
@@ -42,7 +44,9 @@ export function IndexPage({ data }: { data: IndexData }) {
   };
 
   const [helpOpen, setHelpOpen] = useState(false);
+  const [hintHidden, setHintHidden] = useState(() => window.localStorage.getItem("zjs-hint-hidden") === "1");
   const settings = useSettings();
+  const t = useT();
 
   // "?" opens the shortcuts help on the home page too; the result-navigation
   // keys have nothing to act on here
@@ -93,6 +97,33 @@ export function IndexPage({ data }: { data: IndexData }) {
           />
         </div>
       </main>
+      {hintHidden ? null : (
+        <div className="mx-auto mb-10 w-full max-w-xl px-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm animate-fade-up">
+            <LightbulbIcon className="size-4 shrink-0 text-accent" />
+            <button
+              className="min-w-0 flex-1 truncate text-left text-ink-2 transition-colors hover:text-ink"
+              onClick={() => {
+                setHelpOpen(true);
+              }}
+              type="button"
+            >
+              {t("hotkeys_hint")}
+            </button>
+            <button
+              aria-label={t("close")}
+              className="shrink-0 rounded-lg px-2 py-1 text-xs text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+              onClick={() => {
+                window.localStorage.setItem("zjs-hint-hidden", "1");
+                setHintHidden(true);
+              }}
+              type="button"
+            >
+              {t("close")}
+            </button>
+          </div>
+        </div>
+      )}
       {helpOpen ? <HelpModal layout={settings.hotkeys} onClose={() => setHelpOpen(false)} /> : null}
     </Shell>
   );
