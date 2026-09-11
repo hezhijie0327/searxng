@@ -56,6 +56,7 @@ function Favicon({ result }: { result: ResultItem }) {
     <img
       alt=""
       className="size-4 shrink-0 rounded-sm object-contain"
+      decoding="async"
       loading="lazy"
       onError={(event) => {
         event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
@@ -180,6 +181,7 @@ function Thumb({
       <img
         alt={alt}
         className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+        decoding="async"
         loading="lazy"
         onError={(event) => {
           event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
@@ -515,6 +517,7 @@ export function ProductGrid({ results, globals }: { results: ResultItem[]; globa
               <img
                 alt={result.title_text}
                 className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                decoding="async"
                 loading="lazy"
                 onError={(event) => {
                   event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
@@ -1008,6 +1011,7 @@ export function ImageListCard({ result, globals, onOpen }: CardProps & { onOpen:
           <img
             alt={result.title_text}
             className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            decoding="async"
             loading="lazy"
             onError={(event) => {
               event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
@@ -1059,6 +1063,7 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
                   <img
                     alt={result.title_text}
                     className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    decoding="async"
                     loading="lazy"
                     onError={(event) => {
                       event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
@@ -1079,6 +1084,7 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
                   <img
                     alt=""
                     className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
+                    decoding="async"
                     loading="lazy"
                     onError={(event) => {
                       event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;

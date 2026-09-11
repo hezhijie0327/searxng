@@ -36,7 +36,9 @@ function WeatherAnswer({ answer }: { answer: Extract<AnswerData, { template: "an
   return (
     <div>
       <div className="flex items-start gap-3">
-        {current.symbol ? <img alt="" className="size-10" src={current.symbol} /> : null}
+        {current.symbol ? (
+          <img alt="" className="size-10" decoding="async" loading="lazy" src={current.symbol} />
+        ) : null}
         <div className="min-w-0">
           <p className="text-sm font-medium text-ink" dir="auto">
             {current.summary}

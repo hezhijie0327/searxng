@@ -35,6 +35,7 @@ export function Infobox({
           <img
             alt={infobox.title}
             className="aspect-square w-32 shrink-0 rounded-lg object-cover sm:w-36"
+            decoding="async"
             loading="lazy"
             src={infobox.img_src}
           />
@@ -54,6 +55,7 @@ export function Infobox({
                   <img
                     alt={attribute.image_alt}
                     className="inline-block max-h-24 rounded-lg align-middle"
+                    decoding="async"
                     loading="lazy"
                     src={attribute.image_src}
                   />

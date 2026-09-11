@@ -321,6 +321,7 @@ function ImageTile({
         className={`w-full object-cover transition-all duration-300 group-hover:scale-[1.02] ${
           loaded ? "opacity-100" : "h-44 opacity-0"
         }`}
+        decoding="async"
         loading="lazy"
         onError={(event) => {
           event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
