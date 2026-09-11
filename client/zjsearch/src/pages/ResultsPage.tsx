@@ -723,7 +723,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          <div className="hidden w-full shrink-0 pt-4 lg:block lg:w-80 lg:pb-6">
+          <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 lg:pb-6">
             {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
             {showSkeletons ? null : <DebugPanels data={data} />}
           </div>
