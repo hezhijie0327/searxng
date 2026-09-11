@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
-import { ChevronDownIcon, DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
+import { ChevronDownIcon, DownloadIcon, ExternalLinkIcon, SearchIcon } from "../icons.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
   return (
@@ -141,6 +141,33 @@ export function Infobox({
         <ChevronDownIcon className={`size-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
       </button>
     </div>
+  );
+}
+
+export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSearch: (q: string) => void }) {
+  const t = useT();
+  if (data.suggestions.length === 0) {
+    return null;
+  }
+  return (
+    <Box open title={t("suggestions")}>
+      <div className="grid grid-cols-2 gap-2">
+        {data.suggestions.slice(0, 8).map((suggestion) => (
+          <button
+            className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-left text-[13px] text-ink-2 transition-colors hover:border-accent hover:text-ink"
+            dir="auto"
+            key={suggestion.q}
+            onClick={() => {
+              onSearch(suggestion.q);
+            }}
+            type="button"
+          >
+            <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
+            <span className="truncate">{suggestion.title}</span>
+          </button>
+        ))}
+      </div>
+    </Box>
   );
 }
 

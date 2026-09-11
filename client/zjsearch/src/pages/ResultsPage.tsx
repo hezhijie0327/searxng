@@ -14,7 +14,7 @@ import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
-import { DebugPanels, Infobox, Sidebar } from "../components/results/Sidebar.tsx";
+import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
@@ -514,55 +514,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 <DebugPanels data={data} />
               </div>
             ) : null}
-            {!showSkeletons && data.suggestions.length > 0 ? (
-              <div className="mt-2.5 flex items-center gap-2">
-                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-                  {data.suggestions.slice(suggestionPage * 5, suggestionPage * 5 + 5).map((suggestion) => (
-                    <button
-                      className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
-                      dir="auto"
-                      key={suggestion.q}
-                      onClick={() => {
-                        submitQuery(suggestion.q);
-                      }}
-                      type="button"
-                    >
-                      <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
-                      <span className="truncate">{suggestion.title}</span>
-                    </button>
-                  ))}
-                </div>
-                {suggestionPages > 1 ? (
-                  <div className="flex shrink-0 items-center gap-1">
-                    <button
-                      aria-label={t("previous_page")}
-                      className="grid size-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:border-ink-3 hover:text-ink disabled:opacity-40"
-                      disabled={suggestionPage === 0}
-                      onClick={() => {
-                        setSuggestionPage((page) => Math.max(0, page - 1));
-                      }}
-                      type="button"
-                    >
-                      <ChevronLeftIcon className="size-3.5" />
-                    </button>
-                    <span className="text-xs text-ink-3">
-                      {suggestionPage + 1}/{suggestionPages}
-                    </span>
-                    <button
-                      aria-label={t("next_page")}
-                      className="grid size-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:border-ink-3 hover:text-ink disabled:opacity-40"
-                      disabled={suggestionPage === suggestionPages - 1}
-                      onClick={() => {
-                        setSuggestionPage((page) => Math.min(suggestionPages - 1, page + 1));
-                      }}
-                      type="button"
-                    >
-                      <ChevronRightIcon className="size-3.5" />
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
+
             {!showSkeletons && data.infoboxes.length > 0 ? (
               <div className="mt-3 flex flex-col gap-3 lg:hidden">
                 {data.infoboxes.map((infobox, index) => (
@@ -725,6 +677,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
           <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 lg:pb-6">
             {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
+            {showSkeletons ? null : <SuggestionsBox data={data} onSearch={submitQuery} />}
             {showSkeletons ? null : <DebugPanels data={data} />}
           </div>
         </div>
