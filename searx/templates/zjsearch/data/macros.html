@@ -333,14 +333,19 @@ pipeline features without any Python changes. -#}
   {%- elif result.template == 'map.html' %}
     {%- if result.address %}
     {%- set a = result.address %}
+    {%- set addr_fields = {
+      'name': a.get('name'),
+      'road': a.get('road'),
+      'house_number': a.get('house_number'),
+      'postcode': a.get('postcode'),
+      'locality': a.get('locality'),
+      'country': a.get('country'),
+      'country_code': a.get('country_code'),
+    } -%}
     "address": {
-      {%- if a.get('name') %}"name": {{ a['name']|tojson }},{% endif %}
-      {%- if a.get('road') %}"road": {{ a['road']|tojson }},{% endif %}
-      {%- if a.get('house_number') %}"house_number": {{ a['house_number']|tojson }},{% endif %}
-      {%- if a.get('postcode') %}"postcode": {{ a['postcode']|tojson }},{% endif %}
-      {%- if a.get('locality') %}"locality": {{ a['locality']|tojson }},{% endif %}
-      {%- if a.get('country') %}"country": {{ a['country']|tojson }},{% endif %}
-      {%- if a.get('country_code') %}"country_code": {{ a['country_code']|tojson }}{% endif %}
+      {%- for k, v in addr_fields.items() if v -%}
+      {{ k|tojson }}: {{ v|tojson }}{{ ", " if not loop.last }}
+      {%- endfor -%}
     },
     {%- endif %}
     {%- if result.links %}
