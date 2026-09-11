@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronRightIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
@@ -136,6 +136,9 @@ function groupResults(
     section type is consolidated into a single group at its first position. */
 const SECTION_TEMPLATES = new Set(["images", "videos", "news"]);
 
+/** items shown in a collapsed strip; the chevron expands to the full set */
+const SECTION_CAPS: Record<string, number> = { images: 8, videos: 6, news: 6 };
+
 function consolidateGroups(
   groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
 ): Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> {
@@ -159,18 +162,20 @@ function consolidateGroups(
 }
 
 /** Kagi/Google-style section header for a same-type result group: category
-    icon + translated label + count, and a chevron that switches to the
-    dedicated single-category search. */
+    icon + translated label + count, and a chevron that expands the group to
+    its full-page layout client-side (no re-fetch). */
 function GroupHeader({
   category,
   label,
   count,
-  onAll,
+  expanded,
+  onToggle,
 }: {
   category: string;
   label: string;
   count: number;
-  onAll: (categories: string[]) => void;
+  expanded: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div className="flex items-center justify-between gap-2 pb-1 pt-5 first:pt-1">
@@ -182,13 +187,15 @@ function GroupHeader({
       <button
         aria-label={label}
         className="grid size-7 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-        onClick={() => {
-          onAll([category]);
-        }}
+        onClick={onToggle}
         title={label}
         type="button"
       >
-        <ChevronRightIcon className="size-4" />
+        {expanded ? (
+          <ChevronLeftIcon className="size-4" />
+        ) : (
+          <ChevronRightIcon className="size-4" />
+        )}
       </button>
     </div>
   );
@@ -271,6 +278,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
   const [appendState, setAppendState] = useState<"idle" | "loading" | "error" | "done">("idle");
@@ -550,63 +558,50 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-2" ref={listRef}>
                     {consolidateGroups(groupResults(allResults)).map((group, groupIndex) => {
                       const label = globals.category_labels[group.template] ?? group.template;
-                      if (group.template === "images") {
+                      if (SECTION_TEMPLATES.has(group.template)) {
+                        // section chevron expands/collapses client-side from the
+                        // already-fetched results (a real category search stays
+                        // available via the category tabs)
+                        const expanded = expandedSection === group.template;
+                        const shown = expanded ? group.items : group.items.slice(0, SECTION_CAPS[group.template]);
                         return (
                           <section key={`${group.template}-${groupIndex}`}>
                             <GroupHeader
-                              category="images"
+                              category={group.template}
                               count={group.items.length}
+                              expanded={expanded}
                               label={label}
-                              onAll={onSearchCategories}
+                              onToggle={() => {
+                                setExpandedSection(expanded ? null : group.template);
+                              }}
                             />
                             <div className="mt-1">
-                              <ImageGrid results={group.items.slice(0, 8).map(({ result }) => result)} />
-                            </div>
-                          </section>
-                        );
-                      }
-                      if (group.template === "videos") {
-                        return (
-                          <section key={`${group.template}-${groupIndex}`}>
-                            <GroupHeader
-                              category="videos"
-                              count={group.items.length}
-                              label={label}
-                              onAll={onSearchCategories}
-                            />
-                            <div className="mt-1">
-                              <VideoGrid
-                                globals={globals}
-                                results={group.items.slice(0, 6).map(({ result }) => result)}
-                              />
-                            </div>
-                          </section>
-                        );
-                      }
-                      if (group.template === "news") {
-                        return (
-                          <section key={`${group.template}-${groupIndex}`}>
-                            <GroupHeader
-                              category="news"
-                              count={group.items.length}
-                              label={label}
-                              onAll={onSearchCategories}
-                            />
-                            <div className="mt-1 space-y-1">
-                              {group.items.slice(0, 6).map(({ result, index }) => (
-                                <div
-                                  className={`animate-fade-up rounded-2xl ${
-                                    index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                  }`}
-                                  key={index}
-                                  style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-                                >
-                                  <NewsCard globals={globals} result={result} />
+                              {group.template === "images" ? (
+                                <ImageGrid results={shown.map(({ result }) => result)} />
+                              ) : group.template === "videos" ? (
+                                <VideoGrid globals={globals} results={shown.map(({ result }) => result)} />
+                              ) : (
+                                <div className="space-y-1">
+                                  {shown.map(({ result, index }) => (
+                                    <div
+                                      className={`animate-fade-up rounded-2xl ${
+                                        index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                                      }`}
+                                      key={index}
+                                      style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                                    >
+                                      <NewsCard globals={globals} result={result} />
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
+                              )}
                             </div>
                           </section>
                         );
+                      }
+                      if (expandedSection) {
+                        // an expanded section takes over the page - hide the rest
+                        return null;
                       }
                       return (
                         <div key={groupIndex}>
