@@ -64,7 +64,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
             return (
               <button
                 aria-pressed={isSelected}
-                className={`relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-[13px] transition-colors ${
+                className={`relative flex shrink-0 items-center gap-1.5 px-4 py-2 text-[13px] transition-colors ${
                   isSelected ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
                 }`}
                 key={category}
@@ -78,7 +78,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
                 <span>{globals.category_labels[category] ?? category}</span>
                 <span
                   aria-hidden="true"
-                  className={`absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full transition-opacity ${
+                  className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full transition-opacity ${
                     isSelected ? "bg-accent-strong opacity-100" : "opacity-0"
                   }`}
                 />

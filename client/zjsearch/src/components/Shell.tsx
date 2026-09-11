@@ -60,7 +60,7 @@ function ProgressBar({ active }: { active: boolean }) {
 }
 
 const iconBtn =
-  "grid size-8 sm:size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
+  "grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
 
 /** Right-side icon group: Stats / Preferences open as slide-in
     panels (URL unchanged); theme style lives in the preferences panel. */

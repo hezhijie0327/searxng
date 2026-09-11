@@ -106,11 +106,11 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
             <h2 className="text-lg font-semibold text-ink">{t("hotkeys")}</h2>
             <button
               aria-label={t("close")}
-              className="grid size-8 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+              className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
               onClick={onClose}
               type="button"
             >
-              <CloseIcon className="size-4" />
+              <CloseIcon className="size-[18px]" />
             </button>
           </div>
           <div className="grid gap-8 md:grid-cols-3">

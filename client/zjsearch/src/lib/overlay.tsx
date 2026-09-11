@@ -126,7 +126,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
                 onClick={closeOverlay}
                 type="button"
               >
-                <CloseIcon className="size-5" />
+                <CloseIcon className="size-[18px]" />
               </button>
             </div>
             <div

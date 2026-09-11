@@ -184,14 +184,14 @@ export function SearchBox({
         {query ? (
           <button
             aria-label={t("clear")}
-            className="grid size-8 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+            className="grid size-9 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
             onClick={() => {
               setQuery("");
               inputRef.current?.focus();
             }}
             type="button"
           >
-            <CloseIcon className="size-4" />
+            <CloseIcon className="size-[18px] text-ink-2" />
           </button>
         ) : null}
         <button
@@ -200,7 +200,7 @@ export function SearchBox({
           disabled={loading}
           type="submit"
         >
-          {loading ? <SpinnerIcon className="size-4 animate-spin-slow" /> : <SearchIcon className="size-4" />}
+          {loading ? <SpinnerIcon className="size-4 animate-spin-slow" /> : <SearchIcon className="size-[18px]" />}
         </button>
       </form>
 

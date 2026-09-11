@@ -558,12 +558,12 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   const shareOrigin = window.location.origin;
 
   const tabs = [
-    { id: "general", label: t("general"), icon: <SlidersIcon className="size-4" /> },
-    { id: "ui", label: t("user_interface"), icon: <SunIcon className="size-4" /> },
-    { id: "privacy", label: t("privacy"), icon: <ShieldIcon className="size-4" /> },
-    { id: "engines", label: t("engines"), icon: <GridIcon className="size-4" /> },
-    { id: "query", label: t("special_queries"), icon: <TerminalIcon className="size-4" /> },
-    { id: "cookies", label: t("cookies"), icon: <CookieIcon className="size-4" /> },
+    { id: "general", label: t("general"), icon: <SlidersIcon className="size-3.5" /> },
+    { id: "ui", label: t("user_interface"), icon: <SunIcon className="size-3.5" /> },
+    { id: "privacy", label: t("privacy"), icon: <ShieldIcon className="size-3.5" /> },
+    { id: "engines", label: t("engines"), icon: <GridIcon className="size-3.5" /> },
+    { id: "query", label: t("special_queries"), icon: <TerminalIcon className="size-3.5" /> },
+    { id: "cookies", label: t("cookies"), icon: <CookieIcon className="size-3.5" /> },
   ] as const;
 
   return (
@@ -612,7 +612,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           {tabs.map((item) => (
             <button
               aria-selected={tab === item.id}
-              className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm transition-colors ${
+              className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-[13px] transition-colors ${
                 tab === item.id
                   ? "bg-accent-strong font-medium text-accent-contrast"
                   : "text-ink-2 hover:bg-surface-2 hover:text-ink"
@@ -1208,7 +1208,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                     {t("cookies_convenience")}
                   </p>
                   <Link
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink-2 transition-colors hover:border-danger hover:text-danger"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-[13px] text-ink-2 transition-colors hover:border-danger hover:text-danger"
                     href="/clear_cookies"
                   >
                     <RefreshIcon className="size-4" />
