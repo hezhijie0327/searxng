@@ -7,11 +7,9 @@
  * that a direct visit would use.
  */
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, Suspense, useCallback, useContext, useEffect, useState } from "react";
 import { CloseIcon } from "../components/icons.tsx";
-import { InfoPage } from "../pages/InfoPage.tsx";
-import { PreferencesPage } from "../pages/PreferencesPage.tsx";
-import { StatsPage } from "../pages/StatsPage.tsx";
+import { InfoPage, PreferencesPage, StatsPage } from "../pages/lazyPages.ts";
 import { useT } from "./i18n.ts";
 import { extractPageData } from "./pageData.ts";
 import type { AnyPageData } from "./types.ts";
@@ -158,7 +156,9 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
               ) : state.error ? (
                 <p className="p-6 text-sm text-danger">{state.error}</p>
               ) : state.data ? (
-                <OverlayContent data={state.data} />
+                <Suspense fallback={chunkFallback}>
+                  <OverlayContent data={state.data} />
+                </Suspense>
               ) : null}
             </div>
           </div>
@@ -167,6 +167,14 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
     </OverlayContext.Provider>
   );
 }
+
+const chunkFallback = (
+  <div aria-busy="true" className="space-y-3 p-6">
+    {Array.from({ length: 6 }, (_, i) => (
+      <div className="zjs-skeleton h-12" key={i} />
+    ))}
+  </div>
+);
 
 function OverlayContent({ data }: { data: AnyPageData }) {
   if (isPreferencesPageData(data)) {

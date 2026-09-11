@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { BrandMark } from "./components/icons.tsx";
+import { Suspense } from "react";
+import { BrandMark, SpinnerIcon } from "./components/icons.tsx";
 import { Shell } from "./components/Shell.tsx";
 import { I18nContext, useT } from "./lib/i18n.ts";
 import { OverlayProvider } from "./lib/overlay.tsx";
@@ -10,10 +11,8 @@ import { SettingsContext } from "./lib/settings.ts";
 import type { AnyPageData } from "./lib/types.ts";
 import { isInfoPageData, isPreferencesPageData, isSearchPageData, isStatsPageData } from "./lib/types.ts";
 import { IndexPage } from "./pages/IndexPage.tsx";
-import { InfoPage } from "./pages/InfoPage.tsx";
-import { PreferencesPage } from "./pages/PreferencesPage.tsx";
+import { InfoPage, PreferencesPage, StatsPage } from "./pages/lazyPages.ts";
 import { ResultsPage } from "./pages/ResultsPage.tsx";
-import { StatsPage } from "./pages/StatsPage.tsx";
 
 function Pages() {
   const { data, error } = useRouter();
@@ -34,13 +33,25 @@ function Pages() {
   }
 
   if (isPreferencesPageData(data)) {
-    return <PreferencesPage data={data} />;
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <PreferencesPage data={data} />
+      </Suspense>
+    );
   }
   if (isStatsPageData(data)) {
-    return <StatsPage data={data} />;
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <StatsPage data={data} />
+      </Suspense>
+    );
   }
   if (isInfoPageData(data)) {
-    return <InfoPage data={data} />;
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <InfoPage data={data} />
+      </Suspense>
+    );
   }
   switch (globals.page) {
     case "index":
@@ -56,6 +67,14 @@ function Pages() {
         </Shell>
       );
   }
+}
+
+function PageFallback() {
+  return (
+    <div className="grid min-h-[60vh] place-items-center">
+      <SpinnerIcon className="size-6 animate-spin-slow text-ink-3" />
+    </div>
+  );
 }
 
 export function App({ initialData, settings }: { initialData: AnyPageData | null; settings: ClientSettings }) {

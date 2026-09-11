@@ -170,11 +170,13 @@ function Thumb({
   alt,
   className,
   lengthDisplay,
+  eager,
 }: {
   src: string;
   alt: string;
   className?: string;
   lengthDisplay?: string | null;
+  eager?: boolean;
 }) {
   return (
     <div className={`relative shrink-0 overflow-hidden rounded-xl bg-surface-2 ${className ?? ""}`}>
@@ -182,7 +184,8 @@ function Thumb({
         alt={alt}
         className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
         decoding="async"
-        loading="lazy"
+        fetchPriority={eager ? "high" : undefined}
+        loading={eager ? "eager" : "lazy"}
         onError={(event) => {
           event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
         }}
@@ -280,9 +283,11 @@ interface CardProps {
   autoOpenMap?: boolean;
   /** music-intent pages show the media preview expanded with our own player */
   mediaOpen?: boolean;
+  /** first results load their thumbnail eagerly (LCP) */
+  eager?: boolean;
 }
 
-export function DefaultCard({ result, globals, mediaOpen }: CardProps) {
+export function DefaultCard({ eager, result, globals, mediaOpen }: CardProps) {
   const t = useT();
   return (
     <ResultArticle priority={result.priority}>
@@ -322,6 +327,7 @@ export function DefaultCard({ result, globals, mediaOpen }: CardProps) {
             <Thumb
               alt={result.title_text}
               className="h-24 w-40"
+              eager={eager}
               lengthDisplay={formatLength(result.length_display, result.length_seconds)}
               src={result.thumbnail}
             />
@@ -333,7 +339,7 @@ export function DefaultCard({ result, globals, mediaOpen }: CardProps) {
   );
 }
 
-export function VideoCard({ result, globals, mediaOpen }: CardProps) {
+export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
   const t = useT();
   return (
     <ResultArticle priority={result.priority}>
@@ -368,6 +374,7 @@ export function VideoCard({ result, globals, mediaOpen }: CardProps) {
             <Thumb
               alt={result.title_text}
               className="h-24 w-40"
+              eager={eager}
               lengthDisplay={formatLength(result.length_display, result.length_seconds)}
               src={result.thumbnail}
             />

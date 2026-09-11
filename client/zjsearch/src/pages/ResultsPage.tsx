@@ -631,7 +631,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                               key={index}
                               style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                             >
-                              <ResultCard autoOpenMap={isMapPage} globals={globals} result={result} />
+                              <ResultCard autoOpenMap={isMapPage} eager={index < 4} globals={globals} result={result} />
                             </div>
                           ))}
                         </div>
