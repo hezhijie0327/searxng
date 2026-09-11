@@ -42,15 +42,15 @@ function shortcutRows(layout: "default" | "vim", t: Translate): Array<[string, s
 
 function operatorRows(t: Translate): Array<[string, string]> {
   return [
-    ["filetype:", t("op_filetype")],
     ["site:", t("op_site")],
-    ["inurl:", t("op_inurl")],
-    ["intitle:", t("op_intitle")],
+    ["filetype:", t("op_filetype")],
+    ["before:/after:", t("op_dates")],
     ['"words"', t("op_exact")],
-    ["AND", t("op_and")],
-    ["OR", t("op_or")],
-    ["+ -", t("op_inclexc")],
-    ["*", t("op_wildcard")],
+    ["+term", t("op_include")],
+    ["-term", t("op_exclude")],
+    ["intitle:", t("op_intitle")],
+    ["inurl:", t("op_inurl")],
+    ["intext:", t("op_intext")],
   ];
 }
 
@@ -61,10 +61,12 @@ function bangRows(t: Translate): Array<[string, string]> {
     ["!videos !v", t("bang_videos")],
     ["!news !n", t("bang_news")],
     ["!maps !m", t("bang_maps")],
-    ["keyword", t("bang_keyword")],
-    ["ip", t("widget_ip")],
-    ["hash md5 …", t("widget_hash")],
     ["random", t("widget_random")],
+    ["min max avg sum", t("widget_stats")],
+    ["1+2", t("widget_calc")],
+    ["time Berlin", t("widget_time")],
+    ["ip user-agent", t("widget_ip")],
+    ["md5 sha512", t("widget_hash")],
   ];
 }
 
