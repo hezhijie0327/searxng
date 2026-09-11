@@ -1,4 +1,5 @@
-# zjsearch theme dev instance settings (not tracked by git).
+# zjsearch theme dev instance settings (tracked; carries LAN-specific values
+# such as the outgoing proxy).
 # Run with:
 #   SEARXNG_SETTINGS_PATH=client/zjsearch/dev-settings.yml ./manage webapp.run
 use_default_settings: true

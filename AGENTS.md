@@ -53,9 +53,10 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
 - Client settings come from the base64 `client_settings` attribute on the module
   script tag (`get_client_settings()` in webapp.py). Note: its `theme_static_path`
   is hardcoded to the simple theme — zjsearch uses its own `THEME_STATIC` constant.
-- i18n: all UI strings are translated server-side into `globals.strings` (see the
-  `_strings()` macro). Use msgids that match `searx/translations/*.po` exactly
-  (e.g. lowercase `_('auto')`, not `_('Auto')`) or translations silently fall back.
+- i18n is theme-owned: `client/zjsearch/src/lib/i18n.ts` holds the whole UI
+  string catalog (English sources + Simplified Chinese; every other locale
+  falls back to English). `globals.strings` is gone from the page-data
+  contract. Add new keys to BOTH maps and render via `useT()` / `t("key")`.
 - About/Stats/Preferences open as slide-in drawers (`src/lib/overlay.tsx`); the
   panel fetches page-data and renders the same page components with
   `embedded`/`hideTopNav` props. Internal links inside a panel are browsed within
@@ -93,6 +94,79 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   hint paint over the homepage autocomplete). Wrappers that contain an overlay
   (autocomplete dropdown, menus) need an explicit raised level such as
   `relative z-10`.
+
+## zjsearch UI design system
+
+A consistent control/typography language is enforced across all pages —
+reuse these tokens instead of inventing sizes. The catalog lives in
+`client/zjsearch/src/lib/i18n.ts`; strings are looked up by key with
+`t("key")`.
+
+Type scale — one size per text role:
+
+- 12px `text-xs`: meta/captions — engine chips, pretty URLs, answers meta,
+  mono blocks (URL/hash), footer.
+- 13px `text-[13px]`: interactive controls & compact descriptions — category
+  tabs, dropdown triggers, pills, help dialog copy, sidebar suggestions,
+  preference section tabs.
+- 14px `text-sm`: body text and settings row titles.
+- 16px `text-base`: result titles (list/news/product/video grids all share
+  the `Title`/h3 token) and search inputs.
+- 20px `text-xl`: infobox title; 24px `text-2xl`: page headings.
+- Brand marks: hero `text-6xl/7xl`, header `text-xl`, both `font-extrabold`.
+- Thumbnail corner badges (duration, image count): 11px `font-medium`.
+
+Weights: `font-extrabold` brand only, `font-semibold` headings,
+`font-medium` emphasis/selected states; body stays regular.
+
+Controls:
+
+- Circular ghost icon buttons: 36px (`size-9`) with 18px icons
+  (`size-[18px]`) — header actions, drawer/help closes, search clear. The
+  search submit is the accent-filled circle, also 36px. BackToTop is the
+  one floating exception (40px).
+- Tab-style buttons (category tabs, filter triggers, preference section
+  tabs): `px-4 py-2 text-[13px]`, leading icon 14px.
+- Pills/chips (choices, enable/disable, suggestions): `px-3 py-1.5
+  text-[13px]` rounded-full; category chips carry `CategoryIcon`; selection
+  = `border-accent-strong bg-accent-soft font-medium text-accent`.
+- Boxed form selects (preferences): `h-9 text-sm`.
+- Category/choice selection uses the bordered chip language everywhere
+  (including the engines tab).
+
+Instant answers (Answers.tsx) are tiered:
+
+- Answers without a source url (calculator, time, ip, hash, random) render
+  uncarded in the results column — gray lead-in expression, value at 4xl,
+  `border-b` divider (Google-style).
+- Answers with a source url (definitions) and rich widgets (weather,
+  translations) keep the accent card.
+- The sidebar hosts knowledge (infobox) and diagnostics only — never
+  answers.
+
+Results right rail (desktop): the infobox scrolls inside its own area
+(`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /
+engine messages, download links) sits pinned underneath — they must never
+share the infobox's scroll. On mobile the debug panels render right after
+the meta line and the infobox above the first result (`lg:hidden` blocks);
+hide the rail area entirely when its content is empty (e.g. "test"-style
+searches with no infobox) so blank space never pushes content down.
+
+Query-term highlighting (`.highlight` in global.css) is a tinted
+background only — color marks the term, no bold.
+
+## zjsearch performance notes
+
+- Every content `<img>` is `loading="lazy" decoding="async"` inside an
+  aspect-ratio container (no CLS); the first four result thumbnails are
+  `loading="eager" fetchPriority="high"` (LCP).
+- Route-level code splitting: Preferences/Stats/Info pages load through
+  `src/pages/lazyPages.ts` (`React.lazy` + `Suspense` skeleton fallbacks in
+  app.tsx and overlay.tsx); OpenLayers is dynamically imported only when a
+  map result expands. Keep heavy features out of the eager graph.
+- No webfonts (system font stack) and no third-party scripts; icons are
+  inline SVG (`src/components/icons.tsx`), never an icon font.
+- Drawer/lightbox overlays render conditionally (zero cost when closed).
 
 ## Windows (Git Bash) development notes
 
