@@ -36,3 +36,9 @@ utils/lib_sxng_vite.sh
 
 # local zjsearch patch export
 /zjsearch-theme.patch
+
+# windows local-verification links (hardlinks + junctions into themes/zjsearch)
+/searx/static/zjsearch.min.js
+/searx/static/zjsearch.min.css
+/searx/static/chunk/
+/searx/static/img/
