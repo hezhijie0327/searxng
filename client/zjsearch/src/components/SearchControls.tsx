@@ -5,6 +5,7 @@ import { useSettings } from "../lib/settings.ts";
 import type { GlobalData, SearchPageData } from "../lib/types.ts";
 import type { DropdownOption } from "./Dropdown.tsx";
 import { Dropdown } from "./Dropdown.tsx";
+import { CategoryIcon } from "./icons.tsx";
 
 interface CategoryTabsProps {
   globals: GlobalData;
@@ -54,7 +55,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
         return (
           <button
             aria-pressed={isSelected}
-            className={`relative shrink-0 px-3.5 py-2 text-[13.5px] transition-colors ${
+            className={`relative flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-[13.5px] transition-colors ${
               isSelected ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
             }`}
             key={category}
@@ -64,6 +65,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
             title={settings.search_on_category_select ? undefined : t("search")}
             type="button"
           >
+            <CategoryIcon category={category} className="size-3.5 shrink-0" />
             <span>{globals.category_labels[category] ?? category}</span>
             <span
               aria-hidden="true"
