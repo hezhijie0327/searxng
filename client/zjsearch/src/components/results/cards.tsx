@@ -143,7 +143,7 @@ function MetaLine({ result }: { result: ResultItem }) {
   );
 }
 
-const MAX_ENGINES_SHOWN = 8;
+const MAX_ENGINES_SHOWN = 3;
 
 function EnginesLine({ result }: { result: ResultItem }) {
   const shown = result.engines.slice(0, MAX_ENGINES_SHOWN);
