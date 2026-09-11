@@ -191,11 +191,7 @@ function GroupHeader({
         title={label}
         type="button"
       >
-        {expanded ? (
-          <ChevronLeftIcon className="size-4" />
-        ) : (
-          <ChevronRightIcon className="size-4" />
-        )}
+        {expanded ? <ChevronLeftIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
       </button>
     </div>
   );
@@ -381,21 +377,30 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   };
 
   // ----- keyboard navigation (default / vim layouts) -----
+  // navigable cards are marked with data-hotkey-index (the index into
+  // allResults); grids without per-result cards (images) are skipped
   const selectedCard = () => {
-    const cards = listRef.current ? Array.from(listRef.current.querySelectorAll("article")) : [];
-    return hotkeysSelected >= 0 ? (cards[hotkeysSelected] as HTMLElement | undefined) : undefined;
+    if (hotkeysSelected < 0 || !listRef.current) {
+      return undefined;
+    }
+    return listRef.current.querySelector<HTMLElement>(`[data-hotkey-index="${hotkeysSelected}"]`) ?? undefined;
   };
   const hotkeyTarget = {
     move: (delta: number) => {
-      const cards = listRef.current ? Array.from(listRef.current.querySelectorAll("article")) : [];
+      const cards = listRef.current
+        ? Array.from(listRef.current.querySelectorAll<HTMLElement>("[data-hotkey-index]"))
+        : [];
       if (cards.length === 0) {
         return;
       }
-      setHotkeysSelected((prev) => {
-        const next = Math.min(cards.length - 1, Math.max(0, prev + delta));
-        cards[next]?.scrollIntoView({ block: "center", behavior: "smooth" });
-        return next;
-      });
+      const pos =
+        hotkeysSelected < 0 ? -1 : cards.findIndex((card) => card.dataset.hotkeyIndex === String(hotkeysSelected));
+      const next = cards[Math.min(cards.length - 1, Math.max(0, pos + delta))];
+      if (!next) {
+        return;
+      }
+      next.scrollIntoView({ block: "center", behavior: "smooth" });
+      setHotkeysSelected(Number(next.dataset.hotkeyIndex));
     },
     open: (newTab: boolean) => {
       const href = selectedCard()?.querySelector("a[href]")?.getAttribute("href");
@@ -419,7 +424,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     },
   };
   useHotkeys(settings.hotkeys, hotkeyTarget, () => {
-    setHelpOpen(true);
+    setHelpOpen((open) => !open);
   });
 
   const allResults = useMemo(() => [...data.results, ...appended], [data.results, appended]);
@@ -487,7 +492,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
       <main className="zjs-results-main mx-auto w-full flex-1 px-4 sm:px-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-          <div className="min-w-0 flex-1 pt-4">
+          <div className="min-w-0 flex-1 pt-4" ref={listRef}>
             {error ? (
               <div
                 className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
@@ -529,6 +534,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                         className={`animate-fade-up rounded-2xl ${
                           index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                         }`}
+                        data-hotkey-index={index}
                         key={index}
                         style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                       >
@@ -547,6 +553,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                         className={`animate-fade-up rounded-2xl ${
                           index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                         }`}
+                        data-hotkey-index={index}
                         key={index}
                         style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                       >
@@ -555,7 +562,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-2" ref={listRef}>
+                  <div className="mt-2">
                     {consolidateGroups(groupResults(allResults)).map((group, groupIndex) => {
                       const label = globals.category_labels[group.template] ?? group.template;
                       if (SECTION_TEMPLATES.has(group.template)) {
@@ -587,6 +594,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                       className={`animate-fade-up rounded-2xl ${
                                         index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                                       }`}
+                                      data-hotkey-index={index}
                                       key={index}
                                       style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                                     >
@@ -610,6 +618,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                               className={`animate-fade-up rounded-2xl ${
                                 index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                               }`}
+                              data-hotkey-index={index}
                               key={index}
                               style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                             >

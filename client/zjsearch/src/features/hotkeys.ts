@@ -3,9 +3,12 @@
 /**
  * Keyboard navigation for the results page, mirroring the upstream
  * default and vim layouts (client_settings.hotkeys).
+ *
+ * All actions are delegated to the HotkeyTarget: the page owns the
+ * selection state and knows which elements are navigable.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export interface HotkeyTarget {
   /** select previous / next result (clamped) */
@@ -21,27 +24,15 @@ export interface HotkeyTarget {
 }
 
 const TEXT_ENTRY = new Set(["INPUT", "TEXTAREA", "SELECT"]);
+/** elements with native Enter/space activation - never intercept their keys */
+const NATIVE_ACTIVATION = new Set(["A", "BUTTON"]);
 
 export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHelp: () => void) {
-  const [selected, setSelected] = useState(-1);
-  const listRef = useRef<HTMLElement | null>(null);
-
-  const cards = () => (listRef.current ? Array.from(listRef.current.querySelectorAll("article.result")) : []);
-
-  const move = (delta: number) => {
-    const items = cards();
-    if (items.length === 0) {
-      return;
-    }
-    const next = Math.min(items.length - 1, Math.max(0, selected + delta));
-    setSelected(next);
-    items[next]?.scrollIntoView({ block: "center", behavior: "smooth" });
-  };
-
   const ref = useRef(target);
   ref.current = target;
+  const helpRef = useRef(onHelp);
+  helpRef.current = onHelp;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: handlers are read through ref.current
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey || event.altKey || event.metaKey) {
@@ -56,34 +47,38 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
         }
         return;
       }
+      if (NATIVE_ACTIVATION.has(tag)) {
+        // a focused link or button keeps its native keyboard behavior
+        return;
+      }
+      // keys arriving through an IME composition are input, not commands
+      if (event.isComposing || event.keyCode === 229) {
+        return;
+      }
 
       const t = ref.current;
       const vim = layout === "vim";
       const key = event.key;
 
-      if (key === "?") {
+      // the CJK punctuation mode of Chinese IMEs emits the full-width "？"
+      if (key === "?" || key === "？") {
         event.preventDefault();
-        onHelp();
+        helpRef.current();
         return;
       }
-      if (vim && key === "j") {
+      if (vim && (key === "j" || key === "k")) {
         event.preventDefault();
-        move(1);
-        return;
-      }
-      if (vim && key === "k") {
-        event.preventDefault();
-        move(-1);
+        t.move(key === "j" ? 1 : -1);
         return;
       }
       if (!vim && (key === "ArrowDown" || key === "ArrowRight")) {
         event.preventDefault();
-        key === "ArrowRight" ? t.page(1) : move(1);
+        key === "ArrowRight" ? t.page(1) : t.move(1);
         return;
       }
       if (!vim && (key === "ArrowUp" || key === "ArrowLeft")) {
         event.preventDefault();
-        key === "ArrowLeft" ? t.page(-1) : move(-1);
+        key === "ArrowLeft" ? t.page(-1) : t.move(-1);
         return;
       }
       if (key === "n") {
@@ -96,7 +91,7 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
         t.page(-1);
         return;
       }
-      if (key === "o" || (vim && key === "Enter")) {
+      if (key === "o" || key === "Enter") {
         event.preventDefault();
         t.open(false);
         return;
@@ -114,7 +109,7 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
         }
         return;
       }
-      if (key === "/") {
+      if (key === "i" || key === "/" || key === "／") {
         event.preventDefault();
         t.focusSearch();
       }
@@ -123,10 +118,5 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [layout, onHelp]);
-
-  const selectRef = useRef(selected);
-  selectRef.current = selected;
-
-  return { selected, setSelected, listRef };
+  }, [layout]);
 }

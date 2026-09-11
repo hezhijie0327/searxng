@@ -13,13 +13,13 @@ interface HelpColumn {
 
 const SHORTCUT_ROWS: Array<[string, string]> = [
   ["? / ?", "Show / hide this help"],
-  ["j ↓ · k ↑", "Focus next / previous result"],
-  ["← →", "Previous / next page"],
+  ["↓ ↑", "Focus next / previous result"],
+  ["→ ←", "Next / previous page"],
   ["n p", "Next / previous page"],
   ["o ⏎", "Open focused result"],
-  ["t v", "Open in a new tab"],
+  ["t", "Open in a new tab"],
   ["y", "Copy URL of the focused result"],
-  ["i", "Focus the search box"],
+  ["i /", "Focus the search box"],
   ["Esc", "Close panels, blur the search box"],
 ];
 
@@ -77,14 +77,15 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
       layout === "vim"
         ? [
             ["?", "Show / hide this help"],
-            ["j / ↓", "Focus next result"],
-            ["k / ↑", "Focus previous result"],
+            ["j", "Focus next result"],
+            ["k", "Focus previous result"],
             ["n", "Next page"],
             ["p", "Previous page"],
             ["o ⏎", "Open focused result"],
             ["v", "Open in a new tab"],
             ["y", "Copy URL of the focused result"],
             ["i", "Focus the search box"],
+            ["Esc", "Close panels, blur the search box"],
           ]
         : column.rows;
     return { title: column.title, rows };
