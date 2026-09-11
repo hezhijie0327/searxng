@@ -127,23 +127,11 @@ function TopNav({ globals, hideBrand = false }: { globals: GlobalData; hideBrand
   );
 }
 
-function Footer({ globals }: { globals: GlobalData }) {
-  const t = useT();
+function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="mx-auto w-full max-w-5xl px-4 pb-8 text-center text-xs text-ink-3 sm:px-6">
-      <p className="leading-5">
-        © {year} Zhijie Online · {t("powered_by")}{" "}
-        <a
-          className="transition-colors hover:text-accent hover:underline"
-          href={globals.git_url}
-          rel="noreferrer"
-          target="_blank"
-        >
-          SearXNG
-        </a>
-        {globals.version ? <span className="ms-1 opacity-70">v{globals.version}</span> : null}
-      </p>
+      <p className="leading-5">© {year} Zhijie Online</p>
     </footer>
   );
 }
@@ -177,7 +165,7 @@ export function Shell({
       <ProgressBar active={loading} />
       {hideTopNav ? null : <TopNav globals={globals} hideBrand={variant === "hero"} />}
       <div className={`flex flex-1 flex-col ${variant === "hero" ? "justify-center" : ""}`}>{children}</div>
-      <Footer globals={globals} />
+      <Footer />
     </div>
   );
 }

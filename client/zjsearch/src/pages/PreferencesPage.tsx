@@ -1210,6 +1210,18 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             </div>
           ) : null}
         </div>
+        <p className="mt-6 text-center text-xs text-ink-3">
+          {t("powered_by")}{" "}
+          <a
+            className="transition-colors hover:text-accent hover:underline"
+            href={globals.git_url}
+            rel="noreferrer"
+            target="_blank"
+          >
+            SearXNG
+          </a>
+          {globals.version ? <span className="ms-1 opacity-70">v{globals.version}</span> : null}
+        </p>
       </main>
     </Shell>
   );
