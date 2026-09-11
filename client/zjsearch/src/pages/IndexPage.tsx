@@ -54,7 +54,10 @@ export function IndexPage({ data }: { data: IndexData }) {
           {globals.instance_name}
           <span className="text-accent-strong">.</span>
         </h1>
-        <div className="mt-12 w-full animate-fade-up [animation-delay:60ms]">
+        {/* raised stacking level: fade-up leaves a residual transform (a
+            stacking context) on every animated sibling, which would let the
+            category tabs and the hotkeys hint paint over the z-30 dropdown */}
+        <div className="relative z-10 mt-12 w-full animate-fade-up [animation-delay:60ms]">
           <SearchBox
             initialQuery=""
             onQueryChange={setQuery}
