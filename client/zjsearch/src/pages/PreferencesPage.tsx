@@ -569,17 +569,26 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   return (
     <Shell embedded={embedded} globals={globals}>
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-20 sm:px-6">
-        <div className="flex items-center justify-between py-6">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">{t("preferences")}</h1>
-          <div className="flex items-center gap-3">
-            {savedAt > 0 ? (
-              <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
-                <CheckIcon className="size-3.5" />
-                {t("saved")}
-              </span>
-            ) : null}
+        {!embedded ? (
+          <div className="flex items-center justify-between py-6">
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">{t("preferences")}</h1>
+            <div className="flex items-center gap-3">
+              {savedAt > 0 ? (
+                <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
+                  <CheckIcon className="size-3.5" />
+                  {t("saved")}
+                </span>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : savedAt > 0 ? (
+          <div className="flex justify-end py-3">
+            <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
+              <CheckIcon className="size-3.5" />
+              {t("saved")}
+            </span>
+          </div>
+        ) : null}
 
         {isPreview ? (
           <div className="mb-4 flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-ink-2 animate-fade-up">

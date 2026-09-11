@@ -154,18 +154,20 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
   return (
     <Shell embedded={embedded} globals={globals}>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-16 sm:px-6">
-        <h1 className="py-5 text-2xl font-semibold tracking-tight text-ink">
-          {data.selected_engine_name ? (
-            <>
-              <Link className="hover:text-accent" href="/stats">
-                {t("engine_stats")}
-              </Link>{" "}
-              - {data.selected_engine_name}
-            </>
-          ) : (
-            t("engine_stats")
-          )}
-        </h1>
+        {embedded ? null : (
+          <h1 className="py-5 text-2xl font-semibold tracking-tight text-ink">
+            {data.selected_engine_name ? (
+              <>
+                <Link className="hover:text-accent" href="/stats">
+                  {t("engine_stats")}
+                </Link>{" "}
+                - {data.selected_engine_name}
+              </>
+            ) : (
+              t("engine_stats")
+            )}
+          </h1>
+        )}
 
         {engines.length === 0 ? (
           <p className="text-sm text-ink-2">{t("no_data_available")}</p>

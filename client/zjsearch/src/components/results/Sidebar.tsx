@@ -53,7 +53,7 @@ export function Infobox({
                 {attribute.image_src ? (
                   <img
                     alt={attribute.image_alt}
-                    className="inline-block max-h-6 rounded align-middle"
+                    className="inline-block max-h-24 rounded-lg align-middle"
                     loading="lazy"
                     src={attribute.image_src}
                   />
