@@ -33,3 +33,6 @@ searx/static/themes/zjsearch/
 Makefile
 utils/lib_sxng_themes.sh
 utils/lib_sxng_vite.sh
+
+# local zjsearch patch export
+/zjsearch-theme.patch
