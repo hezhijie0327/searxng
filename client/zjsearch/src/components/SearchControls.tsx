@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { useEffect, useState } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
 import type { GlobalData, SearchPageData } from "../lib/types.ts";
 import type { DropdownOption } from "./Dropdown.tsx";
 import { Dropdown } from "./Dropdown.tsx";
-import { CategoryIcon } from "./icons.tsx";
 
 interface CategoryTabsProps {
   globals: GlobalData;
