@@ -55,9 +55,19 @@ function BackToTop() {
   );
 }
 
-function NoResults({ pageno }: { pageno: number }) {
+function NoResults({ pageno, hasInfobox }: { pageno: number; hasInfobox: boolean }) {
   const t = useT();
   const firstPage = pageno === 1;
+  if (hasInfobox && firstPage) {
+    return (
+      <div className="rounded-2xl border border-line bg-surface p-4 text-sm text-ink-2">
+        <p className="flex items-center gap-2">
+          <InfoIcon className="size-4 shrink-0 text-accent" />
+          {t("no_web_results")}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-md rounded-2xl border border-line bg-surface p-6 text-sm text-ink-2 animate-fade-up">
       <p className="flex items-center gap-2 font-medium text-ink">
@@ -74,18 +84,6 @@ function NoResults({ pageno }: { pageno: number }) {
               </button>
             </li>
             <li>{t("try_other_query")}</li>
-            <li>
-              {t("change_engines_prefs")}{" "}
-              <Link className="text-accent hover:underline" href="/preferences">
-                /preferences
-              </Link>
-            </li>
-            <li>
-              {t("switch_instance")}{" "}
-              <a className="text-accent hover:underline" href="https://searx.space" rel="noreferrer" target="_blank">
-                https://searx.space
-              </a>
-            </li>
           </>
         ) : (
           <li>{t("go_previous_page")}</li>
@@ -592,7 +590,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
                 {allResults.length === 0 && data.answers.length === 0 ? (
                   <div className="mt-6">
-                    <NoResults pageno={data.pageno} />
+                    <NoResults hasInfobox={data.infoboxes.length > 0} pageno={data.pageno} />
                   </div>
                 ) : isImagePage ? (
                   <div className="mt-4">
