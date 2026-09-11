@@ -2,8 +2,10 @@
 
 import { type ReactNode, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
+import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
-import { ChevronDownIcon, ExternalLinkIcon } from "../icons.tsx";
+import { ChevronDownIcon, DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
+import { Link } from "../Shell.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
   return (
@@ -140,6 +142,102 @@ export function Infobox({
   );
 }
 
+export function DebugPanels({ data }: { data: SearchPageData }) {
+  const t = useT();
+  const { openOverlay } = useOverlay();
+  const hasEngineMsg = data.unresponsive_engines.length > 0 || data.timings.length > 0;
+  const maxTime = data.max_response_time ?? 0;
+  const globals = data.globals;
+  return (
+    <>
+      {hasEngineMsg ? (
+        <Box
+          open={data.results.length === 0}
+          title={
+            data.max_response_time
+              ? `${t("response_time")}: ${Math.round(data.max_response_time * 10) / 10} ${t("seconds")}`
+              : t("engines_messages")
+          }
+        >
+          {data.unresponsive_engines.length > 0 ? (
+            <table className="w-full text-xs">
+              <tbody>
+                {data.unresponsive_engines.map(([name, errorMessage]) => (
+                  <tr key={name}>
+                    <td className="py-0.5 pr-2 align-top">
+                      <button
+                        className="text-left font-medium text-ink-2 hover:text-accent"
+                        onClick={() => {
+                          openOverlay(`/stats?engine=${encodeURIComponent(name)}`, t("engine_stats"));
+                        }}
+                        type="button"
+                      >
+                        {name}
+                      </button>
+                    </td>
+                    <td className="py-0.5 text-danger" dir="auto">
+                      {errorMessage}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+          {data.timings.length > 0 ? (
+            <table className="mt-1 w-full text-xs">
+              <tbody>
+                {data.timings.map((timing) => (
+                  <tr key={timing.name}>
+                    <td className="w-24 py-0.5 pr-2 truncate">
+                      <button
+                        className="text-left text-ink-2 hover:text-accent"
+                        onClick={() => {
+                          openOverlay(`/stats?engine=${encodeURIComponent(timing.name)}`, t("engine_stats"));
+                        }}
+                        type="button"
+                      >
+                        {timing.name}
+                      </button>
+                    </td>
+                    <td className="py-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="w-10 shrink-0 text-right text-ink-3">{Math.round(timing.time * 10) / 10}</span>
+                        <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
+                          <span
+                            className="block h-full rounded-full bg-accent/70"
+                            style={{ width: maxTime > 0 ? `${Math.max(2, (timing.time / maxTime) * 100)}%` : "0%" }}
+                          />
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+        </Box>
+      ) : null}
+
+      {globals.search_formats.length > 0 ? (
+        <Box title={t("download_results")}>
+          <div className="flex flex-wrap gap-1.5">
+            {globals.search_formats.map((format) => (
+              <a
+                className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
+                href={`${window.location.pathname}${window.location.search}${window.location.search.includes("?") ? "&" : "?"}format=${format}`}
+                key={format}
+              >
+                <DownloadIcon className="size-3.5" />
+                {format}
+              </a>
+            ))}
+          </div>
+        </Box>
+      ) : null}
+    </>
+  );
+}
+
 export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q: string) => void }) {
   const t = useT();
   const globals = data.globals;
@@ -155,6 +253,8 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
           ))}
         </section>
       ) : null}
+
+      <DebugPanels data={data} />
 
       {globals.method === "POST" ? (
         <Box title={t("search_url")}>

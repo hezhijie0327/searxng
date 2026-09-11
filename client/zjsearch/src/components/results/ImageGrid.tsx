@@ -67,6 +67,41 @@ function Lightbox({
   const settings = useSettings();
   const result = results[index];
   const touchStartX = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+
+  const resetZoom = useCallback(() => {
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+  }, []);
+
+  // wheel zoom, non-passive so the page never scrolls behind the viewer
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) {
+      return;
+    }
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      setZoom((prev) => {
+        // allow zooming out to 50% so small thumbnails can shrink to context
+        const next = Math.min(5, Math.max(0.5, prev * (event.deltaY < 0 ? 1.15 : 1 / 1.15)));
+        return Math.round(next * 100) / 100;
+      });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, []);
+
+  // reset whenever another image is opened
+  useEffect(() => {
+    resetZoom();
+  }, [index, resetZoom]);
 
   const close = useCallback(
     (viaUser: boolean) => {
@@ -81,10 +116,11 @@ function Lightbox({
 
   const nav = useCallback(
     (delta: number) => {
+      resetZoom();
       const next = (index + delta + results.length) % results.length;
       onNavigate(next);
     },
-    [index, results.length, onNavigate],
+    [index, results.length, onNavigate, resetZoom],
   );
 
   useEffect(() => {
@@ -165,6 +201,7 @@ function Lightbox({
       <div className="flex items-center justify-between p-3">
         <span className="text-xs text-zinc-500" dir="ltr">
           {index + 1} / {results.length}
+          {zoom > 1 ? <span className="ms-2 opacity-80">{Math.round(zoom * 100)}%</span> : null}
         </span>
         <button
           aria-label={t("close")}
@@ -179,8 +216,43 @@ function Lightbox({
       </div>
 
       {/* image */}
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-4">
-        <ProgressiveImage alt={result.title_text} full={result.img_src ?? ""} thumbnail={thumbSrc} />
+      <div
+        className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 pb-4"
+        ref={stageRef}
+      >
+        <div
+          className={`flex items-center justify-center ${zoom > 1 ? "touch-none" : ""}`}
+          onDoubleClick={() => {
+            resetZoom();
+          }}
+          onPointerDown={(event) => {
+            if (zoom <= 1) {
+              return;
+            }
+            dragStart.current = { x: event.clientX, y: event.clientY, ox: offset.x, oy: offset.y };
+            setDragging(true);
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            const start = dragStart.current;
+            if (!start) {
+              return;
+            }
+            setOffset({ x: start.ox + (event.clientX - start.x), y: start.oy + (event.clientY - start.y) });
+          }}
+          onPointerUp={(event) => {
+            dragStart.current = null;
+            setDragging(false);
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }}
+          style={{
+            transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+            transition: dragging ? "none" : "transform 150ms ease-out",
+            cursor: zoom > 1 ? (dragging ? "grabbing" : "grab") : "zoom-in",
+          }}
+        >
+          <ProgressiveImage alt={result.title_text} full={result.img_src ?? ""} thumbnail={thumbSrc} />
+        </div>
         <div className="absolute bottom-2 right-5 flex gap-2">
           <button
             aria-label={t("previous_page")}

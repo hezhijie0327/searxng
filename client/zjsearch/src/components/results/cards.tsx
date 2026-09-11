@@ -7,6 +7,7 @@ import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import {
   CalendarIcon,
   ClockIcon,
+  CloseIcon,
   DownloadIcon,
   ExternalLinkIcon,
   FileIcon,
@@ -341,6 +342,8 @@ export function DefaultCard({ eager, result, globals, mediaOpen }: CardProps) {
 
 export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
   const t = useT();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const hasMedia = Boolean(result.iframe_src);
   return (
     <ResultArticle priority={result.priority}>
       <div className="flex gap-4">
@@ -352,15 +355,9 @@ export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
           <div className="mt-1">
             <MetaLine result={result} />
           </div>
-          {result.iframe_src ? (
-            <div className="mt-2">
-              {mediaOpen ? (
-                <MediaPreview src={result.iframe_src} video />
-              ) : (
-                <MediaCollapse hideLabel={t("hide_video")} showLabel={t("show_video")}>
-                  {() => <EmbedFrame src={result.iframe_src ?? ""} />}
-                </MediaCollapse>
-              )}
+          {hasMedia && previewOpen ? (
+            <div className="mt-2 animate-fade-in">
+              <MediaPreview src={result.iframe_src ?? ""} video={!mediaOpen} />
             </div>
           ) : null}
           <p
@@ -370,15 +367,30 @@ export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
           />
         </div>
         {result.thumbnail ? (
-          <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
-            <Thumb
-              alt={result.title_text}
-              className="h-24 w-40"
-              eager={eager}
-              lengthDisplay={formatLength(result.length_display, result.length_seconds)}
-              src={result.thumbnail}
-            />
-          </ResultLink>
+          <div className="relative shrink-0">
+            <ResultLink className="block" globals={globals} result={result}>
+              <Thumb
+                alt={result.title_text}
+                className="h-24 w-40"
+                eager={eager}
+                lengthDisplay={formatLength(result.length_display, result.length_seconds)}
+                src={result.thumbnail}
+              />
+            </ResultLink>
+            {hasMedia ? (
+              <button
+                aria-label={previewOpen ? t("hide_video") : t("show_video")}
+                className="absolute end-1 top-1 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+                onClick={() => {
+                  setPreviewOpen((value) => !value);
+                }}
+                title={previewOpen ? t("hide_video") : t("show_video")}
+                type="button"
+              >
+                {previewOpen ? <CloseIcon className="size-3.5" /> : <PlayIcon className="size-3.5" />}
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
       <EnginesLine result={result} />

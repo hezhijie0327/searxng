@@ -719,16 +719,11 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          {!isImagePage &&
-          !isVideoPage &&
-          !isProductPage &&
-          (data.infoboxes.length > 0 || globals.method === "POST") ? (
-            <div className="hidden w-full shrink-0 pt-4 lg:block lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
-              {/* keep the column reserved but blank while the new query loads -
+          <div className="hidden w-full shrink-0 pt-4 lg:block lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
+            {/* keep the column reserved but blank while the new query loads -
                   stale infoboxes from the previous query must not linger */}
-              {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
-            </div>
-          ) : null}
+            {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
+          </div>
         </div>
       </main>
 
