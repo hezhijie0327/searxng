@@ -19,15 +19,16 @@ import {
   KeyIcon,
   LanguagesIcon,
   LinkIcon,
+  MonitorIcon,
   MoonIcon,
   RefreshIcon,
   SearchIcon,
   ShieldIcon,
   SlidersIcon,
   SparkIcon,
-  StarIcon,
   SunIcon,
   SwapIcon,
+  TagIcon,
   TerminalIcon,
 } from "../components/icons.tsx";
 import { Link, Shell } from "../components/Shell.tsx";
@@ -158,7 +159,7 @@ function PluginRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <SettingRow description={plugin.description} icon={<TerminalIcon className="size-4.5" />} title={plugin.name}>
+    <SettingRow description={plugin.description} icon={<SparkIcon className="size-4.5" />} title={plugin.name}>
       <Switch checked={enabled} label={plugin.name} onChange={onChange} />
     </SettingRow>
   );
@@ -695,7 +696,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("favicon_resolver") ? (
                 <SettingRow
                   description={t("display_favicons")}
-                  icon={<StarIcon className="size-4.5" />}
+                  icon={<GlobeIcon className="size-4.5" />}
                   title={t("favicon_resolver")}
                 >
                   <Select
@@ -801,7 +802,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("theme") ? (
                 <SettingRow
                   description={t("change_layout")}
-                  icon={<SparkIcon className="size-4.5" />}
+                  icon={<MonitorIcon className="size-4.5" />}
                   title={t("theme")}
                 >
                   <Select
@@ -817,7 +818,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               ) : null}
               <SettingRow
                 description={t("choose_auto")}
-                icon={<MoonIcon className="size-4.5" />}
+                icon={<SunIcon className="size-4.5" />}
                 title={t("theme_style")}
               >
                 <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
@@ -878,7 +879,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("search_on_category_select") ? (
                 <SettingRow
                   description={t("search_on_category_select_desc")}
-                  icon={<CheckIcon className="size-4.5" />}
+                  icon={<SearchIcon className="size-4.5" />}
                   title={t("search_on_category_select")}
                 >
                   <Switch
@@ -973,7 +974,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("query_in_title") ? (
                 <SettingRow
                   description={t("query_in_title_desc")}
-                  icon={<TerminalIcon className="size-4.5" />}
+                  icon={<TagIcon className="size-4.5" />}
                   title={t("query_in_title")}
                 >
                   <Switch checked={queryInTitle} label={t("query_in_title")} onChange={setQueryInTitle} />
