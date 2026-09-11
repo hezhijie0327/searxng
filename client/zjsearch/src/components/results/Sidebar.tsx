@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
-import { ExternalLinkIcon } from "../icons.tsx";
+import { ChevronDownIcon, ExternalLinkIcon } from "../icons.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
   return (
@@ -27,6 +27,8 @@ export function Infobox({
   globals: GlobalData;
   onSearch: (q: string) => void;
 }) {
+  const t = useT();
+  const [expanded, setExpanded] = useState(false);
   return (
     <div className="rounded-2xl border border-line bg-surface p-3">
       <div className={infobox.img_src ? "flex items-start gap-4" : ""}>
@@ -44,81 +46,96 @@ export function Infobox({
         </h3>
       </div>
 
-      {infobox.attributes && infobox.attributes.length > 0 ? (
-        <dl className="mt-3 space-y-1 text-xs">
-          {infobox.attributes.map((attribute, index) => (
-            <div className="flex gap-2" key={index}>
-              <dt className="shrink-0 text-ink-3">{attribute.label}:</dt>
-              <dd className="min-w-0 text-ink-2">
-                {attribute.image_src ? (
-                  <img
-                    alt={attribute.image_alt}
-                    className="inline-block max-h-24 rounded-lg align-middle"
-                    decoding="async"
-                    loading="lazy"
-                    src={attribute.image_src}
-                  />
-                ) : (
-                  <span dir="auto">{attribute.value}</span>
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-
-      {infobox.content_html ? (
-        <div
-          className="mt-3 text-[13px] leading-relaxed text-ink-2 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-2"
-          dangerouslySetInnerHTML={{ __html: infobox.content_html }}
-          dir="auto"
-        />
-      ) : null}
-
-      {infobox.urls && infobox.urls.length > 0 ? (
-        <ul className="mt-3 space-y-1 text-xs">
-          {infobox.urls.map((url) => (
-            <li className="truncate" key={url.url}>
-              <a
-                className="inline-flex items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
-                {...(globals.results_on_new_tab
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : { rel: "noreferrer" })}
-                href={url.url}
-              >
-                <span className="truncate">{url.title}</span>
-                <ExternalLinkIcon className="size-3 shrink-0" />
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {infobox.related_topics && infobox.related_topics.length > 0 ? (
-        <div className="mt-4 space-y-2">
-          {infobox.related_topics.map((topic) => (
-            <div key={topic.name}>
-              <h4 className="text-xs font-medium text-ink" dir="auto">
-                {topic.name}
-              </h4>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {topic.suggestions.map((suggestion) => (
-                  <button
-                    className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
-                    key={suggestion}
-                    onClick={() => {
-                      onSearch(suggestion);
-                    }}
-                    type="button"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+      <div className={`relative mt-3 ${expanded ? "" : "max-h-72 overflow-hidden"}`}>
+        {infobox.attributes && infobox.attributes.length > 0 ? (
+          <dl className="space-y-1 text-xs">
+            {infobox.attributes.map((attribute, index) => (
+              <div className="flex gap-2" key={index}>
+                <dt className="shrink-0 text-ink-3">{attribute.label}:</dt>
+                <dd className="min-w-0 text-ink-2">
+                  {attribute.image_src ? (
+                    <img
+                      alt={attribute.image_alt}
+                      className="inline-block max-h-24 rounded-lg align-middle"
+                      decoding="async"
+                      loading="lazy"
+                      src={attribute.image_src}
+                    />
+                  ) : (
+                    <span dir="auto">{attribute.value}</span>
+                  )}
+                </dd>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
+            ))}
+          </dl>
+        ) : null}
+
+        {infobox.content_html ? (
+          <div
+            className="mt-3 text-[13px] leading-relaxed text-ink-2 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-2"
+            dangerouslySetInnerHTML={{ __html: infobox.content_html }}
+            dir="auto"
+          />
+        ) : null}
+
+        {infobox.urls && infobox.urls.length > 0 ? (
+          <ul className="mt-3 space-y-1 text-xs">
+            {infobox.urls.map((url) => (
+              <li className="truncate" key={url.url}>
+                <a
+                  className="inline-flex items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
+                  {...(globals.results_on_new_tab
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : { rel: "noreferrer" })}
+                  href={url.url}
+                >
+                  <span className="truncate">{url.title}</span>
+                  <ExternalLinkIcon className="size-3 shrink-0" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {infobox.related_topics && infobox.related_topics.length > 0 ? (
+          <div className="mt-4 space-y-2">
+            {infobox.related_topics.map((topic) => (
+              <div key={topic.name}>
+                <h4 className="text-xs font-medium text-ink" dir="auto">
+                  {topic.name}
+                </h4>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {topic.suggestions.map((suggestion) => (
+                    <button
+                      className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
+                      key={suggestion}
+                      onClick={() => {
+                        onSearch(suggestion);
+                      }}
+                      type="button"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {expanded ? null : (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent" />
+        )}
+      </div>
+      <button
+        className="mt-2 flex w-full items-center justify-center gap-1 border-t border-line pt-2.5 text-xs text-ink-3 transition-colors hover:text-ink"
+        onClick={() => {
+          setExpanded((value) => !value);
+        }}
+        type="button"
+      >
+        {expanded ? t("collapse") : t("expand")}
+        <ChevronDownIcon className={`size-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+      </button>
     </div>
   );
 }

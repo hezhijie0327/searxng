@@ -211,6 +211,8 @@ const EN: Record<string, string> = {
   meta_results: "results",
   meta_in: "in",
   more_categories: "More categories",
+  expand: "Show more",
+  collapse: "Show less",
   hotkeys_hint: "Press ? anytime for keyboard shortcuts",
   hotkeys_desc:
     'Navigate search results with hotkeys (JavaScript required). Press "?" on the main or results page to get help.',
@@ -467,6 +469,8 @@ const ZH_CN: Record<string, string> = {
   meta_results: "条相关结果",
   meta_in: "用时",
   more_categories: "更多分类",
+  expand: "查看更多",
+  collapse: "收起",
   hotkeys_hint: "随时按 ? 查看键盘快捷键",
   hotkeys_desc: "使用快捷键导航搜索结果(需要 JavaScript)。在主页或结果页按 ? 查看帮助。",
   hotkeys_default: "默认",

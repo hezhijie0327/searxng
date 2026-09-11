@@ -2,12 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon, SearchIcon } from "../components/icons.tsx";
+import {
+  ArrowUpIcon,
+  CategoryIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  InfoIcon,
+  SearchIcon,
+} from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
-import { Sidebar } from "../components/results/Sidebar.tsx";
+import { Infobox, Sidebar } from "../components/results/Sidebar.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
@@ -274,6 +281,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
+  const [suggestionPage, setSuggestionPage] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
@@ -446,6 +454,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
   useEffect(() => {
     setHotkeysSelected(-1);
+    setSuggestionPage(0);
   }, [href]);
 
   // client-side calculator answer (server plugin "calculator" enabled)
@@ -457,6 +466,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     return calc ? ({ template: "answer/legacy.html", answer: `${calc.expr} = ${calc.value}`, url: "" } as const) : null;
   }, [data.q, hasPlugin]);
   const showSkeletons = loading && !error;
+  const suggestionPages = Math.ceil(data.suggestions.length / 5);
 
   return (
     <Shell globals={globals} hideTopNav>
@@ -503,20 +513,58 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               </p>
             ) : null}
             {!showSkeletons && data.suggestions.length > 0 ? (
-              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                {data.suggestions.slice(0, 8).map((suggestion) => (
-                  <button
-                    className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
-                    dir="auto"
-                    key={suggestion.q}
-                    onClick={() => {
-                      submitQuery(suggestion.q);
-                    }}
-                    type="button"
-                  >
-                    <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
-                    <span className="truncate">{suggestion.title}</span>
-                  </button>
+              <div className="mt-2.5 flex items-center gap-2">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                  {data.suggestions.slice(suggestionPage * 5, suggestionPage * 5 + 5).map((suggestion) => (
+                    <button
+                      className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
+                      dir="auto"
+                      key={suggestion.q}
+                      onClick={() => {
+                        submitQuery(suggestion.q);
+                      }}
+                      type="button"
+                    >
+                      <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
+                      <span className="truncate">{suggestion.title}</span>
+                    </button>
+                  ))}
+                </div>
+                {suggestionPages > 1 ? (
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      aria-label={t("previous_page")}
+                      className="grid size-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:border-ink-3 hover:text-ink disabled:opacity-40"
+                      disabled={suggestionPage === 0}
+                      onClick={() => {
+                        setSuggestionPage((page) => Math.max(0, page - 1));
+                      }}
+                      type="button"
+                    >
+                      <ChevronLeftIcon className="size-3.5" />
+                    </button>
+                    <span className="text-xs text-ink-3">
+                      {suggestionPage + 1}/{suggestionPages}
+                    </span>
+                    <button
+                      aria-label={t("next_page")}
+                      className="grid size-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:border-ink-3 hover:text-ink disabled:opacity-40"
+                      disabled={suggestionPage === suggestionPages - 1}
+                      onClick={() => {
+                        setSuggestionPage((page) => Math.min(suggestionPages - 1, page + 1));
+                      }}
+                      type="button"
+                    >
+                      <ChevronRightIcon className="size-3.5" />
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            {!showSkeletons && data.infoboxes.length > 0 ? (
+              <div className="mt-3 lg:hidden">
+                {data.infoboxes.map((infobox, index) => (
+                  <Infobox globals={globals} infobox={infobox} key={index} onSearch={submitQuery} />
                 ))}
               </div>
             ) : null}
@@ -673,9 +721,14 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          {!isImagePage && !isVideoPage && !isProductPage && (data.infoboxes.length > 0 || globals.method === "POST") ? (
-            <div className="w-full shrink-0 pt-4 lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
-              <Sidebar data={data} onSearch={submitQuery} />
+          {!isImagePage &&
+          !isVideoPage &&
+          !isProductPage &&
+          (data.infoboxes.length > 0 || globals.method === "POST") ? (
+            <div className="hidden w-full shrink-0 pt-4 lg:block lg:w-80 lg:max-h-[calc(100dvh-9rem)] lg:self-start lg:overflow-y-auto lg:pb-6 [scrollbar-width:thin]">
+              {/* keep the column reserved but blank while the new query loads -
+                  stale infoboxes from the previous query must not linger */}
+              {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
             </div>
           ) : null}
         </div>
