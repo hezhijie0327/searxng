@@ -83,32 +83,6 @@ export function IndexPage({ data }: { data: IndexData }) {
             query={query}
             variant="hero"
           />
-          <div className="mt-1 flex w-full justify-end">
-            <button
-              aria-expanded={optionsOpen}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
-                optionsOpen ? "bg-surface-2 text-ink" : "text-ink-3 hover:bg-surface-2 hover:text-ink"
-              }`}
-              onClick={() => {
-                setOptionsOpen((open) => !open);
-              }}
-              type="button"
-            >
-              <SlidersIcon className="size-3.5" />
-              {t("search_options")}
-            </button>
-          </div>
-          {optionsOpen ? (
-            <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 animate-fade-in">
-              <SearchFilters
-                globals={globals}
-                onChange={(next) => {
-                  setFilters((prev) => ({ ...prev, ...next }));
-                }}
-                values={filters}
-              />
-            </div>
-          ) : null}
         </div>
         <div className="mt-3 max-w-full animate-fade-up [animation-delay:120ms]">
           <CategoryTabs
@@ -122,6 +96,32 @@ export function IndexPage({ data }: { data: IndexData }) {
             wrap
           />
         </div>
+        <div className="mt-1 flex w-full justify-end animate-fade-up [animation-delay:150ms]">
+          <button
+            aria-expanded={optionsOpen}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
+              optionsOpen ? "bg-surface-2 text-ink" : "text-ink-3 hover:bg-surface-2 hover:text-ink"
+            }`}
+            onClick={() => {
+              setOptionsOpen((open) => !open);
+            }}
+            type="button"
+          >
+            <SlidersIcon className="size-3.5" />
+            {t("search_options")}
+          </button>
+        </div>
+        {optionsOpen ? (
+          <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 animate-fade-in">
+            <SearchFilters
+              globals={globals}
+              onChange={(next) => {
+                setFilters((prev) => ({ ...prev, ...next }));
+              }}
+              values={filters}
+            />
+          </div>
+        ) : null}
       </main>
       {hintHidden ? null : (
         <div className="mx-auto mb-10 w-full max-w-xl px-4">
