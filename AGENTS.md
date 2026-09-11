@@ -16,7 +16,9 @@ Key directories:
 - `searx/templates/zjsearch/data/macros.html` — the server → client data contract.
 - `client/zjsearch/` — React 19 + TS + Vite 8 + Tailwind v4 workspace for zjsearch.
 - `client/simple/`, `searx/templates/simple/` — upstream theme, do not refactor.
-- `searx/static/themes/<theme>/` — built assets (committed to git, like upstream).
+- `searx/static/themes/simple/` — built assets of the upstream theme (committed
+  to git, like upstream). `searx/static/themes/zjsearch/` is **git-ignored**
+  (`.gitignore`) — never commit zjsearch build output.
 - `utils/lib_sxng_themes.sh`, `utils/lib_sxng_vite.sh` — make targets for themes.
 
 ## Commands
@@ -84,6 +86,46 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   `me-`, `start-`, `end-`) against a single stylesheet.
 - The empty `searx/templates/<name>/` directory alone registers a theme in the
   UI — never leave a half-created theme dir behind.
+- Stacking contexts: entrance animations (`animate-fade-up`, fill-mode `both`)
+  leave a residual `transform` on their wrapper, which makes every animated
+  sibling a stacking context — a `z-30` dropdown inside one of them loses
+  against DOM-later siblings (this once let the category tabs and the hotkeys
+  hint paint over the homepage autocomplete). Wrappers that contain an overlay
+  (autocomplete dropdown, menus) need an explicit raised level such as
+  `relative z-10`.
+
+## Windows (Git Bash) development notes
+
+`./manage` and `make` assume a POSIX host and **do not work on Windows**:
+`utils/lib.sh` sources `/etc/os-release`, `manage` needs a `python3` command
+and a POSIX venv layout (`local/py3/bin/python`), and `make` is absent from
+Git Bash. To run the dev instance on Windows anyway (all outside the repo, no
+Python edits — the repo policy forbids them):
+
+- Create the venv manually: `python -m venv local/py3` (Windows layout:
+  `local/py3/Scripts/`), then
+  `local/py3/Scripts/python -m pip install -r requirements.txt -r requirements-dev.txt`.
+- `searx/valkeydb.py` imports the POSIX-only `pwd` module at top level and
+  crashes on import. Put a tiny `pwd` stub outside the repo on `PYTHONPATH`.
+- Windows path separators break theme asset URLs:
+  `webutils.get_static_file_list()` returns `themes\zjsearch\...` while
+  `webapp.custom_url_for` compares with forward slashes, so `/static/zjsearch.min.js`
+  is served unmapped and 404s (works fine on POSIX). Workaround: hardlink the
+  built assets into `searx/static/` with `cmd //c "mklink /H zjsearch.min.js
+  themes\zjsearch\zjsearch.min.js"` (same for `.css`). These links are
+  untracked, must not be committed, and go stale after every rebuild (vite
+  replaces the target file) — delete and recreate them.
+- Start the app directly, mirroring `manage`'s `webapp.run` env vars:
+  `SEARXNG_SETTINGS_PATH=<settings.yml> GRANIAN_INTERFACE=wsgi
+  GRANIAN_HOST=127.0.0.1 GRANIAN_PORT=8888 local/py3/Scripts/granian
+  searx.webapp:app` (needs the `granian[pname,reload]` extra for the
+  `GRANIAN_PROCESS_NAME`/reload vars; they can simply be omitted).
+- Granian workers inherit the listening socket. Killing the shell wrapper (or
+  a task manager's "stop") can leave an orphan worker bound to :8888; a second
+  instance can then bind the same port too (SO_REUSEADDR) and requests race
+  between an old and a new server — the classic symptom is "rebuilt assets
+  but the page serves stale ones". Before starting an instance, check
+  `netstat -ano | grep :8888` and `taskkill //PID <pid> //F` every listener.
 
 ## Docs worth reading first
 
