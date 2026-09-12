@@ -1,27 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BackToTop } from "../components/BackToTop.tsx";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, GripVerticalIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers, CalculatorAnswer } from "../components/results/Answers.tsx";
-import {
-  AppsGrid,
-  DictionaryCard,
-  NewsCard,
-  PaperCard,
-  PosterGrid,
-  ProductGrid,
-  ResultCard,
-  ResultSkeleton,
-  VideoGrid,
-} from "../components/results/cards.tsx";
+import { collectBlocks } from "../components/results/blocks.ts";
+import { ResultSkeleton } from "../components/results/cardParts.tsx";
+import { DictionaryCard, NewsCard, PaperCard, ResultCard } from "../components/results/cards.tsx";
+import { Corrections, NoResults } from "../components/results/EmptyStates.tsx";
 import { FilesGrid } from "../components/results/FilesGrid.tsx";
+import { GroupHeader } from "../components/results/GroupHeader.tsx";
+import { AppsGrid, PosterGrid, ProductGrid, VideoGrid } from "../components/results/grids.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
+import { InfiniteScrollSentinel } from "../components/results/InfiniteScroll.tsx";
 import { MusicGrid } from "../components/results/MusicGrid.tsx";
 import { PackageGrid } from "../components/results/PackageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
 import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
-
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
@@ -32,207 +27,6 @@ import { extractPageData } from "../lib/pageData.ts";
 import { buildSearchUrl, parseSearchUrl, useRouter } from "../lib/router.tsx";
 import { useHasPlugin, useSettings } from "../lib/settings.ts";
 import type { ResultItem, SearchPageData } from "../lib/types.ts";
-
-function BackToTop() {
-  const t = useT();
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const onScroll = () => {
-      setVisible(window.scrollY > 400);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-  if (!visible) {
-    return null;
-  }
-  return (
-    <button
-      aria-label={t("back_to_top")}
-      className="fixed bottom-6 right-6 z-40 grid size-11 place-items-center rounded-full border border-line bg-surface text-ink-2 shadow-pop transition-colors hover:text-accent animate-fade-in"
-      onClick={() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }}
-      type="button"
-    >
-      <ArrowUpIcon className="size-5" />
-    </button>
-  );
-}
-
-function NoResults({ pageno, hasInfobox }: { pageno: number; hasInfobox: boolean }) {
-  const t = useT();
-  const firstPage = pageno === 1;
-  if (hasInfobox && firstPage) {
-    return (
-      <div className="rounded-2xl border border-line bg-surface p-4 text-sm text-ink-2">
-        <p className="flex items-center gap-2">
-          <InfoIcon className="size-4 shrink-0 text-accent" />
-          {t("no_web_results")}
-        </p>
-      </div>
-    );
-  }
-  return (
-    <div className="mx-auto max-w-md rounded-2xl border border-line bg-surface p-6 text-sm text-ink-2 animate-fade-up">
-      <p className="flex items-center gap-2 font-medium text-ink">
-        <InfoIcon className="size-4 text-accent" />
-        {firstPage ? t("sorry") : ""}
-      </p>
-      <p className="mt-2">{firstPage ? t("no_results_found") : t("no_more_results")}</p>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
-        {firstPage ? (
-          <>
-            <li>
-              <button className="text-accent hover:underline" onClick={() => window.location.reload()} type="button">
-                {t("refresh_page")}
-              </button>
-            </li>
-            <li>{t("try_other_query")}</li>
-          </>
-        ) : (
-          <li>{t("go_previous_page")}</li>
-        )}
-      </ul>
-    </div>
-  );
-}
-
-function Corrections({ data, onSearch }: { data: SearchPageData; onSearch: (q: string) => void }) {
-  const t = useT();
-  if (data.corrections.length === 0) {
-    return null;
-  }
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="text-ink-3">{t("try_searching_for")}</span>
-      {data.corrections.map((correction) => (
-        <button
-          className="rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
-          dir="auto"
-          key={correction.q}
-          onClick={() => {
-            onSearch(correction.q);
-          }}
-          type="button"
-        >
-          {correction.title}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/** Packages fold into the it block; every other category stands alone. */
-function blockKeyOf(result: ResultItem): string {
-  const category = result.category || "general";
-  return category === "packages" ? "it" : category;
-}
-
-function collectBlocks(results: ResultItem[]): Map<string, Array<{ result: ResultItem; index: number }>> {
-  const blocks = new Map<string, Array<{ result: ResultItem; index: number }>>();
-  results.forEach((result, index) => {
-    const key = blockKeyOf(result);
-    const items = blocks.get(key);
-    if (items) {
-      items.push({ result, index });
-    } else {
-      blocks.set(key, [{ result, index }]);
-    }
-  });
-  return blocks;
-}
-
-/** Collapsible block header: category icon + translated label + result
-    count; the whole header toggles the block. */
-interface GripHandlers {
-  onPointerDown: (event: ReactPointerEvent<HTMLSpanElement>) => void;
-  onPointerUp: (event: ReactPointerEvent<HTMLSpanElement>) => void;
-  onKeyDown: (event: React.KeyboardEvent<HTMLSpanElement>) => void;
-}
-
-function GroupHeader({
-  category,
-  label,
-  count,
-  collapsed,
-  onToggle,
-  grip,
-}: {
-  category: string;
-  label: string;
-  count: number;
-  collapsed: boolean;
-  onToggle: () => void;
-  grip?: GripHandlers;
-}) {
-  const t = useT();
-  return (
-    <h2 className="group flex items-center gap-1 pb-1 pt-2">
-      {grip ? (
-        <span
-          aria-label={t("drag_reorder")}
-          className="-ms-1 cursor-grab touch-none rounded p-1 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink active:cursor-grabbing"
-          onKeyDown={grip.onKeyDown}
-          onPointerDown={grip.onPointerDown}
-          onPointerUp={grip.onPointerUp}
-          role="button"
-          tabIndex={0}
-          title={t("drag_reorder")}
-        >
-          <GripVerticalIcon className="size-4" />
-        </span>
-      ) : null}
-      <button
-        aria-expanded={!collapsed}
-        className="flex min-w-0 flex-1 items-center gap-1.5 text-left text-sm font-semibold text-ink"
-        onClick={onToggle}
-        type="button"
-      >
-        <CategoryIcon category={category} className="size-4 shrink-0 text-accent" />
-        {label}
-        <span className="font-normal text-ink-3">{count}</span>
-        <ChevronDownIcon
-          className={`size-4 shrink-0 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`}
-        />
-      </button>
-    </h2>
-  );
-}
-
-function InfiniteScrollSentinel({ onNext, error, loading }: { onNext: () => void; error: boolean; loading: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const t = useT();
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) {
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          onNext();
-        }
-      },
-      { rootMargin: "320px" },
-    );
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-    };
-  }, [onNext]);
-
-  if (error) {
-    return <p className="py-4 text-center text-sm text-danger">{t("error_loading_next_page")}</p>;
-  }
-  return (
-    <div aria-busy={loading} className="flex justify-center py-6" ref={ref}>
-      <div className="size-6 animate-spin-slow rounded-full border-2 border-line border-t-accent-strong" />
-    </div>
-  );
-}
 
 export function ResultsPage({ data }: { data: SearchPageData }) {
   const t = useT();

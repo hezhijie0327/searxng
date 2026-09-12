@@ -19,7 +19,7 @@ import {
   MagnetIcon,
   MusicIcon,
 } from "../icons.tsx";
-import { ResultLink } from "./cards.tsx";
+import { ResultLink } from "./cardParts.tsx";
 import { TileBadge, TileFavicon } from "./Tile.tsx";
 
 function detectExtension(title: string): string | null {

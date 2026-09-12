@@ -8,7 +8,7 @@ import { formatDate } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import { CalendarIcon, CodeIcon, ExternalLinkIcon, PackageIcon } from "../icons.tsx";
-import { ResultLink } from "./cards.tsx";
+import { ResultLink } from "./cardParts.tsx";
 import { TileFavicon } from "./Tile.tsx";
 
 function PackageCell({

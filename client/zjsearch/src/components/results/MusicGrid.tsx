@@ -11,7 +11,7 @@ import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import { CalendarIcon, CloseIcon, MusicIcon, PauseIcon, PlayIcon } from "../icons.tsx";
-import { ResultLink } from "./cards.tsx";
+import { ResultLink } from "./cardParts.tsx";
 import { TileBadge, TileFavicon } from "./Tile.tsx";
 
 function formatClock(seconds: number): string {
