@@ -120,7 +120,13 @@ function WeatherDaily({ forecasts }: { forecasts: WeatherItem[] }) {
   );
 }
 
-function WeatherAnswer({ answer }: { answer: Extract<AnswerData, { template: "answer/weather.html" }> }) {
+function WeatherAnswer({
+  answer,
+  sources,
+}: {
+  answer: Extract<AnswerData, { template: "answer/weather.html" }>;
+  sources: Array<{ service: string; url: string }>;
+}) {
   const t = useT();
   const current = answer.current;
   const heroC = Math.round(current.temp_c);
@@ -145,19 +151,26 @@ function WeatherAnswer({ answer }: { answer: Extract<AnswerData, { template: "an
           <LocationIcon className="size-4 shrink-0 text-ink-3" />
           {current.location_name}
         </p>
-        {answer.service ? (
-          answer.url ? (
-            <a
-              className="text-xs text-ink-3 transition-colors hover:text-ink hover:underline"
-              href={answer.url}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {answer.service}
-            </a>
-          ) : (
-            <p className="text-xs text-ink-3">{answer.service}</p>
-          )
+        {sources.length > 0 ? (
+          <p className="flex items-center gap-1.5 text-xs text-ink-3">
+            {sources.map((source, index) => (
+              <span className="flex items-center gap-1.5" key={source.service}>
+                {index > 0 ? <span>·</span> : null}
+                {source.url ? (
+                  <a
+                    className="transition-colors hover:text-ink hover:underline"
+                    href={source.url}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {source.service}
+                  </a>
+                ) : (
+                  source.service
+                )}
+              </span>
+            ))}
+          </p>
         ) : null}
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
@@ -291,19 +304,29 @@ export function Answers({ answers }: { answers: AnswerData[] }) {
   if (answers.length === 0) {
     return null;
   }
-  // several weather engines may answer the same query; one big card is the
-  // whole point of the weather presentation, so keep the first only
-  let weatherSeen = false;
-  const visible = answers.filter((answer) => {
-    if (answer.template !== "answer/weather.html") {
-      return true;
+  // several weather engines may answer the same query with the same data at
+  // different coverage (duckduckgo ~10 days hourly, open-meteo ~2.7 days,
+  // wttr.in 3 days 3-hourly): render the longest coverage as one card and
+  // credit every answering engine as its source
+  const weatherAnswers = answers.filter(
+    (answer): answer is Extract<AnswerData, { template: "answer/weather.html" }> =>
+      answer.template === "answer/weather.html",
+  );
+  weatherAnswers.sort((a, b) => b.forecasts.length - a.forecasts.length);
+  const weatherSources = weatherAnswers.map((a) => ({ service: a.service, url: a.url }));
+  const longest = weatherAnswers[0];
+  const visible: AnswerData[] = [];
+  let weatherInserted = false;
+  for (const answer of answers) {
+    if (answer.template === "answer/weather.html") {
+      if (!weatherInserted && longest !== undefined) {
+        visible.push(longest);
+        weatherInserted = true;
+      }
+      continue;
     }
-    if (weatherSeen) {
-      return false;
-    }
-    weatherSeen = true;
-    return true;
-  });
+    visible.push(answer);
+  }
   return (
     <section aria-label={t("answers")} className="space-y-2">
       {visible.map((answer, index) => (
@@ -311,7 +334,7 @@ export function Answers({ answers }: { answers: AnswerData[] }) {
           {answer.template === "answer/translations.html" ? (
             <TranslationsAnswer answer={answer} />
           ) : answer.template === "answer/weather.html" ? (
-            <WeatherAnswer answer={answer} />
+            <WeatherAnswer answer={answer} sources={weatherSources} />
           ) : (
             <LegacyAnswer answer={answer} />
           )}
