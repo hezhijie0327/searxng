@@ -49,8 +49,8 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
       <div
         className={`min-w-0 ${
           wrap
-            ? "flex flex-wrap items-center gap-x-1 gap-y-0.5"
-            : "flex items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            ? "-ms-4 flex flex-wrap items-center gap-x-1 gap-y-0.5"
+            : "-ms-4 flex items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         }`}
       >
         {tabs.map((category) => {
