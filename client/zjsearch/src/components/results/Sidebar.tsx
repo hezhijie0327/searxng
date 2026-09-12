@@ -47,7 +47,10 @@ export function Infobox({
         </h3>
       </div>
 
-      <div className={`relative mt-3 ${expanded ? "" : "max-h-72 overflow-hidden"}`}>
+      {/* overflow-hidden stays on in both states: without it the inner mt-3
+          collapses through the wrapper when expanded and the visible content
+          jumps up 12px on toggle */}
+      <div className={`relative mt-3 overflow-hidden ${expanded ? "" : "max-h-72"}`}>
         {infobox.attributes && infobox.attributes.length > 0 ? (
           <dl className="space-y-1 text-xs">
             {infobox.attributes.map((attribute, index) => (
