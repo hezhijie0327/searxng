@@ -173,10 +173,11 @@ its content, all sharing one visual language:
   the presentation stays visually identical. Music-category default
   results, torrent/file results and package results join their sections
   via `groupKey`; grid cells take `indexOffset` so hotkey indices stay
-  page-global. **Placement matters with infinite scroll**: sections sit
-  after the FIRST page's untyped results and appended pages flow below
-  the strips (otherwise an ever-growing stream would push the sections
-  out of reach forever); appended media still merges into the strips.
+  page-global. **Sections render ABOVE the untyped results** (right after
+  answers/corrections) — a user searching for a package/file/... on an
+  intent page must see them immediately; the strips are compact, and
+  infinite-scroll appends flow below them so nothing becomes unreachable
+  while appended media still merges into the strips.
 
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /

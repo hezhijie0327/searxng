@@ -605,21 +605,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-2">
                     {(() => {
                       const groups = consolidateGroups(groupResults(allResults));
-                      // Sections render after the first page's untyped results
-                      // in a fixed order, each a fixed-row strip paged in
-                      // place.  Infinite-scroll appends flow BELOW the strips,
-                      // so the sections stay reachable no matter how much
-                      // content streams in (appended media still merges into
-                      // the strips above).
-                      const firstPageCount = data.results.length;
-                      const beforeRest: Array<(typeof groups)[number]> = [];
-                      const afterRest: Array<(typeof groups)[number]> = [];
-                      for (const group of groups) {
-                        if (SECTION_TEMPLATES.has(group.template)) {
-                          continue;
-                        }
-                        ((group.items[0]?.index ?? 0) < firstPageCount ? beforeRest : afterRest).push(group);
-                      }
+                      // Section strips render BEFORE the untyped results - a
+                      // user searching for a package/file/... on an intent
+                      // page must see them immediately.  The strips are
+                      // compact fixed rows, and infinite-scroll appends flow
+                      // below them, so nothing ever becomes unreachable
+                      // (appended media still merges into the strips).
+                      const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
                       const sections = SECTION_ORDER.map((template) =>
                         groups.find((group) => group.template === template),
                       ).filter((group) => group !== undefined);
@@ -710,9 +702,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                       };
                       return (
                         <>
-                          {renderRest(beforeRest)}
                           {sections.map((group, i) => renderSection(group, i))}
-                          {renderRest(afterRest)}
+                          {renderRest(rest)}
                         </>
                       );
                     })()}
