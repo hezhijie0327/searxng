@@ -5,18 +5,21 @@ import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   CalendarIcon,
   ClockIcon,
   CloseIcon,
+  CodeIcon,
   DownloadIcon,
   ExternalLinkIcon,
-  EyeIcon,
   FileIcon,
   FilmIcon,
   MagnetIcon,
   MusicIcon,
   PackageIcon,
   PlayIcon,
+  StarIcon,
 } from "../icons.tsx";
 import { MapResult } from "./MapView.tsx";
 
@@ -24,7 +27,7 @@ export const THEME_STATIC = "/static/themes/zjsearch";
 
 // ------------------------------------------------------------- shared parts
 
-function ResultLink({
+export function ResultLink({
   result,
   globals,
   href,
@@ -420,68 +423,88 @@ export function NewsCard({ result, globals }: CardProps) {
   );
 }
 
+/** File-share layout: the magnet link doubles as the card's primary action
+    tile, health stats read as a colored seeder/leecher strip - the
+    "transfer" reading of the files category. */
 export function TorrentCard({ result, globals }: CardProps) {
   const t = useT();
   return (
     <ResultArticle priority={result.priority}>
-      <PrettyUrl globals={globals} result={result} />
-      <div className="mt-1">
-        <Title globals={globals} result={result} />
-      </div>
-      <div className="mt-1">
-        <MetaLine result={result} />
-      </div>
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+      <div className="flex gap-4">
         {result.magnetlink ? (
           <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 transition-colors hover:text-ink"
+            aria-label={t("magnet_link")}
+            className="grid size-14 shrink-0 self-start place-items-center rounded-xl bg-accent-soft text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
             href={result.magnetlink}
+            title={t("magnet_link")}
           >
-            <MagnetIcon className="size-3.5" />
-            {t("magnet_link")}
+            <MagnetIcon className="size-6" />
           </a>
-        ) : null}
-        {result.torrentfile ? (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 transition-colors hover:text-ink"
-            href={result.torrentfile}
-          >
-            <DownloadIcon className="size-3.5" />
-            {t("torrent_file")}
-          </a>
-        ) : null}
-        {result.seed !== undefined ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-2">
-            <span className="size-1.5 rounded-full bg-ok" />
-            {result.seed} {t("seeder")}
+        ) : (
+          <span className="grid size-14 shrink-0 self-start place-items-center rounded-xl bg-surface-2 text-ink-3">
+            <FileIcon className="size-6" />
           </span>
-        ) : null}
-        {result.leech !== undefined ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-2">
-            <span className="size-1.5 rounded-full bg-danger" />
-            {result.leech} {t("leecher")}
-          </span>
-        ) : null}
-        {result.filesize ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-2">
-            <FileIcon className="size-3.5" />
-            {result.filesize}
-          </span>
-        ) : null}
-        {result.files ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-2">
-            {result.files} {t("files")}
-          </span>
-        ) : null}
+        )}
+        <div className="min-w-0 flex-1">
+          <PrettyUrl globals={globals} result={result} />
+          <div className="mt-1">
+            <Title globals={globals} result={result} />
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
+            {result.seed !== undefined ? (
+              <span className="inline-flex items-center gap-1">
+                <ArrowUpIcon className="size-3.5 text-ok" />
+                <span className="font-semibold text-ok">{result.seed}</span>
+                {t("seeder")}
+              </span>
+            ) : null}
+            {result.leech !== undefined ? (
+              <span className="inline-flex items-center gap-1">
+                <ArrowDownIcon className="size-3.5 text-danger" />
+                <span className="font-semibold text-danger">{result.leech}</span>
+                {t("leecher")}
+              </span>
+            ) : null}
+            {result.filesize ? (
+              <span className="inline-flex items-center gap-1">
+                <FileIcon className="size-3.5" />
+                {result.filesize}
+              </span>
+            ) : null}
+            {result.files ? (
+              <span className="inline-flex items-center gap-1">
+                <PackageIcon className="size-3.5" />
+                {result.files} {t("files")}
+              </span>
+            ) : null}
+            {result.published_date ? (
+              <span className="inline-flex items-center gap-1">
+                <CalendarIcon className="size-3.5" />
+                {formatDate(result.published_date)}
+              </span>
+            ) : null}
+          </div>
+          {result.content_html ? (
+            <p
+              className="mt-1.5 line-clamp-2 text-sm text-ink-2"
+              dangerouslySetInnerHTML={{ __html: result.content_html }}
+              dir="auto"
+            />
+          ) : null}
+          {result.torrentfile ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              <a
+                className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 transition-colors hover:text-ink"
+                href={result.torrentfile}
+              >
+                <DownloadIcon className="size-3.5" />
+                {t("torrent_file")}
+              </a>
+            </div>
+          ) : null}
+          <EnginesLine result={result} />
+        </div>
       </div>
-      {result.content_html ? (
-        <p
-          className="mt-2 line-clamp-2 text-sm text-ink-2"
-          dangerouslySetInnerHTML={{ __html: result.content_html }}
-          dir="auto"
-        />
-      ) : null}
-      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
@@ -644,204 +667,216 @@ export function CodeCard({ result, globals }: CardProps) {
   );
 }
 
+/** General file-download layout, sharing the transfer-card language of the
+    torrent card: type icon tile, compact stat strip, primary action. */
 export function FileCard({ result, globals }: CardProps) {
   const t = useT();
-  const attributes: Array<[string, string | undefined]> = [
+  const isMedia = result.mtype === "audio" || result.mtype === "video";
+  const tileClass = isMedia ? "bg-accent-soft text-accent" : "bg-surface-2 text-ink-3";
+  const tileIcon =
+    result.mtype === "audio" ? (
+      <MusicIcon className="size-6" />
+    ) : result.mtype === "video" ? (
+      <FilmIcon className="size-6" />
+    ) : (
+      <FileIcon className="size-6" />
+    );
+  const stats: Array<[string, string | undefined]> = [
     [t("author"), result.author],
     [t("filename"), result.filename],
     [t("filesize"), result.size],
     [t("date"), result.time],
     [t("type"), result.mimetype],
   ];
-  const isMedia = result.mtype === "audio" || result.mtype === "video";
   return (
     <ResultArticle priority={result.priority}>
-      <PrettyUrl globals={globals} result={result} />
-      <div className="mt-1 flex items-baseline gap-2">
-        <FileIcon className="size-4 shrink-0 text-ink-3" />
-        <Title globals={globals} result={result} />
+      <div className="flex gap-4">
+        <span className={`grid size-14 shrink-0 self-start place-items-center rounded-xl ${tileClass}`}>
+          {tileIcon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <PrettyUrl globals={globals} result={result} />
+          <div className="mt-1">
+            <Title globals={globals} result={result} />
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
+            {stats
+              .filter(([, value]) => Boolean(value))
+              .map(([label, value]) => (
+                <span className="inline-flex min-w-0 items-center gap-1" key={label}>
+                  {label}:
+                  <span className="truncate text-ink-2" dir="auto">
+                    {value}
+                  </span>
+                </span>
+              ))}
+          </div>
+          {result.abstract_html ? (
+            <p
+              className="mt-1.5 line-clamp-3 text-sm text-ink-2"
+              dangerouslySetInnerHTML={{ __html: result.abstract_html }}
+              dir="auto"
+            />
+          ) : null}
+          {result.content_html ? (
+            <p
+              className="mt-1 line-clamp-2 text-sm text-ink-2"
+              dangerouslySetInnerHTML={{ __html: result.content_html }}
+              dir="auto"
+            />
+          ) : null}
+          {result.embedded ? (
+            isMedia ? (
+              result.mtype === "video" ? (
+                <MediaCollapse hideLabel={t("hide_media")} showLabel={t("show_media")}>
+                  {() => (
+                    <video
+                      className="w-full max-w-lg rounded-xl"
+                      controls
+                      poster={result.thumbnail}
+                      preload="metadata"
+                      src={result.embedded}
+                    />
+                  )}
+                </MediaCollapse>
+              ) : (
+                // audio: inline player, no collapse - music results should be
+                // playable in one click (preload="none" keeps it cheap)
+                <div className="mt-2 flex max-w-md items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2">
+                  <MusicIcon className="size-4 shrink-0 text-accent" />
+                  <audio className="h-8 w-full" controls preload="none" src={result.embedded} />
+                </div>
+              )
+            ) : (
+              <a
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
+                download
+                href={result.embedded}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <DownloadIcon className="size-3.5" />
+                {t("download")}
+              </a>
+            )
+          ) : null}
+          <EnginesLine result={result} />
+        </div>
       </div>
-      <div className="mt-1">
-        <MetaLine result={result} />
-      </div>
-      {result.abstract_html ? (
-        <p
-          className="mt-1.5 text-sm text-ink-2"
-          dangerouslySetInnerHTML={{ __html: result.abstract_html }}
-          dir="auto"
-        />
-      ) : null}
-      {result.content_html ? (
-        <p className="mt-1 text-sm text-ink-2" dangerouslySetInnerHTML={{ __html: result.content_html }} dir="auto" />
-      ) : null}
-      <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3">
-        {attributes
-          .filter(([, value]) => Boolean(value))
-          .map(([label, value]) => (
-            <div className="flex gap-1" key={label}>
-              <dt>{label}:</dt>
-              <dd className="text-ink-2">{value}</dd>
-            </div>
-          ))}
-      </dl>
-      {result.embedded ? (
-        isMedia ? (
-          result.mtype === "video" ? (
-            <MediaCollapse hideLabel={t("hide_media")} showLabel={t("show_media")}>
-              {() => (
-                <video
-                  className="w-full max-w-lg rounded-xl"
-                  controls
-                  poster={result.thumbnail}
-                  preload="metadata"
-                  src={result.embedded}
-                />
-              )}
-            </MediaCollapse>
-          ) : (
-            // audio: inline player, no collapse - music results should be
-            // playable in one click (preload="none" keeps it cheap)
-            <audio className="mt-2 w-full max-w-md" controls preload="none" src={result.embedded} />
-          )
-        ) : (
-          <a
-            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 hover:text-ink"
-            download
-            href={result.embedded}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <DownloadIcon className="size-3.5" />
-            {t("download")}
-          </a>
-        )
-      ) : null}
-      <EnginesLine result={result} />
     </ResultArticle>
   );
 }
 
+/** Scholarly layout (science intent, arxiv/pubmed/...): authors · venue ·
+    date meta line, clamped abstract, PDF/HTML actions and a compact DOI
+    link.  Non-paper results on a science page (e.g. pdb figures) degrade
+    gracefully - the card simply renders without the paper-specific bits. */
 export function PaperCard({ result, globals }: CardProps) {
   const t = useT();
-  const details: Array<[string, ReactNode]> = [];
-  if (result.authors && result.authors.length > 0) {
-    details.push([t("author"), result.authors.join(", ")]);
-  }
-  if (result.published_date) {
-    details.push([t("date"), formatDate(result.published_date)]);
-  }
+  const venueBits: string[] = [];
   if (result.journal) {
-    details.push([
-      "",
-      <>
-        {result.journal}
-        {result.volume ? `, ${result.volume}` : ""}
-        {result.number ? ` (${result.number})` : ""}
-        {result.pages ? `, ${result.pages}` : ""}
-      </>,
-    ]);
+    venueBits.push(result.journal);
   }
-  if (result.editor) {
-    details.push(["Editor", result.editor]);
+  if (result.volume) {
+    venueBits.push(`vol. ${result.volume}`);
   }
-  if (result.publisher) {
-    details.push(["Publisher", result.publisher]);
+  if (result.number) {
+    venueBits.push(`no. ${result.number}`);
   }
-  if (result.paper_type) {
-    details.push([t("type"), result.paper_type]);
+  if (result.pages) {
+    venueBits.push(`pp. ${result.pages}`);
   }
-  if (result.doi) {
-    details.push([
-      "DOI",
-      <a
-        className="text-accent hover:underline"
-        href={`https://${globals.doi_resolver}/${result.doi}`}
-        key="doi"
-        rel="noreferrer"
-        target="_blank"
-      >
-        {result.doi}
-      </a>,
-    ]);
+  let authors = result.author ?? "";
+  if (result.authors && result.authors.length > 0) {
+    authors = result.authors.slice(0, 3).join(", ");
+    if (result.authors.length > 3) {
+      authors += ` ${t("et_al")}`;
+    }
   }
-  if (result.issn && result.issn.length > 0) {
-    details.push(["ISSN", result.issn.join(", ")]);
-  }
-  if (result.isbn && result.isbn.length > 0) {
-    details.push(["ISBN", result.isbn.join(", ")]);
-  }
+  const metaBits: Array<string | null> = [
+    authors || null,
+    venueBits.length > 0 ? venueBits.join(", ") : null,
+    result.published_date ? formatDate(result.published_date) : null,
+  ];
+  const chips = [...(result.paper_type ? [result.paper_type] : []), ...(result.tags ?? [])];
   return (
     <ResultArticle priority={result.priority}>
-      <PrettyUrl globals={globals} result={result} />
-      <div className="mt-1">
-        <Title globals={globals} result={result} />
-      </div>
-      <div className="mt-1">
-        <MetaLine result={result} />
-      </div>
-      {result.content_html ? (
-        <p
-          className="mt-1.5 line-clamp-4 text-sm leading-relaxed text-ink-2"
-          dangerouslySetInnerHTML={{ __html: result.content_html }}
-          dir="auto"
-        />
-      ) : null}
-      {result.comments ? (
-        <p className="mt-1.5 text-sm italic text-ink-3" dir="auto">
-          {result.comments}
-        </p>
-      ) : null}
-      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-        {details.map(([label, value], index) => (
-          <div className="col-span-2 grid grid-cols-subgrid items-baseline" key={index}>
-            {label ? <dt className="text-ink-3">{label}:</dt> : <dt />}
-            <dd className="text-ink-2">{value}</dd>
+      <div className="flex gap-4">
+        <div className="min-w-0 flex-1">
+          <PrettyUrl globals={globals} result={result} />
+          <div className="mt-1">
+            <Title globals={globals} result={result} />
           </div>
-        ))}
-      </dl>
-      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-        {result.pdf_url ? (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
-            href={result.pdf_url}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <FileIcon className="size-3.5" />
-            PDF
-          </a>
-        ) : null}
-        {result.html_url ? (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
-            href={result.html_url}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <ExternalLinkIcon className="size-3.5" />
-            HTML
-          </a>
-        ) : null}
-        {result.doi ? (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
-            href={`https://www.altmetric.com/details/doi/${result.doi}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Altmetric
-          </a>
+          {metaBits.some(Boolean) ? (
+            <p className="mt-1 truncate text-xs text-ink-3" dir="auto">
+              {metaBits.filter(Boolean).join(" · ")}
+            </p>
+          ) : null}
+          {result.content_html ? (
+            <p
+              className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-ink-2"
+              dangerouslySetInnerHTML={{ __html: result.content_html }}
+              dir="auto"
+            />
+          ) : null}
+          {result.comments ? (
+            <p className="mt-1.5 text-sm italic text-ink-3" dir="auto">
+              {result.comments}
+            </p>
+          ) : null}
+          {result.pdf_url || result.html_url || result.doi ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              {result.pdf_url ? (
+                <a
+                  className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
+                  href={result.pdf_url}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <FileIcon className="size-3.5" />
+                  PDF
+                </a>
+              ) : null}
+              {result.html_url ? (
+                <a
+                  className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
+                  href={result.html_url}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <ExternalLinkIcon className="size-3.5" />
+                  HTML
+                </a>
+              ) : null}
+              {result.doi ? (
+                <a
+                  className="min-w-0 truncate font-mono text-[11px] text-ink-3 hover:text-accent"
+                  dir="ltr"
+                  href={`https://${globals.doi_resolver}/${result.doi}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  DOI {result.doi}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+          {chips.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {chips.map((chip) => (
+                <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-3" key={chip}>
+                  {chip}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        {result.thumbnail ? (
+          <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
+            <Thumb alt={result.title_text} className="h-28 w-28" src={result.thumbnail} />
+          </ResultLink>
         ) : null}
       </div>
-      {result.tags && result.tags.length > 0 ? (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {result.tags.map((tag) => (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-3" key={tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
       <EnginesLine result={result} />
     </ResultArticle>
   );
@@ -868,40 +903,47 @@ export function PackageCard({ result, globals }: CardProps) {
           dir="auto"
         />
       ) : null}
-      <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
         {result.maintainer ? (
-          <div className="flex gap-1">
-            <dt>{t("author")}:</dt>
-            <dd className="text-ink-2">{result.maintainer}</dd>
-          </div>
+          <span className="inline-flex min-w-0 items-center gap-1">
+            {t("author")}:
+            <span className="truncate text-ink-2" dir="auto">
+              {result.maintainer}
+            </span>
+          </span>
         ) : null}
         {result.published_date ? (
-          <div className="flex gap-1">
-            <dt>Updated:</dt>
-            <dd className="text-ink-2">{formatDate(result.published_date)}</dd>
-          </div>
+          <span className="inline-flex items-center gap-1">
+            <CalendarIcon className="size-3.5" />
+            {formatDate(result.published_date)}
+          </span>
         ) : null}
         {result.popularity ? (
-          <div className="flex gap-1">
-            <dt>Popularity:</dt>
-            <dd className="text-ink-2">{result.popularity}</dd>
-          </div>
+          <span className="inline-flex items-center gap-1">
+            <StarIcon className="size-3.5" />
+            <span className="text-ink-2">{result.popularity}</span>
+          </span>
         ) : null}
         {result.license_name ? (
-          <div className="flex gap-1">
-            <dt>License:</dt>
-            <dd className="text-ink-2">
+          <span className="inline-flex items-center gap-1">
+            {t("license")}:
+            <span className="text-ink-2">
               {result.license_url ? (
-                <a className="text-accent hover:underline" href={result.license_url} rel="noreferrer" target="_blank">
+                <a
+                  className="hover:text-accent hover:underline"
+                  href={result.license_url}
+                  rel="noreferrer"
+                  target="_blank"
+                >
                   {result.license_name}
                 </a>
               ) : (
                 result.license_name
               )}
-            </dd>
-          </div>
+            </span>
+          </span>
         ) : null}
-      </dl>
+      </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs">
         {result.homepage ? (
           <a
@@ -921,7 +963,7 @@ export function PackageCard({ result, globals }: CardProps) {
             rel="noreferrer"
             target="_blank"
           >
-            <PackageIcon className="size-3.5" />
+            <CodeIcon className="size-3.5" />
             Source code
           </a>
         ) : null}
@@ -1062,8 +1104,20 @@ export function ImageListCard({ result, globals, onOpen }: CardProps & { onOpen:
 
 /** Kagi-style video tiles for video-only result pages.  Tiles with an
     embeddable source get a Spotify-style hover play button that expands the
-    player in place. */
-export function VideoGrid({ results, globals }: { results: ResultItem[]; globals: GlobalData }) {
+    player in place.  Cells carry data-hotkey-index so the results hotkeys
+    can walk the grid like the list layouts. */
+export function VideoGrid({
+  results,
+  globals,
+  selected,
+  indexOffset = 0,
+}: {
+  results: ResultItem[];
+  globals: GlobalData;
+  selected?: number;
+  /** hotkey indices are page-global: offset by the grid's first result index */
+  indexOffset?: number;
+}) {
   const t = useT();
   const [playing, setPlaying] = useState<number | null>(null);
   return (
@@ -1071,8 +1125,13 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
       {results.map((result, index) => {
         const length = formatLength(result.length_display, result.length_seconds);
         const isPlaying = playing === index;
+        const hotkeyIndex = indexOffset + index;
         return (
-          <article className="group" key={`${result.url}-${index}`}>
+          <article
+            className={`group rounded-2xl ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
+            data-hotkey-index={hotkeyIndex}
+            key={`${result.url}-${index}`}
+          >
             <div className="relative">
               <ResultLink
                 className="relative block aspect-video overflow-hidden rounded-xl bg-surface-2"
@@ -1114,7 +1173,7 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
                 ) : null}
               </ResultLink>
               {result.iframe_src && isPlaying ? (
-                <div className="absolute inset-0 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
+                <div className="absolute inset-0 z-10 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
                   <iframe
                     allowFullScreen
                     className="size-full"
@@ -1124,17 +1183,29 @@ export function VideoGrid({ results, globals }: { results: ResultItem[]; globals
                   />
                 </div>
               ) : null}
-              {result.iframe_src ? (
+              {result.iframe_src && isPlaying ? (
                 <button
-                  aria-label={isPlaying ? t("hide_video") : t("show_video")}
-                  className="absolute end-2 top-2 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong"
+                  aria-label={t("hide_video")}
+                  className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
                   onClick={() => {
-                    setPlaying(isPlaying ? null : index);
+                    setPlaying(null);
                   }}
-                  title={isPlaying ? t("hide_video") : t("show_video")}
+                  title={t("hide_video")}
                   type="button"
                 >
-                  {isPlaying ? <CloseIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
+                  <CloseIcon className="size-3.5" />
+                </button>
+              ) : result.iframe_src ? (
+                <button
+                  aria-label={t("play")}
+                  className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-ink group-hover:opacity-100"
+                  onClick={() => {
+                    setPlaying(index);
+                  }}
+                  title={t("play")}
+                  type="button"
+                >
+                  <PlayIcon className="size-5 translate-x-px" />
                 </button>
               ) : null}
             </div>

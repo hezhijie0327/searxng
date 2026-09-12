@@ -98,7 +98,8 @@ function Lightbox({
     };
   }, []);
 
-  // reset whenever another image is opened
+  // reset whenever another image is opened (resetZoom itself is stable)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: index change must re-run the reset
   useEffect(() => {
     resetZoom();
   }, [index, resetZoom]);
@@ -221,6 +222,7 @@ function Lightbox({
         ref={stageRef}
       >
         <div
+          aria-label={result.title_text}
           className={`flex items-center justify-center ${zoom > 1 ? "touch-none" : ""}`}
           onDoubleClick={() => {
             resetZoom();
@@ -245,6 +247,7 @@ function Lightbox({
             setDragging(false);
             event.currentTarget.releasePointerCapture(event.pointerId);
           }}
+          role="img"
           style={{
             transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
             transition: dragging ? "none" : "transform 150ms ease-out",

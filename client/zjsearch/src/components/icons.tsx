@@ -60,6 +60,13 @@ export const ImageIcon = makeIcon(
 
 export const PlayIcon = makeIcon(<polygon points="6 3 20 12 6 21 6 3" />);
 
+export const PauseIcon = makeIcon(
+  <>
+    <rect height="16" width="3" x="7" y="4" />
+    <rect height="16" width="3" x="14" y="4" />
+  </>,
+);
+
 export const NewsIcon = makeIcon(
   <>
     <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V9" />
@@ -179,6 +186,13 @@ export const ArrowUpIcon = makeIcon(
   <>
     <path d="M12 19V5" />
     <path d="m5 12 7-7 7 7" />
+  </>,
+);
+
+export const ArrowDownIcon = makeIcon(
+  <>
+    <path d="M12 5v14" />
+    <path d="m19 12-7 7-7-7" />
   </>,
 );
 

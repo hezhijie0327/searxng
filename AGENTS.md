@@ -144,6 +144,35 @@ Instant answers (Answers.tsx) are tiered:
 - The sidebar hosts knowledge (infobox) and diagnostics only — never
   answers.
 
+Category-specific result presentations (single-category intent pages, see
+`ResultsPage.tsx` `is*Page` flags) — each category gets the layout that fits
+its content, all sharing one visual language:
+
+- images → masonry `ImageGrid`; videos → `VideoGrid`; music → `MusicGrid`;
+  files (torrents) → `FilesGrid`; science → scholarly `PaperCard` list;
+  products → `ProductGrid`. Bang-limited searches route the same way via
+  `only_template` (`paper`, `torrent`).
+- Media grids share one tile anatomy: square/16:9 rounded tile, corner
+  badges bottom (duration / filesize bottom-right, favicon bottom-left),
+  title + one compact meta row below, cells carry `data-hotkey-index` and
+  the `selected` ring so results hotkeys walk grids like lists.
+- Playable media uses a centered play button on the tile (hover-revealed
+  emphasis); while playing, a close button sits top-right. Music tiles with
+  a raw `audio_src` swap to a custom mini player (dimmed cover, big
+  play/pause, seek bar) and fall back to the `iframe_src` embed on stream
+  error; videos play their embed inside the tile.
+- FilesGrid has no cover art: the tile shows a type icon + detected file
+  extension, the filesize takes the badge slot, seed/leech health reads as
+  colored ↑↓ counts, and the magnet link is an accent circle button.
+- Mixed searches keep the generic list: paper/torrent results render as
+  their list cards inline, while media sections consolidate after the
+  untyped results in a fixed order (images → videos → news → music) with a
+  group header and a client-side "show more" pill — never navigate on
+  expand. Music-category results with the default template (genius, ...)
+  join the music section, so every intent page shares one presentation per
+  category (see `groupKey`). Grid cells take `indexOffset` so hotkey
+  indices stay page-global.
+
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /
 engine messages, download links) sits pinned underneath — they must never

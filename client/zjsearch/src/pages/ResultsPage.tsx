@@ -2,16 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import {
-  ArrowUpIcon,
-  CategoryIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  InfoIcon,
-} from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
-import { NewsCard, ProductGrid, ResultCard, ResultSkeleton, VideoGrid } from "../components/results/cards.tsx";
+import {
+  NewsCard,
+  PaperCard,
+  ProductGrid,
+  ResultCard,
+  ResultSkeleton,
+  VideoGrid,
+} from "../components/results/cards.tsx";
+import { FilesGrid } from "../components/results/FilesGrid.tsx";
 import { ImageGrid } from "../components/results/ImageGrid.tsx";
+import { MusicGrid } from "../components/results/MusicGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
 import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
@@ -117,6 +120,16 @@ function Corrections({ data, onSearch }: { data: SearchPageData; onSearch: (q: s
   );
 }
 
+/** Mixed searches group results by template; music-category results that
+    carry the default template (genius, ...) still belong to a music section
+    so every intent page shares one presentation per category. */
+function groupKey(result: ResultItem): string {
+  if (result.template === "default" && result.category === "music") {
+    return "music";
+  }
+  return result.template || "default";
+}
+
 /** Consecutive same-template results form groups (image strips in mixed mode). */
 function groupResults(
   results: ResultItem[],
@@ -124,7 +137,7 @@ function groupResults(
   const groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> = [];
   for (let index = 0; index < results.length; index += 1) {
     const result = results[index];
-    const template = result?.template ?? "default";
+    const template = result ? groupKey(result) : "default";
     const last = groups[groups.length - 1];
     if (last && last.template === template) {
       last.items.push({ result: result as ResultItem, index });
@@ -136,12 +149,14 @@ function groupResults(
 }
 
 /** Sections that get a Kagi/Google-style header.  Special-typed results
-    interleave heavily in mixed searches (one group per engine), so each
-    section type is consolidated into a single group at its first position. */
-const SECTION_TEMPLATES = new Set(["images", "videos", "news"]);
+    interleave heavily in mixed searches, so each section type is
+    consolidated into a single group and rendered in this fixed order after
+    the untyped results. */
+const SECTION_TEMPLATES = new Set(["images", "videos", "news", "music"]);
+const SECTION_ORDER = ["images", "videos", "news", "music"];
 
-/** items shown in a collapsed strip; the chevron expands to the full set */
-const SECTION_CAPS: Record<string, number> = { images: 8, videos: 6, news: 6 };
+/** items shown in a collapsed strip; the pill expands to the full set */
+const SECTION_CAPS: Record<string, number> = { images: 8, videos: 6, news: 6, music: 8 };
 
 function consolidateGroups(
   groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
@@ -278,7 +293,6 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
-  const [suggestionPage, setSuggestionPage] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
@@ -447,11 +461,22 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const isNewsPage = singleCategory === "news" && !isImagePage && !isVideoPage;
   const isMapPage = singleCategory === "map" && !isImagePage && !isVideoPage;
   const isMusicPage = singleCategory === "music" && !isImagePage && !isVideoPage;
+  // science intent renders every result in the scholarly layout; a
+  // paper-only bang search (`!pubmed ...`) gets the same treatment
+  const isSciencePage =
+    (singleCategory === "science" || data.only_template === "paper") && !isImagePage && !isVideoPage && !isMusicPage;
+  // files intent (or a torrent-only bang search) gets the file-tile grid;
+  // torrents keep the transfer card inside mixed searches
+  const isFilesPage =
+    (singleCategory === "files" || data.only_template === "torrent") &&
+    !isImagePage &&
+    !isVideoPage &&
+    !isMusicPage &&
+    !isSciencePage;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
   useEffect(() => {
     setHotkeysSelected(-1);
-    setSuggestionPage(0);
   }, [href]);
 
   // client-side calculator answer (server plugin "calculator" enabled)
@@ -463,7 +488,6 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     return calc ? ({ template: "answer/legacy.html", answer: `${calc.expr} = ${calc.value}`, url: "" } as const) : null;
   }, [data.q, hasPlugin]);
   const showSkeletons = loading && !error;
-  const suggestionPages = Math.ceil(data.suggestions.length / 5);
 
   return (
     <Shell globals={globals} hideTopNav>
@@ -554,9 +578,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   </div>
                 ) : isVideoPage ? (
                   <div className="mt-4">
-                    <VideoGrid globals={globals} results={allResults} />
+                    <VideoGrid globals={globals} results={allResults} selected={hotkeysSelected} />
                   </div>
                 ) : isMusicPage ? (
+                  <div className="mt-4">
+                    <MusicGrid globals={globals} results={allResults} selected={hotkeysSelected} />
+                  </div>
+                ) : isSciencePage ? (
                   <div className="mt-2 space-y-1">
                     {allResults.map((result, index) => (
                       <div
@@ -567,9 +595,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                         key={index}
                         style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                       >
-                        <ResultCard globals={globals} mediaOpen result={result} />
+                        <PaperCard globals={globals} result={result} />
                       </div>
                     ))}
+                  </div>
+                ) : isFilesPage ? (
+                  <div className="mt-4">
+                    <FilesGrid globals={globals} results={allResults} selected={hotkeysSelected} />
                   </div>
                 ) : isProductPage ? (
                   <div className="mt-4">
@@ -592,14 +624,25 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   </div>
                 ) : (
                   <div className="mt-2">
-                    {consolidateGroups(groupResults(allResults)).map((group, groupIndex) => {
-                      const label = globals.category_labels[group.template] ?? group.template;
-                      if (SECTION_TEMPLATES.has(group.template)) {
-                        // section chevron expands/collapses client-side from the
-                        // already-fetched results (a real category search stays
-                        // available via the category tabs)
+                    {(() => {
+                      const groups = consolidateGroups(groupResults(allResults));
+                      // media sections render after the untyped results in a
+                      // fixed order; an expanded section takes over the page
+                      const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
+                      const sections = SECTION_ORDER.map((template) =>
+                        groups.find((group) => group.template === template),
+                      ).filter((group) => group !== undefined);
+                      const visibleSections = expandedSection
+                        ? sections.filter((group) => group.template === expandedSection)
+                        : sections;
+                      const renderSection = (group: (typeof sections)[number], groupIndex: number) => {
+                        const label = globals.category_labels[group.template] ?? group.template;
                         const expanded = expandedSection === group.template;
+                        // expand/collapse happens client-side from the
+                        // already-fetched results - no navigation involved
                         const shown = expanded ? group.items : group.items.slice(0, SECTION_CAPS[group.template]);
+                        const results = shown.map(({ result }) => result);
+                        const indexOffset = group.items[0]?.index ?? 0;
                         return (
                           <section key={`${group.template}-${groupIndex}`}>
                             <GroupHeader
@@ -613,9 +656,21 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                             />
                             <div className="mt-1">
                               {group.template === "images" ? (
-                                <ImageGrid results={shown.map(({ result }) => result)} />
+                                <ImageGrid results={results} />
                               ) : group.template === "videos" ? (
-                                <VideoGrid globals={globals} results={shown.map(({ result }) => result)} />
+                                <VideoGrid
+                                  globals={globals}
+                                  indexOffset={indexOffset}
+                                  results={results}
+                                  selected={hotkeysSelected}
+                                />
+                              ) : group.template === "music" ? (
+                                <MusicGrid
+                                  globals={globals}
+                                  indexOffset={indexOffset}
+                                  results={results}
+                                  selected={hotkeysSelected}
+                                />
                               ) : (
                                 <div className="space-y-1">
                                   {shown.map(({ result, index }) => (
@@ -633,30 +688,47 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                 </div>
                               )}
                             </div>
+                            <div className="mt-2">
+                              <button
+                                className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-4 py-1.5 text-[13px] text-ink-2 transition-colors hover:text-ink"
+                                onClick={() => {
+                                  setExpandedSection(expanded ? null : group.template);
+                                }}
+                                type="button"
+                              >
+                                {expanded ? t("show_less") : t("show_more")}
+                              </button>
+                            </div>
                           </section>
                         );
-                      }
-                      if (expandedSection) {
-                        // an expanded section takes over the page - hide the rest
-                        return null;
-                      }
+                      };
                       return (
-                        <div key={groupIndex}>
-                          {group.items.map(({ result, index }) => (
-                            <div
-                              className={`animate-fade-up rounded-2xl ${
-                                index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                              }`}
-                              data-hotkey-index={index}
-                              key={index}
-                              style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-                            >
-                              <ResultCard autoOpenMap={isMapPage} eager={index < 4} globals={globals} result={result} />
+                        <>
+                          {(expandedSection ? [] : rest).map((group, groupIndex) => (
+                            <div key={groupIndex}>
+                              {group.items.map(({ result, index }) => (
+                                <div
+                                  className={`animate-fade-up rounded-2xl ${
+                                    index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                                  }`}
+                                  data-hotkey-index={index}
+                                  key={index}
+                                  style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                                >
+                                  <ResultCard
+                                    autoOpenMap={isMapPage}
+                                    eager={index < 4}
+                                    globals={globals}
+                                    result={result}
+                                  />
+                                </div>
+                              ))}
                             </div>
                           ))}
-                        </div>
+                          {visibleSections.map((group, i) => renderSection(group, i))}
+                        </>
                       );
-                    })}
+                    })()}
                   </div>
                 )}
 

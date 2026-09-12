@@ -4,13 +4,18 @@
 
 const DAY_MS = 86_400_000;
 
-/** Relative date for recent timestamps, locale date otherwise. */
+/** Relative date for recent timestamps, locale date otherwise.
+    Future timestamps (sloppy engine metadata) get the absolute date too. */
 export function formatDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
     return iso;
   }
+  const absolute = () => date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   const diff = Date.now() - date.getTime();
+  if (diff < 0) {
+    return absolute();
+  }
   const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
   if (diff < DAY_MS) {
     return rtf.format(-Math.round(diff / 3_600_000), "hour");
@@ -21,7 +26,7 @@ export function formatDate(iso: string): string {
   if (diff < 365 * DAY_MS) {
     return rtf.format(-Math.round(diff / (30 * DAY_MS)), "month");
   }
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return absolute();
 }
 
 /** Video/audio duration: passthrough display string or seconds -> h:mm:ss. */
