@@ -213,12 +213,19 @@ its content, all sharing one visual language:
   block; loading pauses while the general block is collapsed.
 
 Results right rail (desktop): the infobox scrolls inside its own area
-(`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /
-engine messages, download links) sits pinned underneath — they must never
-share the infobox's scroll. On mobile the debug panels render right after
-the meta line and the infobox above the first result (`lg:hidden` blocks);
-hide the rail area entirely when its content is empty (e.g. "test"-style
-searches with no infobox) so blank space never pushes content down.
+(`min-h-0 flex-1 overflow-y-auto`); hide the rail area entirely when its
+content is empty (e.g. "test"-style searches with no infobox) so blank
+space never pushes content down. Diagnostics (`DebugPanels`) live in the
+results meta line on both desktop and mobile: the line reads 「找到 N 条
+相关结果 · 耗时 X.X 秒 ▾」 and clicking it expands a single engine-timing
+table — unresponsive engines share the same grid (red error label + empty
+bar, seconds column aligned); the panel starts expanded when there are
+zero results. Suggestions render as a single-row chip strip
+under the results meta line (`SuggestionsBox`, all breakpoints): chips
+are single-line truncated, the row pages via ‹ › ghost arrows that stay
+persistent (disabled at the ends and when the row fits, so flipping state
+never shifts the chips; uncapped — paging handles any count, honors
+`prefers-reduced-motion`); the right rail never hosts suggestions.
 
 Query-term highlighting (`.highlight` in global.css) is a tinted
 background only — color marks the term, no bold.

@@ -544,15 +544,21 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
             </div>
             {!showSkeletons && !error ? (
-              <p className="mt-2 text-xs text-ink-3">
-                {t("meta_found")} {allResults.length} {t("meta_results")}
-              </p>
-            ) : null}
-            {!showSkeletons ? (
-              <div className="mt-2 flex flex-col gap-3 lg:hidden">
-                <SuggestionsBox data={data} onSearch={submitQuery} />
-                <DebugPanels data={data} />
-              </div>
+              <>
+                <div className="mt-2">
+                  <DebugPanels
+                    data={data}
+                    leading={
+                      <span>
+                        {t("meta_found")} {allResults.length} {t("meta_results")}
+                      </span>
+                    }
+                  />
+                </div>
+                <div className="mt-3.5">
+                  <SuggestionsBox data={data} onSearch={submitQuery} />
+                </div>
+              </>
             ) : null}
 
             {!showSkeletons && data.infoboxes.length > 0 ? (
@@ -813,8 +819,6 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
           <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 lg:pb-6">
             {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
-            {showSkeletons ? null : <SuggestionsBox data={data} onSearch={submitQuery} />}
-            {showSkeletons ? null : <DebugPanels data={data} />}
           </div>
         </div>
       </main>

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
-import { ChevronDownIcon, DownloadIcon, ExternalLinkIcon, SearchIcon } from "../icons.tsx";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, SearchIcon } from "../icons.tsx";
 
 function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
   return (
@@ -149,15 +149,67 @@ export function Infobox({
 
 export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSearch: (q: string) => void }) {
   const t = useT();
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  const measure = useCallback(() => {
+    const strip = stripRef.current;
+    if (!strip) {
+      return;
+    }
+    const maxScroll = strip.scrollWidth - strip.clientWidth;
+    setCanLeft(strip.scrollLeft > 2);
+    setCanRight(strip.scrollLeft < maxScroll - 2);
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when a new query swaps the suggestion set
+  useLayoutEffect(() => {
+    measure();
+  }, [data.suggestions, measure]);
+
+  useEffect(() => {
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
+
   if (data.suggestions.length === 0) {
     return null;
   }
+
+  const page = (direction: -1 | 1) => {
+    const strip = stripRef.current;
+    if (!strip) {
+      return;
+    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    strip.scrollBy({ left: direction * strip.clientWidth * 0.8, behavior: reduced ? "auto" : "smooth" });
+  };
+
+  // buttons are persistent so flipping state never shifts the chips
+  const arrowClass =
+    "flex size-7 shrink-0 items-center justify-center rounded-full text-ink-3 transition hover:bg-surface-2 hover:text-ink disabled:pointer-events-none disabled:opacity-30";
   return (
-    <Box open title={t("suggestions")}>
-      <div className="grid grid-cols-2 gap-2">
-        {data.suggestions.slice(0, 8).map((suggestion) => (
+    <div className="flex items-center gap-1">
+      <button
+        aria-label={t("previous_page")}
+        className={arrowClass}
+        disabled={!canLeft}
+        onClick={() => {
+          page(-1);
+        }}
+        type="button"
+      >
+        <ChevronLeftIcon className="size-3.5" />
+      </button>
+      <div
+        className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onScroll={measure}
+        ref={stripRef}
+      >
+        {data.suggestions.map((suggestion) => (
           <button
-            className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-left text-[13px] text-ink-2 transition-colors hover:border-accent hover:text-ink"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
             dir="auto"
             key={suggestion.q}
             onClick={() => {
@@ -166,107 +218,116 @@ export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSea
             type="button"
           >
             <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
-            <span className="truncate">{suggestion.title}</span>
+            <span className="max-w-40 truncate">{suggestion.title}</span>
           </button>
         ))}
       </div>
-    </Box>
+      <button
+        aria-label={t("next_page")}
+        className={arrowClass}
+        disabled={!canRight}
+        onClick={() => {
+          page(1);
+        }}
+        type="button"
+      >
+        <ChevronRightIcon className="size-3.5" />
+      </button>
+    </div>
   );
 }
 
-export function DebugPanels({ data }: { data: SearchPageData }) {
+export function DebugPanels({ data, leading }: { data: SearchPageData; leading?: ReactNode }) {
   const t = useT();
   const { openOverlay } = useOverlay();
-  const hasEngineMsg = data.unresponsive_engines.length > 0 || data.timings.length > 0;
+  const hasEnginesPanel = data.unresponsive_engines.length > 0 || data.timings.length > 0;
+  // with zero results the engine messages matter most — start expanded
+  const [openPanel, setOpenPanel] = useState<null | "engines">(() =>
+    hasEnginesPanel && data.results.length === 0 ? "engines" : null,
+  );
+  const roundedTime = data.max_response_time ? Math.round(data.max_response_time * 10) / 10 : null;
   const maxTime = data.max_response_time ?? 0;
-  const globals = data.globals;
   return (
-    <>
-      {hasEngineMsg ? (
-        <Box
-          open={data.results.length === 0}
-          title={
-            data.max_response_time
-              ? `${t("response_time")}: ${Math.round(data.max_response_time * 10) / 10} ${t("seconds")}`
-              : t("engines_messages")
-          }
-        >
-          {data.unresponsive_engines.length > 0 ? (
-            <table className="w-full text-xs">
-              <tbody>
-                {data.unresponsive_engines.map(([name, errorMessage]) => (
-                  <tr key={name}>
-                    <td className="py-0.5 pr-2 align-top">
-                      <button
-                        className="text-left font-medium text-ink-2 hover:text-accent"
-                        onClick={() => {
-                          openOverlay(`/stats?engine=${encodeURIComponent(name)}`, t("engine_stats"));
-                        }}
-                        type="button"
-                      >
-                        {name}
-                      </button>
-                    </td>
-                    <td className="py-0.5 text-danger" dir="auto">
-                      {errorMessage}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : null}
-          {data.timings.length > 0 ? (
-            <table className="mt-1 w-full text-xs">
-              <tbody>
-                {data.timings.map((timing) => (
-                  <tr key={timing.name}>
-                    <td className="w-24 py-0.5 pr-2 truncate">
-                      <button
-                        className="text-left text-ink-2 hover:text-accent"
-                        onClick={() => {
-                          openOverlay(`/stats?engine=${encodeURIComponent(timing.name)}`, t("engine_stats"));
-                        }}
-                        type="button"
-                      >
-                        {timing.name}
-                      </button>
-                    </td>
-                    <td className="py-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="w-10 shrink-0 text-right text-ink-3">{Math.round(timing.time * 10) / 10}</span>
-                        <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
-                          <span
-                            className="block h-full rounded-full bg-accent/70"
-                            style={{ width: maxTime > 0 ? `${Math.max(2, (timing.time / maxTime) * 100)}%` : "0%" }}
-                          />
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : null}
-        </Box>
-      ) : null}
+    <div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-3">
+        {leading}
+        {hasEnginesPanel ? (
+          <button
+            aria-expanded={openPanel === "engines"}
+            className="inline-flex items-center gap-1 transition-colors hover:text-ink"
+            onClick={() => {
+              setOpenPanel((current) => (current === "engines" ? null : "engines"));
+            }}
+            type="button"
+          >
+            {roundedTime !== null ? `${t("took")} ${roundedTime} ${t("seconds")}` : t("engines_messages")}
+            <ChevronDownIcon className={`size-3 transition-transform ${openPanel === "engines" ? "rotate-180" : ""}`} />
+          </button>
+        ) : null}
+      </div>
 
-      {globals.search_formats.length > 0 ? (
-        <Box title={t("download_results")}>
-          <div className="flex flex-wrap gap-1.5">
-            {globals.search_formats.map((format) => (
-              <a
-                className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
-                href={`${window.location.pathname}${window.location.search}${window.location.search.includes("?") ? "&" : "?"}format=${format}`}
-                key={format}
-              >
-                <DownloadIcon className="size-3.5" />
-                {format}
-              </a>
-            ))}
-          </div>
-        </Box>
+      {openPanel === "engines" ? (
+        <div className="mt-2 rounded-2xl border border-line bg-surface px-4 py-3">
+          {/* one table for every engine: timings get seconds + bar, unresponsive
+              engines get their error label + an empty track on the same grid */}
+          <table className="w-full text-xs">
+            <tbody>
+              {data.unresponsive_engines.map(([name, errorMessage]) => (
+                <tr key={name}>
+                  <td className="w-24 py-0.5 pr-2 truncate">
+                    <button
+                      className="text-left font-medium text-ink-2 hover:text-accent"
+                      onClick={() => {
+                        openOverlay(`/stats?engine=${encodeURIComponent(name)}`, t("engine_stats"));
+                      }}
+                      type="button"
+                    >
+                      {name}
+                    </button>
+                  </td>
+                  <td className="py-0.5">
+                    <div className="flex items-center gap-2">
+                      {/* right-aligned into the seconds column: the error's
+                          right edge lines up with the digits / bar start */}
+                      <span className="w-24 shrink-0 truncate text-right text-danger" dir="auto" title={errorMessage}>
+                        {errorMessage}
+                      </span>
+                      <span className="h-1.5 flex-1 rounded-full bg-surface-2" />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {data.timings.map((timing) => (
+                <tr key={timing.name}>
+                  <td className="w-24 py-0.5 pr-2 truncate">
+                    <button
+                      className="text-left text-ink-2 hover:text-accent"
+                      onClick={() => {
+                        openOverlay(`/stats?engine=${encodeURIComponent(timing.name)}`, t("engine_stats"));
+                      }}
+                      type="button"
+                    >
+                      {timing.name}
+                    </button>
+                  </td>
+                  <td className="py-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-24 shrink-0 text-right text-ink-3">{Math.round(timing.time * 10) / 10}</span>
+                      <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
+                        <span
+                          className="block h-full rounded-full bg-accent/70"
+                          style={{ width: maxTime > 0 ? `${Math.max(2, (timing.time / maxTime) * 100)}%` : "0%" }}
+                        />
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : null}
-    </>
+    </div>
   );
 }
 
