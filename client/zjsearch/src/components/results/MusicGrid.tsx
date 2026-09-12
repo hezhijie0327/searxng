@@ -243,7 +243,7 @@ export function MusicGrid({
             </button>
           ) : null}
         </div>
-        <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
+        <h3 className="mt-2.5 line-clamp-2 min-h-[2.75rem] text-base font-medium leading-snug">
           <ResultLink
             className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
             globals={globals}

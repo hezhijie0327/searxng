@@ -461,11 +461,13 @@ export function NewsCard({ result, globals }: CardProps) {
       <div className="mt-1">
         <MetaLine result={result} />
       </div>
-      <p
-        className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
-        dangerouslySetInnerHTML={{ __html: result.content_html }}
-        dir="auto"
-      />
+      {result.content_html ? (
+        <p
+          className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
+          dangerouslySetInnerHTML={{ __html: result.content_html }}
+          dir="auto"
+        />
+      ) : null}
       <EnginesLine result={result} />
     </ResultArticle>
   );
@@ -842,14 +844,14 @@ export function PaperCard({ result, globals }: CardProps) {
     }
   }
   const metaBits: Array<string | null | ReactNode> = [
-    authors || null,
-    venueBits.length > 0 ? venueBits.join(", ") : null,
     result.published_date ? (
       <span className="inline-flex items-center gap-1" key="date">
         <CalendarIcon className="size-3" />
         {formatDate(result.published_date)}
       </span>
     ) : null,
+    authors || null,
+    venueBits.length > 0 ? venueBits.join(", ") : null,
   ];
   // every optional extra (PDF/HTML, DOI, citation note, subject tags) lives
   // in ONE footer row in a fixed order, so cards share the same skeleton no
@@ -1271,7 +1273,7 @@ export function VideoGrid({
             </button>
           ) : null}
         </div>
-        <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
+        <h3 className="mt-2.5 line-clamp-2 min-h-[2.75rem] text-base font-medium leading-snug">
           <ResultLink
             className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
             globals={globals}
