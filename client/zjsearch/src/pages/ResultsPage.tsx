@@ -608,8 +608,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 ) : singleCategory !== null ? (
                   // category intent page: a pure relevance-ordered list in
                   // which every type keeps its own card - extracting a type
-                  // into a strip would break the relevance order
-                  <div className="mt-2">
+                  // into a strip would break the relevance order.
+                  // space-y keeps highlighted (selected / hovered) cards from
+                  // touching, matching the mixed-block and news lists.
+                  <div className="mt-2 space-y-1">
                     {allResults.map((result, index) => (
                       <div
                         className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
