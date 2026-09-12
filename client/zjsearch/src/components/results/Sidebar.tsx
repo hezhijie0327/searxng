@@ -2,14 +2,16 @@
 
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
+import { newTabLinkProps } from "../../lib/link.ts";
 import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
+import { CopyButton } from "../CopyButton.tsx";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, SearchIcon } from "../icons.tsx";
 
-function Box({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
+function Box({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-surface">
-      <details open={open}>
+      <details>
         <summary className="cursor-pointer select-none px-4 py-2.5 text-xs font-semibold tracking-wide text-ink-3 uppercase transition-colors hover:text-ink">
           {title}
         </summary>
@@ -91,9 +93,7 @@ export function Infobox({
               <li className="truncate" key={url.url}>
                 <a
                   className="inline-flex items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
-                  {...(globals.results_on_new_tab
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : { rel: "noreferrer" })}
+                  {...newTabLinkProps(globals.results_on_new_tab)}
                   href={url.url}
                 >
                   <span className="truncate">{url.title}</span>
@@ -356,36 +356,10 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
             >
               {searchUrl}
             </pre>
-            <CopyButton text={searchUrl} />
+            <CopyButton value={searchUrl} />
           </div>
         </Box>
       ) : null}
     </aside>
-  );
-}
-
-export function CopyButton({ text, label }: { text: string; label?: string }) {
-  const t = useT();
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      className="shrink-0 rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2 transition-colors hover:text-ink"
-      onClick={() => {
-        void navigator.clipboard
-          .writeText(text)
-          .then(() => {
-            setCopied(true);
-            window.setTimeout(() => {
-              setCopied(false);
-            }, 1500);
-          })
-          .catch(() => {
-            /* clipboard unavailable */
-          });
-      }}
-      type="button"
-    >
-      {copied ? t("copied") : (label ?? t("copy"))}
-    </button>
   );
 }

@@ -6,11 +6,13 @@
     sources play inside the tile like videos do. */
 
 import { useEffect, useRef, useState } from "react";
+import { THEME_STATIC } from "../../lib/constants.ts";
 import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import { CalendarIcon, CloseIcon, MusicIcon, PauseIcon, PlayIcon } from "../icons.tsx";
-import { ResultLink, THEME_STATIC } from "./cards.tsx";
+import { ResultLink } from "./cards.tsx";
+import { TileBadge, TileFavicon } from "./Tile.tsx";
 
 function formatClock(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) {
@@ -184,23 +186,8 @@ export function MusicGrid({
                 <MusicIcon className="size-10" />
               </span>
             )}
-            {length ? (
-              <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
-                {length}
-              </span>
-            ) : null}
-            {result.favicon ? (
-              <img
-                alt=""
-                className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
-                decoding="async"
-                loading="lazy"
-                onError={(event) => {
-                  event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
-                }}
-                src={result.favicon}
-              />
-            ) : null}
+            {length ? <TileBadge>{length}</TileBadge> : null}
+            {result.favicon ? <TileFavicon src={result.favicon} /> : null}
           </ResultLink>
           {playable && isPlaying ? (
             mode === "audio" && audioSrc ? (

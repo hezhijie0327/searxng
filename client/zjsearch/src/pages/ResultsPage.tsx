@@ -29,7 +29,7 @@ import { tryEvaluateExpression } from "../features/calculator.ts";
 import { useHotkeys } from "../features/hotkeys.ts";
 import { useT } from "../lib/i18n.ts";
 import { extractPageData } from "../lib/pageData.ts";
-import { parseSearchUrl, useRouter } from "../lib/router.tsx";
+import { buildSearchUrl, parseSearchUrl, useRouter } from "../lib/router.tsx";
 import { useHasPlugin, useSettings } from "../lib/settings.ts";
 import type { ResultItem, SearchPageData } from "../lib/types.ts";
 
@@ -355,27 +355,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
       return;
     }
     setAppendState("loading");
-    const nextUrl = (() => {
-      const params = new URLSearchParams();
-      params.set("q", data.q);
-      params.set("pageno", String(data.pageno + 1));
-      if (filterValues.language) {
-        params.set("language", filterValues.language);
-      }
-      if (filterValues.time_range) {
-        params.set("time_range", filterValues.time_range);
-      }
-      params.set("safesearch", String(filterValues.safesearch));
-      if (selectedCategories.length > 0) {
-        params.set("categories", selectedCategories.join(","));
-      }
-      for (const [engine, kv] of Object.entries(data.engine_data ?? {})) {
-        for (const [key, value] of Object.entries(kv)) {
-          params.set(`engine_data-${engine}-${key}`, value);
-        }
-      }
-      return `/search?${params.toString()}`;
-    })();
+    const nextUrl = buildSearchUrl(buildParams({ pageno: data.pageno + 1 }));
     void fetch(nextUrl, { headers: { Accept: "text/html" } })
       .then(async (resp) => {
         if (!resp.ok) {

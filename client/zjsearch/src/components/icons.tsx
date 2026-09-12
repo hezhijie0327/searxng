@@ -208,13 +208,6 @@ export const ExternalLinkIcon = makeIcon(
   </>,
 );
 
-export const CopyIcon = makeIcon(
-  <>
-    <rect height="13" rx="2" width="13" x="9" y="9" />
-    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-  </>,
-);
-
 export const DownloadIcon = makeIcon(
   <>
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -309,8 +302,6 @@ export const TagIcon = makeIcon(
     <circle cx="7.5" cy="7.5" r="1" />
   </>,
 );
-
-export const DotIcon = makeIcon(<circle cx="12" cy="12" fill="currentColor" r="4" stroke="none" />);
 
 export const SpinnerIcon = makeIcon(
   <>
@@ -442,21 +433,6 @@ export const TerminalIcon = makeIcon(
   <>
     <polyline points="4 17 10 11 4 5" />
     <path d="m12 19 8 0" />
-  </>,
-);
-
-export const EyeIcon = makeIcon(
-  <>
-    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-    <circle cx="12" cy="12" r="3" />
-  </>,
-);
-
-export const EllipsisIcon = makeIcon(
-  <>
-    <circle cx="5" cy="12" r="1" />
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
   </>,
 );
 

@@ -9,11 +9,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { THEME_STATIC } from "../../lib/constants.ts";
 import { useT } from "../../lib/i18n.ts";
+import { newTabLinkProps } from "../../lib/link.ts";
 import { useSettings } from "../../lib/settings.ts";
 import type { ResultItem } from "../../lib/types.ts";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
-import { THEME_STATIC } from "./cards.tsx";
 
 const IMAGE_VIEWER_HASH = "#image-viewer";
 
@@ -167,9 +168,7 @@ function Lightbox({
   }
 
   const thumbSrc = result.thumbnail_src || result.img_src || "";
-  const linkProps = settings.results_on_new_tab
-    ? { target: "_blank", rel: "noopener noreferrer" }
-    : { rel: "noreferrer" };
+  const linkProps = newTabLinkProps(settings.results_on_new_tab);
 
   let hostname = "";
   if (result.netloc) {

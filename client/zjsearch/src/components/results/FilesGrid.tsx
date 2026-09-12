@@ -19,7 +19,8 @@ import {
   MagnetIcon,
   MusicIcon,
 } from "../icons.tsx";
-import { ResultLink, THEME_STATIC } from "./cards.tsx";
+import { ResultLink } from "./cards.tsx";
+import { TileBadge, TileFavicon } from "./Tile.tsx";
 
 function detectExtension(title: string): string | null {
   const match = /\.([a-z0-9]{1,4})$/i.exec(title.trim());
@@ -82,23 +83,8 @@ export function FilesGrid({
                   <span className="text-[10px] font-semibold uppercase tracking-widest">{extension}</span>
                 ) : null}
               </span>
-              {size ? (
-                <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
-                  {size}
-                </span>
-              ) : null}
-              {result.favicon ? (
-                <img
-                  alt=""
-                  className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
-                  decoding="async"
-                  loading="lazy"
-                  onError={(event) => {
-                    event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
-                  }}
-                  src={result.favicon}
-                />
-              ) : null}
+              {size ? <TileBadge>{size}</TileBadge> : null}
+              {result.favicon ? <TileFavicon src={result.favicon} /> : null}
               {primaryHref ? (
                 <a
                   aria-label={primaryLabel}

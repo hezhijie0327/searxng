@@ -61,7 +61,9 @@ export default {
     outDir: PATH.dist,
     manifest: "manifest.json",
     emptyOutDir: true,
-    sourcemap: true,
+    // source maps are a debugging aid only — keep the ~1.5 MB of .map files
+    // out of the deployed static folder unless they are explicitly requested
+    sourcemap: process.env.ZJSEARCH_SOURCEMAP === "1",
     rollupOptions: {
       input: {
         app: `${PATH.src}/main.tsx`,

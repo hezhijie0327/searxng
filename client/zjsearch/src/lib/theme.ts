@@ -27,16 +27,6 @@ export function applyCenterAlignment(on: boolean) {
   document.documentElement.classList.toggle("centered", on);
 }
 
-export function writeThemeStyle(style: ThemeStyle) {
-  // "auto" means: follow the system setting, i.e. no cookie (the server shell
-  // and readThemeStyle treat a missing cookie as auto).
-  if (style === "auto") {
-    document.cookie = "simple_style=; path=/; max-age=0; samesite=lax";
-  } else {
-    document.cookie = `simple_style=${style}; path=/; max-age=157680000; samesite=lax`;
-  }
-}
-
 /** Live-follow system theme switches while the page is open (auto mode). */
 export function watchSystemTheme() {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {

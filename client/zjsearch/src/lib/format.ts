@@ -45,10 +45,3 @@ export function formatLength(lengthDisplay: string | undefined, lengthSeconds: n
   const ss = String(seconds).padStart(2, "0");
   return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
 }
-
-export function formatSeconds(value: number | null | undefined): string {
-  if (value === null || value === undefined) {
-    return "";
-  }
-  return `${Math.round(value * 100) / 100}`;
-}

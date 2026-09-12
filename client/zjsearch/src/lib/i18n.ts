@@ -50,7 +50,6 @@ const EN: Record<string, string> = {
   author: "Author",
   show_media: "show media",
   hide_media: "hide media",
-  show_video: "show video",
   hide_video: "hide video",
   play: "Play",
   pause: "Pause",
@@ -74,8 +73,8 @@ const EN: Record<string, string> = {
   engines: "Engines",
   view_source: "View source",
   address: "address",
-  temperature: "Temperature",
   feels_like: "Feels Like",
+  weather_trend: "Temperature trend",
   wind: "Wind",
   pressure: "Pressure",
   humidity: "Humidity",
@@ -174,8 +173,6 @@ const EN: Record<string, string> = {
   dark: "dark",
   black: "black",
   license: "License",
-  other: "Other",
-  packages: "Packages",
   show_less: "Show less",
   drag_reorder: "Drag to reorder",
 
@@ -193,8 +190,6 @@ const EN: Record<string, string> = {
     'Navigate search results with hotkeys (JavaScript required). Press "?" on the main or results page to get help.',
   search_on_category_select_desc:
     "Perform a search immediately if a category is selected. Disable to select multiple categories",
-  engine_tab_bang_hint:
-    "This tab does not exist in the user interface, but you can search with these engines via !bangs.",
   settings_in_cookies: "These settings are stored in your cookies. This allows us not to store this data about you.",
   cookies_list_desc: "This is the list of cookies and their values SearXNG is storing on your computer.",
   prefs_url_privacy_note:
@@ -277,7 +272,6 @@ const ZH_CN: Record<string, string> = {
   author: "作者",
   show_media: "显示媒体",
   hide_media: "隐藏媒体",
-  show_video: "显示视频",
   hide_video: "隐藏视频",
   play: "播放",
   pause: "暂停",
@@ -301,8 +295,8 @@ const ZH_CN: Record<string, string> = {
   engines: "引擎",
   view_source: "查看源码",
   address: "地址",
-  temperature: "温度",
   feels_like: "体感温度",
+  weather_trend: "温度趋势",
   wind: "风速",
   pressure: "气压",
   humidity: "湿度",
@@ -401,8 +395,6 @@ const ZH_CN: Record<string, string> = {
   dark: "深色",
   black: "纯黑",
   license: "许可证",
-  other: "其他",
-  packages: "软件包",
   show_less: "收起",
   drag_reorder: "拖拽排序",
 

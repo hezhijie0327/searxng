@@ -2,6 +2,7 @@
 
 import type { MouseEvent, ReactNode } from "react";
 import { useT } from "../lib/i18n.ts";
+import { newTabLinkProps } from "../lib/link.ts";
 import { useOverlay } from "../lib/overlay.tsx";
 import { useRouter } from "../lib/router.tsx";
 import type { GlobalData } from "../lib/types.ts";
@@ -41,7 +42,7 @@ export function Link({
       onClick={onClick}
       {...(ariaLabel ? { "aria-label": ariaLabel } : {})}
       {...(title ? { title } : {})}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : { rel: "noreferrer" })}
+      {...newTabLinkProps(external)}
     >
       {children}
     </a>

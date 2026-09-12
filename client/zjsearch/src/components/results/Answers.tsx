@@ -4,8 +4,10 @@ import { useState } from "react";
 import type { CalculationAnswer } from "../../features/calculator.ts";
 import { tryEvaluateExpression } from "../../features/calculator.ts";
 import { useT } from "../../lib/i18n.ts";
+import { newTabLinkProps } from "../../lib/link.ts";
 import { useSettings } from "../../lib/settings.ts";
-import type { AnswerData, LegacyAnswerData, WeatherItem } from "../../lib/types.ts";
+import type { AnswerData, WeatherItem } from "../../lib/types.ts";
+import { CopyButton } from "../CopyButton.tsx";
 import { LocationIcon } from "../icons.tsx";
 
 const MAX_SOURCES_SHOWN = 3;
@@ -91,6 +93,7 @@ export function CalculatorAnswer({ calc }: { calc: CalculationAnswer }) {
 /** SVG temperature trend over the next hourly slots (accent area line with
     temp / time labels every third slot), horizontally scrollable. */
 function WeatherTrend({ forecasts }: { forecasts: WeatherItem[] }) {
+  const t = useT();
   const slots = forecasts.slice(0, 24);
   if (slots.length < 3) {
     return null;
@@ -120,6 +123,7 @@ function WeatherTrend({ forecasts }: { forecasts: WeatherItem[] }) {
   return (
     <div className="mt-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <svg className="block" height={height} role="img" width={slots.length * step}>
+        <title>{t("weather_trend")}</title>
         <path className="fill-accent/15" d={area} />
         <path className="stroke-accent-strong" d={line} fill="none" strokeLinecap="round" strokeWidth={2} />
         {labels.map((label) => (
@@ -505,24 +509,8 @@ function TranslationsAnswer({
   );
 }
 
-function CopyButton({ value }: { value: string }) {
-  const t = useT();
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      className="shrink-0 rounded-lg border border-line px-2 py-1 text-xs text-ink-3 transition-colors hover:text-ink"
-      onClick={() => {
-        navigator.clipboard?.writeText(value).then(() => {
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 1200);
-        });
-      }}
-      type="button"
-    >
-      {copied ? t("copied") : t("copy")}
-    </button>
-  );
-}
+const COPY_BUTTON_CLASS =
+  "shrink-0 rounded-lg border border-line px-2 py-1 text-xs text-ink-3 transition-colors hover:text-ink";
 
 /** Special-query answers (random, statistics, hash, self-info, time zone)
     carry a structured *data* payload emitted by their plugins; the layouts
@@ -547,7 +535,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
           <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2" dir="ltr">
             {data.algo}
           </span>
-          <CopyButton value={data.digest} />
+          <CopyButton className={COPY_BUTTON_CLASS} value={data.digest} />
         </div>
         <p className="mt-2 break-all font-mono text-sm text-ink" dir="ltr">
           {data.digest}
@@ -565,7 +553,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
           <p className="text-2xl font-semibold text-ink" dir="ltr">
             {data.result}
           </p>
-          <CopyButton value={data.result} />
+          <CopyButton className={COPY_BUTTON_CLASS} value={data.result} />
         </div>
       </div>
     );
@@ -602,7 +590,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
           >
             {data.value}
           </p>
-          <CopyButton value={data.value} />
+          <CopyButton className={COPY_BUTTON_CLASS} value={data.value} />
         </div>
       </div>
     );
@@ -616,7 +604,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
         <p className="min-w-0 flex-1 break-all font-mono text-sm text-ink" dir="ltr">
           {data.value}
         </p>
-        <CopyButton value={data.value} />
+        <CopyButton className={COPY_BUTTON_CLASS} value={data.value} />
       </div>
     );
   }
@@ -626,7 +614,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
       {answer.url ? (
         <a
           href={answer.url}
-          {...(settings.results_on_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : { rel: "noreferrer" })}
+          {...newTabLinkProps(settings.results_on_new_tab)}
           className="ml-2 whitespace-nowrap text-xs text-accent hover:underline"
         >
           {hostname}

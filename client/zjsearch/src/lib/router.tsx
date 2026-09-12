@@ -161,7 +161,10 @@ export function RouterProvider({
         const finalUrl = new URL(resp.url, window.location.href).href;
         if (historyMode !== "none") {
           const historyMethod = historyMode === "replace" ? "replaceState" : "pushState";
-          window.history[historyMethod](pageData, "", finalUrl);
+          // keep the payload out of the history state — the page data already
+          // lives in React state and popstate re-fetches by URL, so storing
+          // it here would only duplicate memory for every visited page
+          window.history[historyMethod](null, "", finalUrl);
         }
         setHref(finalUrl);
         setData(pageData);

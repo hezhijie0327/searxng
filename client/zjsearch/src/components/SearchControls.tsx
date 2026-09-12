@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
-import type { GlobalData, SearchPageData } from "../lib/types.ts";
+import type { GlobalData } from "../lib/types.ts";
 import type { DropdownOption } from "./Dropdown.tsx";
 import { Dropdown } from "./Dropdown.tsx";
 import { CategoryIcon, ClockIcon, LanguagesIcon, ShieldIcon } from "./icons.tsx";
@@ -33,6 +33,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   // Keep the active tab in view on narrow screens: landing on a category
   // whose tab sits beyond the first viewport-width otherwise reads as
   // "nothing selected".  Centering is a no-op while the row fits.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-center when the selection changes
   useLayoutEffect(() => {
     if (wrap) {
       return;
@@ -195,13 +196,4 @@ export function SearchFilters({
 /** Filter values for a page that has no search payload yet (index page). */
 export function defaultFilterValues(globals: GlobalData): FilterValues {
   return { language: globals.language || "all", time_range: "", safesearch: globals.safesearch };
-}
-
-export function filterValuesFromResults(data: SearchPageData): FilterValues {
-  return {
-    language: data.current_language || "all",
-    time_range: data.time_range || "",
-    safesearch: data.globals.safesearch,
-    search_language: data.search_language,
-  };
 }

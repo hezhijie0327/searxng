@@ -8,7 +8,8 @@ import { formatDate } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import { CalendarIcon, CodeIcon, ExternalLinkIcon, PackageIcon } from "../icons.tsx";
-import { ResultLink, THEME_STATIC } from "./cards.tsx";
+import { ResultLink } from "./cards.tsx";
+import { TileFavicon } from "./Tile.tsx";
 
 function PackageCell({
   result,
@@ -38,18 +39,7 @@ function PackageCell({
             <span className="font-mono text-[11px] font-semibold tracking-wide">{result.version}</span>
           ) : null}
         </span>
-        {result.favicon ? (
-          <img
-            alt=""
-            className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
-            decoding="async"
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
-            }}
-            src={result.favicon}
-          />
-        ) : null}
+        {result.favicon ? <TileFavicon src={result.favicon} /> : null}
       </ResultLink>
       <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
         <ResultLink
