@@ -891,10 +891,17 @@ export function PaperCard({ result, globals }: CardProps) {
             />
           ) : null}
           {hasFooter ? (
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+            // single line by default so every card shares the same height;
+            // long comments/DOIs truncate instead of wrapping items onto
+            // extra rows.  Wrapping returns only when tags are expanded.
+            <div
+              className={`mt-2 flex min-h-6 min-w-0 items-center gap-x-3 text-xs ${
+                tagsExpanded ? "flex-wrap" : "overflow-hidden whitespace-nowrap"
+              }`}
+            >
               {result.pdf_url ? (
                 <a
-                  className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
                   href={result.pdf_url}
                   rel="noreferrer"
                   target="_blank"
@@ -905,7 +912,7 @@ export function PaperCard({ result, globals }: CardProps) {
               ) : null}
               {result.html_url ? (
                 <a
-                  className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
                   href={result.html_url}
                   rel="noreferrer"
                   target="_blank"
@@ -916,7 +923,7 @@ export function PaperCard({ result, globals }: CardProps) {
               ) : null}
               {result.doi ? (
                 <a
-                  className="min-w-0 truncate font-mono text-[11px] text-ink-3 hover:text-accent"
+                  className="max-w-36 shrink-0 truncate font-mono text-[11px] text-ink-3 hover:text-accent"
                   dir="ltr"
                   href={`https://${globals.doi_resolver}/${result.doi}`}
                   rel="noreferrer"
@@ -931,13 +938,13 @@ export function PaperCard({ result, globals }: CardProps) {
                 </span>
               ) : null}
               {tags.slice(0, tagsExpanded ? tags.length : maxTags).map((tag) => (
-                <span className="max-w-40 truncate text-ink-3" key={tag} title={tag}>
+                <span className="max-w-40 shrink-0 truncate text-ink-3" key={tag} title={tag}>
                   #{tag}
                 </span>
               ))}
               {tags.length > maxTags && !tagsExpanded ? (
                 <button
-                  className="text-ink-3 transition-colors hover:text-ink"
+                  className="shrink-0 text-ink-3 transition-colors hover:text-ink"
                   onClick={() => {
                     setTagsExpanded(true);
                   }}
@@ -949,7 +956,7 @@ export function PaperCard({ result, globals }: CardProps) {
               ) : null}
               {tags.length > maxTags && tagsExpanded ? (
                 <button
-                  className="text-ink-3 transition-colors hover:text-ink"
+                  className="shrink-0 text-ink-3 transition-colors hover:text-ink"
                   onClick={() => {
                     setTagsExpanded(false);
                   }}
