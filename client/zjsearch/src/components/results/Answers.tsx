@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import { useSettings } from "../../lib/settings.ts";
 import type { AnswerData, WeatherItem } from "../../lib/types.ts";
 import { LocationIcon } from "../icons.tsx";
+
+const MAX_SOURCES_SHOWN = 3;
 
 /** SVG temperature trend over the next hourly slots (accent area line with
     temp / time labels every third slot), horizontally scrollable. */
@@ -128,6 +131,10 @@ function WeatherAnswer({
   sources: Array<{ service: string; url: string }>;
 }) {
   const t = useT();
+  // same cap-and-expand contract as EnginesLine: 3 pills + "+N"
+  const [sourcesExpanded, setSourcesExpanded] = useState(false);
+  const shownSources = sourcesExpanded ? sources : sources.slice(0, MAX_SOURCES_SHOWN);
+  const hiddenSources = sources.length - MAX_SOURCES_SHOWN;
   const current = answer.current;
   const heroC = Math.round(current.temp_c);
   const heroF = Math.round(current.temp_f);
@@ -177,7 +184,7 @@ function WeatherAnswer({
       <WeatherDaily forecasts={answer.forecasts} />
       {sources.length > 0 ? (
         <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
-          {sources.map((source) =>
+          {shownSources.map((source) =>
             source.url ? (
               <a
                 className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-2 transition-colors hover:text-ink"
@@ -194,6 +201,29 @@ function WeatherAnswer({
               </span>
             ),
           )}
+          {!sourcesExpanded && hiddenSources > 0 ? (
+            <button
+              className="rounded-full bg-surface-2 px-2 py-0.5 transition-colors hover:text-ink"
+              onClick={() => {
+                setSourcesExpanded(true);
+              }}
+              title={sources.map((source) => source.service).join(", ")}
+              type="button"
+            >
+              +{hiddenSources}
+            </button>
+          ) : null}
+          {sourcesExpanded && hiddenSources > 0 ? (
+            <button
+              className="transition-colors hover:text-ink"
+              onClick={() => {
+                setSourcesExpanded(false);
+              }}
+              type="button"
+            >
+              {t("show_less")}
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>
