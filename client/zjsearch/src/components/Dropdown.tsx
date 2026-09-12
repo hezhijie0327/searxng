@@ -144,7 +144,7 @@ export function Dropdown({
                 open ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink"
               }`
             : variant === "bare"
-              ? `flex items-center gap-1.5 rounded-lg pe-3 py-2 text-[13px] transition-colors ${
+              ? `flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] transition-colors ${
                   open ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink"
                 }`
               : `flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 text-sm transition-colors ${

@@ -138,8 +138,9 @@ export function SearchFilters({
 
   return (
     // single line at every width - narrow viewports scroll the row, exactly
-    // like the category tab row above it
-    <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
+    // like the category tab row above it; -ms-4 cancels the triggers' ps-4 so
+    // their icons stay aligned with the tab icons and the meta line below
+    <div className="-ms-4 flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
       <SelectField
         icon={<LanguagesIcon className="size-3.5 shrink-0" />}
         label={t("search_language")}
