@@ -164,24 +164,24 @@ its content, all sharing one visual language:
 - FilesGrid has no cover art: the tile shows a type icon + detected file
   extension, the filesize takes the badge slot, seed/leech health reads as
   colored ↑↓ counts, and the magnet link is an accent circle button.
-- Mixed searches render every type as a **collapsible block**: the untyped
-  web list first (pure relevance order), then typed strips (images →
-  videos → news → music → files → packages is the default order).  Blocks
-  are named by information type — 网页结果 / 图片结果 / ... via the
-  `*_results` i18n keys, never the bare category name.  Each
-  block header (category icon + label + count + chevron) toggles collapse,
-  and hover chevrons move the block up/down — the order persists in
-  localStorage (`zjs-block-order`).  This is the quick-locate mechanism
-  and it works on mobile.  Strips (`Strip.tsx`, fixed rows + left/right
-  arrows) reuse the exact cells of the single-category page (`ImageStrip`
-  tiles + shared lightbox, `VideoGrid`/`MusicGrid`/`FilesGrid`/
-  `PackageGrid` `variant="strip"`) so presentation stays visually
-  identical.  Music-category default results, torrent/file results and
-  package results join their sections via `groupKey`; grid cells take
-  `indexOffset` so hotkey indices stay page-global.  Single-category
-  intent pages (it, ...) keep a plain relevance-ordered list instead —
-  extracting a type into a strip there would break the relevance order
-  (see `groupKey` / `singleCategory` gate in `ResultsPage`).
+- Mixed searches render one **collapsible block per original search
+  category** (`collectBlocks` / `blockKeyOf` in `ResultsPage`): general,
+  images, videos, news, map, music, it, science, files, social media,
+  other — pure relevance order inside each block.  Blocks are named by
+  information type — 综合结果 / 图片结果 / ... via the `*_results`
+  i18n keys, never the bare category name.  Each block header (category
+  icon + label + count + chevron) toggles collapse, and the `::` grip on
+  the header drag-reorders blocks (pointer capture + insertion indicator,
+  arrow-key fallback; order persists in localStorage `zjs-block-order`).
+  This is the quick-locate mechanism and it works on mobile.  Strips
+  (`Strip.tsx`, fixed rows + left/right arrows) reuse the exact cells of
+  the single-category page (`ImageStrip` tiles + shared lightbox,
+  `VideoGrid`/`MusicGrid`/`FilesGrid`/`PackageGrid` `variant="strip"`) so
+  presentation stays visually identical.  Grid cells take `indexOffset`
+  so hotkey indices stay page-global.  Single-category intent pages
+  (it, ...) keep a plain relevance-ordered list instead — extracting a
+  type into a strip there would break the relevance order (see the
+  `singleCategory` gate in `ResultsPage`).
 
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /
