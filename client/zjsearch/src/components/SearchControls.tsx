@@ -49,7 +49,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
       <div
         className={`min-w-0 ${
           wrap
-            ? "flex flex-wrap items-center gap-x-1 gap-y-0.5"
+            ? "flex flex-wrap items-center gap-x-1 gap-y-0.5 ps-2"
             : "-ms-4 flex items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         }`}
       >

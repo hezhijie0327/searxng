@@ -118,7 +118,7 @@ export function IndexPage({ data }: { data: IndexData }) {
                 wrap
               />
             </div>
-            <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 ps-4 animate-fade-in">
+            <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 ps-6 animate-fade-in">
               <SearchFilters
                 globals={globals}
                 onChange={(next) => {
