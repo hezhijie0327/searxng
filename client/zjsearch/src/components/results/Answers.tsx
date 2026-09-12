@@ -230,9 +230,34 @@ function WeatherAnswer({
   );
 }
 
-/** Dictionary/translation answer (wordnik): the queried word heads the card
-    with the numbered definitions visible directly — the definition IS the
-    answer, so nothing important hides behind a collapsed section. */
+/** Translation engines stamp the language pair into their answer URLs in
+    engine-specific shapes: lingva uses /from/to/ path segments, mymemory
+    uses sl/tl query parameters, libretranslate uses source/target. */
+function parseLangPair(url: string): { from: string; to: string } | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  const lang = /^[a-z]{2,3}(?:-[a-zA-Z]{2,4})?$/i;
+  const [pathFrom, pathTo] = parsed.pathname.split("/").filter(Boolean);
+  if (pathFrom && pathTo && lang.test(pathFrom) && lang.test(pathTo)) {
+    return { from: pathFrom, to: pathTo };
+  }
+  const from = parsed.searchParams.get("source") ?? parsed.searchParams.get("sl") ?? parsed.searchParams.get("from");
+  const to = parsed.searchParams.get("target") ?? parsed.searchParams.get("tl") ?? parsed.searchParams.get("to");
+  if (from && to && lang.test(from) && lang.test(to)) {
+    return { from, to };
+  }
+  return null;
+}
+
+/** Dictionary/translation answer.  Two layouts by payload shape:
+    - translation (lingva, no definitions): language-pair chip + the translated
+      text as the hero;
+    - dictionary (wordnik): the queried word heads numbered definitions — the
+      definition IS the answer, so nothing important hides behind a collapse. */
 function TranslationsAnswer({
   answer,
   query,
@@ -246,12 +271,72 @@ function TranslationsAnswer({
     return null;
   }
   const rest = answer.translations.slice(1);
+  // the raw query keeps its bang tokens and the "en-de " language-pair prefix
+  // of dictionary engines — both are noise everywhere it could be displayed
+  const cleanQuery = query
+    ?.replace(/^(\s*![^\s]+)+/, "")
+    .replace(/^\s*[a-z]{2,3}-[a-zA-Z]{2,4}\s+/i, "")
+    .trim();
+  const langPair = parseLangPair(answer.url);
+  const showExamples = (max: number) =>
+    first.examples.length > 0 ? (
+      <div className="mt-2 space-y-1">
+        {first.examples.slice(0, max).map((example, i) => (
+          <p className="text-sm italic leading-relaxed text-ink-2" dir="auto" key={i}>
+            “{example}”
+          </p>
+        ))}
+      </div>
+    ) : null;
+  if (first.definitions.length === 0) {
+    // pure translation (lingva, mymemory): the translated text is the hero,
+    // alternatives and match examples follow
+    return (
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          {langPair ? (
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2" dir="ltr">
+              {langPair.from} → {langPair.to}
+            </span>
+          ) : null}
+          {cleanQuery && cleanQuery !== first.text ? (
+            <span className="min-w-0 truncate text-xs text-ink-3" dir="auto">
+              {cleanQuery}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-2.5 text-xl font-medium leading-snug text-ink" dir="auto">
+          {first.text}
+        </p>
+        {showExamples(3)}
+        {rest.length > 0 ? (
+          <div className="mt-3 space-y-2 border-t border-line pt-3">
+            {rest.map((item, index) => (
+              <div key={index}>
+                <p className="text-sm font-medium text-ink" dir="auto">
+                  {item.text}
+                </p>
+                {item.definitions.map((definition, i) => (
+                  <p className="mt-0.5 text-xs leading-relaxed text-ink-2" dir="auto" key={i}>
+                    {definition}
+                  </p>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : null}
+        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+          <span className="rounded-full bg-surface-2 px-2 py-0.5">{answer.engine}</span>
+        </div>
+      </div>
+    );
+  }
   const hasMore =
     first.definitions.length > 4 || rest.length > 0 || first.examples.length > 0 || first.synonyms.length > 0;
   return (
     <div>
       <p className="text-lg font-semibold text-ink" dir="auto">
-        {query ?? first.text}
+        {cleanQuery ?? first.text}
         {first.transliteration ? (
           <span className="ms-2 text-sm font-normal text-ink-3">{first.transliteration}</span>
         ) : null}
@@ -266,6 +351,7 @@ function TranslationsAnswer({
           ))}
         </ol>
       ) : null}
+      {showExamples(2)}
       {first.examples.length > 0 ? (
         <div className="mt-2 space-y-1">
           {first.examples.slice(0, 2).map((example, i) => (
