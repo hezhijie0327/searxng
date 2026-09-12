@@ -338,7 +338,7 @@ export function DefaultCard({ eager, result, globals, mediaOpen }: CardProps) {
             </div>
           ) : null}
           <p
-            className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+            className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
             dangerouslySetInnerHTML={{
               __html: result.content_html || t("no_description"),
             }}
@@ -386,7 +386,7 @@ export function VideoCard({ eager, result, globals }: CardProps) {
             </div>
           ) : null}
           <p
-            className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+            className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
             dangerouslySetInnerHTML={{ __html: result.content_html || t("no_description") }}
             dir="auto"
           />
@@ -463,7 +463,7 @@ export function NewsCard({ result, globals }: CardProps) {
       </div>
       {result.content_html ? (
         <p
-          className="mt-1 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+          className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
           dangerouslySetInnerHTML={{ __html: result.content_html }}
           dir="auto"
         />
@@ -536,7 +536,7 @@ export function TorrentCard({ result, globals }: CardProps) {
           </div>
           {result.content_html ? (
             <p
-              className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />
@@ -578,7 +578,7 @@ export function ProductCard({ result, globals }: CardProps) {
           </div>
           {result.content_html ? (
             <p
-              className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />
@@ -704,7 +704,7 @@ export function CodeCard({ result, globals }: CardProps) {
       ) : null}
       {result.content_html ? (
         <p
-          className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+          className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
           dangerouslySetInnerHTML={{ __html: result.content_html }}
           dir="auto"
         />
@@ -767,14 +767,14 @@ export function FileCard({ result, globals }: CardProps) {
           </div>
           {result.abstract_html ? (
             <p
-              className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.abstract_html }}
               dir="auto"
             />
           ) : null}
           {result.content_html ? (
             <p
-              className="mt-1 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+              className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />
@@ -884,7 +884,7 @@ export function PaperCard({ result, globals }: CardProps) {
           ) : null}
           {result.content_html ? (
             <p
-              className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />
@@ -988,7 +988,7 @@ export function PackageCard({ result, globals }: CardProps) {
       </div>
       {result.content_html ? (
         <p
-          className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+          className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
           dangerouslySetInnerHTML={{ __html: result.content_html }}
           dir="auto"
         />
@@ -1126,7 +1126,7 @@ export function MapCard({ result, globals, autoOpenMap }: CardProps) {
       </div>
       {result.content_html ? (
         <p
-          className="mt-1.5 line-clamp-2 min-h-[3.25em] text-sm leading-relaxed text-ink-2"
+          className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
           dangerouslySetInnerHTML={{ __html: result.content_html }}
           dir="auto"
         />

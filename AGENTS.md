@@ -86,11 +86,12 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
 - Respect `prefers-reduced-motion`; RTL uses Tailwind logical properties (`ps-`,
   `me-`, `start-`, `end-`) against a single stylesheet.
 - Text result cards keep fixed height slots so every card in a list is the
-  same height: pretty URL 1 line, title `line-clamp-1`, snippet exactly
-  `line-clamp-2 min-h-[3.25em] leading-relaxed` (2 × 1.625em at text-sm),
-  engines row capped at 3 pills + "+N". Cards grow only for real content
-  extras (publishedDate meta row, thumbnails, embedded media) — do not
-  reserve empty slots for those.
+  same height: pretty URL 1 line, title `line-clamp-1`, snippet capped at
+  `line-clamp-2` (never reserve empty lines below short snippets — the gap
+  reads as broken spacing on pages with 1-line content, e.g. IT), engines
+  row capped at 3 pills + "+N". Cards grow only for real content extras
+  (publishedDate meta row, thumbnails, embedded media) — do not reserve
+  empty slots for those.
 - The empty `searx/templates/<name>/` directory alone registers a theme in the
   UI — never leave a half-created theme dir behind.
 - Stacking contexts: entrance animations (`animate-fade-up`, fill-mode `both`)
