@@ -71,7 +71,7 @@ export function FilesGrid({
         const hotkeyIndex = indexOffset + index;
         return (
           <article
-            className={`group rounded-2xl ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
+            className={`group -m-2 rounded-2xl p-2 ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
             data-hotkey-index={hotkeyIndex}
             key={`${result.url}-${index}`}
           >
