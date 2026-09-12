@@ -86,7 +86,7 @@ export function IndexPage({ data }: { data: IndexData }) {
         </div>
         {/* single stable toggle: opens the tabs + filter rows, highlights
             while expanded, clicks again to collapse */}
-        <div className="mt-1 flex w-full justify-end animate-fade-up [animation-delay:120ms]">
+        <div className="mt-3 flex w-full justify-end animate-fade-up [animation-delay:120ms]">
           <button
             aria-expanded={optionsOpen}
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${

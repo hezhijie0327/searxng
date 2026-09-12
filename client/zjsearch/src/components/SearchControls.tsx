@@ -45,12 +45,12 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
 
   return (
-    <div className={`flex items-center gap-0.5 py-1 ${wrap ? "flex-wrap justify-center gap-y-0.5" : ""}`}>
+    <div className={`flex items-center gap-0.5 py-1 ${wrap ? "justify-center" : ""}`}>
       <div
-        className={`flex min-w-0 items-center gap-0.5 pb-0.5 ${
+        className={`min-w-0 ${
           wrap
-            ? "flex-wrap justify-center gap-y-0.5"
-            : "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            ? "grid w-full grid-cols-3 justify-items-center gap-y-0.5 sm:grid-cols-5"
+            : "flex items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         }`}
       >
         {tabs.map((category) => {
