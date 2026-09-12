@@ -41,6 +41,8 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
       if (!container) {
         return;
       }
+      // controls (zoom, attribution) render unstyled garbage without it
+      await import("ol/ol.css");
       const { default: OlMap } = await import("ol/Map.js");
       const { default: View } = await import("ol/View.js");
       const { default: TileLayer } = await import("ol/layer/Tile.js");
