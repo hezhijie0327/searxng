@@ -133,11 +133,6 @@ function Footer() {
   return (
     <footer className="mx-auto w-full max-w-5xl px-4 pb-8 text-center text-xs text-ink-3 sm:px-6">
       <p className="leading-5">© {year} Zhijie Online</p>
-      <p className="mt-1 leading-5">
-        <a className="transition-colors hover:text-ink hover:underline" href="/static/themes/zjsearch/LICENSE.txt">
-          Open Source under Apache-2.0 with Commons Clause v1.0
-        </a>
-      </p>
     </footer>
   );
 }

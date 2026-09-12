@@ -897,6 +897,16 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             SearXNG
           </a>
           {globals.version ? <span className="ms-1 opacity-70">v{globals.version}</span> : null}
+          {" · "}
+          {t("license")}:{" "}
+          <a
+            className="transition-colors hover:text-accent hover:underline"
+            href="/static/themes/zjsearch/LICENSE.txt"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Apache-2.0 with Commons Clause v1.0
+          </a>
         </p>
       </main>
     </Shell>
