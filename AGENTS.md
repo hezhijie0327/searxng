@@ -166,7 +166,9 @@ its content, all sharing one visual language:
   colored ↑↓ counts, and the magnet link is an accent circle button.
 - Mixed searches render every type as a **collapsible block**: the untyped
   web list first (pure relevance order), then typed strips (images →
-  videos → news → music → files → packages is the default order).  Each
+  videos → news → music → files → packages is the default order).  Blocks
+  are named by information type — 网页结果 / 图片结果 / ... via the
+  `*_results` i18n keys, never the bare category name.  Each
   block header (category icon + label + count + chevron) toggles collapse,
   and hover chevrons move the block up/down — the order persists in
   localStorage (`zjs-block-order`).  This is the quick-locate mechanism

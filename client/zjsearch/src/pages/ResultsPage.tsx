@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, GripVerticalIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import {
   NewsCard,
@@ -185,26 +185,46 @@ function consolidateGroups(
 
 /** Collapsible block header: category icon + translated label + result
     count; the whole header toggles the block. */
+interface GripHandlers {
+  onPointerDown: (event: ReactPointerEvent<HTMLSpanElement>) => void;
+  onPointerMove: (event: ReactPointerEvent<HTMLSpanElement>) => void;
+  onPointerUp: (event: ReactPointerEvent<HTMLSpanElement>) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLSpanElement>) => void;
+}
+
 function GroupHeader({
   category,
   label,
   count,
   collapsed,
   onToggle,
-  onMoveUp,
-  onMoveDown,
+  grip,
 }: {
   category: string;
   label: string;
   count: number;
   collapsed: boolean;
   onToggle: () => void;
-  onMoveUp?: (() => void) | undefined;
-  onMoveDown?: (() => void) | undefined;
+  grip?: GripHandlers;
 }) {
   const t = useT();
   return (
     <h2 className="group flex items-center gap-1 pb-1 pt-2">
+      {grip ? (
+        <span
+          aria-label={t("drag_reorder")}
+          className="-ms-1 cursor-grab touch-none rounded p-1 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink active:cursor-grabbing"
+          onKeyDown={grip.onKeyDown}
+          onPointerDown={grip.onPointerDown}
+          onPointerMove={grip.onPointerMove}
+          onPointerUp={grip.onPointerUp}
+          role="button"
+          tabIndex={0}
+          title={t("drag_reorder")}
+        >
+          <GripVerticalIcon className="size-4" />
+        </span>
+      ) : null}
       <button
         aria-expanded={!collapsed}
         className="flex min-w-0 flex-1 items-center gap-1.5 text-left text-sm font-semibold text-ink"
@@ -218,28 +238,6 @@ function GroupHeader({
           className={`size-4 shrink-0 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`}
         />
       </button>
-      {onMoveUp ? (
-        <button
-          aria-label={`${t("move_up")} ${label}`}
-          className="grid size-6 shrink-0 place-items-center rounded-full text-ink-3 opacity-40 transition-all hover:bg-surface-2 hover:text-ink hover:opacity-100 focus-visible:opacity-100"
-          onClick={onMoveUp}
-          title={t("move_up")}
-          type="button"
-        >
-          <ChevronUpIcon className="size-3.5" />
-        </button>
-      ) : null}
-      {onMoveDown ? (
-        <button
-          aria-label={`${t("move_down")} ${label}`}
-          className="grid size-6 shrink-0 place-items-center rounded-full text-ink-3 opacity-40 transition-all hover:bg-surface-2 hover:text-ink hover:opacity-100 focus-visible:opacity-100"
-          onClick={onMoveDown}
-          title={t("move_down")}
-          type="button"
-        >
-          <ChevronDownIcon className="size-3.5" />
-        </button>
-      ) : null}
     </h2>
   );
 }
@@ -321,6 +319,12 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
+  const [dragKey, setDragKey] = useState<string | null>(null);
+  const [dragY, setDragY] = useState(0);
+  const dragActiveRef = useRef(false);
+  const dragRectsRef = useRef<
+    Array<{ key: string; top: number; bottom: number; midY: number; left: number; width: number }>
+  >([]);
   const [blockOrder, setBlockOrder] = useState<string[]>(() => {
     try {
       const stored: unknown = JSON.parse(localStorage.getItem(BLOCK_ORDER_KEY) ?? "null");
@@ -678,14 +682,15 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-2">
+                  <div className={`relative mt-2 ${dragKey !== null ? "select-none" : ""}`}>
                     {(() => {
                       // Mixed search: every type renders as its own
                       // collapsible block - the untyped web list first (pure
                       // relevance order), then the typed strips.  The block
-                      // order is user-adjustable (headers expose up/down) and
-                      // persists in localStorage; collapsing works on every
-                      // screen size so huge blocks never dominate the page.
+                      // order is user-adjustable by dragging the grip on a
+                      // header and persists in localStorage; collapsing works
+                      // on every screen size so huge blocks never dominate
+                      // the page.
                       const groups = consolidateGroups(groupResults(allResults));
                       const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
                       const restCount = rest.reduce((sum, group) => sum + group.items.length, 0);
@@ -703,41 +708,94 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                           (key) => !blockOrder.includes(key) && (key === "general" || sectionByKey.has(key)),
                         ),
                       ];
+                      // blocks are named by information type: 网页结果 /
+                      // 图片结果 / ... (never the bare category name)
+                      const blockLabel = (key: string) =>
+                        t(
+                          {
+                            general: "web_results",
+                            images: "images_results",
+                            videos: "videos_results",
+                            news: "news_results",
+                            music: "music_results",
+                            files: "files_results",
+                            packages: "packages_results",
+                          }[key] ?? key,
+                        );
                       const isCollapsed = (key: string) => Boolean(collapsedBlocks[key]);
                       const toggle = (key: string) => setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
-                      const move = (key: string, delta: -1 | 1) => {
-                        const order = [...blockOrder];
-                        const from = order.indexOf(key);
-                        const to = from + delta;
-                        if (from < 0 || to < 0 || to >= order.length) {
-                          return;
-                        }
-                        const moved = order.splice(from, 1)[0];
-                        if (moved !== undefined) {
-                          order.splice(to, 0, moved);
-                        }
+                      const commitMove = (key: string, index: number) => {
+                        const order = orderedKeys.filter((candidate) => candidate !== key);
+                        const at = Math.min(Math.max(index, 0), order.length);
+                        order.splice(at, 0, key);
                         setBlockOrder(order);
                         try {
                           localStorage.setItem(BLOCK_ORDER_KEY, JSON.stringify(order));
                         } catch {}
                       };
+                      const gripFor = (key: string): GripHandlers => ({
+                        onPointerDown: (event) => {
+                          if (event.button !== 0) {
+                            return;
+                          }
+                          event.stopPropagation();
+                          dragRectsRef.current = Array.from(
+                            listRef.current?.querySelectorAll<HTMLElement>("[data-block-key]") ?? [],
+                          ).map((el) => {
+                            const rect = el.getBoundingClientRect();
+                            return {
+                              key: el.dataset.blockKey ?? "",
+                              top: rect.top,
+                              bottom: rect.bottom,
+                              midY: rect.top + rect.height / 2,
+                              left: rect.left,
+                              width: rect.width,
+                            };
+                          });
+                          dragActiveRef.current = true;
+                          setDragKey(key);
+                          setDragY(event.clientY);
+                          event.currentTarget.setPointerCapture(event.pointerId);
+                        },
+                        onPointerMove: (event) => {
+                          if (dragActiveRef.current) {
+                            setDragY(event.clientY);
+                          }
+                        },
+                        onPointerUp: (event) => {
+                          if (!dragActiveRef.current) {
+                            return;
+                          }
+                          dragActiveRef.current = false;
+                          const y = event.clientY;
+                          setDragKey(null);
+                          const others = dragRectsRef.current.filter((rect) => rect.key !== key);
+                          commitMove(key, others.filter((rect) => rect.midY < y).length);
+                        },
+                        onKeyDown: (event) => {
+                          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+                            return;
+                          }
+                          event.preventDefault();
+                          const from = orderedKeys.indexOf(key);
+                          const to = from + (event.key === "ArrowUp" ? -1 : 1);
+                          if (from < 0 || to < 0 || to >= orderedKeys.length) {
+                            return;
+                          }
+                          commitMove(key, to);
+                        },
+                      });
                       const restItems = rest.flatMap((group) => group.items);
                       const restBlock = {
                         key: "general",
                         node: (
-                          <section className="mt-6 first:mt-0" key="general">
+                          <section className="mt-6 first:mt-0" data-block-key="general" key="general">
                             <GroupHeader
                               category="general"
                               collapsed={Boolean(collapsedBlocks.general)}
                               count={restCount}
-                              label={globals.category_labels.general ?? "general"}
-                              onMoveDown={
-                                orderedKeys.indexOf("general") < orderedKeys.length - 1
-                                  ? () => {
-                                      move("general", 1);
-                                    }
-                                  : undefined
-                              }
+                              grip={gripFor("general")}
+                              label={t("web_results")}
                               onToggle={() => {
                                 toggle("general");
                               }}
@@ -766,8 +824,27 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                           </section>
                         ),
                       };
+                      // insertion indicator geometry while a block is dragged
+                      const others =
+                        dragKey !== null ? dragRectsRef.current.filter((rect) => rect.key !== dragKey) : [];
+                      const insertion = dragKey !== null ? others.filter((rect) => rect.midY < dragY).length : -1;
+                      const gapY =
+                        insertion >= 0 && insertion <= others.length
+                          ? insertion < others.length
+                            ? others[insertion]?.top
+                            : others[others.length - 1]?.bottom
+                          : undefined;
+                      const draggedRect =
+                        dragKey !== null ? dragRectsRef.current.find((r) => r.key === dragKey) : undefined;
                       return (
                         <>
+                          {dragKey !== null && gapY !== undefined && draggedRect ? (
+                            <div
+                              aria-hidden="true"
+                              className="fixed z-40 h-0.5 rounded-full bg-accent-strong"
+                              style={{ top: gapY, left: draggedRect.left, width: draggedRect.width }}
+                            />
+                          ) : null}
                           {orderedKeys.map((key, position) => {
                             if (key === "general") {
                               return restBlock.node;
@@ -776,31 +853,22 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                             if (!group) {
                               return null;
                             }
-                            const label = globals.category_labels[key] ?? t(key);
+                            const label = blockLabel(key);
                             const results = group.items.map(({ result }) => result);
                             const indexOffset = group.items[0]?.index ?? 0;
                             const collapsed = isCollapsed(key);
                             return (
-                              <section className="mt-6 first:mt-0" key={key}>
+                              <section
+                                className={`mt-6 first:mt-0 ${dragKey === key ? "opacity-40" : ""}`}
+                                data-block-key={key}
+                                key={key}
+                              >
                                 <GroupHeader
                                   category={key}
                                   collapsed={collapsed}
                                   count={group.items.length}
+                                  grip={gripFor(key)}
                                   label={label}
-                                  onMoveDown={
-                                    position < orderedKeys.length - 1
-                                      ? () => {
-                                          move(key, 1);
-                                        }
-                                      : undefined
-                                  }
-                                  onMoveUp={
-                                    position > 0
-                                      ? () => {
-                                          move(key, -1);
-                                        }
-                                      : undefined
-                                  }
                                   onToggle={() => {
                                     toggle(key);
                                   }}
@@ -867,7 +935,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   </div>
                 )}
 
-                {infiniteScroll && appendState !== "done" && (data.paging || appended.length > 0) ? (
+                {infiniteScroll &&
+                !collapsedBlocks.general &&
+                appendState !== "done" &&
+                (data.paging || appended.length > 0) ? (
                   <InfiniteScrollSentinel
                     error={appendState === "error"}
                     loading={appendState === "loading"}
