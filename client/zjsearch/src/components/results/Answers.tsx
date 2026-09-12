@@ -505,8 +505,122 @@ function TranslationsAnswer({
   );
 }
 
+function CopyButton({ value }: { value: string }) {
+  const t = useT();
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      className="shrink-0 rounded-lg border border-line px-2 py-1 text-xs text-ink-3 transition-colors hover:text-ink"
+      onClick={() => {
+        navigator.clipboard?.writeText(value).then(() => {
+          setCopied(true);
+          window.setTimeout(() => setCopied(false), 1200);
+        });
+      }}
+      type="button"
+    >
+      {copied ? t("copied") : t("copy")}
+    </button>
+  );
+}
+
+/** Special-query answers (random, statistics, hash, self-info, time zone)
+    arrive as plain legacy text; the patterns below give each of them a
+    purpose-built layout, falling back to plain text for anything else. */
 function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "answer/legacy.html" }> }) {
   const settings = useSettings();
+  const text = answer.answer;
+  const hashMatch = /^(.+?)\s*(?:hash digest|散列摘要)\s*:\s*([a-f0-9]{32,128})$/i.exec(text);
+  const statsMatch = /^\[(.+?)\] (\w+)\((.+)\) = (.+?)\s*$/.exec(text);
+  const zoneMatch = /^(.+?): (.+ \d[^)]*) \(([A-Z]{2,5})\)$/.exec(text);
+  const ipMatch = /^(.*IP.*?[：:])\s*(\d{1,3}(?:\.\d{1,3}){3})$/u.exec(text);
+  const uaMatch = /^(.*(?:user-agent|用户代理).*?[：:])\s*(.+)$/iu.exec(text);
+  const isColor = /^#[0-9a-f]{6}$/i.test(text);
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(text);
+  const isBareValue = !isColor && !isUuid && !/\s/.test(text) && text.length <= 64;
+
+  if (hashMatch) {
+    const algo = hashMatch[1] ?? "";
+    const digest = hashMatch[2] ?? "";
+    return (
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2" dir="ltr">
+            {algo}
+          </span>
+          <CopyButton value={digest} />
+        </div>
+        <p className="mt-2 break-all font-mono text-sm text-ink" dir="ltr">
+          {digest}
+        </p>
+      </div>
+    );
+  }
+  if (statsMatch) {
+    const fn = statsMatch[2] ?? "";
+    const args = statsMatch[3] ?? "";
+    const result = statsMatch[4] ?? "";
+    return (
+      <div>
+        <p className="truncate text-xs text-ink-3" dir="ltr">
+          <span className="font-mono font-medium text-accent-strong">{fn}</span>({args})
+        </p>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <p className="text-2xl font-semibold text-ink" dir="ltr">
+            {result}
+          </p>
+          <CopyButton value={result} />
+        </div>
+      </div>
+    );
+  }
+  if (zoneMatch) {
+    const zone = zoneMatch[1] ?? "";
+    const time = zoneMatch[2] ?? "";
+    const abbr = zoneMatch[3] ?? "";
+    return (
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-mono text-xs text-ink-3" dir="ltr">
+            {zone}
+          </p>
+          <p className="mt-1 text-xl font-medium text-ink" dir="auto">
+            {time}
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2">{abbr}</span>
+      </div>
+    );
+  }
+  if (ipMatch || uaMatch) {
+    const match = ipMatch ?? uaMatch;
+    const label = (match?.[1] ?? "").replace(/[：:]\s*$/, "");
+    const value = match?.[2] ?? "";
+    return (
+      <div>
+        <p className="text-xs text-ink-3">{label}</p>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <p className={`min-w-0 text-ink ${ipMatch ? "font-mono text-lg" : "break-all font-mono text-sm"}`} dir="ltr">
+            {value}
+          </p>
+          <CopyButton value={value} />
+        </div>
+      </div>
+    );
+  }
+  if (isColor || isUuid || isBareValue) {
+    return (
+      <div className="flex items-center gap-3">
+        {isColor ? (
+          <span className="size-10 shrink-0 rounded-xl border border-line" style={{ backgroundColor: text }} />
+        ) : null}
+        <p className="min-w-0 flex-1 break-all font-mono text-sm text-ink" dir="ltr">
+          {text}
+        </p>
+        <CopyButton value={text} />
+      </div>
+    );
+  }
   let hostname = "";
   if (answer.url) {
     try {
@@ -517,7 +631,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
   }
   return (
     <p className="text-sm leading-relaxed text-ink" dir="auto">
-      {answer.answer}
+      {text}
       {answer.url ? (
         <a
           href={answer.url}
