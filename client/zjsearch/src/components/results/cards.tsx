@@ -365,7 +365,7 @@ export function DefaultCard({ eager, result, globals, mediaOpen }: CardProps) {
   );
 }
 
-export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
+export function VideoCard({ eager, result, globals }: CardProps) {
   const t = useT();
   const [previewOpen, setPreviewOpen] = useState(false);
   const hasMedia = Boolean(result.iframe_src);
@@ -380,9 +380,9 @@ export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
           <div className="mt-1">
             <MetaLine result={result} />
           </div>
-          {hasMedia && previewOpen ? (
+          {!result.thumbnail && hasMedia && previewOpen ? (
             <div className="mt-2 animate-fade-in">
-              <MediaPreview src={result.iframe_src ?? ""} video={!mediaOpen} />
+              <MediaPreview src={result.iframe_src ?? ""} video />
             </div>
           ) : null}
           <p
@@ -392,29 +392,56 @@ export function VideoCard({ eager, result, globals, mediaOpen }: CardProps) {
           />
         </div>
         {result.thumbnail ? (
-          <div className="relative shrink-0">
-            <ResultLink className="block" globals={globals} result={result}>
-              <Thumb
-                alt={result.title_text}
-                className="h-24 w-40"
-                eager={eager}
-                lengthDisplay={formatLength(result.length_display, result.length_seconds)}
-                src={result.thumbnail}
-              />
-            </ResultLink>
-            {hasMedia ? (
-              <button
-                aria-label={previewOpen ? t("hide_video") : t("show_video")}
-                className="absolute end-1 top-1 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
-                onClick={() => {
-                  setPreviewOpen((value) => !value);
-                }}
-                title={previewOpen ? t("hide_video") : t("show_video")}
-                type="button"
-              >
-                {previewOpen ? <CloseIcon className="size-3.5" /> : <PlayIcon className="size-3.5" />}
-              </button>
-            ) : null}
+          // the player replaces the thumbnail in place - same behaviour as
+          // the video grid, never expanding below the text
+          <div className={`relative shrink-0 transition-all ${previewOpen && hasMedia ? "w-72" : "w-40"}`}>
+            <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-2">
+              <ResultLink className="block size-full" globals={globals} result={result}>
+                <Thumb
+                  alt={result.title_text}
+                  className="size-full"
+                  eager={eager}
+                  lengthDisplay={formatLength(result.length_display, result.length_seconds)}
+                  src={result.thumbnail}
+                />
+              </ResultLink>
+              {hasMedia && previewOpen ? (
+                <>
+                  <iframe
+                    allowFullScreen
+                    className="absolute inset-0 size-full"
+                    referrerPolicy="origin"
+                    src={result.iframe_src ?? ""}
+                    title={result.title_text}
+                  />
+                  <button
+                    aria-label={t("hide_video")}
+                    className="absolute end-1 top-1 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+                    onClick={() => {
+                      setPreviewOpen(false);
+                    }}
+                    title={t("hide_video")}
+                    type="button"
+                  >
+                    <CloseIcon className="size-3.5" />
+                  </button>
+                </>
+              ) : hasMedia ? (
+                <button
+                  aria-label={t("play")}
+                  className="absolute inset-0 z-10 grid size-full place-items-center rounded-xl bg-black/0 text-white transition-colors hover:bg-black/30"
+                  onClick={() => {
+                    setPreviewOpen(true);
+                  }}
+                  title={t("play")}
+                  type="button"
+                >
+                  <span className="grid size-9 place-items-center rounded-full bg-black/70 shadow-pop">
+                    <PlayIcon className="size-4 translate-x-px" />
+                  </span>
+                </button>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </div>
