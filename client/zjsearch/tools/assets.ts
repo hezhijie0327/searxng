@@ -18,6 +18,9 @@ export function plgAssets(PATH: { brand: string; dist: string }): import("vite")
       const imgDir = path.join(PATH.dist, "img");
       await fs.mkdir(imgDir, { recursive: true });
 
+      // serve the license so the footer link resolves
+      await fs.copyFile(path.resolve("LICENSE.txt"), path.join(PATH.dist, "LICENSE.txt"));
+
       const copies = ["favicon.svg", "img_load_error.svg", "empty_favicon.svg"] as const;
       for (const file of copies) {
         await fs.copyFile(path.resolve(PATH.brand, file), path.join(imgDir, file));

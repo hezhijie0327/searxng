@@ -113,3 +113,11 @@ Feature checklist (parity with ``simple``)
 
 \* calculator render is handled by the server answerer; client plugin
 parity is on the roadmap.
+
+License
+=======
+
+The zjsearch theme is released under the Apache License 2.0 with
+Commons Clause v1.0 — see ``client/zjsearch/LICENSE.txt`` for the full
+text. The license is also linked from the site footer.
+
