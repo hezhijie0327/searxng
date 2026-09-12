@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useT } from "../../lib/i18n.ts";
 import { useSettings } from "../../lib/settings.ts";
 import type { ResultItem } from "../../lib/types.ts";
@@ -280,9 +281,10 @@ function Lightbox({
         </div>
       </div>
 
-      {/* bottom bar: title / actions / metadata */}
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/10 bg-[#1c1c1c]/95 px-5 py-3">
-        <div className="min-w-0">
+      {/* bottom bar: title / actions / metadata - fixed sections so button
+          positions never shift with the title length */}
+      <div className="flex items-center gap-x-4 border-t border-white/10 bg-[#1c1c1c]/95 px-5 py-3">
+        <div className="min-w-0 flex-1">
           {result.url ? (
             <a
               className="block truncate text-sm font-medium text-zinc-100 hover:underline"
@@ -304,7 +306,7 @@ function Lightbox({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs">
+        <div className="flex shrink-0 items-center gap-2 text-xs">
           {result.img_src ? (
             <a
               className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 px-3.5 py-1.5 text-zinc-200 transition-colors hover:border-zinc-400"
@@ -327,7 +329,7 @@ function Lightbox({
           ) : null}
         </div>
 
-        <div className="hidden gap-x-6 text-xs lg:grid lg:grid-cols-none lg:grid-flow-col lg:gap-x-8">
+        <div className="hidden shrink-0 items-center gap-x-6 text-xs xl:flex">
           <Label label={t("resolution")} value={result.resolution} />
           <Label label={t("type")} value={result.img_format} />
           <Label label={t("source")} value={result.source} />
@@ -433,18 +435,21 @@ export function ImageGrid({ results }: { results: ResultItem[] }) {
           />
         );
       })}
-      {openIndex !== null ? (
-        <Lightbox
-          index={openIndex}
-          onClose={() => {
-            setOpenIndex(null);
-          }}
-          onNavigate={(index) => {
-            setOpenIndex(index);
-          }}
-          results={results}
-        />
-      ) : null}
+      {openIndex !== null
+        ? createPortal(
+            <Lightbox
+              index={openIndex}
+              onClose={() => {
+                setOpenIndex(null);
+              }}
+              onNavigate={(index) => {
+                setOpenIndex(index);
+              }}
+              results={results}
+            />,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
