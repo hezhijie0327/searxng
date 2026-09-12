@@ -11,7 +11,6 @@ import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import { CloseIcon, MusicIcon, PauseIcon, PlayIcon } from "../icons.tsx";
 import { ResultLink, THEME_STATIC } from "./cards.tsx";
-import { Strip } from "./Strip.tsx";
 
 function formatClock(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) {
@@ -140,15 +139,12 @@ export function MusicGrid({
   globals,
   selected,
   indexOffset = 0,
-  variant = "grid",
 }: {
   results: ResultItem[];
   globals: GlobalData;
   selected?: number;
   /** hotkey indices are page-global: offset by the grid's first result index */
   indexOffset?: number;
-  /** "strip" renders the same cells in a fixed-row horizontal carousel */
-  variant?: "grid" | "strip";
 }) {
   const t = useT();
   const [playing, setPlaying] = useState<number | null>(null);
@@ -265,8 +261,5 @@ export function MusicGrid({
       </article>
     );
   });
-  if (variant === "strip") {
-    return <Strip rows={1}>{cells}</Strip>;
-  }
   return <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">{cells}</div>;
 }

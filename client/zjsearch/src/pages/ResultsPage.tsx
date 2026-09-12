@@ -13,12 +13,12 @@ import {
   VideoGrid,
 } from "../components/results/cards.tsx";
 import { FilesGrid } from "../components/results/FilesGrid.tsx";
-import { ImageGrid, ImageStrip } from "../components/results/ImageGrid.tsx";
+import { ImageGrid } from "../components/results/ImageGrid.tsx";
 import { MusicGrid } from "../components/results/MusicGrid.tsx";
 import { PackageGrid } from "../components/results/PackageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
 import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
-import { Strip } from "../components/results/Strip.tsx";
+
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
@@ -164,7 +164,6 @@ function collectBlocks(results: ResultItem[]): Map<string, Array<{ result: Resul
     count; the whole header toggles the block. */
 interface GripHandlers {
   onPointerDown: (event: ReactPointerEvent<HTMLSpanElement>) => void;
-  onPointerMove: (event: ReactPointerEvent<HTMLSpanElement>) => void;
   onPointerUp: (event: ReactPointerEvent<HTMLSpanElement>) => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLSpanElement>) => void;
 }
@@ -193,7 +192,6 @@ function GroupHeader({
           className="-ms-1 cursor-grab touch-none rounded p-1 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink active:cursor-grabbing"
           onKeyDown={grip.onKeyDown}
           onPointerDown={grip.onPointerDown}
-          onPointerMove={grip.onPointerMove}
           onPointerUp={grip.onPointerUp}
           role="button"
           tabIndex={0}
@@ -297,26 +295,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
   const [dragKey, setDragKey] = useState<string | null>(null);
-  const [dragY, setDragY] = useState(0);
   const dragActiveRef = useRef(false);
   const dragRectsRef = useRef<
     Array<{ key: string; top: number; bottom: number; midY: number; left: number; width: number }>
   >([]);
-  const BLOCK_LABEL_KEYS: Record<string, string> = {
-    general: "general_results",
-    images: "images_results",
-    videos: "videos_results",
-    news: "news_results",
-    map: "map_results",
-    music: "music_results",
-    it: "it_results",
-    science: "science_results",
-    files: "files_results",
-    "social media": "social_media_results",
-    packages: "packages_results",
-    other: "other_results",
-  };
-  const blockLabel = (key: string) => t(BLOCK_LABEL_KEYS[key] ?? key);
   const [blockOrder, setBlockOrder] = useState<string[]>(() => {
     try {
       const stored: unknown = JSON.parse(localStorage.getItem(BLOCK_ORDER_KEY) ?? "null");
@@ -677,10 +659,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className={`relative mt-2 ${dragKey !== null ? "select-none" : ""}`}>
                     {(() => {
                       // Mixed search: one collapsible block per original
-                      // search category (pure relevance order inside), in the
-                      // user's chosen order; media categories render with
-                      // their strip layouts, the rest as card lists.
+                      // search category (pure relevance order inside), in tab
+                      // order by default; every block renders the same full
+                      // presentation as its single-category page and can be
+                      // folded away via its header.
                       const blocks = collectBlocks(allResults);
+                      // persisted user order first (tab order is the
+                      // fallback), then categories never seen before
                       const orderedKeys = [
                         ...blockOrder.filter((key) => blocks.has(key)),
                         ...[...blocks.keys()].filter((key) => !blockOrder.includes(key)),
@@ -717,13 +702,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                           });
                           dragActiveRef.current = true;
                           setDragKey(key);
-                          setDragY(event.clientY);
                           event.currentTarget.setPointerCapture(event.pointerId);
-                        },
-                        onPointerMove: (event) => {
-                          if (dragActiveRef.current) {
-                            setDragY(event.clientY);
-                          }
                         },
                         onPointerUp: (event) => {
                           if (!dragActiveRef.current) {
@@ -748,13 +727,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                           commitMove(key, to);
                         },
                       });
-                      const stripResults = (key: string) => (blocks.get(key) ?? []).map(({ result }) => result);
-                      const indexOffsetOf = (key: string) => blocks.get(key)?.[0]?.index ?? 0;
                       return (
                         <>
-                          {orderedKeys.map((key, position) => {
+                          {orderedKeys.map((key) => {
                             const items = blocks.get(key) ?? [];
                             const collapsed = isCollapsed(key);
+                            const results = items.map(({ result }) => result);
+                            const indexOffset = items[0]?.index ?? 0;
                             return (
                               <section
                                 className={`mt-6 first:mt-0 ${dragKey === key ? "opacity-40" : ""}`}
@@ -766,7 +745,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                   collapsed={collapsed}
                                   count={items.length}
                                   grip={gripFor(key)}
-                                  label={blockLabel(key)}
+                                  label={globals.category_labels[key] ?? key}
                                   onToggle={() => {
                                     toggle(key);
                                   }}
@@ -774,38 +753,34 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                 {!collapsed ? (
                                   <div className="mt-1">
                                     {key === "images" ? (
-                                      <ImageStrip results={stripResults(key)} />
+                                      <ImageGrid results={results} />
                                     ) : key === "videos" ? (
                                       <VideoGrid
                                         globals={globals}
-                                        indexOffset={indexOffsetOf(key)}
-                                        results={stripResults(key)}
+                                        indexOffset={indexOffset}
+                                        results={results}
                                         selected={hotkeysSelected}
-                                        variant="strip"
                                       />
                                     ) : key === "music" ? (
                                       <MusicGrid
                                         globals={globals}
-                                        indexOffset={indexOffsetOf(key)}
-                                        results={stripResults(key)}
+                                        indexOffset={indexOffset}
+                                        results={results}
                                         selected={hotkeysSelected}
-                                        variant="strip"
                                       />
                                     ) : key === "files" ? (
                                       <FilesGrid
                                         globals={globals}
-                                        indexOffset={indexOffsetOf(key)}
-                                        results={stripResults(key)}
+                                        indexOffset={indexOffset}
+                                        results={results}
                                         selected={hotkeysSelected}
-                                        variant="strip"
                                       />
                                     ) : key === "packages" ? (
                                       <PackageGrid
                                         globals={globals}
-                                        indexOffset={indexOffsetOf(key)}
-                                        results={stripResults(key)}
+                                        indexOffset={indexOffset}
+                                        results={results}
                                         selected={hotkeysSelected}
-                                        variant="strip"
                                       />
                                     ) : (
                                       <div>

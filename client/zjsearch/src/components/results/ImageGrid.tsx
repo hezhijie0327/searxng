@@ -13,7 +13,6 @@ import { useSettings } from "../../lib/settings.ts";
 import type { ResultItem } from "../../lib/types.ts";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
 import { THEME_STATIC } from "./cards.tsx";
-import { Strip } from "./Strip.tsx";
 
 const IMAGE_VIEWER_HASH = "#image-viewer";
 
@@ -447,75 +446,5 @@ export function ImageGrid({ results }: { results: ResultItem[] }) {
         />
       ) : null}
     </div>
-  );
-}
-
-/** Square strip tile: the masonry tile's look with a fixed footprint so the
-    mixed-search strip can keep uniform rows. */
-function StripTile({ result, onOpen }: { result: ResultItem; onOpen: () => void }) {
-  const [loaded, setLoaded] = useState(false);
-  const thumbSrc = result.thumbnail_src || result.img_src || "";
-  return (
-    <button
-      className={`group relative block aspect-square w-full overflow-hidden rounded-lg bg-surface-2 transition-opacity ${
-        loaded ? "opacity-100" : "opacity-70 animate-pulse-soft"
-      }`}
-      onClick={onOpen}
-      type="button"
-    >
-      <img
-        alt={result.title_text}
-        className={`size-full object-cover transition-all duration-300 group-hover:scale-[1.03] ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
-        decoding="async"
-        loading="lazy"
-        onError={(event) => {
-          event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
-          setLoaded(true);
-        }}
-        onLoad={() => {
-          setLoaded(true);
-        }}
-        src={thumbSrc}
-      />
-      <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <span className="pointer-events-none absolute inset-x-2 bottom-2 line-clamp-2 text-[11px] font-medium leading-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-        {result.title_text}
-      </span>
-    </button>
-  );
-}
-
-/** Mixed-search images section: a fixed two-row horizontal strip.  Tiles
-    open the shared lightbox, which can page through the full result set. */
-export function ImageStrip({ results, rows = 2 }: { results: ResultItem[]; rows?: 1 | 2 }) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  return (
-    <>
-      <Strip rows={rows}>
-        {results.map((result, index) => (
-          <StripTile
-            key={`${result.url}-${index}`}
-            onOpen={() => {
-              setOpenIndex(index);
-            }}
-            result={result}
-          />
-        ))}
-      </Strip>
-      {openIndex !== null ? (
-        <Lightbox
-          index={openIndex}
-          onClose={() => {
-            setOpenIndex(null);
-          }}
-          onNavigate={(index) => {
-            setOpenIndex(index);
-          }}
-          results={results}
-        />
-      ) : null}
-    </>
   );
 }

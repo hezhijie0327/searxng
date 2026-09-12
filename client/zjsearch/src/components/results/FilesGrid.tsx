@@ -10,7 +10,6 @@ import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
 import { ArrowDownIcon, ArrowUpIcon, DownloadIcon, FileIcon, FilmIcon, MagnetIcon, MusicIcon } from "../icons.tsx";
 import { ResultLink, THEME_STATIC } from "./cards.tsx";
-import { Strip } from "./Strip.tsx";
 
 function detectExtension(title: string): string | null {
   const match = /\.([a-z0-9]{1,4})$/i.exec(title.trim());
@@ -32,15 +31,12 @@ export function FilesGrid({
   globals,
   selected,
   indexOffset = 0,
-  variant = "grid",
 }: {
   results: ResultItem[];
   globals: GlobalData;
   selected?: number;
   /** hotkey indices are page-global: offset by the grid's first result index */
   indexOffset?: number;
-  /** "strip" renders the same cells in a fixed-row horizontal carousel */
-  variant?: "grid" | "strip";
 }) {
   const t = useT();
   const cells = results.map((result, index) => {
@@ -155,8 +151,5 @@ export function FilesGrid({
       </article>
     );
   });
-  if (variant === "strip") {
-    return <Strip rows={1}>{cells}</Strip>;
-  }
   return <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">{cells}</div>;
 }

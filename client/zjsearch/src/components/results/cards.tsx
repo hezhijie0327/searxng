@@ -22,7 +22,6 @@ import {
   StarIcon,
 } from "../icons.tsx";
 import { MapResult } from "./MapView.tsx";
-import { Strip } from "./Strip.tsx";
 
 export const THEME_STATIC = "/static/themes/zjsearch";
 
@@ -1182,15 +1181,12 @@ export function VideoGrid({
   globals,
   selected,
   indexOffset = 0,
-  variant = "grid",
 }: {
   results: ResultItem[];
   globals: GlobalData;
   selected?: number;
   /** hotkey indices are page-global: offset by the grid's first result index */
   indexOffset?: number;
-  /** "strip" renders the same cells in a fixed-row horizontal carousel */
-  variant?: "grid" | "strip";
 }) {
   const t = useT();
   const [playing, setPlaying] = useState<number | null>(null);
@@ -1300,9 +1296,6 @@ export function VideoGrid({
       </article>
     );
   });
-  if (variant === "strip") {
-    return <Strip rows={1}>{cells}</Strip>;
-  }
   return <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{cells}</div>;
 }
 
