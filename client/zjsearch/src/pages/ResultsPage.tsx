@@ -338,15 +338,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   };
 
   const onFilters = (next: Partial<FilterValues>) => {
+    // filters apply on the next search submit (magnifier / Enter) — switching
+    // one alone must not fire a new search
     setFilterValues((prev) => ({ ...prev, ...next }));
-    search(
-      buildParams({
-        language: next.language ?? filterValues.language,
-        time_range: next.time_range ?? filterValues.time_range,
-        safesearch: next.safesearch ?? filterValues.safesearch,
-        pageno: 1,
-      }),
-    );
   };
 
   const onPage = (pageno: number) => {
@@ -550,7 +544,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               <SearchFilters globals={globals} onChange={onFilters} values={filterValues} />
             </div>
             {!showSkeletons && !error ? (
-              <p className="mt-2 ps-3.5 text-xs text-ink-3">
+              <p className="mt-2 text-xs text-ink-3">
                 {t("meta_found")} {allResults.length} {t("meta_results")}
               </p>
             ) : null}
