@@ -153,8 +153,11 @@ function MetaLine({ result }: { result: ResultItem }) {
 const MAX_ENGINES_SHOWN = 3;
 
 function EnginesLine({ result }: { result: ResultItem }) {
-  const shown = result.engines.slice(0, MAX_ENGINES_SHOWN);
-  const hidden = result.engines.length - shown.length;
+  const t = useT();
+  const [expanded, setExpanded] = useState(false);
+  const engines = result.engines;
+  const shown = expanded ? engines : engines.slice(0, MAX_ENGINES_SHOWN);
+  const hidden = engines.length - MAX_ENGINES_SHOWN;
   return (
     <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
       {shown.map((engine) => (
@@ -162,10 +165,28 @@ function EnginesLine({ result }: { result: ResultItem }) {
           {engine}
         </span>
       ))}
-      {hidden > 0 ? (
-        <span className="rounded-full bg-surface-2 px-2 py-0.5" title={result.engines.join(", ")}>
+      {!expanded && hidden > 0 ? (
+        <button
+          className="rounded-full bg-surface-2 px-2 py-0.5 transition-colors hover:text-ink"
+          onClick={() => {
+            setExpanded(true);
+          }}
+          title={engines.join(", ")}
+          type="button"
+        >
           +{hidden}
-        </span>
+        </button>
+      ) : null}
+      {expanded && hidden > 0 ? (
+        <button
+          className="transition-colors hover:text-ink"
+          onClick={() => {
+            setExpanded(false);
+          }}
+          type="button"
+        >
+          {t("show_less")}
+        </button>
       ) : null}
     </div>
   );
@@ -804,6 +825,7 @@ export function PaperCard({ result, globals }: CardProps) {
   // matter which fields the source engine provides
   const maxTags = 2;
   const tags = result.tags ?? [];
+  const [tagsExpanded, setTagsExpanded] = useState(false);
   const hasFooter = Boolean(result.pdf_url || result.html_url || result.doi || result.comments || tags.length > 0);
   return (
     <ResultArticle priority={result.priority}>
@@ -865,19 +887,33 @@ export function PaperCard({ result, globals }: CardProps) {
                   {result.comments}
                 </span>
               ) : null}
-              {tags.slice(0, maxTags).map((tag) => (
-                <span
-                  className="max-w-40 truncate rounded-full bg-surface-2 px-2 py-0.5 text-ink-3"
-                  key={tag}
-                  title={tag}
-                >
-                  {tag}
+              {tags.slice(0, tagsExpanded ? tags.length : maxTags).map((tag) => (
+                <span className="max-w-40 truncate text-ink-3" key={tag} title={tag}>
+                  #{tag}
                 </span>
               ))}
-              {tags.length > maxTags ? (
-                <span className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-3" title={tags.join(", ")}>
+              {tags.length > maxTags && !tagsExpanded ? (
+                <button
+                  className="text-ink-3 transition-colors hover:text-ink"
+                  onClick={() => {
+                    setTagsExpanded(true);
+                  }}
+                  title={tags.join(", ")}
+                  type="button"
+                >
                   +{tags.length - maxTags}
-                </span>
+                </button>
+              ) : null}
+              {tags.length > maxTags && tagsExpanded ? (
+                <button
+                  className="text-ink-3 transition-colors hover:text-ink"
+                  onClick={() => {
+                    setTagsExpanded(false);
+                  }}
+                  type="button"
+                >
+                  {t("show_less")}
+                </button>
               ) : null}
             </div>
           ) : null}
@@ -895,6 +931,7 @@ export function PaperCard({ result, globals }: CardProps) {
 
 export function PackageCard({ result, globals }: CardProps) {
   const t = useT();
+  const [tagsExpanded, setTagsExpanded] = useState(false);
   return (
     <ResultArticle priority={result.priority}>
       <PrettyUrl globals={globals} result={result} />
@@ -992,12 +1029,35 @@ export function PackageCard({ result, globals }: CardProps) {
         ))}
       </div>
       {result.tags && result.tags.length > 0 ? (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {result.tags.map((tag) => (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-3" key={tag}>
-              {tag}
+        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-ink-3">
+          {result.tags.slice(0, 4).map((tag) => (
+            <span className="max-w-48 truncate" key={tag} title={tag}>
+              #{tag}
             </span>
           ))}
+          {result.tags.length > 4 && !tagsExpanded ? (
+            <button
+              className="transition-colors hover:text-ink"
+              onClick={() => {
+                setTagsExpanded(true);
+              }}
+              title={result.tags.join(", ")}
+              type="button"
+            >
+              +{result.tags.length - 4}
+            </button>
+          ) : null}
+          {result.tags.length > 4 && tagsExpanded ? (
+            <button
+              className="transition-colors hover:text-ink"
+              onClick={() => {
+                setTagsExpanded(false);
+              }}
+              type="button"
+            >
+              {t("show_less")}
+            </button>
+          ) : null}
         </div>
       ) : null}
       <EnginesLine result={result} />
