@@ -230,10 +230,16 @@ function WeatherAnswer({
   );
 }
 
-/** Dictionary/translation answer (wordnik): headword with the numbered
-    definitions visible directly — the definition IS the answer, so nothing
-    important hides behind a collapsed section. */
-function TranslationsAnswer({ answer }: { answer: Extract<AnswerData, { template: "answer/translations.html" }> }) {
+/** Dictionary/translation answer (wordnik): the queried word heads the card
+    with the numbered definitions visible directly — the definition IS the
+    answer, so nothing important hides behind a collapsed section. */
+function TranslationsAnswer({
+  answer,
+  query,
+}: {
+  answer: Extract<AnswerData, { template: "answer/translations.html" }>;
+  query?: string;
+}) {
   const t = useT();
   const first = answer.translations[0];
   if (!first) {
@@ -245,7 +251,7 @@ function TranslationsAnswer({ answer }: { answer: Extract<AnswerData, { template
   return (
     <div>
       <p className="text-lg font-semibold text-ink" dir="auto">
-        {first.text}
+        {query ?? first.text}
         {first.transliteration ? (
           <span className="ms-2 text-sm font-normal text-ink-3">{first.transliteration}</span>
         ) : null}
@@ -359,7 +365,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
   );
 }
 
-export function Answers({ answers }: { answers: AnswerData[] }) {
+export function Answers({ answers, query }: { answers: AnswerData[]; query?: string }) {
   const t = useT();
   if (answers.length === 0) {
     return null;
@@ -392,7 +398,7 @@ export function Answers({ answers }: { answers: AnswerData[] }) {
       {visible.map((answer, index) => (
         <div className="rounded-2xl border border-accent/25 bg-accent-soft/50 px-4 py-3 animate-fade-up" key={index}>
           {answer.template === "answer/translations.html" ? (
-            <TranslationsAnswer answer={answer} />
+            <TranslationsAnswer answer={answer} query={query} />
           ) : answer.template === "answer/weather.html" ? (
             <WeatherAnswer answer={answer} sources={weatherSources} />
           ) : (

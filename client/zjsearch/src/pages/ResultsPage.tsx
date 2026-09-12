@@ -573,7 +573,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               <>
                 <Corrections data={data} onSearch={submitQuery} />
                 <div className="mt-3 space-y-3">
-                  <Answers answers={calcAnswer ? [calcAnswer, ...data.answers] : data.answers} />
+                  <Answers answers={calcAnswer ? [calcAnswer, ...data.answers] : data.answers} query={data.q} />
                 </div>
 
                 {allResults.length === 0 && data.answers.length === 0 ? (
