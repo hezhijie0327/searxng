@@ -314,7 +314,22 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   });
 
   const submitQuery = (q: string) => {
-    search(buildParams({ q, pageno: 1 }));
+    // a bang search pins its resolved category into selectedCategories; a
+    // plain follow-up query must fall back to the user's default category
+    // (the preferences cookie) instead of silently keeping the bang's
+    const previousWasBang = data.q.trim().startsWith("!");
+    const nextIsBang = q.trim().startsWith("!");
+    const cookieDefault = document.cookie
+      .match(/(?:^|; *)categories=([^;]*)/)?.[1]
+      ?.split(",")
+      .filter(Boolean);
+    const categories =
+      previousWasBang && !nextIsBang
+        ? cookieDefault && cookieDefault.length > 0
+          ? cookieDefault
+          : [globals.default_category]
+        : selectedCategories;
+    search(buildParams({ q, pageno: 1, categories }));
   };
 
   const onSearchCategories = (categories: string[]) => {
