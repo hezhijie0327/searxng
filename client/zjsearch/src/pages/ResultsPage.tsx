@@ -448,23 +448,29 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
       ? firstResult.category
       : null;
   const isImagePage =
-    (data.only_template === "images" || singleCategory === "images") &&
+    (data.only_template === "images" || singleCategory === "images" || bangCategory === "images") &&
     allResults.every((result) => result.template === "images" || result.thumbnail_src || result.img_src);
-  const isVideoPage = data.only_template === "videos" || singleCategory === "videos";
-  const isProductPage = (data.only_template === "products" || singleCategory === "products") && !isVideoPage;
-  const isNewsPage = singleCategory === "news" && !isImagePage && !isVideoPage;
-  const isMapPage = singleCategory === "map" && !isImagePage && !isVideoPage;
-  const isMusicPage = singleCategory === "music" && !isImagePage && !isVideoPage;
+  const isVideoPage =
+    data.only_template === "videos" || singleCategory === "videos" || bangCategory === "videos";
+  const isProductPage =
+    (data.only_template === "products" || singleCategory === "products" || bangCategory === "products") &&
+    !isVideoPage;
+  const isNewsPage = (singleCategory === "news" || bangCategory === "news") && !isImagePage && !isVideoPage;
+  const isMapPage = (singleCategory === "map" || bangCategory === "map") && !isImagePage && !isVideoPage;
+  const isMusicPage = (singleCategory === "music" || bangCategory === "music") && !isImagePage && !isVideoPage;
   const isMoviesPage =
     (singleCategory === "movies" || bangCategory === "movies") && !isImagePage && !isVideoPage;
   // science intent renders every result in the scholarly layout; a
   // paper-only bang search (`!pubmed ...`) gets the same treatment
   const isSciencePage =
-    (singleCategory === "science" || data.only_template === "paper") && !isImagePage && !isVideoPage && !isMusicPage;
+    (singleCategory === "science" || bangCategory === "science" || data.only_template === "paper") &&
+    !isImagePage &&
+    !isVideoPage &&
+    !isMusicPage;
   // files intent (or a torrent-only bang search) gets the file-tile grid;
   // torrents keep the transfer card inside mixed searches
   const isFilesPage =
-    (singleCategory === "files" || data.only_template === "torrent") &&
+    (singleCategory === "files" || bangCategory === "files" || data.only_template === "torrent") &&
     !isImagePage &&
     !isVideoPage &&
     !isMusicPage &&
