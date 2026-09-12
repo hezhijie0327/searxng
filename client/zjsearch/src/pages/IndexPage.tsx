@@ -115,6 +115,7 @@ export function IndexPage({ data }: { data: IndexData }) {
                 }}
                 onSelectionChange={setSelected}
                 selected={selected}
+                wrap
               />
             </div>
             <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 animate-fade-in">
