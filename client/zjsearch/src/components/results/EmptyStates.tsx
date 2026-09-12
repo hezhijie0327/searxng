@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { useT } from "../../lib/i18n.ts";
 import type { SearchPageData } from "../../lib/types.ts";

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 /** Secondary pages load on demand: the entry bundle stays lean and these
     chunks are only fetched the first time a drawer (or a direct visit)

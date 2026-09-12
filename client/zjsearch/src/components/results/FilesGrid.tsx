@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 /** Files-intent layout: landscape file tiles mirroring the media grids.
     Torrents and file downloads have no cover art, so the tile shows a

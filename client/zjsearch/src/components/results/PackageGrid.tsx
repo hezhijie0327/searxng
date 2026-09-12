@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 /** Package results (crates.io, docker hub, pypi, ...): the file-tile
     language of FilesGrid applied to software packages - icon tile with the

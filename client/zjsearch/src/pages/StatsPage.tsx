@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { useMemo, useState } from "react";
 import { ChevronLeftIcon } from "../components/icons.tsx";

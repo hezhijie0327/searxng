@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@zjsearch/theme-zjsearch",
+  "name": "@hezhijie0327/zjsearch",
   "version": "0.1.0",
   "private": true,
-  "license": "AGPL-3.0",
+  "license": "Apache 2.0 with Commons Clause v1.0",
   "type": "module",
   "scripts": {
     "build": "vite build",

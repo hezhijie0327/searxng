@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 /** target/rel attributes for outbound links, following the
     "open results in new tabs" preference (Shell nav, results, infobox
