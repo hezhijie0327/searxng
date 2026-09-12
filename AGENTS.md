@@ -167,21 +167,22 @@ its content, all sharing one visual language:
 - Mixed searches render one **collapsible block per original search
   category** (`collectBlocks` / `blockKeyOf` in `ResultsPage`): general,
   images, videos, news, map, music, it, science, files, social media,
-  other — pure relevance order inside each block.  Blocks are named by
-  information type — 综合结果 / 图片结果 / ... via the `*_results`
-  i18n keys, never the bare category name.  Each block header (category
-  icon + label + count + chevron) toggles collapse, and the `::` grip on
-  the header drag-reorders blocks (pointer capture + insertion indicator,
-  arrow-key fallback; order persists in localStorage `zjs-block-order`).
-  This is the quick-locate mechanism and it works on mobile.  Strips
-  (`Strip.tsx`, fixed rows + left/right arrows) reuse the exact cells of
-  the single-category page (`ImageStrip` tiles + shared lightbox,
-  `VideoGrid`/`MusicGrid`/`FilesGrid`/`PackageGrid` `variant="strip"`) so
-  presentation stays visually identical.  Grid cells take `indexOffset`
-  so hotkey indices stay page-global.  Single-category intent pages
-  (it, ...) keep a plain relevance-ordered list instead — extracting a
-  type into a strip there would break the relevance order (see the
-  `singleCategory` gate in `ResultsPage`).
+  other — pure relevance order inside each block, in tab order by
+  default.  Blocks are titled with the bare category name (综合 / 图片 /
+  ... via `category_labels`), never with a 结果 suffix.  Each block
+  header (category icon + label + count + chevron) toggles collapse, and
+  the `::` grip on the header drag-reorders blocks (pointer capture +
+  arrow-key fallback; order persists in localStorage
+  `zjs-block-order`).  This is the quick-locate mechanism and it works
+  on mobile.  Every block renders the same full presentation as its
+  single-category page (`ImageGrid` masonry, `VideoGrid`/`MusicGrid`/
+  `FilesGrid`/`PackageGrid` full grids) — never a stripped-down preview.
+  Grid cells take `indexOffset` so hotkey indices stay page-global.
+  Single-category intent pages (it, ...) keep a plain
+  relevance-ordered list instead — extracting a type into a block there
+  would break the relevance order (see the `singleCategory` gate in
+  `ResultsPage`).  Infinite scroll appends results into their matching
+  block; loading pauses while the general block is collapsed.
 
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /
