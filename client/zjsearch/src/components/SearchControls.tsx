@@ -47,7 +47,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   return (
     <div className={`flex items-center gap-0.5 py-1 ${wrap ? "flex-wrap justify-center gap-y-0.5" : ""}`}>
       <div
-        className={`flex min-w-0 items-center gap-0.5 ${
+        className={`flex min-w-0 items-center gap-0.5 pb-0.5 ${
           wrap
             ? "flex-wrap justify-center gap-y-0.5"
             : "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
