@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
 import type { GlobalData, SearchPageData } from "../lib/types.ts";
@@ -28,6 +28,19 @@ interface CategoryTabsProps {
 export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, wrap = false }: CategoryTabsProps) {
   const t = useT();
   const settings = useSettings();
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  // Keep the active tab in view on narrow screens: landing on a category
+  // whose tab sits beyond the first viewport-width otherwise reads as
+  // "nothing selected".  Centering is a no-op while the row fits.
+  useLayoutEffect(() => {
+    if (wrap) {
+      return;
+    }
+    scrollerRef.current
+      ?.querySelector('button[aria-pressed="true"]')
+      ?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [wrap, selected]);
 
   const toggle = (category: string) => {
     const next = selected.includes(category) ? selected.filter((item) => item !== category) : [...selected, category];
@@ -52,6 +65,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
             ? "flex flex-wrap items-center gap-x-1 gap-y-0.5 ps-2"
             : "-ms-4 flex items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         }`}
+        ref={scrollerRef}
       >
         {tabs.map((category) => {
           const isSelected = selected.includes(category);
