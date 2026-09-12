@@ -123,7 +123,9 @@ export function SearchFilters({
   const locales = [...globals.locales].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="flex flex-wrap items-center gap-1">
+    // single line at every width - narrow viewports scroll the row, exactly
+    // like the category tab row above it
+    <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
       <SelectField
         icon={<LanguagesIcon className="size-3.5 shrink-0" />}
         label={t("search_language")}
