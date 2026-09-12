@@ -227,9 +227,17 @@ pipeline features without any Python changes. -#}
 {
   "summary": {{ (data.summary or '')|tojson }},
   "symbol": {{ (data.url or '')|tojson }},
-  "temperature": {{ data.temperature.l10n(locale=data.location)|tojson }}
-  {%- if data.datetime %}, "datetime_display": {{ data.datetime.l10n(locale=data.location, fmt='short')|tojson }}{% endif %}
-  {%- if data.feels_like %}, "feels_like": {{ data.feels_like.l10n(locale=data.location)|tojson }}{% endif %}
+  "location_name": {{ data.location.name|tojson }},
+  "condition_display": {{ _(data.condition.capitalize())|tojson }},
+  "temp_c": {{ data.temperature.value("°C") }},
+  "temp_f": {{ data.temperature.value("°F") }}
+  {%- if data.datetime %},
+  "datetime_display": {{ data.datetime.l10n(locale=data.location, fmt='short')|tojson }},
+  "time": {{ data.datetime.l10n(locale=data.location, fmt='HH:mm')|tojson }},
+  "weekday": {{ data.datetime.l10n(locale=data.location, fmt='EEE')|tojson }},
+  "date_iso": {{ data.datetime.datetime.date().isoformat()|tojson }},
+  "hour": {{ data.datetime.datetime.hour }}{% endif %}
+  {%- if data.feels_like %}, "feels_like": {{ data.feels_like.l10n(locale=data.location, unit="°C")|tojson }}{% endif %}
   {%- if data.wind_from %}, "wind": {{ data.wind_from.l10n(locale=data.location)|tojson }}{% endif %}
   {%- if data.wind_speed %}, "wind_speed": {{ data.wind_speed.l10n(locale=data.location)|tojson }}{% endif %}
   {%- if data.pressure %}, "pressure": {{ data.pressure.l10n(locale=data.location)|tojson }}{% endif %}

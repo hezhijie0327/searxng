@@ -189,8 +189,20 @@ export interface TranslationItem {
 export interface WeatherItem {
   summary: string;
   symbol: string;
-  temperature: string;
+  location_name: string;
+  condition_display: string;
+  /** temperature in °C — trend chart and daily hi/lo */
+  temp_c: number;
+  /** temperature in °F — small secondary readout in the hero */
+  temp_f: number;
   datetime_display?: string;
+  /** localized HH:mm — hourly slots only */
+  time?: string;
+  /** localized weekday (EEE) — hourly slots only */
+  weekday?: string;
+  /** ISO date (YYYY-MM-DD) — hourly slots only, groups the daily strip */
+  date_iso?: string;
+  hour?: number;
   feels_like?: string;
   wind?: string;
   wind_speed?: string;
