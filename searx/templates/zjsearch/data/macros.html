@@ -271,10 +271,12 @@ pipeline features without any Python changes. -#}
     {{ _weather_item(f, answer) }}{{ ", " if not loop.last }}
     {%- endfor -%}
   ]
-  {%- else %}
-  , "answer": {{ (answer.answer or '')|tojson }}
-  , "url": {{ (answer.url or '')|tojson }}
-  {%- endif %}
+{%- else %}
+, "answer": {{ (answer.answer or '')|tojson }}
+, "url": {{ (answer.url or '')|tojson }}
+{%- if answer.data %}
+, "data": { {%- for key, value in answer.data.items() %}{{ key|tojson }}: {{ value|tojson }}{{ ", " if not loop.last }}{%- endfor -%} }{% endif %}
+{%- endif %}
 }
 {%- endmacro %}
 

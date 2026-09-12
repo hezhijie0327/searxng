@@ -186,6 +186,16 @@ export interface TranslationItem {
   synonyms: string[];
 }
 
+/** Structured payload of the special-query answers (see
+    searx/plugins/{hash_plugin,self_info,time_zone}.py and
+    searx/answerers/{random,statistics}.py). */
+export type LegacyAnswerData =
+  | { kind: "hash"; algo: string; digest: string }
+  | { kind: "stats"; func: string; args: string; result: string }
+  | { kind: "time"; zone?: string; time: string; abbr?: string }
+  | { kind: "self"; label: string; value: string }
+  | { kind: "value"; value: string; swatch?: string };
+
 export interface WeatherItem {
   summary: string;
   symbol: string;
@@ -215,6 +225,10 @@ export type AnswerData =
       template: "answer/legacy.html";
       answer: string;
       url: string;
+      /** structured payload emitted by the special-query plugins (hash,
+          statistics, time zone, self-info, random); themes render from this
+          instead of parsing the localized *answer* text */
+      data?: LegacyAnswerData;
     }
   | {
       template: "answer/translations.html";
