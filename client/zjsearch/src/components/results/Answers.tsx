@@ -146,33 +146,10 @@ function WeatherAnswer({
   }
   return (
     <div>
-      <div className="flex items-center justify-between gap-3">
-        <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
-          <LocationIcon className="size-4 shrink-0 text-ink-3" />
-          {current.location_name}
-        </p>
-        {sources.length > 0 ? (
-          <p className="flex items-center gap-1.5 text-xs text-ink-3">
-            {sources.map((source, index) => (
-              <span className="flex items-center gap-1.5" key={source.service}>
-                {index > 0 ? <span>·</span> : null}
-                {source.url ? (
-                  <a
-                    className="transition-colors hover:text-ink hover:underline"
-                    href={source.url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {source.service}
-                  </a>
-                ) : (
-                  source.service
-                )}
-              </span>
-            ))}
-          </p>
-        ) : null}
-      </div>
+      <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
+        <LocationIcon className="size-4 shrink-0 text-ink-3" />
+        {current.location_name}
+      </p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
         <div className="flex items-center gap-4">
           {current.symbol ? <img alt="" className="size-16" src={current.symbol} /> : null}
@@ -198,6 +175,27 @@ function WeatherAnswer({
       </div>
       <WeatherTrend forecasts={answer.forecasts} />
       <WeatherDaily forecasts={answer.forecasts} />
+      {sources.length > 0 ? (
+        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+          {sources.map((source) =>
+            source.url ? (
+              <a
+                className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-2 transition-colors hover:text-ink"
+                href={source.url}
+                key={source.service}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {source.service}
+              </a>
+            ) : (
+              <span className="rounded-full bg-surface-2 px-2 py-0.5" key={source.service}>
+                {source.service}
+              </span>
+            ),
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
