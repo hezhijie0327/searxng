@@ -40,6 +40,9 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
       }
       const el = event.target as HTMLElement | null;
       const tag = el?.tagName ?? "";
+      const t = ref.current;
+      const vim = layout === "vim";
+      const key = event.key;
       if (el?.isContentEditable || TEXT_ENTRY.has(tag)) {
         // inside text fields only Escape means "leave the field"
         if (event.key === "Escape" && tag === "INPUT") {
@@ -48,17 +51,22 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
         return;
       }
       if (NATIVE_ACTIVATION.has(tag)) {
-        // a focused link or button keeps its native keyboard behavior
+        // a focused link or button keeps Space/Enter for its own activation,
+        // but the arrow keys must keep navigating the results - otherwise the
+        // hotkeys die after clicking a collapsible block header
+        if (key === "ArrowDown" || key === "j") {
+          event.preventDefault();
+          t.move(1);
+        } else if (key === "ArrowUp" || key === "k") {
+          event.preventDefault();
+          t.move(-1);
+        }
         return;
       }
       // keys arriving through an IME composition are input, not commands
       if (event.isComposing || event.keyCode === 229) {
         return;
       }
-
-      const t = ref.current;
-      const vim = layout === "vim";
-      const key = event.key;
 
       // the CJK punctuation mode of Chinese IMEs emits the full-width "？"
       if (key === "?" || key === "？") {
