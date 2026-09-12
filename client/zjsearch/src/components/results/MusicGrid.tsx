@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { CloseIcon, MusicIcon, PauseIcon, PlayIcon } from "../icons.tsx";
+import { CalendarIcon, CloseIcon, MusicIcon, PauseIcon, PlayIcon } from "../icons.tsx";
 import { ResultLink, THEME_STATIC } from "./cards.tsx";
 
 function formatClock(seconds: number): string {
@@ -256,7 +256,14 @@ export function MusicGrid({
           <span className="truncate" dir="auto">
             {result.author || result.engines[0]}
           </span>
-          <span className="shrink-0">{result.published_date ? formatDate(result.published_date) : null}</span>
+          <span className="flex shrink-0 items-center gap-1">
+            {result.published_date ? (
+              <>
+                <CalendarIcon className="size-3" />
+                {formatDate(result.published_date)}
+              </>
+            ) : null}
+          </span>
         </div>
       </article>
     );

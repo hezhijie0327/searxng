@@ -841,10 +841,15 @@ export function PaperCard({ result, globals }: CardProps) {
       authors += ` ${t("et_al")}`;
     }
   }
-  const metaBits: Array<string | null> = [
+  const metaBits: Array<string | null | ReactNode> = [
     authors || null,
     venueBits.length > 0 ? venueBits.join(", ") : null,
-    result.published_date ? formatDate(result.published_date) : null,
+    result.published_date ? (
+      <span className="inline-flex items-center gap-1" key="date">
+        <CalendarIcon className="size-3" />
+        {formatDate(result.published_date)}
+      </span>
+    ) : null,
   ];
   // every optional extra (PDF/HTML, DOI, citation note, subject tags) lives
   // in ONE footer row in a fixed order, so cards share the same skeleton no
@@ -863,7 +868,12 @@ export function PaperCard({ result, globals }: CardProps) {
           </div>
           {metaBits.some(Boolean) ? (
             <p className="mt-1 truncate text-xs text-ink-3" dir="auto">
-              {metaBits.filter(Boolean).join(" · ")}
+              {metaBits.filter(Boolean).map((bit, index) => (
+                <span key={index}>
+                  {index > 0 ? <span className="text-ink-3"> · </span> : null}
+                  {bit}
+                </span>
+              ))}
             </p>
           ) : null}
           {result.content_html ? (
@@ -1276,7 +1286,14 @@ export function VideoGrid({
           </span>
           <span className="flex shrink-0 items-center gap-2">
             {result.views ? <span>{result.views}</span> : null}
-            <span>{result.published_date ? formatDate(result.published_date) : null}</span>
+            <span className="flex items-center gap-1">
+              {result.published_date ? (
+                <>
+                  <CalendarIcon className="size-3" />
+                  {formatDate(result.published_date)}
+                </>
+              ) : null}
+            </span>
           </span>
         </div>
       </article>

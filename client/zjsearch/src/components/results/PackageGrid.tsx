@@ -7,7 +7,7 @@
 import { formatDate } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { CodeIcon, ExternalLinkIcon, PackageIcon } from "../icons.tsx";
+import { CalendarIcon, CodeIcon, ExternalLinkIcon, PackageIcon } from "../icons.tsx";
 import { ResultLink, THEME_STATIC } from "./cards.tsx";
 
 function PackageCell({
@@ -64,7 +64,14 @@ function PackageCell({
         <span className="truncate" dir="auto">
           {result.maintainer || result.author || result.engines[0]}
         </span>
-        <span className="shrink-0">{result.published_date ? formatDate(result.published_date) : null}</span>
+        <span className="flex shrink-0 items-center gap-1">
+          {result.published_date ? (
+            <>
+              <CalendarIcon className="size-3" />
+              {formatDate(result.published_date)}
+            </>
+          ) : null}
+        </span>
       </div>
       {result.homepage || result.source_code_url ? (
         <div className="mt-1.5 flex items-center gap-1.5">

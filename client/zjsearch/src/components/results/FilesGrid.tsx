@@ -8,7 +8,16 @@
 import { formatDate } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { ArrowDownIcon, ArrowUpIcon, DownloadIcon, FileIcon, FilmIcon, MagnetIcon, MusicIcon } from "../icons.tsx";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CalendarIcon,
+  DownloadIcon,
+  FileIcon,
+  FilmIcon,
+  MagnetIcon,
+  MusicIcon,
+} from "../icons.tsx";
 import { ResultLink, THEME_STATIC } from "./cards.tsx";
 
 function detectExtension(title: string): string | null {

@@ -3,6 +3,7 @@
 import { useT } from "../../lib/i18n.ts";
 import { useSettings } from "../../lib/settings.ts";
 import type { AnswerData, WeatherItem } from "../../lib/types.ts";
+import { ClockIcon } from "../icons.tsx";
 
 function WeatherGrid({ item }: { item: WeatherItem }) {
   const t = useT();
@@ -57,7 +58,11 @@ function WeatherAnswer({ answer }: { answer: Extract<AnswerData, { template: "an
             {answer.forecasts.map((forecast, index) => (
               <div key={index}>
                 <p className="text-xs text-ink-2" dir="auto">
-                  <span className="font-medium">{forecast.datetime_display}</span> — {forecast.summary}
+                  <span className="inline-flex items-center gap-1 font-medium">
+                    <ClockIcon className="size-3" />
+                    {forecast.datetime_display}
+                  </span>{" "}
+                  — {forecast.summary}
                 </p>
                 <div className="mt-1">
                   <WeatherGrid item={forecast} />
