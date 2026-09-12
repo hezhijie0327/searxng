@@ -7,6 +7,7 @@ import { Answers } from "../components/results/Answers.tsx";
 import {
   NewsCard,
   PaperCard,
+  PosterGrid,
   ProductGrid,
   ResultCard,
   ResultSkeleton,
@@ -436,6 +437,16 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   // selected category signals intent, `only_template` additionally catches
   // bang-limited searches where every result shares one template.
   const singleCategory = selectedCategories.length === 1 ? selectedCategories[0] : null;
+  // engine bangs (`!imdb bat`) run with the pseudo category "none"; every
+  // result still carries its real category, so a bang search whose results
+  // all agree on one category inherits that category's presentation
+  const firstResult = allResults[0];
+  const bangCategory =
+    singleCategory === "none" &&
+    firstResult !== undefined &&
+    allResults.every((result) => result.category === firstResult.category)
+      ? firstResult.category
+      : null;
   const isImagePage =
     (data.only_template === "images" || singleCategory === "images") &&
     allResults.every((result) => result.template === "images" || result.thumbnail_src || result.img_src);
@@ -444,6 +455,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const isNewsPage = singleCategory === "news" && !isImagePage && !isVideoPage;
   const isMapPage = singleCategory === "map" && !isImagePage && !isVideoPage;
   const isMusicPage = singleCategory === "music" && !isImagePage && !isVideoPage;
+  const isMoviesPage =
+    (singleCategory === "movies" || bangCategory === "movies") && !isImagePage && !isVideoPage;
   // science intent renders every result in the scholarly layout; a
   // paper-only bang search (`!pubmed ...`) gets the same treatment
   const isSciencePage =
@@ -567,6 +580,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-4">
                     <MusicGrid globals={globals} results={allResults} selected={hotkeysSelected} />
                   </div>
+                ) : isMoviesPage ? (
+                  <div className="mt-4">
+                    <PosterGrid globals={globals} results={allResults} selected={hotkeysSelected} />
+                  </div>
                 ) : isSciencePage ? (
                   <div className="mt-2 space-y-1">
                     {allResults.map((result, index) => (
@@ -677,6 +694,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                       />
                                     ) : key === "files" ? (
                                       <FilesGrid
+                                        globals={globals}
+                                        indexOffset={indexOffset}
+                                        results={results}
+                                        selected={hotkeysSelected}
+                                      />
+                                    ) : key === "movies" ? (
+                                      <PosterGrid
                                         globals={globals}
                                         indexOffset={indexOffset}
                                         results={results}

@@ -83,6 +83,14 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
 - Results hotkeys (default / vim, see `src/features/hotkeys.ts`) must not fire
   while focus is in text inputs; hash-only changes (`#image-viewer`) are ignored
   by the router's popstate handler.
+- Bangs: category bangs (`!movies`), engine bangs (`!imdb`, one per engine
+  `shortcut`) and external DDG bangs (`!!w`, redirect off-site — the SPA
+  fetch fails cross-origin and falls back to a full page load, which is the
+  desired behaviour).  Engine bangs run with selected category `"none"`, so
+  ResultsPage derives the presentation category from the results' common
+  category (`bangCategory`) — that is how `!imdb` lands on the movies
+  PosterGrid.  Movies = tmdb/imdb/moviepilot/rottentomatoes/senscritique;
+  tmdb is disabled upstream, dev-settings.yml enables it.
 - Respect `prefers-reduced-motion`; RTL uses Tailwind logical properties (`ps-`,
   `me-`, `start-`, `end-`) against a single stylesheet.
 - Text result cards keep fixed height slots so every card in a list is the
