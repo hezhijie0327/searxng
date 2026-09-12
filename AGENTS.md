@@ -91,7 +91,11 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   reads as broken spacing on pages with 1-line content, e.g. IT), engines
   row capped at 3 pills + "+N". Cards grow only for real content extras
   (publishedDate meta row, thumbnails, embedded media) — do not reserve
-  empty slots for those.
+  empty slots for those. All text cards share the margin language
+  `mt-1` (title, meta) / `mt-1.5` (snippet, tags) / `mt-2` (engines row);
+  PackageCard follows it too — version/license live in the meta row, no
+  redundant package_name, secondary links fold into the engines row as
+  muted chips (`EnginesLine`'s `leading` slot).
 - The empty `searx/templates/<name>/` directory alone registers a theme in the
   UI — never leave a half-created theme dir behind.
 - Stacking contexts: entrance animations (`animate-fade-up`, fill-mode `both`)

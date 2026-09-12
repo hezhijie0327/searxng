@@ -151,7 +151,7 @@ function MetaLine({ result }: { result: ResultItem }) {
 
 const MAX_ENGINES_SHOWN = 3;
 
-function EnginesLine({ result }: { result: ResultItem }) {
+function EnginesLine({ result, leading }: { result: ResultItem; leading?: ReactNode }) {
   const t = useT();
   const [expanded, setExpanded] = useState(false);
   const engines = result.engines;
@@ -159,6 +159,7 @@ function EnginesLine({ result }: { result: ResultItem }) {
   const hidden = engines.length - MAX_ENGINES_SHOWN;
   return (
     <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+      {leading}
       {shown.map((engine) => (
         <span className="rounded-full bg-surface-2 px-2 py-0.5" key={engine}>
           {engine}
@@ -974,18 +975,70 @@ export function PaperCard({ result, globals }: CardProps) {
 export function PackageCard({ result, globals }: CardProps) {
   const t = useT();
   const [tagsExpanded, setTagsExpanded] = useState(false);
+  // same slot rhythm as DefaultCard: url / title / meta / content / engines;
+  // secondary links fold into the engines row so no card grows extra rows
+  const links: Array<{ icon: ReactNode; label: string; url: string }> = [];
+  if (result.homepage) {
+    links.push({ icon: <ExternalLinkIcon className="size-3" />, label: "Homepage", url: result.homepage });
+  }
+  if (result.source_code_url && result.source_code_url !== result.url) {
+    links.push({ icon: <CodeIcon className="size-3" />, label: "Source code", url: result.source_code_url });
+  }
+  for (const [name, url] of Object.entries(result.project_links ?? {})) {
+    if (url !== result.url) {
+      links.push({ icon: <ExternalLinkIcon className="size-3" />, label: name, url });
+    }
+  }
   return (
     <ResultArticle priority={result.priority}>
       <PrettyUrl globals={globals} result={result} />
-      <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      <div className="mt-1">
         <Title globals={globals} result={result} />
-        {result.version ? (
-          <code className="rounded bg-surface-2 px-1.5 py-0.5 text-xs text-ink-2">{result.version}</code>
-        ) : null}
-        {result.package_name && result.package_name !== result.title_text ? (
-          <code className="text-xs text-ink-2">{result.package_name}</code>
-        ) : null}
       </div>
+      {result.published_date || result.maintainer || result.popularity || result.license_name || result.version ? (
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-ink-3">
+          {result.published_date ? (
+            <span className="inline-flex items-center gap-1" key="date">
+              <CalendarIcon className="size-3" />
+              {formatDate(result.published_date)}
+            </span>
+          ) : null}
+          {result.maintainer ? (
+            <span className="inline-flex min-w-0 items-center gap-1" key="author">
+              {t("author")}:
+              <span className="truncate text-ink-2" dir="auto">
+                {result.maintainer}
+              </span>
+            </span>
+          ) : null}
+          {result.popularity ? (
+            <span className="inline-flex items-center gap-1" key="popularity">
+              <StarIcon className="size-3" />
+              <span className="text-ink-2">{result.popularity}</span>
+            </span>
+          ) : null}
+          {result.license_name ? (
+            <span className="inline-flex items-center gap-1" key="license">
+              {t("license")}:
+              <span className="text-ink-2">
+                {result.license_url ? (
+                  <a
+                    className="hover:text-accent hover:underline"
+                    href={result.license_url}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {result.license_name}
+                  </a>
+                ) : (
+                  result.license_name
+                )}
+              </span>
+            </span>
+          ) : null}
+          {result.version ? <span key="version">v{result.version}</span> : null}
+        </div>
+      ) : null}
       {result.content_html ? (
         <p
           className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
@@ -993,85 +1046,8 @@ export function PackageCard({ result, globals }: CardProps) {
           dir="auto"
         />
       ) : null}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
-        {result.maintainer ? (
-          <span className="inline-flex min-w-0 items-center gap-1">
-            {t("author")}:
-            <span className="truncate text-ink-2" dir="auto">
-              {result.maintainer}
-            </span>
-          </span>
-        ) : null}
-        {result.published_date ? (
-          <span className="inline-flex items-center gap-1">
-            <CalendarIcon className="size-3.5" />
-            {formatDate(result.published_date)}
-          </span>
-        ) : null}
-        {result.popularity ? (
-          <span className="inline-flex items-center gap-1">
-            <StarIcon className="size-3.5" />
-            <span className="text-ink-2">{result.popularity}</span>
-          </span>
-        ) : null}
-        {result.license_name ? (
-          <span className="inline-flex items-center gap-1">
-            {t("license")}:
-            <span className="text-ink-2">
-              {result.license_url ? (
-                <a
-                  className="hover:text-accent hover:underline"
-                  href={result.license_url}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {result.license_name}
-                </a>
-              ) : (
-                result.license_name
-              )}
-            </span>
-          </span>
-        ) : null}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-        {result.homepage ? (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
-            href={result.homepage}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <ExternalLinkIcon className="size-3.5" />
-            Homepage
-          </a>
-        ) : null}
-        {result.source_code_url ? (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
-            href={result.source_code_url}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <CodeIcon className="size-3.5" />
-            Source code
-          </a>
-        ) : null}
-        {Object.entries(result.project_links ?? {}).map(([name, url]) => (
-          <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 hover:text-ink"
-            href={url}
-            key={url}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <ExternalLinkIcon className="size-3.5" />
-            {name}
-          </a>
-        ))}
-      </div>
       {result.tags && result.tags.length > 0 ? (
-        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-ink-3">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-ink-3">
           {result.tags.slice(0, 4).map((tag) => (
             <span className="max-w-48 truncate" key={tag} title={tag}>
               #{tag}
@@ -1102,7 +1078,25 @@ export function PackageCard({ result, globals }: CardProps) {
           ) : null}
         </div>
       ) : null}
-      <EnginesLine result={result} />
+      <EnginesLine
+        leading={
+          links.length > 0
+            ? links.map((link) => (
+                <a
+                  className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-ink-2 transition-colors hover:text-ink"
+                  href={link.url}
+                  key={link.url}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {link.icon}
+                  {link.label}
+                </a>
+              ))
+            : null
+        }
+        result={result}
+      />
     </ResultArticle>
   );
 }
