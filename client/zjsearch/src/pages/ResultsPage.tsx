@@ -122,65 +122,42 @@ function Corrections({ data, onSearch }: { data: SearchPageData; onSearch: (q: s
   );
 }
 
-/** Mixed searches group results by template; music results that carry the
-    default template (genius, ...) and torrent/file downloads belong to
-    their own sections so every category shares one presentation. */
-function groupKey(result: ResultItem): string {
-  const template = result.template || "default";
-  if (template === "default" && result.category === "music") {
-    return "music";
-  }
-  if (template === "torrent" || template === "file") {
-    return "files";
-  }
-  return template;
-}
-
-/** Consecutive same-template results form groups (image strips in mixed mode). */
-function groupResults(
-  results: ResultItem[],
-): Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> {
-  const groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> = [];
-  for (let index = 0; index < results.length; index += 1) {
-    const result = results[index];
-    const template = result ? groupKey(result) : "default";
-    const last = groups[groups.length - 1];
-    if (last && last.template === template) {
-      last.items.push({ result: result as ResultItem, index });
-    } else {
-      groups.push({ template, items: [{ result: result as ResultItem, index }] });
-    }
-  }
-  return groups;
-}
-
-/** Sections that get a Kagi/Google-style header.  They render as fixed-row
-    horizontal strips (paged with left/right arrows) in this fixed order
-    after the untyped results - nothing expands in place. */
-const SECTION_TEMPLATES = new Set(["general", "images", "videos", "news", "music", "files", "packages"]);
-const SECTION_ORDER = ["images", "videos", "news", "music", "files", "packages"];
+/** Mixed searches consolidate results into collapsible blocks keyed by the
+    original search category; the packages category folds into it. */
 const BLOCK_ORDER_KEY = "zjs-block-order";
 
-function consolidateGroups(
-  groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
-): Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> {
-  const first: Map<string, { template: string; items: Array<{ result: ResultItem; index: number }> }> = new Map();
-  const out: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }> = [];
-  for (const group of groups) {
-    if (!SECTION_TEMPLATES.has(group.template)) {
-      out.push(group);
-      continue;
-    }
-    const merged = first.get(group.template);
-    if (merged) {
-      merged.items.push(...group.items);
+const BLOCK_DEFAULT_ORDER = [
+  "general",
+  "images",
+  "videos",
+  "news",
+  "map",
+  "music",
+  "it",
+  "science",
+  "files",
+  "social media",
+  "packages",
+  "other",
+];
+
+function blockKeyOf(result: ResultItem): string {
+  const category = result.category || "general";
+  return category === "packages" ? "it" : category;
+}
+
+function collectBlocks(results: ResultItem[]): Map<string, Array<{ result: ResultItem; index: number }>> {
+  const blocks = new Map<string, Array<{ result: ResultItem; index: number }>>();
+  results.forEach((result, index) => {
+    const key = blockKeyOf(result);
+    const items = blocks.get(key);
+    if (items) {
+      items.push({ result, index });
     } else {
-      const created = { template: group.template, items: [...group.items] };
-      first.set(group.template, created);
-      out.push(created);
+      blocks.set(key, [{ result, index }]);
     }
-  }
-  return out;
+  });
+  return blocks;
 }
 
 /** Collapsible block header: category icon + translated label + result
@@ -325,6 +302,21 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const dragRectsRef = useRef<
     Array<{ key: string; top: number; bottom: number; midY: number; left: number; width: number }>
   >([]);
+  const BLOCK_LABEL_KEYS: Record<string, string> = {
+    general: "general_results",
+    images: "images_results",
+    videos: "videos_results",
+    news: "news_results",
+    map: "map_results",
+    music: "music_results",
+    it: "it_results",
+    science: "science_results",
+    files: "files_results",
+    "social media": "social_media_results",
+    packages: "packages_results",
+    other: "other_results",
+  };
+  const blockLabel = (key: string) => t(BLOCK_LABEL_KEYS[key] ?? key);
   const [blockOrder, setBlockOrder] = useState<string[]>(() => {
     try {
       const stored: unknown = JSON.parse(localStorage.getItem(BLOCK_ORDER_KEY) ?? "null");
@@ -332,7 +324,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
         return stored;
       }
     } catch {}
-    return ["general", ...SECTION_ORDER];
+    return BLOCK_DEFAULT_ORDER;
   });
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -684,44 +676,15 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 ) : (
                   <div className={`relative mt-2 ${dragKey !== null ? "select-none" : ""}`}>
                     {(() => {
-                      // Mixed search: every type renders as its own
-                      // collapsible block - the untyped web list first (pure
-                      // relevance order), then the typed strips.  The block
-                      // order is user-adjustable by dragging the grip on a
-                      // header and persists in localStorage; collapsing works
-                      // on every screen size so huge blocks never dominate
-                      // the page.
-                      const groups = consolidateGroups(groupResults(allResults));
-                      const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
-                      const restCount = rest.reduce((sum, group) => sum + group.items.length, 0);
-                      const sectionByKey = new Map(
-                        groups
-                          .filter((group) => SECTION_TEMPLATES.has(group.template))
-                          .map((group) => [group.template, group]),
-                      );
-                      const defaultOrder = ["general", ...SECTION_ORDER];
+                      // Mixed search: one collapsible block per original
+                      // search category (pure relevance order inside), in the
+                      // user's chosen order; media categories render with
+                      // their strip layouts, the rest as card lists.
+                      const blocks = collectBlocks(allResults);
                       const orderedKeys = [
-                        ...blockOrder.filter(
-                          (key) => defaultOrder.includes(key) && (key === "general" || sectionByKey.has(key)),
-                        ),
-                        ...defaultOrder.filter(
-                          (key) => !blockOrder.includes(key) && (key === "general" || sectionByKey.has(key)),
-                        ),
+                        ...blockOrder.filter((key) => blocks.has(key)),
+                        ...[...blocks.keys()].filter((key) => !blockOrder.includes(key)),
                       ];
-                      // blocks are named by information type: 网页结果 /
-                      // 图片结果 / ... (never the bare category name)
-                      const blockLabel = (key: string) =>
-                        t(
-                          {
-                            general: "web_results",
-                            images: "images_results",
-                            videos: "videos_results",
-                            news: "news_results",
-                            music: "music_results",
-                            files: "files_results",
-                            packages: "packages_results",
-                          }[key] ?? key,
-                        );
                       const isCollapsed = (key: string) => Boolean(collapsedBlocks[key]);
                       const toggle = (key: string) => setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
                       const commitMove = (key: string, index: number) => {
@@ -785,77 +748,12 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                           commitMove(key, to);
                         },
                       });
-                      const restItems = rest.flatMap((group) => group.items);
-                      const restBlock = {
-                        key: "general",
-                        node: (
-                          <section className="mt-6 first:mt-0" data-block-key="general" key="general">
-                            <GroupHeader
-                              category="general"
-                              collapsed={Boolean(collapsedBlocks.general)}
-                              count={restCount}
-                              grip={gripFor("general")}
-                              label={t("web_results")}
-                              onToggle={() => {
-                                toggle("general");
-                              }}
-                            />
-                            {!collapsedBlocks.general ? (
-                              <div className="mt-1">
-                                {restItems.map(({ result, index }) => (
-                                  <div
-                                    className={`animate-fade-up rounded-2xl ${
-                                      index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                    }`}
-                                    data-hotkey-index={index}
-                                    key={index}
-                                    style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-                                  >
-                                    <ResultCard
-                                      autoOpenMap={isMapPage}
-                                      eager={index < 4}
-                                      globals={globals}
-                                      result={result}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            ) : null}
-                          </section>
-                        ),
-                      };
-                      // insertion indicator geometry while a block is dragged
-                      const others =
-                        dragKey !== null ? dragRectsRef.current.filter((rect) => rect.key !== dragKey) : [];
-                      const insertion = dragKey !== null ? others.filter((rect) => rect.midY < dragY).length : -1;
-                      const gapY =
-                        insertion >= 0 && insertion <= others.length
-                          ? insertion < others.length
-                            ? others[insertion]?.top
-                            : others[others.length - 1]?.bottom
-                          : undefined;
-                      const draggedRect =
-                        dragKey !== null ? dragRectsRef.current.find((r) => r.key === dragKey) : undefined;
+                      const stripResults = (key: string) => (blocks.get(key) ?? []).map(({ result }) => result);
+                      const indexOffsetOf = (key: string) => blocks.get(key)?.[0]?.index ?? 0;
                       return (
                         <>
-                          {dragKey !== null && gapY !== undefined && draggedRect ? (
-                            <div
-                              aria-hidden="true"
-                              className="fixed z-40 h-0.5 rounded-full bg-accent-strong"
-                              style={{ top: gapY, left: draggedRect.left, width: draggedRect.width }}
-                            />
-                          ) : null}
                           {orderedKeys.map((key, position) => {
-                            if (key === "general") {
-                              return restBlock.node;
-                            }
-                            const group = sectionByKey.get(key);
-                            if (!group) {
-                              return null;
-                            }
-                            const label = blockLabel(key);
-                            const results = group.items.map(({ result }) => result);
-                            const indexOffset = group.items[0]?.index ?? 0;
+                            const items = blocks.get(key) ?? [];
                             const collapsed = isCollapsed(key);
                             return (
                               <section
@@ -866,9 +764,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                 <GroupHeader
                                   category={key}
                                   collapsed={collapsed}
-                                  count={group.items.length}
+                                  count={items.length}
                                   grip={gripFor(key)}
-                                  label={label}
+                                  label={blockLabel(key)}
                                   onToggle={() => {
                                     toggle(key);
                                   }}
@@ -876,53 +774,59 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                 {!collapsed ? (
                                   <div className="mt-1">
                                     {key === "images" ? (
-                                      <ImageStrip results={results} />
+                                      <ImageStrip results={stripResults(key)} />
                                     ) : key === "videos" ? (
                                       <VideoGrid
                                         globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
+                                        indexOffset={indexOffsetOf(key)}
+                                        results={stripResults(key)}
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
                                     ) : key === "music" ? (
                                       <MusicGrid
                                         globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
+                                        indexOffset={indexOffsetOf(key)}
+                                        results={stripResults(key)}
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
                                     ) : key === "files" ? (
                                       <FilesGrid
                                         globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
+                                        indexOffset={indexOffsetOf(key)}
+                                        results={stripResults(key)}
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
                                     ) : key === "packages" ? (
                                       <PackageGrid
                                         globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
+                                        indexOffset={indexOffsetOf(key)}
+                                        results={stripResults(key)}
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
                                     ) : (
-                                      <Strip rows={1}>
-                                        {group.items.map(({ result, index }) => (
+                                      <div>
+                                        {items.map(({ result, index }) => (
                                           <div
-                                            className={`h-full rounded-2xl ${
+                                            className={`animate-fade-up rounded-2xl ${
                                               index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                                             }`}
                                             data-hotkey-index={index}
                                             key={index}
+                                            style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                                           >
-                                            <NewsCard globals={globals} result={result} />
+                                            <ResultCard
+                                              autoOpenMap={isMapPage}
+                                              eager={index < 4}
+                                              globals={globals}
+                                              result={result}
+                                            />
                                           </div>
                                         ))}
-                                      </Strip>
+                                      </div>
                                     )}
                                   </div>
                                 ) : null}
