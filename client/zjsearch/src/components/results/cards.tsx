@@ -1129,49 +1129,6 @@ export function MapCard({ result, globals, autoOpenMap }: CardProps) {
   );
 }
 
-export function ImageListCard({ result, globals, onOpen }: CardProps & { onOpen: () => void }) {
-  const thumbSrc = result.thumbnail_src || result.img_src || "";
-  return (
-    <ResultArticle priority={result.priority}>
-      <div className="flex gap-4">
-        <button
-          aria-label={result.title_text}
-          className="group/img relative size-24 shrink-0 overflow-hidden rounded-xl bg-surface-2"
-          onClick={onOpen}
-          type="button"
-        >
-          <img
-            alt={result.title_text}
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-            decoding="async"
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
-            }}
-            src={thumbSrc}
-          />
-          <span className="absolute inset-0 grid place-items-center bg-black/0 text-white opacity-0 transition-all group-hover/img:bg-black/30 group-hover/img:opacity-100">
-            <FilmIcon className="size-5" />
-          </span>
-        </button>
-        <div className="min-w-0 flex-1">
-          <PrettyUrl globals={globals} result={result} />
-          <div className="mt-1">
-            <Title globals={globals} result={result} />
-          </div>
-          <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-ink-3">
-            {result.resolution ? <span>{result.resolution}</span> : null}
-            {result.img_format ? <span>{result.img_format}</span> : null}
-            {result.filesize ? <span>{result.filesize}</span> : null}
-            {result.source ? <span>{result.source}</span> : null}
-          </div>
-          <EnginesLine result={result} />
-        </div>
-      </div>
-    </ResultArticle>
-  );
-}
-
 /** Kagi-style video tiles for video-only result pages.  Tiles with an
     embeddable source get a Spotify-style hover play button that expands the
     player in place.  Cells carry data-hotkey-index so the results hotkeys
@@ -1290,24 +1247,22 @@ export function VideoGrid({
           <span className="truncate" dir="auto">
             {result.author || result.engines[0]}
           </span>
-          <span className="shrink-0">{result.published_date ? formatDate(result.published_date) : null}</span>
+          <span className="flex shrink-0 items-center gap-2">
+            {result.views ? <span>{result.views}</span> : null}
+            <span>{result.published_date ? formatDate(result.published_date) : null}</span>
+          </span>
         </div>
-        {result.views ? <div className="mt-0.5 text-xs text-ink-3">{result.views}</div> : null}
       </article>
     );
   });
   return <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{cells}</div>;
 }
 
-export function FallbackCard(props: CardProps) {
-  return <DefaultCard {...props} />;
-}
-
-export function ResultCard(props: CardProps & { onOpenImage?: () => void }) {
+export function ResultCard(props: CardProps) {
   const { result } = props;
   switch (result.template) {
     case "images":
-      return props.onOpenImage ? <ImageListCard {...props} onOpen={props.onOpenImage} /> : <DefaultCard {...props} />;
+      return <DefaultCard {...props} />;
     case "videos":
       return <VideoCard {...props} />;
     case "news":

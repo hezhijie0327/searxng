@@ -122,25 +122,7 @@ function Corrections({ data, onSearch }: { data: SearchPageData; onSearch: (q: s
   );
 }
 
-/** Mixed searches consolidate results into collapsible blocks keyed by the
-    original search category; the packages category folds into it. */
-const BLOCK_ORDER_KEY = "zjs-block-order";
-
-const BLOCK_DEFAULT_ORDER = [
-  "general",
-  "images",
-  "videos",
-  "news",
-  "map",
-  "music",
-  "it",
-  "science",
-  "files",
-  "social media",
-  "packages",
-  "other",
-];
-
+/** Packages fold into the it block; every other category stands alone. */
 function blockKeyOf(result: ResultItem): string {
   const category = result.category || "general";
   return category === "packages" ? "it" : category;
@@ -294,20 +276,6 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
-  const [dragKey, setDragKey] = useState<string | null>(null);
-  const dragActiveRef = useRef(false);
-  const dragRectsRef = useRef<
-    Array<{ key: string; top: number; bottom: number; midY: number; left: number; width: number }>
-  >([]);
-  const [blockOrder, setBlockOrder] = useState<string[]>(() => {
-    try {
-      const stored: unknown = JSON.parse(localStorage.getItem(BLOCK_ORDER_KEY) ?? "null");
-      if (Array.isArray(stored) && stored.every((key) => typeof key === "string")) {
-        return stored;
-      }
-    } catch {}
-    return BLOCK_DEFAULT_ORDER;
-  });
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
@@ -603,12 +571,12 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-2 space-y-1">
                     {allResults.map((result, index) => (
                       <div
-                        className={`animate-fade-up rounded-2xl ${
+                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
                           index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                         }`}
                         data-hotkey-index={index}
                         key={index}
-                        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
                       >
                         <PaperCard globals={globals} result={result} />
                       </div>
@@ -626,12 +594,12 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-2 space-y-1">
                     {allResults.map((result, index) => (
                       <div
-                        className={`animate-fade-up rounded-2xl ${
+                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
                           index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                         }`}
                         data-hotkey-index={index}
                         key={index}
-                        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
                       >
                         <NewsCard globals={globals} result={result} />
                       </div>
@@ -644,19 +612,19 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-2">
                     {allResults.map((result, index) => (
                       <div
-                        className={`animate-fade-up rounded-2xl ${
+                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
                           index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                         }`}
                         data-hotkey-index={index}
                         key={index}
-                        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
                       >
                         <ResultCard autoOpenMap={isMapPage} eager={index < 4} globals={globals} result={result} />
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className={`relative mt-2 ${dragKey !== null ? "select-none" : ""}`}>
+                  <div className="relative mt-2">
                     {(() => {
                       // Mixed search: one collapsible block per original
                       // search category (pure relevance order inside), in tab
@@ -666,67 +634,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                       const blocks = collectBlocks(allResults);
                       // persisted user order first (tab order is the
                       // fallback), then categories never seen before
-                      const orderedKeys = [
-                        ...blockOrder.filter((key) => blocks.has(key)),
-                        ...[...blocks.keys()].filter((key) => !blockOrder.includes(key)),
-                      ];
+                      const orderedKeys = [...blocks.keys()];
                       const isCollapsed = (key: string) => Boolean(collapsedBlocks[key]);
                       const toggle = (key: string) => setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
-                      const commitMove = (key: string, index: number) => {
-                        const order = orderedKeys.filter((candidate) => candidate !== key);
-                        const at = Math.min(Math.max(index, 0), order.length);
-                        order.splice(at, 0, key);
-                        setBlockOrder(order);
-                        try {
-                          localStorage.setItem(BLOCK_ORDER_KEY, JSON.stringify(order));
-                        } catch {}
-                      };
-                      const gripFor = (key: string): GripHandlers => ({
-                        onPointerDown: (event) => {
-                          if (event.button !== 0) {
-                            return;
-                          }
-                          event.stopPropagation();
-                          dragRectsRef.current = Array.from(
-                            listRef.current?.querySelectorAll<HTMLElement>("[data-block-key]") ?? [],
-                          ).map((el) => {
-                            const rect = el.getBoundingClientRect();
-                            return {
-                              key: el.dataset.blockKey ?? "",
-                              top: rect.top,
-                              bottom: rect.bottom,
-                              midY: rect.top + rect.height / 2,
-                              left: rect.left,
-                              width: rect.width,
-                            };
-                          });
-                          dragActiveRef.current = true;
-                          setDragKey(key);
-                          event.currentTarget.setPointerCapture(event.pointerId);
-                        },
-                        onPointerUp: (event) => {
-                          if (!dragActiveRef.current) {
-                            return;
-                          }
-                          dragActiveRef.current = false;
-                          const y = event.clientY;
-                          setDragKey(null);
-                          const others = dragRectsRef.current.filter((rect) => rect.key !== key);
-                          commitMove(key, others.filter((rect) => rect.midY < y).length);
-                        },
-                        onKeyDown: (event) => {
-                          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
-                            return;
-                          }
-                          event.preventDefault();
-                          const from = orderedKeys.indexOf(key);
-                          const to = from + (event.key === "ArrowUp" ? -1 : 1);
-                          if (from < 0 || to < 0 || to >= orderedKeys.length) {
-                            return;
-                          }
-                          commitMove(key, to);
-                        },
-                      });
                       return (
                         <>
                           {orderedKeys.map((key) => {
@@ -735,16 +645,11 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                             const results = items.map(({ result }) => result);
                             const indexOffset = items[0]?.index ?? 0;
                             return (
-                              <section
-                                className={`mt-6 first:mt-0 ${dragKey === key ? "opacity-40" : ""}`}
-                                data-block-key={key}
-                                key={key}
-                              >
+                              <section className="mt-6 first:mt-0" data-block-key={key} key={key}>
                                 <GroupHeader
                                   category={key}
                                   collapsed={collapsed}
                                   count={items.length}
-                                  grip={gripFor(key)}
                                   label={globals.category_labels[key] ?? key}
                                   onToggle={() => {
                                     toggle(key);
@@ -786,12 +691,16 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                       <div>
                                         {items.map(({ result, index }) => (
                                           <div
-                                            className={`animate-fade-up rounded-2xl ${
+                                            className={`rounded-2xl ${
                                               index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                            }`}
+                                            } ${index < 12 ? "animate-fade-up" : ""}`}
                                             data-hotkey-index={index}
                                             key={index}
-                                            style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                                            style={
+                                              index < 12
+                                                ? { animationDelay: `${Math.min(index * 30, 300)}ms` }
+                                                : undefined
+                                            }
                                           >
                                             <ResultCard
                                               autoOpenMap={isMapPage}

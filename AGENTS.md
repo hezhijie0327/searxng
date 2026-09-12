@@ -170,11 +170,10 @@ its content, all sharing one visual language:
   other — pure relevance order inside each block, in tab order by
   default.  Blocks are titled with the bare category name (综合 / 图片 /
   ... via `category_labels`), never with a 结果 suffix.  Each block
-  header (category icon + label + count + chevron) toggles collapse, and
-  the `::` grip on the header drag-reorders blocks (pointer capture +
-  arrow-key fallback; order persists in localStorage
-  `zjs-block-order`).  This is the quick-locate mechanism and it works
-  on mobile.  Every block renders the same full presentation as its
+  header (category icon + label + count + chevron) toggles collapse —
+  folding is the quick-locate mechanism and it works on mobile.  Blocks
+  default to expanded; do not reintroduce compact strip previews or
+  drag-reorder handles for them (both were tried and removed).  Every block renders the same full presentation as its
   single-category page (`ImageGrid` masonry, `VideoGrid`/`MusicGrid`/
   `FilesGrid`/`PackageGrid` full grids) — never a stripped-down preview.
   Grid cells take `indexOffset` so hotkey indices stay page-global.
