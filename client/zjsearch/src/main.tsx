@@ -3,6 +3,7 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./app.tsx";
 import { extractPageData, parseClientSettings, parseEmbeddedPageData } from "./lib/pageData.ts";
+import { watchSystemTheme } from "./lib/theme.ts";
 import type { AnyPageData } from "./lib/types.ts";
 import "./styles/global.css";
 
@@ -31,6 +32,7 @@ async function bootstrap(): Promise<void> {
   if (!container) {
     return;
   }
+  watchSystemTheme();
   const initialData = await bootData();
   const settings = parseClientSettings();
   createRoot(container).render(<App initialData={initialData} settings={settings} />);

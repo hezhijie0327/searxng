@@ -18,15 +18,17 @@ module script tag.  See ``client/zjsearch/`` for the UI implementation. -#}
   <title>{% block title %}{% endblock %}{{ instance_name }}</title>
   <script>
     // resolve the light/dark mode before first paint: explicit preference from
-    // the cookie, otherwise follow the system setting
+    // the cookie (the server writes "auto" when the preference is auto),
+    // otherwise follow the system setting
     (function () {
       var style = "";
       try {
         var m = document.cookie.match(/(?:^|; *)simple_style=(\w+)/);
         style = m ? m[1] : "";
       } catch (e) { /* ignore */ }
+      var auto = style !== "light" && style !== "dark" && style !== "black";
       var dark = style === "dark" || style === "black" ||
-        (!style && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+        (auto && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.classList.toggle("dark", dark);
       document.documentElement.classList.toggle("black", style === "black");
     })();

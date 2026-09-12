@@ -36,3 +36,12 @@ export function writeThemeStyle(style: ThemeStyle) {
     document.cookie = `simple_style=${style}; path=/; max-age=157680000; samesite=lax`;
   }
 }
+
+/** Live-follow system theme switches while the page is open (auto mode). */
+export function watchSystemTheme() {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (readThemeStyle() === "auto") {
+      applyThemeStyle("auto");
+    }
+  });
+}
