@@ -164,14 +164,16 @@ its content, all sharing one visual language:
 - FilesGrid has no cover art: the tile shows a type icon + detected file
   extension, the filesize takes the badge slot, seed/leech health reads as
   colored ↑↓ counts, and the magnet link is an accent circle button.
-- Mixed searches keep the generic list: paper/torrent results render as
-  their list cards inline, while media sections consolidate after the
-  untyped results in a fixed order (images → videos → news → music) with a
-  group header and a client-side "show more" pill — never navigate on
-  expand. Music-category results with the default template (genius, ...)
-  join the music section, so every intent page shares one presentation per
-  category (see `groupKey`). Grid cells take `indexOffset` so hotkey
-  indices stay page-global.
+- Mixed searches keep the generic list for paper results, while media
+  sections consolidate after the untyped results in a fixed order
+  (images → videos → news → music → files) and render as **fixed-row
+  horizontal strips** (`Strip.tsx`) paged with left/right arrows — nothing
+  expands in place, all results stay reachable by scrolling. Sections use
+  the same cells as their single-category page (`ImageStrip` tiles +
+  shared lightbox, `VideoGrid`/`MusicGrid`/`FilesGrid` `variant="strip"`)
+  so the presentation stays visually identical. Music-category default
+  results and torrent/file results join their sections via `groupKey`;
+  grid cells take `indexOffset` so hotkey indices stay page-global.
 
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /

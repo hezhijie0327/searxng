@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import {
   NewsCard,
@@ -13,10 +13,11 @@ import {
   VideoGrid,
 } from "../components/results/cards.tsx";
 import { FilesGrid } from "../components/results/FilesGrid.tsx";
-import { ImageGrid } from "../components/results/ImageGrid.tsx";
+import { ImageGrid, ImageStrip } from "../components/results/ImageGrid.tsx";
 import { MusicGrid } from "../components/results/MusicGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
 import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
+import { Strip } from "../components/results/Strip.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
@@ -120,14 +121,18 @@ function Corrections({ data, onSearch }: { data: SearchPageData; onSearch: (q: s
   );
 }
 
-/** Mixed searches group results by template; music-category results that
-    carry the default template (genius, ...) still belong to a music section
-    so every intent page shares one presentation per category. */
+/** Mixed searches group results by template; music results that carry the
+    default template (genius, ...) and torrent/file downloads belong to
+    their own sections so every category shares one presentation. */
 function groupKey(result: ResultItem): string {
-  if (result.template === "default" && result.category === "music") {
+  const template = result.template || "default";
+  if (template === "default" && result.category === "music") {
     return "music";
   }
-  return result.template || "default";
+  if (template === "torrent" || template === "file") {
+    return "files";
+  }
+  return template;
 }
 
 /** Consecutive same-template results form groups (image strips in mixed mode). */
@@ -148,15 +153,11 @@ function groupResults(
   return groups;
 }
 
-/** Sections that get a Kagi/Google-style header.  Special-typed results
-    interleave heavily in mixed searches, so each section type is
-    consolidated into a single group and rendered in this fixed order after
-    the untyped results. */
-const SECTION_TEMPLATES = new Set(["images", "videos", "news", "music"]);
-const SECTION_ORDER = ["images", "videos", "news", "music"];
-
-/** items shown in a collapsed strip; the pill expands to the full set */
-const SECTION_CAPS: Record<string, number> = { images: 8, videos: 6, news: 6, music: 8 };
+/** Sections that get a Kagi/Google-style header.  They render as fixed-row
+    horizontal strips (paged with left/right arrows) in this fixed order
+    after the untyped results - nothing expands in place. */
+const SECTION_TEMPLATES = new Set(["images", "videos", "news", "music", "files"]);
+const SECTION_ORDER = ["images", "videos", "news", "music", "files"];
 
 function consolidateGroups(
   groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
@@ -180,38 +181,16 @@ function consolidateGroups(
   return out;
 }
 
-/** Kagi/Google-style section header for a same-type result group: category
-    icon + translated label + count, and a chevron that expands the group to
-    its full-page layout client-side (no re-fetch). */
-function GroupHeader({
-  category,
-  label,
-  count,
-  expanded,
-  onToggle,
-}: {
-  category: string;
-  label: string;
-  count: number;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
+/** Kagi/Google-style section header: category icon + translated label +
+    result count.  Browsing happens inside the strip below it. */
+function GroupHeader({ category, label, count }: { category: string; label: string; count: number }) {
   return (
-    <div className="flex items-center justify-between gap-2 pb-1 pt-5 first:pt-1">
+    <div className="flex items-center gap-1.5 pb-1 pt-5 first:pt-1">
       <h2 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
         <CategoryIcon category={category} className="size-4 text-accent" />
         {label}
         <span className="font-normal text-ink-3">{count}</span>
       </h2>
-      <button
-        aria-label={label}
-        className="grid size-7 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-        onClick={onToggle}
-        title={label}
-        type="button"
-      >
-        {expanded ? <ChevronLeftIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
-      </button>
     </div>
   );
 }
@@ -293,7 +272,6 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
   const [appendState, setAppendState] = useState<"idle" | "loading" | "error" | "done">("idle");
@@ -627,42 +605,28 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                     {(() => {
                       const groups = consolidateGroups(groupResults(allResults));
                       // media sections render after the untyped results in a
-                      // fixed order; an expanded section takes over the page
+                      // fixed order, each a fixed-row strip paged in place
                       const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
                       const sections = SECTION_ORDER.map((template) =>
                         groups.find((group) => group.template === template),
                       ).filter((group) => group !== undefined);
-                      const visibleSections = expandedSection
-                        ? sections.filter((group) => group.template === expandedSection)
-                        : sections;
                       const renderSection = (group: (typeof sections)[number], groupIndex: number) => {
                         const label = globals.category_labels[group.template] ?? group.template;
-                        const expanded = expandedSection === group.template;
-                        // expand/collapse happens client-side from the
-                        // already-fetched results - no navigation involved
-                        const shown = expanded ? group.items : group.items.slice(0, SECTION_CAPS[group.template]);
-                        const results = shown.map(({ result }) => result);
+                        const results = group.items.map(({ result }) => result);
                         const indexOffset = group.items[0]?.index ?? 0;
                         return (
                           <section key={`${group.template}-${groupIndex}`}>
-                            <GroupHeader
-                              category={group.template}
-                              count={group.items.length}
-                              expanded={expanded}
-                              label={label}
-                              onToggle={() => {
-                                setExpandedSection(expanded ? null : group.template);
-                              }}
-                            />
+                            <GroupHeader category={group.template} count={group.items.length} label={label} />
                             <div className="mt-1">
                               {group.template === "images" ? (
-                                <ImageGrid results={results} />
+                                <ImageStrip results={results} />
                               ) : group.template === "videos" ? (
                                 <VideoGrid
                                   globals={globals}
                                   indexOffset={indexOffset}
                                   results={results}
                                   selected={hotkeysSelected}
+                                  variant="strip"
                                 />
                               ) : group.template === "music" ? (
                                 <MusicGrid
@@ -670,41 +634,38 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                   indexOffset={indexOffset}
                                   results={results}
                                   selected={hotkeysSelected}
+                                  variant="strip"
+                                />
+                              ) : group.template === "files" ? (
+                                <FilesGrid
+                                  globals={globals}
+                                  indexOffset={indexOffset}
+                                  results={results}
+                                  selected={hotkeysSelected}
+                                  variant="strip"
                                 />
                               ) : (
-                                <div className="space-y-1">
-                                  {shown.map(({ result, index }) => (
+                                <Strip rows={1}>
+                                  {group.items.map(({ result, index }) => (
                                     <div
-                                      className={`animate-fade-up rounded-2xl ${
+                                      className={`h-full rounded-2xl ${
                                         index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
                                       }`}
                                       data-hotkey-index={index}
                                       key={index}
-                                      style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                                     >
                                       <NewsCard globals={globals} result={result} />
                                     </div>
                                   ))}
-                                </div>
+                                </Strip>
                               )}
-                            </div>
-                            <div className="mt-2">
-                              <button
-                                className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-4 py-1.5 text-[13px] text-ink-2 transition-colors hover:text-ink"
-                                onClick={() => {
-                                  setExpandedSection(expanded ? null : group.template);
-                                }}
-                                type="button"
-                              >
-                                {expanded ? t("show_less") : t("show_more")}
-                              </button>
                             </div>
                           </section>
                         );
                       };
                       return (
                         <>
-                          {(expandedSection ? [] : rest).map((group, groupIndex) => (
+                          {rest.map((group, groupIndex) => (
                             <div key={groupIndex}>
                               {group.items.map(({ result, index }) => (
                                 <div
@@ -725,7 +686,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                               ))}
                             </div>
                           ))}
-                          {visibleSections.map((group, i) => renderSection(group, i))}
+                          {sections.map((group, i) => renderSection(group, i))}
                         </>
                       );
                     })()}

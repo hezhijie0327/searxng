@@ -22,6 +22,7 @@ import {
   StarIcon,
 } from "../icons.tsx";
 import { MapResult } from "./MapView.tsx";
+import { Strip } from "./Strip.tsx";
 
 export const THEME_STATIC = "/static/themes/zjsearch";
 
@@ -1111,125 +1112,128 @@ export function VideoGrid({
   globals,
   selected,
   indexOffset = 0,
+  variant = "grid",
 }: {
   results: ResultItem[];
   globals: GlobalData;
   selected?: number;
   /** hotkey indices are page-global: offset by the grid's first result index */
   indexOffset?: number;
+  /** "strip" renders the same cells in a fixed-row horizontal carousel */
+  variant?: "grid" | "strip";
 }) {
   const t = useT();
   const [playing, setPlaying] = useState<number | null>(null);
-  return (
-    <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {results.map((result, index) => {
-        const length = formatLength(result.length_display, result.length_seconds);
-        const isPlaying = playing === index;
-        const hotkeyIndex = indexOffset + index;
-        return (
-          <article
-            className={`group rounded-2xl ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
-            data-hotkey-index={hotkeyIndex}
-            key={`${result.url}-${index}`}
+  const cells = results.map((result, index) => {
+    const length = formatLength(result.length_display, result.length_seconds);
+    const isPlaying = playing === index;
+    const hotkeyIndex = indexOffset + index;
+    return (
+      <article
+        className={`group rounded-2xl ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
+        data-hotkey-index={hotkeyIndex}
+        key={`${result.url}-${index}`}
+      >
+        <div className="relative">
+          <ResultLink
+            className="relative block aspect-video overflow-hidden rounded-xl bg-surface-2"
+            globals={globals}
+            result={result}
           >
-            <div className="relative">
-              <ResultLink
-                className="relative block aspect-video overflow-hidden rounded-xl bg-surface-2"
-                globals={globals}
-                result={result}
-              >
-                {result.thumbnail ? (
-                  <img
-                    alt={result.title_text}
-                    className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    decoding="async"
-                    loading="lazy"
-                    onError={(event) => {
-                      event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
-                    }}
-                    src={result.thumbnail}
-                  />
-                ) : (
-                  <span className="grid size-full place-items-center text-ink-3">
-                    <PlayIcon className="size-8" />
-                  </span>
-                )}
-                {length ? (
-                  <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
-                    {length}
-                  </span>
-                ) : null}
-                {result.favicon ? (
-                  <img
-                    alt=""
-                    className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
-                    decoding="async"
-                    loading="lazy"
-                    onError={(event) => {
-                      event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
-                    }}
-                    src={result.favicon}
-                  />
-                ) : null}
-              </ResultLink>
-              {result.iframe_src && isPlaying ? (
-                <div className="absolute inset-0 z-10 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
-                  <iframe
-                    allowFullScreen
-                    className="size-full"
-                    referrerPolicy="origin"
-                    src={result.iframe_src ?? ""}
-                    title={result.title_text}
-                  />
-                </div>
-              ) : null}
-              {result.iframe_src && isPlaying ? (
-                <button
-                  aria-label={t("hide_video")}
-                  className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
-                  onClick={() => {
-                    setPlaying(null);
-                  }}
-                  title={t("hide_video")}
-                  type="button"
-                >
-                  <CloseIcon className="size-3.5" />
-                </button>
-              ) : result.iframe_src ? (
-                <button
-                  aria-label={t("play")}
-                  className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-ink group-hover:opacity-100"
-                  onClick={() => {
-                    setPlaying(index);
-                  }}
-                  title={t("play")}
-                  type="button"
-                >
-                  <PlayIcon className="size-5 translate-x-px" />
-                </button>
-              ) : null}
-            </div>
-            <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
-              <ResultLink
-                className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
-                globals={globals}
-                result={result}
-              >
-                <span dangerouslySetInnerHTML={{ __html: result.title_html }} dir="auto" />
-              </ResultLink>
-            </h3>
-            <div className="mt-1.5 flex items-center justify-between gap-3 text-xs text-ink-3">
-              <span className="truncate" dir="auto">
-                {result.author || result.engines[0]}
+            {result.thumbnail ? (
+              <img
+                alt={result.title_text}
+                className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                decoding="async"
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.src = `${THEME_STATIC}/img/img_load_error.svg`;
+                }}
+                src={result.thumbnail}
+              />
+            ) : (
+              <span className="grid size-full place-items-center text-ink-3">
+                <PlayIcon className="size-8" />
               </span>
-              <span className="shrink-0">{result.published_date ? formatDate(result.published_date) : null}</span>
+            )}
+            {length ? (
+              <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
+                {length}
+              </span>
+            ) : null}
+            {result.favicon ? (
+              <img
+                alt=""
+                className="absolute bottom-2 left-2 size-6 rounded-full bg-white ring-1 ring-white/25"
+                decoding="async"
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.src = `${THEME_STATIC}/img/empty_favicon.svg`;
+                }}
+                src={result.favicon}
+              />
+            ) : null}
+          </ResultLink>
+          {result.iframe_src && isPlaying ? (
+            <div className="absolute inset-0 z-10 animate-fade-in overflow-hidden rounded-xl border border-line bg-black">
+              <iframe
+                allowFullScreen
+                className="size-full"
+                referrerPolicy="origin"
+                src={result.iframe_src ?? ""}
+                title={result.title_text}
+              />
             </div>
-            {result.views ? <div className="mt-0.5 text-xs text-ink-3">{result.views}</div> : null}
-          </article>
-        );
-      })}
-    </div>
-  );
+          ) : null}
+          {result.iframe_src && isPlaying ? (
+            <button
+              aria-label={t("hide_video")}
+              className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+              onClick={() => {
+                setPlaying(null);
+              }}
+              title={t("hide_video")}
+              type="button"
+            >
+              <CloseIcon className="size-3.5" />
+            </button>
+          ) : result.iframe_src ? (
+            <button
+              aria-label={t("play")}
+              className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-ink group-hover:opacity-100"
+              onClick={() => {
+                setPlaying(index);
+              }}
+              title={t("play")}
+              type="button"
+            >
+              <PlayIcon className="size-5 translate-x-px" />
+            </button>
+          ) : null}
+        </div>
+        <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
+          <ResultLink
+            className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
+            globals={globals}
+            result={result}
+          >
+            <span dangerouslySetInnerHTML={{ __html: result.title_html }} dir="auto" />
+          </ResultLink>
+        </h3>
+        <div className="mt-1.5 flex items-center justify-between gap-3 text-xs text-ink-3">
+          <span className="truncate" dir="auto">
+            {result.author || result.engines[0]}
+          </span>
+          <span className="shrink-0">{result.published_date ? formatDate(result.published_date) : null}</span>
+        </div>
+        {result.views ? <div className="mt-0.5 text-xs text-ink-3">{result.views}</div> : null}
+      </article>
+    );
+  });
+  if (variant === "strip") {
+    return <Strip rows={1}>{cells}</Strip>;
+  }
+  return <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{cells}</div>;
 }
 
 export function FallbackCard(props: CardProps) {
