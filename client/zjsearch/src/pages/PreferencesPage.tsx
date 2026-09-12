@@ -886,28 +886,31 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             </div>
           ) : null}
         </div>
-        <p className="mt-6 text-center text-xs text-ink-3">
-          {t("powered_by")}{" "}
-          <a
-            className="transition-colors hover:text-accent hover:underline"
-            href={globals.git_url}
-            rel="noreferrer"
-            target="_blank"
-          >
-            SearXNG
-          </a>
-          {globals.version ? <span className="ms-1 opacity-70">v{globals.version}</span> : null}
-          {" · "}
-          {t("license")}:{" "}
-          <a
-            className="transition-colors hover:text-accent hover:underline"
-            href="/static/themes/zjsearch/LICENSE.txt"
-            rel="noreferrer"
-            target="_blank"
-          >
-            Apache-2.0 with Commons Clause v1.0
-          </a>
-        </p>
+        <div className="mt-6 space-y-1 text-center text-xs text-ink-3">
+          <p className="leading-5">
+            {t("powered_by")}{" "}
+            <a
+              className="transition-colors hover:text-accent hover:underline"
+              href={globals.git_url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              SearXNG
+            </a>
+            {globals.version ? <span className="ms-1 opacity-70">v{globals.version}</span> : null}
+          </p>
+          <p className="leading-5">
+            {t("license")}:{" "}
+            <a
+              className="transition-colors hover:text-accent hover:underline"
+              href="/static/themes/zjsearch/LICENSE.txt"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Apache-2.0 with Commons Clause v1.0
+            </a>
+          </p>
+        </div>
       </main>
     </Shell>
   );
