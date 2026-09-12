@@ -799,7 +799,12 @@ export function PaperCard({ result, globals }: CardProps) {
     venueBits.length > 0 ? venueBits.join(", ") : null,
     result.published_date ? formatDate(result.published_date) : null,
   ];
-  const chips = [...(result.paper_type ? [result.paper_type] : []), ...(result.tags ?? [])];
+  // every optional extra (PDF/HTML, DOI, citation note, subject tags) lives
+  // in ONE footer row in a fixed order, so cards share the same skeleton no
+  // matter which fields the source engine provides
+  const maxTags = 2;
+  const tags = result.tags ?? [];
+  const hasFooter = Boolean(result.pdf_url || result.html_url || result.doi || result.comments || tags.length > 0);
   return (
     <ResultArticle priority={result.priority}>
       <div className="flex gap-4">
@@ -820,13 +825,8 @@ export function PaperCard({ result, globals }: CardProps) {
               dir="auto"
             />
           ) : null}
-          {result.comments ? (
-            <p className="mt-1.5 text-sm italic text-ink-3" dir="auto">
-              {result.comments}
-            </p>
-          ) : null}
-          {result.pdf_url || result.html_url || result.doi ? (
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          {hasFooter ? (
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
               {result.pdf_url ? (
                 <a
                   className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
@@ -860,15 +860,25 @@ export function PaperCard({ result, globals }: CardProps) {
                   DOI {result.doi}
                 </a>
               ) : null}
-            </div>
-          ) : null}
-          {chips.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {chips.map((chip) => (
-                <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-3" key={chip}>
-                  {chip}
+              {result.comments ? (
+                <span className="min-w-0 truncate text-ink-3 italic" dir="auto" title={result.comments}>
+                  {result.comments}
+                </span>
+              ) : null}
+              {tags.slice(0, maxTags).map((tag) => (
+                <span
+                  className="max-w-40 truncate rounded-full bg-surface-2 px-2 py-0.5 text-ink-3"
+                  key={tag}
+                  title={tag}
+                >
+                  {tag}
                 </span>
               ))}
+              {tags.length > maxTags ? (
+                <span className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-3" title={tags.join(", ")}>
+                  +{tags.length - maxTags}
+                </span>
+              ) : null}
             </div>
           ) : null}
         </div>
