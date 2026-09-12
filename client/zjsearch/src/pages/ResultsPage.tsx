@@ -656,7 +656,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                   }}
                                 />
                                 {!collapsed ? (
-                                  <div className="mt-1">
+                                  <div className="mt-1 space-y-1">
                                     {key === "images" ? (
                                       <ImageGrid results={results} />
                                     ) : key === "videos" ? (
