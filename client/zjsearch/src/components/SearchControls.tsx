@@ -45,11 +45,11 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
 
   return (
-    <div className={`flex items-center gap-0.5 py-1 ${wrap ? "justify-center" : ""}`}>
+    <div className="flex items-center py-1">
       <div
         className={`min-w-0 ${
           wrap
-            ? "grid w-full grid-cols-3 justify-items-center gap-y-0.5 sm:grid-cols-5"
+            ? "flex flex-wrap items-center gap-x-1 gap-y-0.5"
             : "flex items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         }`}
       >
