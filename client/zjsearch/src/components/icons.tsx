@@ -487,6 +487,7 @@ const CATEGORY_ICONS: Record<string, (props: IconProps) => ReactNode> = {
   map: LocationIcon,
   music: MusicIcon,
   news: NewsIcon,
+  packages: PackageIcon,
   radio: RadioIcon,
   science: FlaskIcon,
   "social media": PeopleIcon,

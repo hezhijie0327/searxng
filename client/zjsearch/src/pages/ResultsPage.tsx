@@ -15,6 +15,7 @@ import {
 import { FilesGrid } from "../components/results/FilesGrid.tsx";
 import { ImageGrid, ImageStrip } from "../components/results/ImageGrid.tsx";
 import { MusicGrid } from "../components/results/MusicGrid.tsx";
+import { PackageGrid } from "../components/results/PackageGrid.tsx";
 import { Pagination } from "../components/results/Pagination.tsx";
 import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
 import { Strip } from "../components/results/Strip.tsx";
@@ -156,8 +157,8 @@ function groupResults(
 /** Sections that get a Kagi/Google-style header.  They render as fixed-row
     horizontal strips (paged with left/right arrows) in this fixed order
     after the untyped results - nothing expands in place. */
-const SECTION_TEMPLATES = new Set(["images", "videos", "news", "music", "files"]);
-const SECTION_ORDER = ["images", "videos", "news", "music", "files"];
+const SECTION_TEMPLATES = new Set(["images", "videos", "news", "music", "files", "packages"]);
+const SECTION_ORDER = ["images", "videos", "news", "music", "files", "packages"];
 
 function consolidateGroups(
   groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
@@ -604,14 +605,50 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-2">
                     {(() => {
                       const groups = consolidateGroups(groupResults(allResults));
-                      // media sections render after the untyped results in a
-                      // fixed order, each a fixed-row strip paged in place
-                      const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
+                      // Sections render after the first page's untyped results
+                      // in a fixed order, each a fixed-row strip paged in
+                      // place.  Infinite-scroll appends flow BELOW the strips,
+                      // so the sections stay reachable no matter how much
+                      // content streams in (appended media still merges into
+                      // the strips above).
+                      const firstPageCount = data.results.length;
+                      const beforeRest: Array<(typeof groups)[number]> = [];
+                      const afterRest: Array<(typeof groups)[number]> = [];
+                      for (const group of groups) {
+                        if (SECTION_TEMPLATES.has(group.template)) {
+                          continue;
+                        }
+                        ((group.items[0]?.index ?? 0) < firstPageCount ? beforeRest : afterRest).push(group);
+                      }
                       const sections = SECTION_ORDER.map((template) =>
                         groups.find((group) => group.template === template),
                       ).filter((group) => group !== undefined);
+                      const renderRest = (list: Array<(typeof groups)[number]>) =>
+                        list.map((group, groupIndex) => (
+                          <div key={`${groupIndex}-${group.items[0]?.index}`}>
+                            {group.items.map(({ result, index }) => (
+                              <div
+                                className={`animate-fade-up rounded-2xl ${
+                                  index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                                }`}
+                                data-hotkey-index={index}
+                                key={index}
+                                style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                              >
+                                <ResultCard
+                                  autoOpenMap={isMapPage}
+                                  eager={index < 4}
+                                  globals={globals}
+                                  result={result}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        ));
                       const renderSection = (group: (typeof sections)[number], groupIndex: number) => {
-                        const label = globals.category_labels[group.template] ?? group.template;
+                        // category_labels only covers tab categories - fall
+                        // back to the theme catalog for the rest (packages)
+                        const label = globals.category_labels[group.template] ?? t(group.template);
                         const results = group.items.map(({ result }) => result);
                         const indexOffset = group.items[0]?.index ?? 0;
                         return (
@@ -644,6 +681,14 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                   selected={hotkeysSelected}
                                   variant="strip"
                                 />
+                              ) : group.template === "packages" ? (
+                                <PackageGrid
+                                  globals={globals}
+                                  indexOffset={indexOffset}
+                                  results={results}
+                                  selected={hotkeysSelected}
+                                  variant="strip"
+                                />
                               ) : (
                                 <Strip rows={1}>
                                   {group.items.map(({ result, index }) => (
@@ -665,28 +710,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                       };
                       return (
                         <>
-                          {rest.map((group, groupIndex) => (
-                            <div key={groupIndex}>
-                              {group.items.map(({ result, index }) => (
-                                <div
-                                  className={`animate-fade-up rounded-2xl ${
-                                    index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                  }`}
-                                  data-hotkey-index={index}
-                                  key={index}
-                                  style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-                                >
-                                  <ResultCard
-                                    autoOpenMap={isMapPage}
-                                    eager={index < 4}
-                                    globals={globals}
-                                    result={result}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          ))}
+                          {renderRest(beforeRest)}
                           {sections.map((group, i) => renderSection(group, i))}
+                          {renderRest(afterRest)}
                         </>
                       );
                     })()}

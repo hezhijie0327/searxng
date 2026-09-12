@@ -165,15 +165,18 @@ its content, all sharing one visual language:
   extension, the filesize takes the badge slot, seed/leech health reads as
   colored ↑↓ counts, and the magnet link is an accent circle button.
 - Mixed searches keep the generic list for paper results, while media
-  sections consolidate after the untyped results in a fixed order
-  (images → videos → news → music → files) and render as **fixed-row
-  horizontal strips** (`Strip.tsx`) paged with left/right arrows — nothing
-  expands in place, all results stay reachable by scrolling. Sections use
-  the same cells as their single-category page (`ImageStrip` tiles +
-  shared lightbox, `VideoGrid`/`MusicGrid`/`FilesGrid` `variant="strip"`)
-  so the presentation stays visually identical. Music-category default
-  results and torrent/file results join their sections via `groupKey`;
-  grid cells take `indexOffset` so hotkey indices stay page-global.
+  sections consolidate and render as **fixed-row horizontal strips**
+  (`Strip.tsx`) paged with left/right arrows — nothing expands in place,
+  all results stay reachable by scrolling. Sections use the same cells as
+  their single-category page (`ImageStrip` tiles + shared lightbox,
+  `VideoGrid`/`MusicGrid`/`FilesGrid`/`PackageGrid` `variant="strip"`) so
+  the presentation stays visually identical. Music-category default
+  results, torrent/file results and package results join their sections
+  via `groupKey`; grid cells take `indexOffset` so hotkey indices stay
+  page-global. **Placement matters with infinite scroll**: sections sit
+  after the FIRST page's untyped results and appended pages flow below
+  the strips (otherwise an ever-growing stream would push the sections
+  out of reach forever); appended media still merges into the strips.
 
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /
