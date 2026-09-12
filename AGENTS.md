@@ -90,7 +90,9 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   ResultsPage derives the presentation category from the results' common
   category (`bangCategory`) — that is how `!imdb` lands on the movies
   PosterGrid.  Movies = tmdb/imdb/moviepilot/rottentomatoes/senscritique;
-  tmdb is disabled upstream, dev-settings.yml enables it.
+  tmdb is disabled upstream, dev-settings.yml enables it.  Dictionary bangs
+  (`!dictionaries` / `!define`) render DictionaryCard word entries; wordnik
+  definitions additionally arrive as a translations answer.
 - Respect `prefers-reduced-motion`; RTL uses Tailwind logical properties (`ps-`,
   `me-`, `start-`, `end-`) against a single stylesheet.
 - Text result cards keep fixed height slots so every card in a list is the

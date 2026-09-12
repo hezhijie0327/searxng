@@ -5,6 +5,7 @@ import { HelpModal } from "../components/HelpModal.tsx";
 import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, GripVerticalIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import {
+  DictionaryCard,
   NewsCard,
   PaperCard,
   PosterGrid,
@@ -450,16 +451,18 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const isImagePage =
     (data.only_template === "images" || singleCategory === "images" || bangCategory === "images") &&
     allResults.every((result) => result.template === "images" || result.thumbnail_src || result.img_src);
-  const isVideoPage =
-    data.only_template === "videos" || singleCategory === "videos" || bangCategory === "videos";
+  const isVideoPage = data.only_template === "videos" || singleCategory === "videos" || bangCategory === "videos";
   const isProductPage =
-    (data.only_template === "products" || singleCategory === "products" || bangCategory === "products") &&
-    !isVideoPage;
+    (data.only_template === "products" || singleCategory === "products" || bangCategory === "products") && !isVideoPage;
   const isNewsPage = (singleCategory === "news" || bangCategory === "news") && !isImagePage && !isVideoPage;
   const isMapPage = (singleCategory === "map" || bangCategory === "map") && !isImagePage && !isVideoPage;
   const isMusicPage = (singleCategory === "music" || bangCategory === "music") && !isImagePage && !isVideoPage;
-  const isMoviesPage =
-    (singleCategory === "movies" || bangCategory === "movies") && !isImagePage && !isVideoPage;
+  const isMoviesPage = (singleCategory === "movies" || bangCategory === "movies") && !isImagePage && !isVideoPage;
+  const isDictionaryPage =
+    singleCategory === "dictionaries" ||
+    singleCategory === "define" ||
+    bangCategory === "dictionaries" ||
+    bangCategory === "define";
   // science intent renders every result in the scholarly layout; a
   // paper-only bang search (`!pubmed ...`) gets the same treatment
   const isSciencePage =
@@ -589,6 +592,21 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 ) : isMoviesPage ? (
                   <div className="mt-4">
                     <PosterGrid globals={globals} results={allResults} selected={hotkeysSelected} />
+                  </div>
+                ) : isDictionaryPage ? (
+                  <div className="mt-2 space-y-1">
+                    {allResults.map((result, index) => (
+                      <div
+                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
+                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                        }`}
+                        data-hotkey-index={index}
+                        key={index}
+                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
+                      >
+                        <DictionaryCard globals={globals} result={result} />
+                      </div>
+                    ))}
                   </div>
                 ) : isSciencePage ? (
                   <div className="mt-2 space-y-1">
