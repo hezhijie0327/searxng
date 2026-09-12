@@ -6,7 +6,8 @@
  * dismissal.
  */
 
-import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CheckIcon } from "./icons.tsx";
 
 export interface DropdownOption {
@@ -45,25 +46,48 @@ export function Dropdown({
   const [active, setActive] = useState(-1);
   const rootRef = useRef<HTMLDivElement>(null);
   const current = options.find((option) => option.value === value);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties | null>(null);
 
-  // close on outside clicks
+  // close on outside clicks (the portaled menu counts as inside)
   useEffect(() => {
     if (!open) {
       return;
     }
     const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) {
         setOpen(false);
       }
     };
+    // a fixed-position menu cannot follow its trigger — close on scroll/resize
+    const onMove = () => {
+      setOpen(false);
+    };
     window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("scroll", onMove, true);
+    window.addEventListener("resize", onMove);
     return () => {
       window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("scroll", onMove, true);
+      window.removeEventListener("resize", onMove);
     };
   }, [open]);
 
   const openMenu = () => {
     setActive(options.findIndex((option) => option.value === value));
+    // the menu renders in a portal (fixed positioning) so overflow-x-auto
+    // ancestors — the tab and filter rows — cannot clip it
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setMenuStyle({
+        position: "fixed",
+        top: rect.bottom + 6,
+        ...(align === "end" ? { right: window.innerWidth - rect.right } : { left: rect.left }),
+        minWidth: Math.max(rect.width, 176),
+      });
+    }
     setOpen(true);
   };
 
@@ -135,6 +159,7 @@ export function Dropdown({
           }
         }}
         onKeyDown={onKeyDown}
+        ref={triggerRef}
         role="combobox"
         type="button"
       >
@@ -154,43 +179,46 @@ export function Dropdown({
         )}
       </button>
 
-      {open ? (
-        <ul
-          aria-label={ariaLabel}
-          className={`absolute top-full z-40 mt-1.5 max-h-80 min-w-44 overflow-auto rounded-2xl border border-line bg-surface py-1.5 shadow-pop animate-fade-in ${
-            align === "end" ? "end-0" : "start-0"
-          } ${menuClassName}`}
-          role="listbox"
-        >
-          {options.map((option, index) => {
-            const selected = option.value === value;
-            return (
-              <li aria-selected={selected} key={option.value} role="option">
-                <button
-                  className={`flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm ${
-                    index === active ? "bg-surface-2" : ""
-                  }`}
-                  onClick={() => {
-                    pick(index);
-                  }}
-                  onMouseEnter={() => {
-                    setActive(index);
-                  }}
-                  type="button"
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    {option.icon ? <span className="shrink-0 text-ink-3">{option.icon}</span> : null}
-                    <span className={`truncate ${selected ? "font-medium text-ink" : "text-ink-2"}`}>
-                      {option.label}
-                    </span>
-                  </span>
-                  {selected ? <CheckIcon className="size-4 shrink-0 text-accent-strong" /> : null}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+      {open && menuStyle
+        ? createPortal(
+            <ul
+              aria-label={ariaLabel}
+              className={`fixed z-50 max-h-80 overflow-auto rounded-2xl border border-line bg-surface py-1.5 shadow-pop animate-fade-in ${menuClassName}`}
+              ref={menuRef}
+              role="listbox"
+              style={menuStyle}
+            >
+              {options.map((option, index) => {
+                const selected = option.value === value;
+                return (
+                  <li aria-selected={selected} key={option.value} role="option">
+                    <button
+                      className={`flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm ${
+                        index === active ? "bg-surface-2" : ""
+                      }`}
+                      onClick={() => {
+                        pick(index);
+                      }}
+                      onMouseEnter={() => {
+                        setActive(index);
+                      }}
+                      type="button"
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        {option.icon ? <span className="shrink-0 text-ink-3">{option.icon}</span> : null}
+                        <span className={`truncate ${selected ? "font-medium text-ink" : "text-ink-2"}`}>
+                          {option.label}
+                        </span>
+                      </span>
+                      {selected ? <CheckIcon className="size-4 shrink-0 text-accent-strong" /> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
