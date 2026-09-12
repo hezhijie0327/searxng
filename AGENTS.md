@@ -164,20 +164,21 @@ its content, all sharing one visual language:
 - FilesGrid has no cover art: the tile shows a type icon + detected file
   extension, the filesize takes the badge slot, seed/leech health reads as
   colored ↑↓ counts, and the magnet link is an accent circle button.
-- Mixed searches keep the generic list for paper results, while media
-  sections consolidate and render as **fixed-row horizontal strips**
-  (`Strip.tsx`) paged with left/right arrows — nothing expands in place,
-  all results stay reachable by scrolling. Sections use the same cells as
-  their single-category page (`ImageStrip` tiles + shared lightbox,
-  `VideoGrid`/`MusicGrid`/`FilesGrid`/`PackageGrid` `variant="strip"`) so
-  the presentation stays visually identical. Music-category default
-  results, torrent/file results and package results join their sections
-  via `groupKey`; grid cells take `indexOffset` so hotkey indices stay
-  page-global. **Sections render ABOVE the untyped results** (right after
-  answers/corrections) — a user searching for a package/file/... on an
-  intent page must see them immediately; the strips are compact, and
-  infinite-scroll appends flow below them so nothing becomes unreachable
-  while appended media still merges into the strips.
+- Mixed searches render every type as a **collapsible block**: the untyped
+  web list first (pure relevance order), then typed strips in a fixed order
+  (images → videos → news → music → files → packages).  Each block header
+  (category icon + label + count + chevron) toggles the block, which is the
+  quick-locate mechanism — it replaces any floating navigator and works on
+  mobile.  Strips (`Strip.tsx`, fixed rows + left/right arrows) reuse the
+  exact cells of the single-category page (`ImageStrip` tiles + shared
+  lightbox, `VideoGrid`/`MusicGrid`/`FilesGrid`/`PackageGrid`
+  `variant="strip"`) so presentation stays visually identical.
+  Music-category default results, torrent/file results and package results
+  join their sections via `groupKey`; grid cells take `indexOffset` so
+  hotkey indices stay page-global.  Single-category intent pages (it, ...)
+  keep a plain relevance-ordered list instead — extracting a type into a
+  strip there would break the relevance order (see `groupKey` /
+  `singleCategory` gate in `ResultsPage`).
 
 Results right rail (desktop): the infobox scrolls inside its own area
 (`min-h-0 flex-1 overflow-y-auto`) while `DebugPanels` (response time /

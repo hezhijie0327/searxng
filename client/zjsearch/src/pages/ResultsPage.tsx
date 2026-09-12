@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import {
   NewsCard,
@@ -182,17 +182,35 @@ function consolidateGroups(
   return out;
 }
 
-/** Kagi/Google-style section header: category icon + translated label +
-    result count.  Browsing happens inside the strip below it. */
-function GroupHeader({ category, label, count }: { category: string; label: string; count: number }) {
+/** Collapsible block header: category icon + translated label + result
+    count; the whole header toggles the block. */
+function GroupHeader({
+  category,
+  label,
+  count,
+  collapsed,
+  onToggle,
+}: {
+  category: string;
+  label: string;
+  count: number;
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <div className="flex items-center gap-1.5 pb-1 pt-5 first:pt-1">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+    <h2 className="pb-1 pt-5 first:pt-1">
+      <button
+        aria-expanded={!collapsed}
+        className="flex w-full items-center gap-1.5 text-left text-sm font-semibold text-ink"
+        onClick={onToggle}
+        type="button"
+      >
         <CategoryIcon category={category} className="size-4 text-accent" />
         {label}
         <span className="font-normal text-ink-3">{count}</span>
-      </h2>
-    </div>
+        <ChevronDownIcon className={`size-4 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+      </button>
+    </h2>
   );
 }
 
@@ -272,6 +290,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
+  const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
@@ -622,116 +641,126 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                 ) : (
                   <div className="mt-2">
                     {(() => {
+                      // Mixed search: every type renders as its own
+                      // collapsible block - the untyped web list first (pure
+                      // relevance order), then the typed strips in a fixed
+                      // order.  Collapsing works on every screen size, so
+                      // huge blocks never dominate the page.
                       const groups = consolidateGroups(groupResults(allResults));
-                      // Mixed search: section strips consolidate the types -
-                      // compact fixed rows, infinite-scroll appends flow below
-                      // them so nothing ever becomes unreachable (appended
-                      // media still merges into the strips).  Whether a strip
-                      // belongs ABOVE or BELOW the untyped list is decided by
-                      // relevance: it hoists only when one of its results is
-                      // competitive with the best-scoring result on the page,
-                      // so loosely related types do not break the order.
-                      const topScore = Math.max(...allResults.map((result) => result.score ?? 0), 0);
-                      const hoists = (group: (typeof sections)[number]) => {
-                        const best = Math.max(...group.items.map(({ result }) => result.score ?? 0));
-                        return best >= topScore * 0.9;
-                      };
                       const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
+                      const restCount = rest.reduce((sum, group) => sum + group.items.length, 0);
                       const sections = SECTION_ORDER.map((template) =>
                         groups.find((group) => group.template === template),
                       ).filter((group) => group !== undefined);
-                      const hoistedSections = sections.filter(hoists);
-                      const belowSections = sections.filter((group) => !hoists(group));
-                      const renderRest = (list: Array<(typeof groups)[number]>) =>
-                        list.map((group, groupIndex) => (
-                          <div key={`${groupIndex}-${group.items[0]?.index}`}>
-                            {group.items.map(({ result, index }) => (
-                              <div
-                                className={`animate-fade-up rounded-2xl ${
-                                  index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                }`}
-                                data-hotkey-index={index}
-                                key={index}
-                                style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-                              >
-                                <ResultCard
-                                  autoOpenMap={isMapPage}
-                                  eager={index < 4}
-                                  globals={globals}
-                                  result={result}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        ));
-                      const renderSection = (group: (typeof sections)[number], groupIndex: number) => {
-                        // category_labels only covers tab categories - fall
-                        // back to the theme catalog for the rest (packages)
-                        const label = globals.category_labels[group.template] ?? t(group.template);
-                        const results = group.items.map(({ result }) => result);
-                        const indexOffset = group.items[0]?.index ?? 0;
-                        return (
-                          <section key={`${group.template}-${groupIndex}`}>
-                            <GroupHeader category={group.template} count={group.items.length} label={label} />
-                            <div className="mt-1">
-                              {group.template === "images" ? (
-                                <ImageStrip results={results} />
-                              ) : group.template === "videos" ? (
-                                <VideoGrid
-                                  globals={globals}
-                                  indexOffset={indexOffset}
-                                  results={results}
-                                  selected={hotkeysSelected}
-                                  variant="strip"
-                                />
-                              ) : group.template === "music" ? (
-                                <MusicGrid
-                                  globals={globals}
-                                  indexOffset={indexOffset}
-                                  results={results}
-                                  selected={hotkeysSelected}
-                                  variant="strip"
-                                />
-                              ) : group.template === "files" ? (
-                                <FilesGrid
-                                  globals={globals}
-                                  indexOffset={indexOffset}
-                                  results={results}
-                                  selected={hotkeysSelected}
-                                  variant="strip"
-                                />
-                              ) : group.template === "packages" ? (
-                                <PackageGrid
-                                  globals={globals}
-                                  indexOffset={indexOffset}
-                                  results={results}
-                                  selected={hotkeysSelected}
-                                  variant="strip"
-                                />
-                              ) : (
-                                <Strip rows={1}>
-                                  {group.items.map(({ result, index }) => (
-                                    <div
-                                      className={`h-full rounded-2xl ${
-                                        index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                      }`}
-                                      data-hotkey-index={index}
-                                      key={index}
-                                    >
-                                      <NewsCard globals={globals} result={result} />
-                                    </div>
-                                  ))}
-                                </Strip>
-                              )}
-                            </div>
-                          </section>
-                        );
-                      };
+                      const isCollapsed = (key: string) => Boolean(collapsedBlocks[key]);
+                      const toggle = (key: string) => setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
+                      const restItems = rest.flatMap((group) => group.items);
                       return (
                         <>
-                          {hoistedSections.map((group, i) => renderSection(group, i))}
-                          {renderRest(rest)}
-                          {belowSections.map((group, i) => renderSection(group, i))}
+                          <section>
+                            <GroupHeader
+                              category="general"
+                              collapsed={Boolean(collapsedBlocks.general)}
+                              count={restCount}
+                              label={globals.category_labels.general ?? "general"}
+                              onToggle={() => {
+                                toggle("general");
+                              }}
+                            />
+                            {!collapsedBlocks.general ? (
+                              <div className="mt-1">
+                                {restItems.map(({ result, index }) => (
+                                  <div
+                                    className={`animate-fade-up rounded-2xl ${
+                                      index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                                    }`}
+                                    data-hotkey-index={index}
+                                    key={index}
+                                    style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                                  >
+                                    <ResultCard
+                                      autoOpenMap={isMapPage}
+                                      eager={index < 4}
+                                      globals={globals}
+                                      result={result}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : null}
+                          </section>
+                          {sections.map((group) => {
+                            const label = globals.category_labels[group.template] ?? t(group.template);
+                            const results = group.items.map(({ result }) => result);
+                            const indexOffset = group.items[0]?.index ?? 0;
+                            const collapsed = isCollapsed(group.template);
+                            return (
+                              <section key={group.template}>
+                                <GroupHeader
+                                  category={group.template}
+                                  collapsed={collapsed}
+                                  count={group.items.length}
+                                  label={label}
+                                  onToggle={() => {
+                                    toggle(group.template);
+                                  }}
+                                />
+                                {!collapsed ? (
+                                  <div className="mt-1">
+                                    {group.template === "images" ? (
+                                      <ImageStrip results={results} />
+                                    ) : group.template === "videos" ? (
+                                      <VideoGrid
+                                        globals={globals}
+                                        indexOffset={indexOffset}
+                                        results={results}
+                                        selected={hotkeysSelected}
+                                        variant="strip"
+                                      />
+                                    ) : group.template === "music" ? (
+                                      <MusicGrid
+                                        globals={globals}
+                                        indexOffset={indexOffset}
+                                        results={results}
+                                        selected={hotkeysSelected}
+                                        variant="strip"
+                                      />
+                                    ) : group.template === "files" ? (
+                                      <FilesGrid
+                                        globals={globals}
+                                        indexOffset={indexOffset}
+                                        results={results}
+                                        selected={hotkeysSelected}
+                                        variant="strip"
+                                      />
+                                    ) : group.template === "packages" ? (
+                                      <PackageGrid
+                                        globals={globals}
+                                        indexOffset={indexOffset}
+                                        results={results}
+                                        selected={hotkeysSelected}
+                                        variant="strip"
+                                      />
+                                    ) : (
+                                      <Strip rows={1}>
+                                        {group.items.map(({ result, index }) => (
+                                          <div
+                                            className={`h-full rounded-2xl ${
+                                              index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                                            }`}
+                                            data-hotkey-index={index}
+                                            key={index}
+                                          >
+                                            <NewsCard globals={globals} result={result} />
+                                          </div>
+                                        ))}
+                                      </Strip>
+                                    )}
+                                  </div>
+                                ) : null}
+                              </section>
+                            );
+                          })}
                         </>
                       );
                     })()}

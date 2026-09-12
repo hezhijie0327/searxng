@@ -26,6 +26,7 @@ export function Strip({ children, rows = 1 }: { children: ReactNode[]; rows?: 1 
     setAtEnd(position >= max - 4);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure the edges whenever the item count changes
   useEffect(() => {
     updateEdges();
     window.addEventListener("resize", updateEdges);
