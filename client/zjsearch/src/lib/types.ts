@@ -68,6 +68,8 @@ export interface ResultItem {
   engines: string[];
   category: string;
   priority: string;
+  /** relevance score from the backend: sum of engine weight / position */
+  score?: number;
 
   netloc?: string;
   favicon?: string;

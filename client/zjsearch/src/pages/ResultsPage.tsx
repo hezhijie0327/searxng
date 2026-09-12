@@ -601,20 +601,47 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                       </div>
                     ))}
                   </div>
+                ) : singleCategory !== null ? (
+                  // category intent page: a pure relevance-ordered list in
+                  // which every type keeps its own card - extracting a type
+                  // into a strip would break the relevance order
+                  <div className="mt-2">
+                    {allResults.map((result, index) => (
+                      <div
+                        className={`animate-fade-up rounded-2xl ${
+                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
+                        }`}
+                        data-hotkey-index={index}
+                        key={index}
+                        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                      >
+                        <ResultCard autoOpenMap={isMapPage} eager={index < 4} globals={globals} result={result} />
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div className="mt-2">
                     {(() => {
                       const groups = consolidateGroups(groupResults(allResults));
-                      // Section strips render BEFORE the untyped results - a
-                      // user searching for a package/file/... on an intent
-                      // page must see them immediately.  The strips are
-                      // compact fixed rows, and infinite-scroll appends flow
-                      // below them, so nothing ever becomes unreachable
-                      // (appended media still merges into the strips).
+                      // Mixed search: section strips consolidate the types -
+                      // compact fixed rows, infinite-scroll appends flow below
+                      // them so nothing ever becomes unreachable (appended
+                      // media still merges into the strips).  Whether a strip
+                      // belongs ABOVE or BELOW the untyped list is decided by
+                      // relevance: it hoists only when one of its results is
+                      // competitive with the best-scoring result on the page,
+                      // so loosely related types do not break the order.
+                      const topScore = Math.max(...allResults.map((result) => result.score ?? 0), 0);
+                      const hoists = (group: (typeof sections)[number]) => {
+                        const best = Math.max(...group.items.map(({ result }) => result.score ?? 0));
+                        return best >= topScore * 0.9;
+                      };
                       const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
                       const sections = SECTION_ORDER.map((template) =>
                         groups.find((group) => group.template === template),
                       ).filter((group) => group !== undefined);
+                      const hoistedSections = sections.filter(hoists);
+                      const belowSections = sections.filter((group) => !hoists(group));
                       const renderRest = (list: Array<(typeof groups)[number]>) =>
                         list.map((group, groupIndex) => (
                           <div key={`${groupIndex}-${group.items[0]?.index}`}>
@@ -702,8 +729,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                       };
                       return (
                         <>
-                          {sections.map((group, i) => renderSection(group, i))}
+                          {hoistedSections.map((group, i) => renderSection(group, i))}
                           {renderRest(rest)}
+                          {belowSections.map((group, i) => renderSection(group, i))}
                         </>
                       );
                     })()}
