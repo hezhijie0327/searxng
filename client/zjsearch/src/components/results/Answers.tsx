@@ -230,73 +230,105 @@ function WeatherAnswer({
   );
 }
 
+/** Dictionary/translation answer (wordnik): headword with the numbered
+    definitions visible directly — the definition IS the answer, so nothing
+    important hides behind a collapsed section. */
 function TranslationsAnswer({ answer }: { answer: Extract<AnswerData, { template: "answer/translations.html" }> }) {
   const t = useT();
   const first = answer.translations[0];
   if (!first) {
     return null;
   }
+  const rest = answer.translations.slice(1);
+  const hasMore =
+    first.definitions.length > 4 || rest.length > 0 || first.examples.length > 0 || first.synonyms.length > 0;
   return (
     <div>
-      <p className="text-base font-medium text-ink" dir="auto">
+      <p className="text-lg font-semibold text-ink" dir="auto">
         {first.text}
         {first.transliteration ? (
-          <span className="ml-2 text-sm font-normal text-ink-3">{first.transliteration}</span>
+          <span className="ms-2 text-sm font-normal text-ink-3">{first.transliteration}</span>
         ) : null}
       </p>
-      {answer.translations.length > 1 ||
-      first.definitions.length > 0 ||
-      first.examples.length > 0 ||
-      first.synonyms.length > 0 ? (
-        <details className="mt-1.5">
+      {first.definitions.length > 0 ? (
+        <ol className="mt-2 space-y-1.5">
+          {first.definitions.slice(0, 4).map((definition, i) => (
+            <li className="flex gap-2 text-sm leading-relaxed text-ink-2" key={i}>
+              <span className="shrink-0 text-ink-3">{i + 1}.</span>
+              <span dir="auto">{definition}</span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      {first.examples.length > 0 ? (
+        <div className="mt-2 space-y-1">
+          {first.examples.slice(0, 2).map((example, i) => (
+            <p className="text-sm italic leading-relaxed text-ink-2" dir="auto" key={i}>
+              “{example}”
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {first.synonyms.length > 0 ? (
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+          <span>{t("synonyms")}:</span>
+          {first.synonyms.slice(0, 6).map((synonym) => (
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-2" dir="auto" key={synonym}>
+              {synonym}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {hasMore ? (
+        <details className="mt-2">
           <summary className="cursor-pointer text-xs text-ink-3 transition-colors hover:text-ink">
             {t("definitions")}
           </summary>
           <div className="mt-2 space-y-3">
-            {answer.translations.map((item, index) => (
-              <div className="text-xs" key={index}>
+            {first.definitions.length > 4 ? (
+              <ol className="space-y-1.5" start={5}>
+                {first.definitions.slice(4).map((definition, i) => (
+                  <li className="flex gap-2 text-sm leading-relaxed text-ink-2" key={i}>
+                    <span className="shrink-0 text-ink-3">{i + 5}.</span>
+                    <span dir="auto">{definition}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
+            {rest.map((item, index) => (
+              <div className="text-sm" key={index}>
                 <p className="font-medium text-ink" dir="auto">
                   {item.text}
                   {item.transliteration ? (
-                    <span className="ml-1.5 font-normal text-ink-3">{item.transliteration}</span>
+                    <span className="ms-1.5 font-normal text-ink-3">{item.transliteration}</span>
                   ) : null}
                 </p>
                 {item.definitions.length > 0 ? (
-                  <div className="mt-1">
-                    <span className="text-ink-3">{t("definitions")}:</span>
-                    <ul className="ml-4 list-disc">
-                      {item.definitions.map((definition, i) => (
-                        <li className="text-ink-2" key={i}>
-                          {definition}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {item.examples.length > 0 ? (
-                  <div className="mt-1">
-                    <span className="text-ink-3">{t("examples")}:</span>
-                    <ul className="ml-4 list-disc">
-                      {item.examples.map((example, i) => (
-                        <li className="text-ink-2" key={i}>
-                          {example}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {item.synonyms.length > 0 ? (
-                  <div className="mt-1">
-                    <span className="text-ink-3">{t("synonyms")}:</span>
-                    <span className="ml-1 text-ink-2">{item.synonyms.join(", ")}</span>
-                  </div>
+                  <ol className="mt-1 space-y-1.5">
+                    {item.definitions.map((definition, i) => (
+                      <li className="flex gap-2 text-ink-2" key={i}>
+                        <span className="shrink-0 text-ink-3">{i + 1}.</span>
+                        <span dir="auto">{definition}</span>
+                      </li>
+                    ))}
+                  </ol>
                 ) : null}
               </div>
             ))}
+            {first.synonyms.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+                <span>{t("synonyms")}:</span>
+                {first.synonyms.slice(6).map((synonym) => (
+                  <span className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-2" dir="auto" key={synonym}>
+                    {synonym}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
         </details>
       ) : null}
-      {answer.engine ? <p className="mt-1.5 text-xs text-ink-3">{answer.engine}</p> : null}
+      {answer.engine ? <p className="mt-2 text-xs text-ink-3">{answer.engine}</p> : null}
     </div>
   );
 }

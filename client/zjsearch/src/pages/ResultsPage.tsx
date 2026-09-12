@@ -5,6 +5,7 @@ import { HelpModal } from "../components/HelpModal.tsx";
 import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, GripVerticalIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import {
+  AppsGrid,
   DictionaryCard,
   NewsCard,
   PaperCard,
@@ -463,6 +464,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     singleCategory === "define" ||
     bangCategory === "dictionaries" ||
     bangCategory === "define";
+  const isAppsPage = singleCategory === "apps" || bangCategory === "apps";
+  const isPackagesPage = singleCategory === "packages" || bangCategory === "packages";
   // science intent renders every result in the scholarly layout; a
   // paper-only bang search (`!pubmed ...`) gets the same treatment
   const isSciencePage =
@@ -607,6 +610,14 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                         <DictionaryCard globals={globals} result={result} />
                       </div>
                     ))}
+                  </div>
+                ) : isAppsPage ? (
+                  <div className="mt-4">
+                    <AppsGrid globals={globals} results={allResults} selected={hotkeysSelected} />
+                  </div>
+                ) : isPackagesPage ? (
+                  <div className="mt-4">
+                    <PackageGrid globals={globals} results={allResults} selected={hotkeysSelected} />
                   </div>
                 ) : isSciencePage ? (
                   <div className="mt-2 space-y-1">
