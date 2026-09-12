@@ -3,7 +3,7 @@
 import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
 import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, GripVerticalIcon, InfoIcon } from "../components/icons.tsx";
-import { Answers } from "../components/results/Answers.tsx";
+import { Answers, CalculatorAnswer } from "../components/results/Answers.tsx";
 import {
   AppsGrid,
   DictionaryCard,
@@ -488,12 +488,11 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   }, [href]);
 
   // client-side calculator answer (server plugin "calculator" enabled)
-  const calcAnswer = useMemo(() => {
+  const calc = useMemo(() => {
     if (!hasPlugin("calculator")) {
       return null;
     }
-    const calc = tryEvaluateExpression(data.q);
-    return calc ? ({ template: "answer/legacy.html", answer: `${calc.expr} = ${calc.value}`, url: "" } as const) : null;
+    return tryEvaluateExpression(data.q);
   }, [data.q, hasPlugin]);
   const showSkeletons = loading && !error;
 
@@ -573,7 +572,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
               <>
                 <Corrections data={data} onSearch={submitQuery} />
                 <div className="mt-3 space-y-3">
-                  <Answers answers={calcAnswer ? [calcAnswer, ...data.answers] : data.answers} query={data.q} />
+                  {calc ? <CalculatorAnswer calc={calc} /> : null}
+                  <Answers answers={data.answers} query={data.q} />
                 </div>
 
                 {allResults.length === 0 && data.answers.length === 0 ? (
