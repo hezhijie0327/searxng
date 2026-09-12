@@ -131,8 +131,11 @@ Controls:
   text-[13px]` rounded-full; category chips carry `CategoryIcon`; selection
   = `border-accent-strong bg-accent-soft font-medium text-accent`.
 - Boxed form selects (preferences): `h-9 text-sm`.
-- Category/choice selection uses the bordered chip language everywhere
-  (including the engines tab).
+- Category selection uses the tab language (icon + label, selected =
+  accent text + amber underline) everywhere — results-page tabs, hero
+  grid, preferences default-categories and engine tabs all share
+  `CategoryTab`/`CategoryTabs` styling.  Other choices (options, toggles)
+  keep the bordered chip language.
 
 Instant answers (Answers.tsx) are tiered:
 

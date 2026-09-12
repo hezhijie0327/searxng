@@ -31,6 +31,41 @@ import {
   TagIcon,
   TerminalIcon,
 } from "../components/icons.tsx";
+
+/** Category selector styled like the results-page category tabs: icon +
+    label, selected = accent text with an amber underline. */
+function CategoryTab({
+  active,
+  category,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  category: string;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-pressed={active}
+      className={`relative flex items-center gap-1.5 px-4 py-2 text-[13px] transition-colors ${
+        active ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
+      }`}
+      onClick={onClick}
+      type="button"
+    >
+      <CategoryIcon category={category} className="size-3.5 shrink-0" />
+      {label}
+      <span
+        aria-hidden="true"
+        className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-accent-strong transition-opacity ${
+          active ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </button>
+  );
+}
+
 import { Link, Shell } from "../components/Shell.tsx";
 import { loadEngineDescriptions } from "../lib/engineDescriptions.ts";
 import { useT } from "../lib/i18n.ts";
@@ -608,30 +643,20 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             <Card>
               {!locked.has("categories") ? (
                 <SettingRow icon={<GridIcon className="size-4.5" />} stacked title={t("default_categories")}>
-                  <div className="flex flex-wrap gap-1.5">
-                    {globals.categories_as_tabs.map((category) => {
-                      const active = categories.includes(category);
-                      return (
-                        <button
-                          aria-pressed={active}
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
-                            active
-                              ? "border-accent-strong bg-accent-soft font-medium text-accent"
-                              : "border-line text-ink-2 hover:border-ink-3 hover:text-ink"
-                          }`}
-                          key={category}
-                          onClick={() => {
-                            setCategories((prev) =>
-                              prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category],
-                            );
-                          }}
-                          type="button"
-                        >
-                          <CategoryIcon category={category} className="size-3.5" />
-                          {globals.category_labels[category] ?? category}
-                        </button>
-                      );
-                    })}
+                  <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                    {globals.categories_as_tabs.map((category) => (
+                      <CategoryTab
+                        active={categories.includes(category)}
+                        category={category}
+                        key={category}
+                        label={globals.category_labels[category] ?? category}
+                        onClick={() => {
+                          setCategories((prev) =>
+                            prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category],
+                          );
+                        }}
+                      />
+                    ))}
                   </div>
                 </SettingRow>
               ) : null}
@@ -1017,23 +1042,17 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   </div>
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
                 {data.engine_tabs.map((tabInfo, index) => (
-                  <button
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
-                      index === engineTab
-                        ? "border-accent-strong bg-accent-soft font-medium text-accent"
-                        : "border-line text-ink-2 hover:border-ink-3 hover:text-ink"
-                    }`}
+                  <CategoryTab
+                    active={index === engineTab}
+                    category={tabInfo.category}
                     key={tabInfo.category}
+                    label={tabInfo.label}
                     onClick={() => {
                       setEngineTab(index);
                     }}
-                    type="button"
-                  >
-                    <CategoryIcon category={tabInfo.category} className="size-3.5" />
-                    {tabInfo.label}
-                  </button>
+                  />
                 ))}
               </div>
               {currentEngineTab ? (
