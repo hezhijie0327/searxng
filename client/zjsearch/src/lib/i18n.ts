@@ -204,6 +204,8 @@ const EN: Record<string, string> = {
   license: "License",
   packages: "Packages",
   show_less: "Show less",
+  move_up: "Move up",
+  move_down: "Move down",
 
   homepage: "Project homepage",
   editor: "Editor",
@@ -467,6 +469,8 @@ const ZH_CN: Record<string, string> = {
   license: "许可证",
   packages: "软件包",
   show_less: "收起",
+  move_up: "上移",
+  move_down: "下移",
 
   homepage: "项目主页",
   editor: "编者",

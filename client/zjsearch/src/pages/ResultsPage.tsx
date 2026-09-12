@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, InfoIcon } from "../components/icons.tsx";
+import { ArrowUpIcon, CategoryIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from "../components/icons.tsx";
 import { Answers } from "../components/results/Answers.tsx";
 import {
   NewsCard,
@@ -157,8 +157,9 @@ function groupResults(
 /** Sections that get a Kagi/Google-style header.  They render as fixed-row
     horizontal strips (paged with left/right arrows) in this fixed order
     after the untyped results - nothing expands in place. */
-const SECTION_TEMPLATES = new Set(["images", "videos", "news", "music", "files", "packages"]);
+const SECTION_TEMPLATES = new Set(["general", "images", "videos", "news", "music", "files", "packages"]);
 const SECTION_ORDER = ["images", "videos", "news", "music", "files", "packages"];
+const BLOCK_ORDER_KEY = "zjs-block-order";
 
 function consolidateGroups(
   groups: Array<{ template: string; items: Array<{ result: ResultItem; index: number }> }>,
@@ -190,26 +191,55 @@ function GroupHeader({
   count,
   collapsed,
   onToggle,
+  onMoveUp,
+  onMoveDown,
 }: {
   category: string;
   label: string;
   count: number;
   collapsed: boolean;
   onToggle: () => void;
+  onMoveUp?: (() => void) | undefined;
+  onMoveDown?: (() => void) | undefined;
 }) {
+  const t = useT();
   return (
-    <h2 className="pb-1 pt-5 first:pt-1">
+    <h2 className="group flex items-center gap-1 pb-1 pt-2">
       <button
         aria-expanded={!collapsed}
-        className="flex w-full items-center gap-1.5 text-left text-sm font-semibold text-ink"
+        className="flex min-w-0 flex-1 items-center gap-1.5 text-left text-sm font-semibold text-ink"
         onClick={onToggle}
         type="button"
       >
-        <CategoryIcon category={category} className="size-4 text-accent" />
+        <CategoryIcon category={category} className="size-4 shrink-0 text-accent" />
         {label}
         <span className="font-normal text-ink-3">{count}</span>
-        <ChevronDownIcon className={`size-4 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+        <ChevronDownIcon
+          className={`size-4 shrink-0 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`}
+        />
       </button>
+      {onMoveUp ? (
+        <button
+          aria-label={`${t("move_up")} ${label}`}
+          className="grid size-6 shrink-0 place-items-center rounded-full text-ink-3 opacity-40 transition-all hover:bg-surface-2 hover:text-ink hover:opacity-100 focus-visible:opacity-100"
+          onClick={onMoveUp}
+          title={t("move_up")}
+          type="button"
+        >
+          <ChevronUpIcon className="size-3.5" />
+        </button>
+      ) : null}
+      {onMoveDown ? (
+        <button
+          aria-label={`${t("move_down")} ${label}`}
+          className="grid size-6 shrink-0 place-items-center rounded-full text-ink-3 opacity-40 transition-all hover:bg-surface-2 hover:text-ink hover:opacity-100 focus-visible:opacity-100"
+          onClick={onMoveDown}
+          title={t("move_down")}
+          type="button"
+        >
+          <ChevronDownIcon className="size-3.5" />
+        </button>
+      ) : null}
     </h2>
   );
 }
@@ -291,6 +321,15 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   const settings = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
+  const [blockOrder, setBlockOrder] = useState<string[]>(() => {
+    try {
+      const stored: unknown = JSON.parse(localStorage.getItem(BLOCK_ORDER_KEY) ?? "null");
+      if (Array.isArray(stored) && stored.every((key) => typeof key === "string")) {
+        return stored;
+      }
+    } catch {}
+    return ["general", ...SECTION_ORDER];
+  });
   const [hotkeysSelected, setHotkeysSelected] = useState(-1);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [appended, setAppended] = useState<ResultItem[]>([]);
@@ -643,26 +682,62 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                     {(() => {
                       // Mixed search: every type renders as its own
                       // collapsible block - the untyped web list first (pure
-                      // relevance order), then the typed strips in a fixed
-                      // order.  Collapsing works on every screen size, so
-                      // huge blocks never dominate the page.
+                      // relevance order), then the typed strips.  The block
+                      // order is user-adjustable (headers expose up/down) and
+                      // persists in localStorage; collapsing works on every
+                      // screen size so huge blocks never dominate the page.
                       const groups = consolidateGroups(groupResults(allResults));
                       const rest = groups.filter((group) => !SECTION_TEMPLATES.has(group.template));
                       const restCount = rest.reduce((sum, group) => sum + group.items.length, 0);
-                      const sections = SECTION_ORDER.map((template) =>
-                        groups.find((group) => group.template === template),
-                      ).filter((group) => group !== undefined);
+                      const sectionByKey = new Map(
+                        groups
+                          .filter((group) => SECTION_TEMPLATES.has(group.template))
+                          .map((group) => [group.template, group]),
+                      );
+                      const defaultOrder = ["general", ...SECTION_ORDER];
+                      const orderedKeys = [
+                        ...blockOrder.filter(
+                          (key) => defaultOrder.includes(key) && (key === "general" || sectionByKey.has(key)),
+                        ),
+                        ...defaultOrder.filter(
+                          (key) => !blockOrder.includes(key) && (key === "general" || sectionByKey.has(key)),
+                        ),
+                      ];
                       const isCollapsed = (key: string) => Boolean(collapsedBlocks[key]);
                       const toggle = (key: string) => setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
+                      const move = (key: string, delta: -1 | 1) => {
+                        const order = [...blockOrder];
+                        const from = order.indexOf(key);
+                        const to = from + delta;
+                        if (from < 0 || to < 0 || to >= order.length) {
+                          return;
+                        }
+                        const moved = order.splice(from, 1)[0];
+                        if (moved !== undefined) {
+                          order.splice(to, 0, moved);
+                        }
+                        setBlockOrder(order);
+                        try {
+                          localStorage.setItem(BLOCK_ORDER_KEY, JSON.stringify(order));
+                        } catch {}
+                      };
                       const restItems = rest.flatMap((group) => group.items);
-                      return (
-                        <>
-                          <section>
+                      const restBlock = {
+                        key: "general",
+                        node: (
+                          <section className="mt-6 first:mt-0" key="general">
                             <GroupHeader
                               category="general"
                               collapsed={Boolean(collapsedBlocks.general)}
                               count={restCount}
                               label={globals.category_labels.general ?? "general"}
+                              onMoveDown={
+                                orderedKeys.indexOf("general") < orderedKeys.length - 1
+                                  ? () => {
+                                      move("general", 1);
+                                    }
+                                  : undefined
+                              }
                               onToggle={() => {
                                 toggle("general");
                               }}
@@ -689,27 +764,52 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                               </div>
                             ) : null}
                           </section>
-                          {sections.map((group) => {
-                            const label = globals.category_labels[group.template] ?? t(group.template);
+                        ),
+                      };
+                      return (
+                        <>
+                          {orderedKeys.map((key, position) => {
+                            if (key === "general") {
+                              return restBlock.node;
+                            }
+                            const group = sectionByKey.get(key);
+                            if (!group) {
+                              return null;
+                            }
+                            const label = globals.category_labels[key] ?? t(key);
                             const results = group.items.map(({ result }) => result);
                             const indexOffset = group.items[0]?.index ?? 0;
-                            const collapsed = isCollapsed(group.template);
+                            const collapsed = isCollapsed(key);
                             return (
-                              <section key={group.template}>
+                              <section className="mt-6 first:mt-0" key={key}>
                                 <GroupHeader
-                                  category={group.template}
+                                  category={key}
                                   collapsed={collapsed}
                                   count={group.items.length}
                                   label={label}
+                                  onMoveDown={
+                                    position < orderedKeys.length - 1
+                                      ? () => {
+                                          move(key, 1);
+                                        }
+                                      : undefined
+                                  }
+                                  onMoveUp={
+                                    position > 0
+                                      ? () => {
+                                          move(key, -1);
+                                        }
+                                      : undefined
+                                  }
                                   onToggle={() => {
-                                    toggle(group.template);
+                                    toggle(key);
                                   }}
                                 />
                                 {!collapsed ? (
                                   <div className="mt-1">
-                                    {group.template === "images" ? (
+                                    {key === "images" ? (
                                       <ImageStrip results={results} />
-                                    ) : group.template === "videos" ? (
+                                    ) : key === "videos" ? (
                                       <VideoGrid
                                         globals={globals}
                                         indexOffset={indexOffset}
@@ -717,7 +817,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
-                                    ) : group.template === "music" ? (
+                                    ) : key === "music" ? (
                                       <MusicGrid
                                         globals={globals}
                                         indexOffset={indexOffset}
@@ -725,7 +825,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
-                                    ) : group.template === "files" ? (
+                                    ) : key === "files" ? (
                                       <FilesGrid
                                         globals={globals}
                                         indexOffset={indexOffset}
@@ -733,7 +833,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                                         selected={hotkeysSelected}
                                         variant="strip"
                                       />
-                                    ) : group.template === "packages" ? (
+                                    ) : key === "packages" ? (
                                       <PackageGrid
                                         globals={globals}
                                         indexOffset={indexOffset}

@@ -200,6 +200,8 @@ export const ChevronLeftIcon = makeIcon(<polyline points="15 18 9 12 15 6" />);
 export const ChevronRightIcon = makeIcon(<polyline points="9 18 15 12 9 6" />);
 export const ChevronDownIcon = makeIcon(<polyline points="6 9 12 15 18 9" />);
 
+export const ChevronUpIcon = makeIcon(<polyline points="18 15 12 9 6 15" />);
+
 export const ExternalLinkIcon = makeIcon(
   <>
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
