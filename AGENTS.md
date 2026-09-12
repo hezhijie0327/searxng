@@ -7,11 +7,16 @@ Guidance for AI agents working in this repository.
 Fork of [SearXNG](https://github.com/searxng/searxng) (metasearch engine, Python/Flask + Jinja2).
 Current working branch: `skin`. The purpose of this fork is the custom theme
 **zjsearch** — a from-scratch React + TypeScript UI — alongside the upstream
-`simple` theme, **without modifying any Python code**.
+`simple` theme. Python changes are the exception, not the rule: only make them
+when the user explicitly asks (e.g. the structured `data` payloads that
+special-query answers carry for the theme — see
+`searx/result_types/answer.py` and the hash/self-info/time-zone plugins plus
+the random/statistics answerers).
 
 Key directories:
 
-- `searx/` — SearXNG core (webapp.py, search, engines, templates). Avoid editing.
+- `searx/` — SearXNG core (webapp.py, search, engines). Avoid editing unless
+  the user directs it; templates under `searx/templates/zjsearch/` are fair game.
 - `searx/templates/zjsearch/` — zjsearch theme templates ("data shells").
 - `searx/templates/zjsearch/data/macros.html` — the server → client data contract.
 - `client/zjsearch/` — React 19 + TS + Vite 8 + Tailwind v4 workspace for zjsearch.
