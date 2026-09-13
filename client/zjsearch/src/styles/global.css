@@ -362,3 +362,11 @@
 html.centered {
   --results-max: 72rem;
 }
+
+/* hero shell (home page) owns its scrolling: the document never scrolls or
+   rubber-bands (iOS Safari would otherwise push the whole layout around);
+   all overflow lives in the shell's inner scroll container */
+.zjs-hero-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}

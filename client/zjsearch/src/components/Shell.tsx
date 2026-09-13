@@ -2,6 +2,7 @@
 
 import { ChartColumn, Heart, SlidersHorizontal } from "lucide-react";
 import type { MouseEvent, ReactNode } from "react";
+import { useEffect } from "react";
 import { useT } from "../lib/i18n.ts";
 import { newTabLinkProps } from "../lib/link.ts";
 import { useOverlay } from "../lib/overlay.tsx";
@@ -154,6 +155,19 @@ export function Shell({
   embedded?: boolean;
 }) {
   const { loading } = useRouter();
+  const hero = variant === "hero";
+  // hero shell owns scrolling: the document itself never scrolls (no iOS
+  // rubber-band pushing the layout around); overflow lives in the shell's
+  // inner container
+  useEffect(() => {
+    if (!hero) {
+      return;
+    }
+    document.documentElement.classList.add("zjs-hero-lock");
+    return () => {
+      document.documentElement.classList.remove("zjs-hero-lock");
+    };
+  }, [hero]);
   if (embedded) {
     return (
       <div className="relative">
@@ -162,11 +176,25 @@ export function Shell({
       </div>
     );
   }
+  if (hero) {
+    return (
+      <div className="flex h-dvh flex-col overflow-hidden">
+        <ProgressBar active={loading} />
+        <TopNav globals={globals} hideBrand />
+        {/* app-shell scroll area: hidden scrollbar, contained overscroll; the
+            footer rides inside so it scrolls away with overflowing content */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex flex-1 flex-col justify-start pt-[20vh] sm:pt-[30vh]">{children}</div>
+          <Footer />
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={`flex min-h-dvh flex-col ${variant === "hero" ? "" : ""}`}>
+    <div className="flex min-h-dvh flex-col">
       <ProgressBar active={loading} />
-      {hideTopNav ? null : <TopNav globals={globals} hideBrand={variant === "hero"} />}
-      <div className={`flex flex-1 flex-col ${variant === "hero" ? "justify-start pt-[30vh]" : ""}`}>{children}</div>
+      {hideTopNav ? null : <TopNav globals={globals} hideBrand={false} />}
+      <div className="flex flex-1 flex-col">{children}</div>
       <Footer />
     </div>
   );
