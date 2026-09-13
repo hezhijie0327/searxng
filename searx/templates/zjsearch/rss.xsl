@@ -8,10 +8,20 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <style>
-          body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 48rem; padding: 0 1rem; color: #201d17; background: #faf9f6; }
-          a { color: #a67c00; }
-          hr { border: none; border-top: 1px solid #e6e2d7; }
-          time { color: #6b675c; font-size: 0.85rem; }
+          :root {
+            --bg: #faf9f6; --ink: #201d17; --ink-2: #6b675c; --line: #e6e2d7;
+            --accent: #a67c00; --accent-strong: #f5c84c; color-scheme: light;
+          }
+          @media (prefers-color-scheme: dark) {
+            :root {
+              --bg: #1b1a18; --ink: #eceae4; --ink-2: #a8a399; --line: #38342f;
+              --accent: #fec843; --accent-strong: #fec843; color-scheme: dark;
+            }
+          }
+          body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 48rem; padding: 0 1rem; color: var(--ink); background: var(--bg); }
+          a { color: var(--accent); }
+          hr { border: none; border-top: 1px solid var(--line); }
+          time { color: var(--ink-2); font-size: 0.85rem; }
         </style>
       </head>
       <body>
