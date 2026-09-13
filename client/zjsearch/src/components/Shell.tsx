@@ -165,7 +165,7 @@ export function Shell({
     <div className={`flex min-h-dvh flex-col ${variant === "hero" ? "" : ""}`}>
       <ProgressBar active={loading} />
       {hideTopNav ? null : <TopNav globals={globals} hideBrand={variant === "hero"} />}
-      <div className={`flex flex-1 flex-col ${variant === "hero" ? "justify-center" : ""}`}>{children}</div>
+      <div className={`flex flex-1 flex-col ${variant === "hero" ? "justify-start pt-[30vh]" : ""}`}>{children}</div>
       <Footer />
     </div>
   );
