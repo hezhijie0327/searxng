@@ -35,6 +35,7 @@
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0 auto; max-width: 48rem; padding: 0 1rem 3rem;
             color: var(--ink); background: var(--bg);
+            overflow-wrap: anywhere; /* torrent titles are long dot-joined strings */
           }
           .brand {
             padding: 2rem 0 1.5rem; border-bottom: 2px solid var(--accent-strong);
