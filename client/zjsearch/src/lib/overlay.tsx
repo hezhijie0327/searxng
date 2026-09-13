@@ -81,6 +81,11 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
         if (controller.signal.aborted) {
           return;
         }
+        // not an app page (e.g. a static file) — fall back to a full load
+        if (String(err).includes("page-data missing")) {
+          window.location.assign(state.url);
+          return;
+        }
         setState((prev) => (prev && prev.url === state.url ? { ...prev, loading: false, error: String(err) } : prev));
       });
     return () => {
@@ -135,6 +140,10 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
                 if (
                   !anchor ||
                   !href?.startsWith("/") ||
+                  anchor.target === "_blank" ||
+                  anchor.hasAttribute("download") ||
+                  // /static/ holds files (LICENSE.txt...), not SPA pages
+                  href.startsWith("/static/") ||
                   event.metaKey ||
                   event.ctrlKey ||
                   event.shiftKey ||
