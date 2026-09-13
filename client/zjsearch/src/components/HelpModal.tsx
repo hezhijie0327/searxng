@@ -57,17 +57,16 @@ function operatorRows(t: Translate): Array<[string, string]> {
 function bangRows(t: Translate): Array<[string, string]> {
   return [
     ["!bang", t("bang_all")],
-    ["!images", t("bang_images")],
-    ["!videos", t("bang_videos")],
-    ["!news", t("bang_news")],
-    ["!map", t("bang_map")],
-    ["!music", t("bang_music")],
-    ["random", t("widget_random")],
-    ["min max avg sum", t("widget_stats")],
+    ["!wp", t("bang_engine")],
+    [":fr", t("bang_lang")],
+    ["!!bang", t("bang_external")],
+    ["!!", t("bang_lucky")],
+    ["random uuid", t("widget_random")],
+    ["avg 123 548 2.04 24.2", t("widget_stats")],
     ["1+2", t("widget_calc")],
     ["time Berlin", t("widget_time")],
-    ["ip user-agent", t("widget_ip")],
-    ["md5 sha512", t("widget_hash")],
+    ["user-agent", t("widget_ip")],
+    ["md5 lorem ipsum", t("widget_hash")],
   ];
 }
 
