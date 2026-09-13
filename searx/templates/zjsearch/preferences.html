@@ -1,0 +1,13 @@
+{% extends "zjsearch/base.html" %}
+{% from "zjsearch/data/macros.html" import page_preferences with context %}
+{% block title %}{{ _('Preferences') }} - {% endblock %}
+{% block head %}{% endblock %}
+{% block page_data -%}
+{{- page_preferences(preferences, selected_categories, locales, current_locale,
+                     engines_by_category, stats, max_rate95, reliabilities,
+                     supports, answer_storage, disabled_engines,
+                     autocomplete_backends, favicon_resolver_names, shortcuts,
+                     themes, plugins_storage, current_doi_resolver,
+                     allowed_plugins, preferences_url_params,
+                     locked_preferences, doi_resolvers, cookies) -}}
+{%- endblock %}
