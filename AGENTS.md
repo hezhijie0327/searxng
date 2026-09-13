@@ -98,8 +98,18 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   tmdb is disabled upstream, dev-settings.yml enables it.  Dictionary bangs
   (`!dictionaries` / `!define`) render DictionaryCard word entries; wordnik
   definitions additionally arrive as a translations answer.
-- Respect `prefers-reduced-motion`; RTL uses Tailwind logical properties (`ps-`,
-  `me-`, `start-`, `end-`) against a single stylesheet.
+- Respect `prefers-reduced-motion`: the global stylesheet guard covers CSS
+  transitions/animations, but JS-initiated smooth scrolling (BackToTop,
+  hotkey navigation, suggestion pager) must pass `scrollBehavior()` from
+  `src/lib/motion.ts` as its `behavior` — the stylesheet cannot reach it.
+  RTL uses Tailwind logical properties (`ps-`, `me-`, `start-`, `end-`)
+  against a single stylesheet; `translate-x` is NOT logical — pair it with
+  the `rtl:` variant when direction matters (see the Switch knob).
+- Text/ink tiers are contrast-audited: every ink token must keep ≥4.5:1
+  against every surface it sits on in its palette (worst case is usually
+  `surface-2`); do not lighten `ink-3` or use `accent-strong` as text on
+  light surfaces (it is a fill/border accent, light-mode text accent is
+  `accent`).
 - Text result cards keep fixed height slots so every card in a list is the
   same height: pretty URL 1 line, title `line-clamp-1`, snippet capped at
   `line-clamp-2` (never reserve empty lines below short snippets — the gap
