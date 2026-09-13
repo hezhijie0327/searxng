@@ -22,6 +22,9 @@ function Box({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+/** Collapsed infobox preview height (the old max-h-72 clamp). */
+const INFOBOX_PREVIEW_PX = 288;
+
 export function Infobox({
   infobox,
   globals,
@@ -34,6 +37,30 @@ export function Infobox({
   const t = useT();
   const [expanded, setExpanded] = useState(false);
   const contentId = useId();
+  const contentRef = useRef<HTMLDivElement>(null);
+  // natural content height, kept current by a ResizeObserver: max-height
+  // cannot transition to `none`, so the expanded state must pin a real
+  // pixel value for the browser to animate to
+  const [contentPx, setContentPx] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) {
+      return;
+    }
+    const ro = new ResizeObserver(() => {
+      // +1 guards against sub-pixel rounding clipping the last text line
+      setContentPx(Math.ceil(el.getBoundingClientRect().height) + 1);
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+    };
+  }, []);
+
+  // content that fits the preview needs no clamp, gradient or toggle
+  const needsClamp = contentPx === null || contentPx > INFOBOX_PREVIEW_PX + 24;
+
   return (
     <div className="rounded-2xl border border-line bg-surface p-3">
       <div className={infobox.img_src ? "flex items-start gap-4" : ""}>
@@ -51,17 +78,18 @@ export function Infobox({
         </h3>
       </div>
 
-      {/* animated disclosure: grid-template-rows 0fr→1fr is the only pure-CSS
-          way to transition to the content's natural height; overflow-hidden
-          stays on in both states (without it the inner mt-3 collapses through
-          the wrapper when expanded and the visible content jumps up 12px) */}
+      {/* animated disclosure: overflow-hidden stays on in both states (without
+          it the inner mt-3 collapses through the wrapper when expanded and
+          the visible content jumps up 12px on toggle); flow-root keeps the
+          inner's first-child margin inside the measured box */}
       <div
-        className={`relative mt-3 grid transition-[grid-template-rows] duration-300 ease-out ${
-          expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
+        className="relative mt-3 overflow-hidden transition-[max-height] duration-300 ease-out"
         id={contentId}
+        style={{
+          maxHeight: needsClamp ? (expanded ? (contentPx ?? INFOBOX_PREVIEW_PX) : INFOBOX_PREVIEW_PX) : undefined,
+        }}
       >
-        <div className="relative min-h-0 overflow-hidden" inert={!expanded}>
+        <div className="relative flow-root" ref={contentRef}>
           {infobox.attributes && infobox.attributes.length > 0 ? (
             <dl className="space-y-1 text-xs">
               {infobox.attributes.map((attribute, index) => (
@@ -138,25 +166,29 @@ export function Infobox({
               ))}
             </div>
           ) : null}
+        </div>
+        {needsClamp ? (
           <div
             className={`pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent transition-opacity duration-300 ${
               expanded ? "opacity-0" : "opacity-100"
             }`}
           />
-        </div>
+        ) : null}
       </div>
-      <button
-        aria-controls={contentId}
-        aria-expanded={expanded}
-        className="mt-2 flex w-full items-center justify-center gap-1 border-t border-line pt-2.5 text-xs text-ink-3 transition-colors hover:text-ink"
-        onClick={() => {
-          setExpanded((value) => !value);
-        }}
-        type="button"
-      >
-        {expanded ? t("collapse") : t("expand")}
-        <ChevronDown className={`size-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
-      </button>
+      {needsClamp ? (
+        <button
+          aria-controls={contentId}
+          aria-expanded={expanded}
+          className="mt-2 flex w-full items-center justify-center gap-1 border-t border-line pt-2.5 text-xs text-ink-3 transition-colors hover:text-ink"
+          onClick={() => {
+            setExpanded((value) => !value);
+          }}
+          type="button"
+        >
+          {expanded ? t("collapse") : t("expand")}
+          <ChevronDown className={`size-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </button>
+      ) : null}
     </div>
   );
 }
