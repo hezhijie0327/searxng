@@ -18,13 +18,18 @@ import { isInfoPageData, isPreferencesPageData, isStatsPageData } from "./types.
 interface OverlayState {
   url: string;
   title: string;
+  /** "document" panels fetch plain text (LICENSE.txt); "page" panels fetch page-data */
+  mode: "page" | "document";
   data: AnyPageData | null;
+  text: string | null;
   loading: boolean;
   error: string | null;
 }
 
 interface OverlayContextValue {
   openOverlay: (url: string, title: string) => void;
+  /** open a plain-text document (LICENSE.txt ...) rendered inside the panel */
+  openDocument: (title: string, url: string) => void;
   closeOverlay: () => void;
 }
 
@@ -47,7 +52,11 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const openOverlay = useCallback((url: string, title: string) => {
-    setState({ url, title, data: null, loading: true, error: null });
+    setState({ url, title, mode: "page", data: null, text: null, loading: true, error: null });
+  }, []);
+
+  const openDocument = useCallback((title: string, url: string) => {
+    setState({ url, title, mode: "document", data: null, text: null, loading: true, error: null });
   }, []);
 
   // navigate the panel to another URL, keeping it open
@@ -55,7 +64,9 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({
       url,
       title: title || prev?.title || "",
+      mode: "page",
       data: null,
+      text: null,
       loading: true,
       error: null,
     }));
@@ -67,14 +78,18 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
       return;
     }
     const controller = new AbortController();
-    void fetch(state.url, { headers: { Accept: "text/html" }, signal: controller.signal })
+    const isDocument = state.mode === "document";
+    void fetch(state.url, { headers: { Accept: isDocument ? "text/plain" : "text/html" }, signal: controller.signal })
       .then(async (resp) => {
         if (!resp.ok) {
           throw new Error(`HTTP ${resp.status}`);
         }
-        return extractPageData(await resp.text());
-      })
-      .then((data) => {
+        const body = await resp.text();
+        if (isDocument) {
+          setState((prev) => (prev && prev.url === state.url ? { ...prev, text: body, loading: false } : prev));
+          return;
+        }
+        const data = extractPageData(body);
         setState((prev) => (prev && prev.url === state.url ? { ...prev, data, loading: false } : prev));
       })
       .catch((err) => {
@@ -82,7 +97,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
           return;
         }
         // not an app page (e.g. a static file) — fall back to a full load
-        if (String(err).includes("page-data missing")) {
+        if (!isDocument && String(err).includes("page-data missing")) {
           window.location.assign(state.url);
           return;
         }
@@ -110,7 +125,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
   }, [state, onKeyDown]);
 
   return (
-    <OverlayContext.Provider value={{ openOverlay, closeOverlay }}>
+    <OverlayContext.Provider value={{ openOverlay, openDocument, closeOverlay }}>
       {children}
       {state ? (
         <div aria-label={state.title} aria-modal="true" className="fixed inset-0 z-50" role="dialog">
@@ -164,6 +179,12 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
                 </div>
               ) : state.error ? (
                 <p className="p-6 text-sm text-danger">{state.error}</p>
+              ) : state.mode === "document" ? (
+                <article className="px-5 pb-8">
+                  <pre className="whitespace-pre-wrap break-words font-mono text-[11.5px] leading-relaxed text-ink-2">
+                    {state.text}
+                  </pre>
+                </article>
               ) : state.data ? (
                 <Suspense fallback={chunkFallback}>
                   <OverlayContent data={state.data} />

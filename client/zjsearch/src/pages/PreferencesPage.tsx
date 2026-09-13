@@ -29,6 +29,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Shell } from "../components/Shell.tsx";
 import { useT } from "../lib/i18n.ts";
+import { useOverlay } from "../lib/overlay.tsx";
 import type { ThemeStyle } from "../lib/theme.ts";
 import { applyCenterAlignment, applyThemeStyle } from "../lib/theme.ts";
 import type { PreferencesPageData } from "../lib/types.ts";
@@ -37,6 +38,7 @@ import { Card, CategoryTab, cap, PluginRow, Select, SettingRow, Switch } from ".
 
 export function PreferencesPage({ data, embedded = false }: { data: PreferencesPageData; embedded?: boolean }) {
   const t = useT();
+  const { openDocument } = useOverlay();
   const globals = data.globals;
   const kv = data.kv;
   const locked = useMemo(() => new Set(data.locked_preferences), [data.locked_preferences]);
@@ -892,8 +894,10 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             <a
               className="transition-colors hover:text-accent hover:underline"
               href="/static/themes/zjsearch/LICENSE.txt"
-              rel="noreferrer"
-              target="_blank"
+              onClick={(event) => {
+                event.preventDefault();
+                openDocument(t("license"), "/static/themes/zjsearch/LICENSE.txt");
+              }}
             >
               Apache-2.0 with Commons Clause v1.0
             </a>
