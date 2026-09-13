@@ -1,0 +1,4 @@
+{% extends "zjsearch/base.html" %}
+{% from "zjsearch/data/macros.html" import page_index with context %}
+{% block title %}{% endblock %}
+{% block page_data %}{{ page_index(selected_categories) }}{% endblock %}

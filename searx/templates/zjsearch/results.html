@@ -1,0 +1,15 @@
+{% extends "zjsearch/base.html" %}
+{% from "zjsearch/data/macros.html" import page_results with context %}
+{% block title %}{% if query_in_title %}{{- q|e }} - {% endif %}{% endblock %}
+{% block head %}<link rel="alternate" type="application/rss+xml" title="{{ instance_name }} search: {{ q|e }}" href="{{ url_for('search', _external=True) }}?q={{ q|urlencode }}&amp;categories={{ selected_categories|join(",") | replace(' ','+') }}&amp;pageno={{ pageno }}&amp;time_range={{ time_range }}&amp;language={{ current_language }}&amp;safesearch={{ safesearch }}&amp;format=rss">{% endblock %}
+{% block page_data -%}
+{%- if results and results|map(attribute='template')|unique|list|count == 1 -%}
+  {%- set only_template = results[0]['template']|default('default.html')|replace('.html', '') -%}
+{%- else -%}
+  {%- set only_template = '' -%}
+{%- endif -%}
+{{- page_results(results, q, selected_categories, pageno, time_range, suggestions,
+                 corrections, answers, infoboxes, engine_data, paging,
+                 unresponsive_engines, timings, max_response_time,
+                 timeout_limit, current_language, search_language, only_template) -}}
+{%- endblock %}

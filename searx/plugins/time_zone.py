@@ -53,7 +53,12 @@ class SXNGPlugin(Plugin):
 
         if not search_term:
             date_time = DateTime(datetime.datetime.now())
-            results.add(results.types.Answer(answer=date_time.l10n()))
+            results.add(
+                results.types.Answer(
+                    answer=date_time.l10n(),
+                    data={"kind": "time", "time": date_time.l10n()},
+                )
+            )
             return results
 
         geo = GeoLocation.by_query(search_term=search_term)
@@ -62,7 +67,13 @@ class SXNGPlugin(Plugin):
             tz_name = geo.timezone.replace('_', ' ')
             results.add(
                 results.types.Answer(
-                    answer=(f"{tz_name}:" f" {date_time.l10n()} ({date_time.datetime.strftime('%Z')})")
+                    answer=(f"{tz_name}:" f" {date_time.l10n()} ({date_time.datetime.strftime('%Z')})"),
+                    data={
+                        "kind": "time",
+                        "zone": tz_name,
+                        "time": date_time.l10n(),
+                        "abbr": date_time.datetime.strftime("%Z"),
+                    },
                 )
             )
 

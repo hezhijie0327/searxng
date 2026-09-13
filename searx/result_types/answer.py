@@ -85,6 +85,11 @@ class Answer(BaseAnswer, kw_only=True):
     answer: str
     """Text of the answer."""
 
+    data: dict[str, str] | None = None
+    """Optional structured payload for theme renderers, e.g. ``{"kind":
+    "hash", "algo": "sha512", "digest": "..."}``.  Themes without support for
+    these fields just render the *answer* text."""
+
     def __hash__(self):
         """The hash value of field *answer* is the hash value of the
         :py:obj:`Answer` object.  :py:obj:`Answer <Result.__eq__>` objects are

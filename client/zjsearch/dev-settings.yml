@@ -1,0 +1,38 @@
+# zjsearch theme dev instance settings (tracked; carries LAN-specific values
+# such as the outgoing proxy).
+# Run with:
+#   SEARXNG_SETTINGS_PATH=client/zjsearch/dev-settings.yml ./manage webapp.run
+use_default_settings: true
+
+general:
+  instance_name: ZJSearch
+  debug: false
+
+search:
+  formats:
+    - html
+    - csv
+    - json
+    - rss
+
+ui:
+  default_theme: zjsearch
+
+server:
+  secret_key: "zjsearch-local-dev-secret-key"
+  limiter: false
+  image_proxy: true
+
+# proxy so region-blocked engines are reachable from this network
+outgoing:
+  request_timeout: 5.0
+  proxies:
+    all://:
+      - http://10.192.7.1:7890
+
+# movie engines for the !movies poster wall (both disabled upstream)
+engines:
+  - name: tmdb
+    disabled: false
+  - name: imdb
+    disabled: false
