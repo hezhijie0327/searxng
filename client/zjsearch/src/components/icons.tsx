@@ -13,6 +13,8 @@ import {
   ArrowUp as LucideArrowUp,
   Book as LucideBook,
   Calendar as LucideCalendar,
+  AlignCenterVertical as LucideCenter,
+  ChartColumn as LucideChartColumn,
   Check as LucideCheck,
   ChevronDown as LucideChevronDown,
   ChevronLeft as LucideChevronLeft,
@@ -38,9 +40,10 @@ import {
   Layers as LucideLayers,
   Lightbulb as LucideLightbulb,
   Link as LucideLink,
+  LoaderCircle as LucideLoaderCircle,
   MapPin as LucideLocation,
   Magnet as LucideMagnet,
-  Monitor as LucideMonitorBase,
+  Monitor as LucideMonitor,
   Moon as LucideMoon,
   Music as LucideMusic,
   Newspaper as LucideNews,
@@ -132,89 +135,13 @@ export const TerminalIcon = lucide(LucideTerminal);
 
 // ------------------------------------------------- custom marks (no lucide)
 
-/** Loading spinner: track + arc — lucide's LoaderCircle has no track. */
-export const SpinnerIcon = function SpinnerIcon({ className }: IconProps) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      focusable="false"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <circle cx="12" cy="12" opacity="0.25" r="9" />
-      <path d="M21 12a9 9 0 0 0-9-9" />
-    </svg>
-  );
-};
+export const SpinnerIcon = lucide(LucideLoaderCircle);
 
-/** Theme monitor: lucide's Monitor lacks the filled "active display" pointer. */
-export const MonitorIcon = function MonitorIcon({ className }: IconProps) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      focusable="false"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <rect height="14" rx="2" width="20" x="2" y="3" />
-      <path d="M8 21h8" />
-      <path d="M12 17v4" />
-      <path d="M12 13l-2.5-3.5L12 6l2.5 3.5L12 13z" fill="currentColor" stroke="none" />
-    </svg>
-  );
-};
+export const MonitorIcon = lucide(LucideMonitor);
 
-/** Center alignment: frame with a filled centered rect. */
-export const CenterIcon = function CenterIcon({ className }: IconProps) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      focusable="false"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <rect height="18" rx="2" width="18" x="3" y="3" />
-      <rect fill="currentColor" height="6" rx="1" stroke="none" width="8" x="8" y="9" />
-    </svg>
-  );
-};
+export const CenterIcon = lucide(LucideCenter);
 
-/** Stats chart: axis + column bars. */
-export const BarChartIcon = function BarChartIcon({ className }: IconProps) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      focusable="false"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d="M3 3v18h18" />
-      <rect height="6" rx="0.5" width="3" x="7" y="12" />
-      <rect height="10" rx="0.5" width="3" x="12" y="8" />
-      <rect height="13" rx="0.5" width="3" x="17" y="5" />
-    </svg>
-  );
-};
+export const BarChartIcon = lucide(LucideChartColumn);
 
 // ------------------------------------------------------------------ brand
 

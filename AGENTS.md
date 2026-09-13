@@ -243,8 +243,7 @@ background only — color marks the term, no bold.
   SVG components from `lucide-react`, re-exported with theme defaults
   (aria-hidden, focusable=false) by `src/components/icons.tsx` — usage
   sites import `*Icon` from there and never import lucide directly.
-  A few marks lucide can't express (brand, spinner, monitor-pointer,
-  center-frame, bar-chart) remain hand-drawn in the same file.
+  Only BrandMark (the logo) remains hand-drawn in the same file.
   Never add an icon font.
 - Drawer/lightbox overlays render conditionally (zero cost when closed).
 
