@@ -1,69 +1,68 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 /**
- * Icon set: lucide-backed stroke icons on the 24x24 grid, plus a handful of
- * custom marks (brand, spinner, monitor-pointer, center-frame, bar-chart)
- * that lucide does not express. Exported names are the stable API — usage
- * sites keep importing *Icon from here and never see lucide directly.
+ * Icon set: lucide-backed stroke icons on the 24x24 grid. Exported names
+ * are the stable API — usage sites import `*Icon` from here and never see
+ * lucide directly. Only BrandMark (the logo) is hand-drawn.
  */
 
 import {
-  AlertTriangle as LucideAlert,
-  ArrowDown as LucideArrowDown,
-  ArrowUp as LucideArrowUp,
-  Book as LucideBook,
-  Calendar as LucideCalendar,
-  AlignCenterVertical as LucideCenter,
-  ChartColumn as LucideChartColumn,
-  Check as LucideCheck,
-  ChevronDown as LucideChevronDown,
-  ChevronLeft as LucideChevronLeft,
-  ChevronRight as LucideChevronRight,
-  Clock as LucideClock,
-  X as LucideClose,
-  Code as LucideCode,
-  Cookie as LucideCookie,
-  Download as LucideDownload,
-  ExternalLink as LucideExternalLink,
-  FileText as LucideFile,
-  Film as LucideFilm,
-  FlaskConical as LucideFlask,
-  Globe as LucideGlobe,
-  LayoutGrid as LucideGrid,
-  GripVertical as LucideGripVertical,
-  Heart as LucideHeart,
-  Image as LucideImage,
-  Info as LucideInfo,
-  Key as LucideKey,
-  Keyboard as LucideKeyboard,
-  Languages as LucideLanguages,
-  Layers as LucideLayers,
-  Lightbulb as LucideLightbulb,
-  Link as LucideLink,
-  LoaderCircle as LucideLoaderCircle,
-  MapPin as LucideLocation,
-  Magnet as LucideMagnet,
-  Monitor as LucideMonitor,
-  Moon as LucideMoon,
-  Music as LucideMusic,
-  Newspaper as LucideNews,
-  Package as LucidePackage,
-  Pause as LucidePause,
-  Users as LucidePeople,
-  Play as LucidePlay,
+  AlertTriangle,
+  AlignCenterVertical,
+  ArrowDown,
+  ArrowLeftRight,
+  ArrowUp,
+  Book,
+  Calendar,
+  ChartColumn,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Code,
+  Cookie,
+  Download,
+  ExternalLink,
+  FileText,
+  Film,
+  FlaskConical,
+  Globe,
+  GripVertical,
+  Heart,
+  Image,
+  Info,
+  Key,
+  Keyboard,
+  Languages,
+  Layers,
+  LayoutGrid,
+  Lightbulb,
+  Link,
+  LoaderCircle,
   type LucideProps,
-  Radio as LucideRadio,
-  RefreshCw as LucideRefresh,
-  Search as LucideSearch,
-  Shield as LucideShield,
-  SlidersHorizontal as LucideSliders,
-  Sparkle as LucideSpark,
-  Star as LucideStar,
-  Sun as LucideSun,
-  ArrowLeftRight as LucideSwap,
-  Tag as LucideTag,
-  Terminal as LucideTerminal,
-  Tv as LucideTv,
+  Magnet,
+  MapPin,
+  Monitor,
+  Moon,
+  Music,
+  Newspaper,
+  Package,
+  Pause,
+  Play,
+  Radio,
+  RefreshCw,
+  Search,
+  Shield,
+  SlidersHorizontal,
+  Sparkle,
+  Star,
+  Sun,
+  Tag,
+  Terminal,
+  Tv,
+  Users,
+  X,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
@@ -71,77 +70,69 @@ interface IconProps {
   className?: string;
 }
 
-/** lucide with the theme defaults: decorative (no a11y noise), inherits text
-    color, keeps the stroke style the whole UI is drawn with. */
+/** lucide with the theme defaults: decorative (no a11y noise), inherits
+    text color, keeps the stroke style the whole UI is drawn with. */
 function lucide(Icon: ComponentType<LucideProps>) {
   return function LucideIcon({ className }: IconProps) {
     return <Icon aria-hidden className={className} focusable="false" />;
   };
 }
 
-// ------------------------------------------------------------- lucide icons
-
-export const SearchIcon = lucide(LucideSearch);
-export const CloseIcon = lucide(LucideClose);
-export const GlobeIcon = lucide(LucideGlobe);
-export const ImageIcon = lucide(LucideImage);
-export const PlayIcon = lucide(LucidePlay);
-export const PauseIcon = lucide(LucidePause);
-export const NewsIcon = lucide(LucideNews);
-export const LayersIcon = lucide(LucideLayers);
-export const LocationIcon = lucide(LucideLocation);
-export const MusicIcon = lucide(LucideMusic);
-export const FlaskIcon = lucide(LucideFlask);
-export const GridIcon = lucide(LucideGrid);
-export const BookIcon = lucide(LucideBook);
-export const FileIcon = lucide(LucideFile);
-export const PeopleIcon = lucide(LucidePeople);
-export const TvIcon = lucide(LucideTv);
-export const RadioIcon = lucide(LucideRadio);
-export const SlidersIcon = lucide(LucideSliders);
-export const HeartIcon = lucide(LucideHeart);
-export const InfoIcon = lucide(LucideInfo);
-export const ArrowUpIcon = lucide(LucideArrowUp);
-export const ArrowDownIcon = lucide(LucideArrowDown);
-export const ChevronLeftIcon = lucide(LucideChevronLeft);
-export const ChevronRightIcon = lucide(LucideChevronRight);
-export const ChevronDownIcon = lucide(LucideChevronDown);
-export const ExternalLinkIcon = lucide(LucideExternalLink);
-export const DownloadIcon = lucide(LucideDownload);
-export const ClockIcon = lucide(LucideClock);
-export const ShieldIcon = lucide(LucideShield);
-export const LanguagesIcon = lucide(LucideLanguages);
-export const MagnetIcon = lucide(LucideMagnet);
-export const AlertIcon = lucide(LucideAlert);
-export const SparkIcon = lucide(LucideSpark);
-export const CalendarIcon = lucide(LucideCalendar);
-export const FilmIcon = lucide(LucideFilm);
-export const PackageIcon = lucide(LucidePackage);
-export const CodeIcon = lucide(LucideCode);
-export const CheckIcon = lucide(LucideCheck);
-export const TagIcon = lucide(LucideTag);
-export const GripVerticalIcon = lucide(LucideGripVertical);
-export const CookieIcon = lucide(LucideCookie);
-export const KeyboardIcon = lucide(LucideKeyboard);
-export const KeyIcon = lucide(LucideKey);
-export const LinkIcon = lucide(LucideLink);
-export const SunIcon = lucide(LucideSun);
-export const MoonIcon = lucide(LucideMoon);
-export const StarIcon = lucide(LucideStar);
-export const SwapIcon = lucide(LucideSwap);
-export const RefreshIcon = lucide(LucideRefresh);
-export const LightbulbIcon = lucide(LucideLightbulb);
-export const TerminalIcon = lucide(LucideTerminal);
-
-// ------------------------------------------------- custom marks (no lucide)
-
-export const SpinnerIcon = lucide(LucideLoaderCircle);
-
-export const MonitorIcon = lucide(LucideMonitor);
-
-export const CenterIcon = lucide(LucideCenter);
-
-export const BarChartIcon = lucide(LucideChartColumn);
+export const AlertIcon = lucide(AlertTriangle);
+export const ArrowDownIcon = lucide(ArrowDown);
+export const ArrowUpIcon = lucide(ArrowUp);
+export const BarChartIcon = lucide(ChartColumn);
+export const BookIcon = lucide(Book);
+export const CalendarIcon = lucide(Calendar);
+export const CenterIcon = lucide(AlignCenterVertical);
+export const CheckIcon = lucide(Check);
+export const ChevronDownIcon = lucide(ChevronDown);
+export const ChevronLeftIcon = lucide(ChevronLeft);
+export const ChevronRightIcon = lucide(ChevronRight);
+export const ClockIcon = lucide(Clock);
+export const CloseIcon = lucide(X);
+export const CodeIcon = lucide(Code);
+export const CookieIcon = lucide(Cookie);
+export const DownloadIcon = lucide(Download);
+export const ExternalLinkIcon = lucide(ExternalLink);
+export const FileIcon = lucide(FileText);
+export const FilmIcon = lucide(Film);
+export const FlaskIcon = lucide(FlaskConical);
+export const GlobeIcon = lucide(Globe);
+export const GridIcon = lucide(LayoutGrid);
+export const GripVerticalIcon = lucide(GripVertical);
+export const HeartIcon = lucide(Heart);
+export const ImageIcon = lucide(Image);
+export const InfoIcon = lucide(Info);
+export const KeyIcon = lucide(Key);
+export const KeyboardIcon = lucide(Keyboard);
+export const LanguagesIcon = lucide(Languages);
+export const LayersIcon = lucide(Layers);
+export const LightbulbIcon = lucide(Lightbulb);
+export const LinkIcon = lucide(Link);
+export const LocationIcon = lucide(MapPin);
+export const MagnetIcon = lucide(Magnet);
+export const MonitorIcon = lucide(Monitor);
+export const MoonIcon = lucide(Moon);
+export const MusicIcon = lucide(Music);
+export const NewsIcon = lucide(Newspaper);
+export const PackageIcon = lucide(Package);
+export const PauseIcon = lucide(Pause);
+export const PeopleIcon = lucide(Users);
+export const PlayIcon = lucide(Play);
+export const RadioIcon = lucide(Radio);
+export const RefreshIcon = lucide(RefreshCw);
+export const SearchIcon = lucide(Search);
+export const ShieldIcon = lucide(Shield);
+export const SlidersIcon = lucide(SlidersHorizontal);
+export const SparkIcon = lucide(Sparkle);
+export const SpinnerIcon = lucide(LoaderCircle);
+export const StarIcon = lucide(Star);
+export const SunIcon = lucide(Sun);
+export const SwapIcon = lucide(ArrowLeftRight);
+export const TagIcon = lucide(Tag);
+export const TerminalIcon = lucide(Terminal);
+export const TvIcon = lucide(Tv);
 
 // ------------------------------------------------------------------ brand
 
