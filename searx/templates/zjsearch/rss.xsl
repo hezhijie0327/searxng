@@ -8,10 +8,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <style>
-          body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 48rem; padding: 0 1rem; color: #1a1a1e; background: #f7f7f8; }
-          a { color: #5457d6; }
-          hr { border: none; border-top: 1px solid #e5e5ea; }
-          time { color: #6b6b76; font-size: 0.85rem; }
+          body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 48rem; padding: 0 1rem; color: #201d17; background: #faf9f6; }
+          a { color: #a67c00; }
+          hr { border: none; border-top: 1px solid #e6e2d7; }
+          time { color: #6b675c; font-size: 0.85rem; }
         </style>
       </head>
       <body>
