@@ -240,7 +240,12 @@ background only — color marks the term, no bold.
   app.tsx and overlay.tsx); OpenLayers is dynamically imported only when a
   map result expands. Keep heavy features out of the eager graph.
 - No webfonts (system font stack) and no third-party scripts; icons are
-  inline SVG (`src/components/icons.tsx`), never an icon font.
+  SVG components from `lucide-react`, re-exported with theme defaults
+  (aria-hidden, focusable=false) by `src/components/icons.tsx` — usage
+  sites import `*Icon` from there and never import lucide directly.
+  A few marks lucide can't express (brand, spinner, monitor-pointer,
+  center-frame, bar-chart) remain hand-drawn in the same file.
+  Never add an icon font.
 - Drawer/lightbox overlays render conditionally (zero cost when closed).
 
 ## Windows (Git Bash) development notes
