@@ -57,15 +57,17 @@ export function EnginesTab({
                   <td className="px-3 py-3">
                     <Switch
                       checked={enabled[key] ?? false}
-                      label={`Allow ${engine.name}`}
+                      label={`${t("allow")} ${engine.name}`}
                       onChange={(value) => {
                         toggleEngine(key, value);
                       }}
                     />
                   </td>
                   <td className="max-w-52 px-4 py-3">
+                    {/* hover OR keyboard focus reveals the tooltip */}
                     <div className="group/engine relative">
                       <button
+                        aria-label={`${t("show_engine_info")}: ${engine.name}`}
                         className="flex items-center gap-1 truncate font-medium text-ink"
                         onMouseEnter={() => void loadEngineDescriptions()}
                         type="button"

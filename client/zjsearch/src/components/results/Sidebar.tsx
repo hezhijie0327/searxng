@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Search } from "lucide-react";
-import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import { newTabLinkProps } from "../../lib/link.ts";
+import { scrollBehavior } from "../../lib/motion.ts";
 import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
 import { CopyButton } from "../CopyButton.tsx";
@@ -32,6 +33,7 @@ export function Infobox({
 }) {
   const t = useT();
   const [expanded, setExpanded] = useState(false);
+  const contentId = useId();
   return (
     <div className="rounded-2xl border border-line bg-surface p-3">
       <div className={infobox.img_src ? "flex items-start gap-4" : ""}>
@@ -49,91 +51,103 @@ export function Infobox({
         </h3>
       </div>
 
-      {/* overflow-hidden stays on in both states: without it the inner mt-3
-          collapses through the wrapper when expanded and the visible content
-          jumps up 12px on toggle */}
-      <div className={`relative mt-3 overflow-hidden ${expanded ? "" : "max-h-72"}`}>
-        {infobox.attributes && infobox.attributes.length > 0 ? (
-          <dl className="space-y-1 text-xs">
-            {infobox.attributes.map((attribute, index) => (
-              <div className="flex gap-2" key={index}>
-                <dt className="shrink-0 text-ink-3">{attribute.label}:</dt>
-                <dd className="min-w-0 text-ink-2">
-                  {attribute.image_src ? (
-                    <img
-                      alt={attribute.image_alt}
-                      className="inline-block max-h-24 rounded-lg align-middle"
-                      decoding="async"
-                      loading="lazy"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
-                      src={attribute.image_src}
-                    />
-                  ) : (
-                    <span dir="auto">{attribute.value}</span>
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        ) : null}
-
-        {infobox.content_html ? (
-          <div
-            className="mt-3 text-[13px] leading-relaxed text-ink-2 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-2"
-            dangerouslySetInnerHTML={{ __html: infobox.content_html }}
-            dir="auto"
-          />
-        ) : null}
-
-        {infobox.urls && infobox.urls.length > 0 ? (
-          <ul className="mt-3 space-y-1 text-xs">
-            {infobox.urls.map((url) => (
-              <li className="truncate" key={url.url}>
-                <a
-                  className="inline-flex items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
-                  {...newTabLinkProps(globals.results_on_new_tab)}
-                  href={url.url}
-                >
-                  <span className="truncate">{url.title}</span>
-                  <ExternalLink className="size-3 shrink-0" />
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        {infobox.related_topics && infobox.related_topics.length > 0 ? (
-          <div className="mt-4 space-y-2">
-            {infobox.related_topics.map((topic) => (
-              <div key={topic.name}>
-                <h4 className="text-xs font-medium text-ink" dir="auto">
-                  {topic.name}
-                </h4>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {topic.suggestions.map((suggestion) => (
-                    <button
-                      className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
-                      key={suggestion}
-                      onClick={() => {
-                        onSearch(suggestion);
-                      }}
-                      type="button"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+      {/* animated disclosure: grid-template-rows 0fr→1fr is the only pure-CSS
+          way to transition to the content's natural height; overflow-hidden
+          stays on in both states (without it the inner mt-3 collapses through
+          the wrapper when expanded and the visible content jumps up 12px) */}
+      <div
+        className={`relative mt-3 grid transition-[grid-template-rows] duration-300 ease-out ${
+          expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+        id={contentId}
+      >
+        <div className="relative min-h-0 overflow-hidden" inert={!expanded}>
+          {infobox.attributes && infobox.attributes.length > 0 ? (
+            <dl className="space-y-1 text-xs">
+              {infobox.attributes.map((attribute, index) => (
+                <div className="flex gap-2" key={index}>
+                  <dt className="shrink-0 text-ink-3">{attribute.label}:</dt>
+                  <dd className="min-w-0 text-ink-2">
+                    {attribute.image_src ? (
+                      <img
+                        alt={attribute.image_alt}
+                        className="inline-block max-h-24 rounded-lg align-middle"
+                        decoding="async"
+                        loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
+                        src={attribute.image_src}
+                      />
+                    ) : (
+                      <span dir="auto">{attribute.value}</span>
+                    )}
+                  </dd>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-        {expanded ? null : (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent" />
-        )}
+              ))}
+            </dl>
+          ) : null}
+
+          {infobox.content_html ? (
+            <div
+              className="mt-3 text-[13px] leading-relaxed text-ink-2 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-2"
+              dangerouslySetInnerHTML={{ __html: infobox.content_html }}
+              dir="auto"
+            />
+          ) : null}
+
+          {infobox.urls && infobox.urls.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-xs">
+              {infobox.urls.map((url) => (
+                <li className="truncate" key={url.url}>
+                  <a
+                    className="inline-flex items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
+                    {...newTabLinkProps(globals.results_on_new_tab)}
+                    href={url.url}
+                  >
+                    <span className="truncate">{url.title}</span>
+                    <ExternalLink className="size-3 shrink-0" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {infobox.related_topics && infobox.related_topics.length > 0 ? (
+            <div className="mt-4 space-y-2">
+              {infobox.related_topics.map((topic) => (
+                <div key={topic.name}>
+                  <h4 className="text-xs font-medium text-ink" dir="auto">
+                    {topic.name}
+                  </h4>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {topic.suggestions.map((suggestion) => (
+                      <button
+                        className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
+                        key={suggestion}
+                        onClick={() => {
+                          onSearch(suggestion);
+                        }}
+                        type="button"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <div
+            className={`pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent transition-opacity duration-300 ${
+              expanded ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        </div>
       </div>
       <button
+        aria-controls={contentId}
+        aria-expanded={expanded}
         className="mt-2 flex w-full items-center justify-center gap-1 border-t border-line pt-2.5 text-xs text-ink-3 transition-colors hover:text-ink"
         onClick={() => {
           setExpanded((value) => !value);
@@ -182,8 +196,7 @@ export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSea
     if (!strip) {
       return;
     }
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    strip.scrollBy({ left: direction * strip.clientWidth * 0.8, behavior: reduced ? "auto" : "smooth" });
+    strip.scrollBy({ left: direction * strip.clientWidth * 0.8, behavior: scrollBehavior() });
   };
 
   // buttons are persistent so flipping state never shifts the chips

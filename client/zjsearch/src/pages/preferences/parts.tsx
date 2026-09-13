@@ -131,7 +131,8 @@ export function Switch({
     >
       <span
         className={`size-5 rounded-full shadow transition-transform ${
-          checked ? "translate-x-5 bg-accent-contrast" : "translate-x-0 bg-ink-3"
+          // translate-x is physical: RTL tracks must move the knob the other way
+          checked ? "translate-x-5 rtl:-translate-x-5 bg-accent-contrast" : "translate-x-0 bg-ink-3"
         }`}
       />
     </button>
@@ -202,7 +203,7 @@ export function EngineTooltip({ engine }: { engine: EngineEntry }) {
   }, [engine.name]);
 
   return (
-    <div className="pointer-events-none absolute start-0 top-full z-30 mt-1 hidden w-80 rounded-xl border border-line bg-surface p-3 text-xs shadow-pop group-hover/engine:block">
+    <div className="pointer-events-none absolute start-0 top-full z-30 mt-1 hidden w-80 rounded-xl border border-line bg-surface p-3 text-xs shadow-pop group-hover/engine:block group-focus-within/engine:block">
       {desc ? (
         <p className="text-ink-2">
           {desc.text} <i className="text-ink-3">(Source: {desc.source})</i>

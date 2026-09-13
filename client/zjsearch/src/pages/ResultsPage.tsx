@@ -23,6 +23,7 @@ import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
 import { tryEvaluateExpression } from "../features/calculator.ts";
 import { useHotkeys } from "../features/hotkeys.ts";
 import { useT } from "../lib/i18n.ts";
+import { scrollBehavior } from "../lib/motion.ts";
 import { extractPageData } from "../lib/pageData.ts";
 import { buildSearchUrl, parseSearchUrl, useRouter } from "../lib/router.tsx";
 import { useHasPlugin, useSettings } from "../lib/settings.ts";
@@ -187,7 +188,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
       if (!next) {
         return;
       }
-      next.scrollIntoView({ block: "center", behavior: "smooth" });
+      next.scrollIntoView({ block: "center", behavior: scrollBehavior() });
       setHotkeysSelected(Number(next.dataset.hotkeyIndex));
     },
     open: (newTab: boolean) => {

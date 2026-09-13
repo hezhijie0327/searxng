@@ -258,15 +258,17 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           </div>
         ) : null}
 
-        <div className="mb-6 flex flex-wrap gap-1.5 rounded-2xl border border-line bg-surface p-2">
+        <div className="mb-6 flex flex-wrap gap-1.5 rounded-2xl border border-line bg-surface p-2" role="tablist">
           {tabs.map((item) => (
             <button
+              aria-controls={`prefs-panel-${item.id}`}
               aria-selected={tab === item.id}
               className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-[13px] transition-colors ${
                 tab === item.id
                   ? "bg-accent-strong font-medium text-accent-contrast"
                   : "text-ink-2 hover:bg-surface-2 hover:text-ink"
               }`}
+              id={`prefs-tab-${item.id}`}
               key={item.id}
               onClick={() => {
                 setTab(item.id);
@@ -280,7 +282,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           ))}
         </div>
 
-        <div key={tab}>
+        <div aria-labelledby={`prefs-tab-${tab}`} id={`prefs-panel-${tab}`} key={tab} role="tabpanel">
           {tab === "general" ? (
             <Card>
               {!locked.has("categories") ? (
@@ -383,6 +385,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 title={t("engine_tokens")}
               >
                 <input
+                  aria-label={t("engine_tokens")}
                   autoComplete="off"
                   className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-sm transition-colors hover:border-ink-3 sm:w-60"
                   onChange={(event) => {
@@ -847,6 +850,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 </div>
                 <SettingRow icon={<RefreshCw className="size-4.5" />} stacked title={t("insert_prefs_hash")}>
                   <input
+                    aria-label={t("insert_prefs_hash")}
                     className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-sm transition-colors hover:border-ink-3"
                     onChange={(event) => {
                       setPastedHash(event.target.value);

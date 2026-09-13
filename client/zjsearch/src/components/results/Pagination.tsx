@@ -31,7 +31,7 @@ export function Pagination({
   }
 
   return (
-    <nav aria-label="pagination" className="mt-6 flex flex-wrap items-center justify-center gap-1.5 pb-4">
+    <nav aria-label={t("pagination")} className="mt-6 flex flex-wrap items-center justify-center gap-1.5 pb-4">
       {hasPrev ? (
         <button
           className="flex h-9 items-center gap-1 rounded-full border border-line bg-surface px-3 text-sm text-ink-2 transition-colors hover:border-accent hover:text-accent"

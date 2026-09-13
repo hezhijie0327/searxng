@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-// SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
-
 import {
   ArrowDown,
   ArrowUp,

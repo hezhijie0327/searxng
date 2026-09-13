@@ -210,7 +210,7 @@ export function Dropdown({
                           {option.label}
                         </span>
                       </span>
-                      {selected ? <Check className="size-4 shrink-0 text-accent-strong" /> : null}
+                      {selected ? <Check className="size-4 shrink-0 text-accent" /> : null}
                     </button>
                   </li>
                 );

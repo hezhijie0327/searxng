@@ -232,6 +232,7 @@ export function MediaCollapse({
   return (
     <div>
       <button
+        aria-expanded={open}
         className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink"
         onClick={() => {
           setOpen((prev) => !prev);

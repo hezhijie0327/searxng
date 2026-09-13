@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { LoaderCircle, Search, X } from "lucide-react";
-import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useRouter } from "../lib/router.tsx";
 import { useSettings } from "../lib/settings.ts";
@@ -43,6 +43,7 @@ export function SearchBox({
   const t = useT();
   const { loading } = useRouter();
   const settings = useSettings();
+  const listboxId = useId();
   const [innerQuery, setInnerQuery] = useState(initialQuery);
   const query = controlledQuery ?? innerQuery;
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -162,6 +163,11 @@ export function SearchBox({
         role="search"
       >
         <input
+          aria-activedescendant={active >= 0 && suggestions[active] ? `${listboxId}-${active}` : undefined}
+          aria-autocomplete="list"
+          aria-controls={showDropdown ? listboxId : undefined}
+          aria-expanded={showDropdown}
+          aria-label={t("search")}
           autoCapitalize="none"
           autoComplete="off"
           className={`min-w-0 flex-1 bg-transparent outline-none placeholder:text-ink-3 ${
@@ -177,6 +183,7 @@ export function SearchBox({
           onKeyDown={onKeyDown}
           placeholder={t("search_placeholder")}
           ref={inputRef}
+          role="combobox"
           spellCheck={false}
           type="text"
           value={query}
@@ -206,11 +213,13 @@ export function SearchBox({
 
       {showDropdown ? (
         <ul
+          aria-label={t("search_suggestions")}
           className="absolute inset-x-0 top-full z-30 mt-2 max-h-80 overflow-auto rounded-2xl border border-line bg-surface py-1.5 shadow-pop animate-fade-in"
+          id={listboxId}
           role="listbox"
         >
           {suggestions.map((suggestion, index) => (
-            <li aria-selected={index === active} key={suggestion.text} role="option">
+            <li aria-selected={index === active} id={`${listboxId}-${index}`} key={suggestion.text} role="option">
               <button
                 className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm ${
                   index === active ? "bg-surface-2" : ""

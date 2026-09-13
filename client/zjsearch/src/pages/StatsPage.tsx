@@ -191,11 +191,36 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
             <table className="w-full min-w-[680px] text-left text-sm">
               <thead className="bg-surface-2 text-xs text-ink-3">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">{sortButton("name", t("engine_name"))}</th>
-                  <th className="px-4 py-2.5 font-medium">{sortButton("score", t("scores"))}</th>
-                  <th className="px-4 py-2.5 font-medium">{sortButton("result_count", t("result_count"))}</th>
-                  <th className="px-4 py-2.5 font-medium">{sortButton("time", t("response_time"))}</th>
-                  <th className="px-4 py-2.5 font-medium">{sortButton("reliability", t("reliability"))}</th>
+                  <th
+                    aria-sort={sortKey === "name" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    className="px-4 py-2.5 font-medium"
+                  >
+                    {sortButton("name", t("engine_name"))}
+                  </th>
+                  <th
+                    aria-sort={sortKey === "score" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    className="px-4 py-2.5 font-medium"
+                  >
+                    {sortButton("score", t("scores"))}
+                  </th>
+                  <th
+                    aria-sort={sortKey === "result_count" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    className="px-4 py-2.5 font-medium"
+                  >
+                    {sortButton("result_count", t("result_count"))}
+                  </th>
+                  <th
+                    aria-sort={sortKey === "time" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    className="px-4 py-2.5 font-medium"
+                  >
+                    {sortButton("time", t("response_time"))}
+                  </th>
+                  <th
+                    aria-sort={sortKey === "reliability" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    className="px-4 py-2.5 font-medium"
+                  >
+                    {sortButton("reliability", t("reliability"))}
+                  </th>
                 </tr>
               </thead>
               <tbody>

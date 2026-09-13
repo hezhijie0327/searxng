@@ -128,6 +128,7 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
   return (
     <div className="mt-2">
       <button
+        aria-expanded={open}
         className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink"
         onClick={() => {
           setOpen((prev) => !prev);

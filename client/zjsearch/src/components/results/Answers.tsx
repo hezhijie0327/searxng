@@ -547,7 +547,7 @@ function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "ans
     return (
       <div>
         <p className="truncate text-xs text-ink-3" dir="ltr">
-          <span className="font-mono font-medium text-accent-strong">{data.func}</span>({data.args})
+          <span className="font-mono font-medium text-accent">{data.func}</span>({data.args})
         </p>
         <div className="mt-1 flex items-center justify-between gap-3">
           <p className="text-2xl font-semibold text-ink" dir="ltr">
