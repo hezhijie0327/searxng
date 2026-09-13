@@ -75,10 +75,8 @@
                   <stop offset="1" stop-color="#f0b429" />
                 </linearGradient>
               </defs>
-              <rect fill="#211f1c" height="100" rx="22" width="100" />
-              <circle cx="43" cy="43" fill="url(#rss-brand-gradient)" r="24" stroke="#f5f2ea" stroke-width="9" />
-              <path d="M61 61 L82 82" stroke="#f5f2ea" stroke-linecap="round" stroke-width="11" />
-              <path d="M33 36 a13 13 0 0 1 10 -6" fill="none" opacity="0.85" stroke="#ffffff" stroke-linecap="round" stroke-width="5" />
+              <circle cx="42" cy="42" fill="url(#rss-brand-gradient)" r="30" />
+              <path d="M63 63 L84 84" stroke="currentColor" stroke-linecap="round" stroke-width="12" />
             </svg>
             <span class="wordmark">ZJSearch<span class="dot">.</span></span>
           </div>
@@ -134,12 +132,7 @@
             </article>
           </xsl:for-each>
         </main>
-        <footer>
-          ZJSearch ·
-          <a href="/static/themes/zjsearch/LICENSE.txt" target="_blank" rel="noreferrer">
-            Apache-2.0 with Commons Clause v1.0
-          </a>
-        </footer>
+        <footer>© 2026 Zhijie Online</footer>
       </body>
     </html>
   </xsl:template>
