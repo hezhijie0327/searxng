@@ -61,8 +61,13 @@ function bangRows(t: Translate): Array<[string, string]> {
     [":fr", t("bang_lang")],
     ["!!bang", t("bang_external")],
     ["!!", t("bang_lucky")],
+  ];
+}
+
+function widgetRows(t: Translate): Array<[string, string]> {
+  return [
     ["random uuid", t("widget_random")],
-    ["avg 123 548 2.04 24.2", t("widget_stats")],
+    ["avg 123 548 2.04", t("widget_stats")],
     ["1+2", t("widget_calc")],
     ["time Berlin", t("widget_time")],
     ["user-agent", t("widget_ip")],
@@ -89,6 +94,7 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
     { title: t("help_shortcuts"), rows: shortcutRows(layout, t) },
     { title: t("help_operators"), rows: operatorRows(t) },
     { title: t("help_bangs"), rows: bangRows(t) },
+    { title: t("help_widgets"), rows: widgetRows(t) },
   ];
 
   return (
@@ -100,7 +106,7 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
         type="button"
       />
       <div className="pointer-events-none absolute inset-0 grid place-items-center p-4">
-        <div className="pointer-events-auto max-h-[86dvh] w-full max-w-5xl overflow-auto rounded-2xl border border-line bg-surface p-6 shadow-pop animate-fade-up">
+        <div className="pointer-events-auto max-h-[86dvh] w-full max-w-7xl overflow-auto rounded-2xl border border-line bg-surface p-6 shadow-pop animate-fade-up">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-ink">{t("hotkeys")}</h2>
             <button
@@ -112,7 +118,7 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
               <X className="size-[18px]" />
             </button>
           </div>
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {columns.map((column) => (
               <section key={column.title}>
                 <h3 className="mb-2 border-b border-line pb-2 text-base font-semibold text-ink">{column.title}</h3>
