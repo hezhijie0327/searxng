@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useT } from "../lib/i18n.ts";
-import { ArrowUpIcon } from "./icons.tsx";
 
 export function BackToTop() {
   const t = useT();
@@ -28,7 +28,7 @@ export function BackToTop() {
       }}
       type="button"
     >
-      <ArrowUpIcon className="size-5" />
+      <ArrowUp className="size-5" />
     </button>
   );
 }

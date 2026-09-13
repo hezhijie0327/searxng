@@ -7,6 +7,7 @@
  * back-button dismissal, progressive thumbnail → full image loading).
  */
 
+import { ChevronLeft, ChevronRight, Download, ExternalLink, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { THEME_STATIC } from "../../lib/constants.ts";
@@ -14,7 +15,6 @@ import { useT } from "../../lib/i18n.ts";
 import { newTabLinkProps } from "../../lib/link.ts";
 import { useSettings } from "../../lib/settings.ts";
 import type { ResultItem } from "../../lib/types.ts";
-import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, DownloadIcon, ExternalLinkIcon } from "../icons.tsx";
 
 const IMAGE_VIEWER_HASH = "#image-viewer";
 
@@ -212,7 +212,7 @@ function Lightbox({
           }}
           type="button"
         >
-          <CloseIcon className="size-5" />
+          <X className="size-5" />
         </button>
       </div>
 
@@ -265,7 +265,7 @@ function Lightbox({
             }}
             type="button"
           >
-            <ChevronLeftIcon className="size-5" />
+            <ChevronLeft className="size-5" />
           </button>
           <button
             aria-label={t("next_page")}
@@ -275,7 +275,7 @@ function Lightbox({
             }}
             type="button"
           >
-            <ChevronRightIcon className="size-5" />
+            <ChevronRight className="size-5" />
           </button>
         </div>
       </div>
@@ -313,7 +313,7 @@ function Lightbox({
               {...linkProps}
             >
               {t("view_source")}
-              <ExternalLinkIcon className="size-3.5" />
+              <ExternalLink className="size-3.5" />
             </a>
           ) : null}
           {result.img_src ? (
@@ -323,7 +323,7 @@ function Lightbox({
               {...linkProps}
             >
               {t("download")}
-              <DownloadIcon className="size-3.5" />
+              <Download className="size-3.5" />
             </a>
           ) : null}
         </div>

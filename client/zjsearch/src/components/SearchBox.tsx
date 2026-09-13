@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { LoaderCircle, Search, X } from "lucide-react";
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useRouter } from "../lib/router.tsx";
 import { useSettings } from "../lib/settings.ts";
-import { CloseIcon, SearchIcon, SpinnerIcon } from "./icons.tsx";
 
 interface Suggestion {
   text: string;
@@ -191,7 +191,7 @@ export function SearchBox({
             }}
             type="button"
           >
-            <CloseIcon className="size-[18px] text-ink-2" />
+            <X className="size-[18px] text-ink-2" />
           </button>
         ) : null}
         <button
@@ -200,7 +200,7 @@ export function SearchBox({
           disabled={loading}
           type="submit"
         >
-          {loading ? <SpinnerIcon className="size-4 animate-spin-slow" /> : <SearchIcon className="size-[18px]" />}
+          {loading ? <LoaderCircle className="size-4 animate-spin-slow" /> : <Search className="size-[18px]" />}
         </button>
       </form>
 
@@ -226,7 +226,7 @@ export function SearchBox({
                 }}
                 type="button"
               >
-                <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
+                <Search className="size-3.5 shrink-0 text-ink-3" />
                 <span className="truncate" dir="auto">
                   {suggestion.text}
                 </span>

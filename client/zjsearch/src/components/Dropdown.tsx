@@ -6,9 +6,9 @@
  * dismissal.
  */
 
+import { Check } from "lucide-react";
 import { type CSSProperties, type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CheckIcon } from "./icons.tsx";
 
 export interface DropdownOption {
   value: string;
@@ -210,7 +210,7 @@ export function Dropdown({
                           {option.label}
                         </span>
                       </span>
-                      {selected ? <CheckIcon className="size-4 shrink-0 text-accent-strong" /> : null}
+                      {selected ? <Check className="size-4 shrink-0 text-accent-strong" /> : null}
                     </button>
                   </li>
                 );

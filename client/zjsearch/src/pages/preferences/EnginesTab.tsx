@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { AlertTriangle } from "lucide-react";
 import type { ReactNode } from "react";
-import { AlertIcon } from "../../components/icons.tsx";
 import { loadEngineDescriptions } from "../../lib/engineDescriptions.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { PreferencesPageData } from "../../lib/types.ts";
@@ -70,7 +70,7 @@ export function EnginesTab({
                         onMouseEnter={() => void loadEngineDescriptions()}
                         type="button"
                       >
-                        {engine.enable_http ? <AlertIcon className="size-3.5 shrink-0 text-warning" /> : null}
+                        {engine.enable_http ? <AlertTriangle className="size-3.5 shrink-0 text-warning" /> : null}
                         <span className="truncate">
                           {engine.name}
                           {engine.language ? ` (${engine.language})` : ""}

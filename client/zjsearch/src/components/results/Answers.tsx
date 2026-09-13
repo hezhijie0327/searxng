@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { MapPin } from "lucide-react";
 import { useState } from "react";
 import type { CalculationAnswer } from "../../features/calculator.ts";
 import { tryEvaluateExpression } from "../../features/calculator.ts";
@@ -8,7 +9,6 @@ import { newTabLinkProps } from "../../lib/link.ts";
 import { useSettings } from "../../lib/settings.ts";
 import type { AnswerData, WeatherItem } from "../../lib/types.ts";
 import { CopyButton } from "../CopyButton.tsx";
-import { LocationIcon } from "../icons.tsx";
 
 const MAX_SOURCES_SHOWN = 3;
 
@@ -238,7 +238,7 @@ function WeatherAnswer({
   return (
     <div>
       <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
-        <LocationIcon className="size-4 shrink-0 text-ink-3" />
+        <MapPin className="size-4 shrink-0 text-ink-3" />
         {current.location_name}
       </p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">

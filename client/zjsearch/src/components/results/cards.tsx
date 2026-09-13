@@ -2,25 +2,25 @@
 
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import {
+  ArrowDown,
+  ArrowUp,
+  Calendar,
+  Code,
+  Download,
+  ExternalLink,
+  FileText,
+  Film,
+  Magnet,
+  Music,
+  Package,
+  Play,
+  Star,
+  X,
+} from "lucide-react";
 import { memo, type ReactNode, useState } from "react";
 import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  CalendarIcon,
-  CloseIcon,
-  CodeIcon,
-  DownloadIcon,
-  ExternalLinkIcon,
-  FileIcon,
-  FilmIcon,
-  MagnetIcon,
-  MusicIcon,
-  PackageIcon,
-  PlayIcon,
-  StarIcon,
-} from "../icons.tsx";
 
 import {
   type CardProps,
@@ -149,7 +149,7 @@ export function VideoCard({ eager, result, globals }: CardProps) {
                     title={t("hide_video")}
                     type="button"
                   >
-                    <CloseIcon className="size-3.5" />
+                    <X className="size-3.5" />
                   </button>
                 </>
               ) : hasMedia ? (
@@ -163,7 +163,7 @@ export function VideoCard({ eager, result, globals }: CardProps) {
                   type="button"
                 >
                   <span className="grid size-9 place-items-center rounded-full bg-black/70 shadow-pop">
-                    <PlayIcon className="size-4 translate-x-px" />
+                    <Play className="size-4 translate-x-px" />
                   </span>
                 </button>
               ) : null}
@@ -225,11 +225,11 @@ export function TorrentCard({ result, globals }: CardProps) {
             href={result.magnetlink}
             title={t("magnet_link")}
           >
-            <MagnetIcon className="size-6" />
+            <Magnet className="size-6" />
           </a>
         ) : (
           <span className="grid size-14 shrink-0 self-start place-items-center rounded-xl bg-surface-2 text-ink-3">
-            <FileIcon className="size-6" />
+            <FileText className="size-6" />
           </span>
         )}
         <div className="min-w-0 flex-1">
@@ -240,33 +240,33 @@ export function TorrentCard({ result, globals }: CardProps) {
           <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
             {result.seed !== undefined ? (
               <span className="inline-flex items-center gap-1">
-                <ArrowUpIcon className="size-3.5 text-ok" />
+                <ArrowUp className="size-3.5 text-ok" />
                 <span className="font-semibold text-ok">{result.seed}</span>
                 {t("seeder")}
               </span>
             ) : null}
             {result.leech !== undefined ? (
               <span className="inline-flex items-center gap-1">
-                <ArrowDownIcon className="size-3.5 text-danger" />
+                <ArrowDown className="size-3.5 text-danger" />
                 <span className="font-semibold text-danger">{result.leech}</span>
                 {t("leecher")}
               </span>
             ) : null}
             {result.filesize ? (
               <span className="inline-flex items-center gap-1">
-                <FileIcon className="size-3.5" />
+                <FileText className="size-3.5" />
                 {result.filesize}
               </span>
             ) : null}
             {result.files ? (
               <span className="inline-flex items-center gap-1">
-                <PackageIcon className="size-3.5" />
+                <Package className="size-3.5" />
                 {result.files} {t("files")}
               </span>
             ) : null}
             {result.published_date ? (
               <span className="inline-flex items-center gap-1">
-                <CalendarIcon className="size-3.5" />
+                <Calendar className="size-3.5" />
                 {formatDate(result.published_date)}
               </span>
             ) : null}
@@ -284,7 +284,7 @@ export function TorrentCard({ result, globals }: CardProps) {
                 className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-ink-2 transition-colors hover:text-ink"
                 href={result.torrentfile}
               >
-                <DownloadIcon className="size-3.5" />
+                <Download className="size-3.5" />
                 {t("torrent_file")}
               </a>
             </div>
@@ -418,11 +418,11 @@ export function FileCard({ result, globals }: CardProps) {
   const tileClass = isMedia ? "bg-accent-soft text-accent" : "bg-surface-2 text-ink-3";
   const tileIcon =
     result.mtype === "audio" ? (
-      <MusicIcon className="size-6" />
+      <Music className="size-6" />
     ) : result.mtype === "video" ? (
-      <FilmIcon className="size-6" />
+      <Film className="size-6" />
     ) : (
-      <FileIcon className="size-6" />
+      <FileText className="size-6" />
     );
   const stats: Array<[string, string | undefined]> = [
     [t("author"), result.author],
@@ -486,7 +486,7 @@ export function FileCard({ result, globals }: CardProps) {
                 // audio: inline player, no collapse - music results should be
                 // playable in one click (preload="none" keeps it cheap)
                 <div className="mt-2 flex max-w-md items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2">
-                  <MusicIcon className="size-4 shrink-0 text-accent" />
+                  <Music className="size-4 shrink-0 text-accent" />
                   <audio className="h-8 w-full" controls preload="none" src={result.embedded} />
                 </div>
               )
@@ -498,7 +498,7 @@ export function FileCard({ result, globals }: CardProps) {
                 rel="noreferrer"
                 target="_blank"
               >
-                <DownloadIcon className="size-3.5" />
+                <Download className="size-3.5" />
                 {t("download")}
               </a>
             )
@@ -539,7 +539,7 @@ export function PaperCard({ result, globals }: CardProps) {
   const metaBits: Array<string | null | ReactNode> = [
     result.published_date ? (
       <span className="inline-flex items-center gap-1" key="date">
-        <CalendarIcon className="size-3" />
+        <Calendar className="size-3" />
         {formatDate(result.published_date)}
       </span>
     ) : null,
@@ -594,7 +594,7 @@ export function PaperCard({ result, globals }: CardProps) {
                   rel="noreferrer"
                   target="_blank"
                 >
-                  <FileIcon className="size-3.5" />
+                  <FileText className="size-3.5" />
                   PDF
                 </a>
               ) : null}
@@ -605,7 +605,7 @@ export function PaperCard({ result, globals }: CardProps) {
                   rel="noreferrer"
                   target="_blank"
                 >
-                  <ExternalLinkIcon className="size-3.5" />
+                  <ExternalLink className="size-3.5" />
                   HTML
                 </a>
               ) : null}
@@ -710,14 +710,14 @@ export function PackageCard({ result, globals }: CardProps) {
   // secondary links fold into the engines row so no card grows extra rows
   const links: Array<{ icon: ReactNode; label: string; url: string }> = [];
   if (result.homepage) {
-    links.push({ icon: <ExternalLinkIcon className="size-3" />, label: "Homepage", url: result.homepage });
+    links.push({ icon: <ExternalLink className="size-3" />, label: "Homepage", url: result.homepage });
   }
   if (result.source_code_url && result.source_code_url !== result.url) {
-    links.push({ icon: <CodeIcon className="size-3" />, label: "Source code", url: result.source_code_url });
+    links.push({ icon: <Code className="size-3" />, label: "Source code", url: result.source_code_url });
   }
   for (const [name, url] of Object.entries(result.project_links ?? {})) {
     if (url !== result.url) {
-      links.push({ icon: <ExternalLinkIcon className="size-3" />, label: name, url });
+      links.push({ icon: <ExternalLink className="size-3" />, label: name, url });
     }
   }
   return (
@@ -730,7 +730,7 @@ export function PackageCard({ result, globals }: CardProps) {
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-ink-3">
           {result.published_date ? (
             <span className="inline-flex items-center gap-1" key="date">
-              <CalendarIcon className="size-3" />
+              <Calendar className="size-3" />
               {formatDate(result.published_date)}
             </span>
           ) : null}
@@ -744,7 +744,7 @@ export function PackageCard({ result, globals }: CardProps) {
           ) : null}
           {result.popularity ? (
             <span className="inline-flex items-center gap-1" key="popularity">
-              <StarIcon className="size-3" />
+              <Star className="size-3" />
               <span className="text-ink-2">{result.popularity}</span>
             </span>
           ) : null}
@@ -890,7 +890,7 @@ export function MapCard({ result, globals, autoOpenMap }: CardProps) {
               rel="noreferrer"
               target="_blank"
             >
-              <ExternalLinkIcon className="size-3.5" />
+              <ExternalLink className="size-3.5" />
               {link.label}
             </a>
           ))}

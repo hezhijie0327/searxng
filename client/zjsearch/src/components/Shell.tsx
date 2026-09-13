@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ChartColumn, Heart, SlidersHorizontal } from "lucide-react";
 import type { MouseEvent, ReactNode } from "react";
 import { useT } from "../lib/i18n.ts";
 import { newTabLinkProps } from "../lib/link.ts";
 import { useOverlay } from "../lib/overlay.tsx";
 import { useRouter } from "../lib/router.tsx";
 import type { GlobalData } from "../lib/types.ts";
-import { BarChartIcon, HeartIcon, SlidersIcon } from "./icons.tsx";
 
 /** Anchor that performs SPA navigation for internal URLs. */
 export function Link({
@@ -78,7 +78,7 @@ export function HeaderActions({ globals }: { globals: GlobalData }) {
           rel="noreferrer"
           title={t("donate")}
         >
-          <HeartIcon className="size-[18px]" />
+          <Heart className="size-[18px]" />
         </a>
       ) : null}
       {globals.enable_metrics ? (
@@ -91,7 +91,7 @@ export function HeaderActions({ globals }: { globals: GlobalData }) {
           title={t("engine_stats")}
           type="button"
         >
-          <BarChartIcon className="size-[18px]" />
+          <ChartColumn className="size-[18px]" />
         </button>
       ) : null}
       <button
@@ -103,7 +103,7 @@ export function HeaderActions({ globals }: { globals: GlobalData }) {
         title={t("preferences")}
         type="button"
       >
-        <SlidersIcon className="size-[18px]" />
+        <SlidersHorizontal className="size-[18px]" />
       </button>
     </div>
   );

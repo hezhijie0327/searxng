@@ -5,12 +5,12 @@
     streams get a custom mini player (blur + play/pause + seek), embeddable
     sources play inside the tile like videos do. */
 
+import { Calendar, Music as MusicIcon, Pause, Play, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { THEME_STATIC } from "../../lib/constants.ts";
 import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { CalendarIcon, CloseIcon, MusicIcon, PauseIcon, PlayIcon } from "../icons.tsx";
 import { ResultLink } from "./cardParts.tsx";
 import { TileBadge, TileFavicon } from "./Tile.tsx";
 
@@ -79,7 +79,7 @@ function AudioTilePlayer({ src, onClose, onError }: { src: string; onClose: () =
         title={t("close")}
         type="button"
       >
-        <CloseIcon className="size-3.5" />
+        <X className="size-3.5" />
       </button>
       <div className="flex flex-1 items-center justify-center">
         <button
@@ -89,7 +89,7 @@ function AudioTilePlayer({ src, onClose, onError }: { src: string; onClose: () =
           title={playing ? t("pause") : t("play")}
           type="button"
         >
-          {playing ? <PauseIcon className="size-6" /> : <PlayIcon className="size-6 translate-x-0.5" />}
+          {playing ? <Pause className="size-6" /> : <Play className="size-6 translate-x-0.5" />}
         </button>
       </div>
       <div className="flex items-center gap-2 px-3 pb-3 text-[11px] font-medium tabular-nums">
@@ -130,7 +130,7 @@ function EmbedTile({ src, title, onClose }: { src: string; title: string; onClos
         title={t("close")}
         type="button"
       >
-        <CloseIcon className="size-3.5" />
+        <X className="size-3.5" />
       </button>
     </div>
   );
@@ -226,7 +226,7 @@ export function MusicGrid({
               title={t("play")}
               type="button"
             >
-              <PlayIcon className="size-5 translate-x-px" />
+              <Play className="size-5 translate-x-px" />
             </button>
           ) : null}
         </div>
@@ -246,7 +246,7 @@ export function MusicGrid({
           <span className="flex shrink-0 items-center gap-1">
             {result.published_date ? (
               <>
-                <CalendarIcon className="size-3" />
+                <Calendar className="size-3" />
                 {formatDate(result.published_date)}
               </>
             ) : null}

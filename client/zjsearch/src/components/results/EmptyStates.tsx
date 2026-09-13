@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { Info } from "lucide-react";
 import { useT } from "../../lib/i18n.ts";
 import type { SearchPageData } from "../../lib/types.ts";
-import { InfoIcon } from "../icons.tsx";
 
 export function NoResults({ pageno, hasInfobox }: { pageno: number; hasInfobox: boolean }) {
   const t = useT();
@@ -11,7 +11,7 @@ export function NoResults({ pageno, hasInfobox }: { pageno: number; hasInfobox: 
     return (
       <div className="rounded-2xl border border-line bg-surface p-4 text-sm text-ink-2">
         <p className="flex items-center gap-2">
-          <InfoIcon className="size-4 shrink-0 text-accent" />
+          <Info className="size-4 shrink-0 text-accent" />
           {t("no_web_results")}
         </p>
       </div>
@@ -20,7 +20,7 @@ export function NoResults({ pageno, hasInfobox }: { pageno: number; hasInfobox: 
   return (
     <div className="mx-auto max-w-md rounded-2xl border border-line bg-surface p-6 text-sm text-ink-2 animate-fade-up">
       <p className="flex items-center gap-2 font-medium text-ink">
-        <InfoIcon className="size-4 text-accent" />
+        <Info className="size-4 text-accent" />
         {firstPage ? t("sorry") : ""}
       </p>
       <p className="mt-2">{firstPage ? t("no_results_found") : t("no_more_results")}</p>

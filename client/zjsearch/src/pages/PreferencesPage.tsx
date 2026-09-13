@@ -1,32 +1,32 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertIcon,
-  BookIcon,
-  CenterIcon,
-  CheckIcon,
-  CloseIcon,
-  CookieIcon,
-  ExternalLinkIcon,
-  GlobeIcon,
-  GridIcon,
-  ImageIcon,
-  KeyboardIcon,
-  KeyIcon,
-  LanguagesIcon,
-  LinkIcon,
-  MonitorIcon,
-  MoonIcon,
-  RefreshIcon,
-  SearchIcon,
-  ShieldIcon,
-  SlidersIcon,
-  SunIcon,
-  SwapIcon,
-  TagIcon,
-  TerminalIcon,
-} from "../components/icons.tsx";
+  AlertTriangle,
+  AlignCenterVertical,
+  ArrowLeftRight,
+  Book,
+  Check,
+  Cookie,
+  ExternalLink,
+  Globe,
+  Image,
+  Key,
+  Keyboard,
+  Languages,
+  LayoutGrid,
+  Link as LinkIcon,
+  Monitor,
+  Moon,
+  RefreshCw,
+  Search,
+  Shield,
+  SlidersHorizontal,
+  Sun,
+  Tag,
+  Terminal,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Shell } from "../components/Shell.tsx";
 import { useT } from "../lib/i18n.ts";
 import type { ThemeStyle } from "../lib/theme.ts";
@@ -206,12 +206,12 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   const shareOrigin = window.location.origin;
 
   const tabs = [
-    { id: "general", label: t("general"), icon: <SlidersIcon className="size-3.5" /> },
-    { id: "ui", label: t("user_interface"), icon: <SunIcon className="size-3.5" /> },
-    { id: "privacy", label: t("privacy"), icon: <ShieldIcon className="size-3.5" /> },
-    { id: "engines", label: t("engines"), icon: <GridIcon className="size-3.5" /> },
-    { id: "query", label: t("special_queries"), icon: <TerminalIcon className="size-3.5" /> },
-    { id: "cookies", label: t("cookies"), icon: <CookieIcon className="size-3.5" /> },
+    { id: "general", label: t("general"), icon: <SlidersHorizontal className="size-3.5" /> },
+    { id: "ui", label: t("user_interface"), icon: <Sun className="size-3.5" /> },
+    { id: "privacy", label: t("privacy"), icon: <Shield className="size-3.5" /> },
+    { id: "engines", label: t("engines"), icon: <LayoutGrid className="size-3.5" /> },
+    { id: "query", label: t("special_queries"), icon: <Terminal className="size-3.5" /> },
+    { id: "cookies", label: t("cookies"), icon: <Cookie className="size-3.5" /> },
   ] as const;
 
   return (
@@ -223,7 +223,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             <div className="flex items-center gap-3">
               {savedAt > 0 ? (
                 <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
-                  <CheckIcon className="size-3.5" />
+                  <Check className="size-3.5" />
                   {t("saved")}
                 </span>
               ) : null}
@@ -232,7 +232,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
         ) : savedAt > 0 ? (
           <div className="flex justify-end py-3">
             <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
-              <CheckIcon className="size-3.5" />
+              <Check className="size-3.5" />
               {t("saved")}
             </span>
           </div>
@@ -240,7 +240,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
 
         {isPreview ? (
           <div className="mb-4 flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-ink-2 animate-fade-up">
-            <AlertIcon className="mt-0.5 size-4 shrink-0 text-warning" />
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
             <div>
               <p>{t("preview_banner")}</p>
               <ul className="mt-1.5 list-disc ps-5">
@@ -282,7 +282,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           {tab === "general" ? (
             <Card>
               {!locked.has("categories") ? (
-                <SettingRow icon={<GridIcon className="size-4.5" />} stacked title={t("default_categories")}>
+                <SettingRow icon={<LayoutGrid className="size-4.5" />} stacked title={t("default_categories")}>
                   <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
                     {globals.categories_as_tabs.map((category) => (
                       <CategoryTab
@@ -303,7 +303,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("language") ? (
                 <SettingRow
                   description={t("what_language")}
-                  icon={<LanguagesIcon className="size-4.5" />}
+                  icon={<Languages className="size-4.5" />}
                   title={t("search_language")}
                 >
                   <Select
@@ -326,7 +326,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("autocomplete") ? (
                 <SettingRow
                   description={t("show_queries_as_you_type")}
-                  icon={<SearchIcon className="size-4.5" />}
+                  icon={<Search className="size-4.5" />}
                   title={t("autocomplete")}
                 >
                   <Select
@@ -343,7 +343,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("favicon_resolver") ? (
                 <SettingRow
                   description={t("display_favicons")}
-                  icon={<GlobeIcon className="size-4.5" />}
+                  icon={<Globe className="size-4.5" />}
                   title={t("favicon_resolver")}
                 >
                   <Select
@@ -360,7 +360,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("safesearch") ? (
                 <SettingRow
                   description={t("filter_content")}
-                  icon={<ShieldIcon className="size-4.5" />}
+                  icon={<Shield className="size-4.5" />}
                   title={t("safesearch")}
                 >
                   <Select
@@ -377,7 +377,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               ) : null}
               <SettingRow
                 description={t("access_tokens")}
-                icon={<KeyIcon className="size-4.5" />}
+                icon={<Key className="size-4.5" />}
                 title={t("engine_tokens")}
               >
                 <input
@@ -415,7 +415,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   ))}
                   <SettingRow
                     description={t("select_doi_service")}
-                    icon={<BookIcon className="size-4.5" />}
+                    icon={<Book className="size-4.5" />}
                     title={t("open_access_doi_resolver")}
                   >
                     <Select
@@ -435,7 +435,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("locale") ? (
                 <SettingRow
                   description={t("change_layout_language")}
-                  icon={<GlobeIcon className="size-4.5" />}
+                  icon={<Globe className="size-4.5" />}
                   title={t("interface_language")}
                 >
                   <Select
@@ -447,11 +447,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 </SettingRow>
               ) : null}
               {!locked.has("theme") ? (
-                <SettingRow
-                  description={t("change_layout")}
-                  icon={<MonitorIcon className="size-4.5" />}
-                  title={t("theme")}
-                >
+                <SettingRow description={t("change_layout")} icon={<Monitor className="size-4.5" />} title={t("theme")}>
                   <Select
                     ariaLabel={t("theme")}
                     onChange={setTheme}
@@ -463,18 +459,14 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   />
                 </SettingRow>
               ) : null}
-              <SettingRow
-                description={t("choose_auto")}
-                icon={<SunIcon className="size-4.5" />}
-                title={t("theme_style")}
-              >
+              <SettingRow description={t("choose_auto")} icon={<Sun className="size-4.5" />} title={t("theme_style")}>
                 <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
                   {(
                     [
-                      ["auto", cap(t("auto")), <SunIcon className="size-4" key="a" />],
-                      ["light", cap(t("light")), <SunIcon className="size-4" key="l" />],
-                      ["dark", cap(t("dark")), <MoonIcon className="size-4" key="d" />],
-                      ["black", cap(t("black")), <MoonIcon className="size-4" key="b" />],
+                      ["auto", cap(t("auto")), <Sun className="size-4" key="a" />],
+                      ["light", cap(t("light")), <Sun className="size-4" key="l" />],
+                      ["dark", cap(t("dark")), <Moon className="size-4" key="d" />],
+                      ["black", cap(t("black")), <Moon className="size-4" key="b" />],
                     ] as const
                   ).map(([value, label, icon]) => (
                     <button
@@ -501,7 +493,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("center_alignment") ? (
                 <SettingRow
                   description={t("center_alignment_desc")}
-                  icon={<CenterIcon className="size-4.5" />}
+                  icon={<AlignCenterVertical className="size-4.5" />}
                   title={t("center_alignment")}
                 >
                   <Switch
@@ -517,7 +509,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("results_on_new_tab") ? (
                 <SettingRow
                   description={t("open_result_new_tabs")}
-                  icon={<ExternalLinkIcon className="size-4.5" />}
+                  icon={<ExternalLink className="size-4.5" />}
                   title={t("results_in_new_tabs")}
                 >
                   <Switch checked={resultsOnNewTab} label={t("results_in_new_tabs")} onChange={setResultsOnNewTab} />
@@ -526,7 +518,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("search_on_category_select") ? (
                 <SettingRow
                   description={t("search_on_category_select_desc")}
-                  icon={<SearchIcon className="size-4.5" />}
+                  icon={<Search className="size-4.5" />}
                   title={t("search_on_category_select")}
                 >
                   <Switch
@@ -536,11 +528,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                   />
                 </SettingRow>
               ) : null}
-              <SettingRow
-                description={t("hotkeys_desc")}
-                icon={<KeyboardIcon className="size-4.5" />}
-                title={t("hotkeys")}
-              >
+              <SettingRow description={t("hotkeys_desc")} icon={<Keyboard className="size-4.5" />} title={t("hotkeys")}>
                 <Select
                   ariaLabel={t("hotkeys")}
                   onChange={setHotkeys}
@@ -585,7 +573,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("method") ? (
                 <SettingRow
                   description={t("change_forms_submit")}
-                  icon={<SwapIcon className="size-4.5" />}
+                  icon={<ArrowLeftRight className="size-4.5" />}
                   title={t("http_method")}
                 >
                   <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
@@ -612,7 +600,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("image_proxy") ? (
                 <SettingRow
                   description={t("proxy_images")}
-                  icon={<ImageIcon className="size-4.5" />}
+                  icon={<Image className="size-4.5" />}
                   title={t("image_proxy")}
                 >
                   <Switch checked={imageProxy} label={t("image_proxy")} onChange={setImageProxy} />
@@ -621,7 +609,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               {!locked.has("query_in_title") ? (
                 <SettingRow
                   description={t("query_in_title_desc")}
-                  icon={<TagIcon className="size-4.5" />}
+                  icon={<Tag className="size-4.5" />}
                   title={t("query_in_title")}
                 >
                   <Switch checked={queryInTitle} label={t("query_in_title")} onChange={setQueryInTitle} />
@@ -644,7 +632,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="flex items-center gap-2 text-sm text-ink-2">
-                  <GridIcon className="size-4 text-ink-3" />
+                  <LayoutGrid className="size-4 text-ink-3" />
                   {t("currently_used_engines")}
                 </p>
                 {currentEngineTab ? (
@@ -661,7 +649,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                       }}
                       type="button"
                     >
-                      <CheckIcon className="size-3.5" />
+                      <Check className="size-3.5" />
                       {t("enable_all")}
                     </button>
                     <button
@@ -676,7 +664,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                       }}
                       type="button"
                     >
-                      <CloseIcon className="size-3.5" />
+                      <X className="size-3.5" />
                       {t("disable_all")}
                     </button>
                   </div>
@@ -771,7 +759,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
               <Card>
                 <SettingRow
                   description={t("cookies_list_desc")}
-                  icon={<CookieIcon className="size-4.5" />}
+                  icon={<Cookie className="size-4.5" />}
                   title={t("cookies")}
                 >
                   <span className="text-xs text-ink-3">
@@ -821,7 +809,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 </div>
                 <div className="px-4 py-4 sm:px-5">
                   <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
-                    <ExternalLinkIcon className="size-4 text-accent" />
+                    <ExternalLink className="size-4 text-accent" />
                     {t("url_to_restore")}
                   </h4>
                   <pre
@@ -834,7 +822,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                 </div>
                 <div className="px-4 py-4 sm:px-5">
                   <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
-                    <KeyIcon className="size-4 text-accent" />
+                    <Key className="size-4 text-accent" />
                     {t("copy_prefs_hash")}
                   </h4>
                   <div className="mt-2 flex items-start gap-2">
@@ -855,7 +843,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                     </button>
                   </div>
                 </div>
-                <SettingRow icon={<RefreshIcon className="size-4.5" />} stacked title={t("insert_prefs_hash")}>
+                <SettingRow icon={<RefreshCw className="size-4.5" />} stacked title={t("insert_prefs_hash")}>
                   <input
                     className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-sm transition-colors hover:border-ink-3"
                     onChange={(event) => {
@@ -878,7 +866,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-[13px] text-ink-2 transition-colors hover:border-danger hover:text-danger"
                     href="/clear_cookies"
                   >
-                    <RefreshIcon className="size-4" />
+                    <RefreshCw className="size-4" />
                     {t("reset_defaults")}
                   </Link>
                 </div>

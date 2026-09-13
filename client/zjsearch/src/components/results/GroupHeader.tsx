@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ChevronDown, GripVertical } from "lucide-react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { useT } from "../../lib/i18n.ts";
-import { CategoryIcon, ChevronDownIcon, GripVerticalIcon } from "../icons.tsx";
+import { CategoryIcon } from "../CategoryIcon.tsx";
 
 /** Collapsible block header: category icon + translated label + result
     count; the whole header toggles the block. */
@@ -41,7 +42,7 @@ export function GroupHeader({
           tabIndex={0}
           title={t("drag_reorder")}
         >
-          <GripVerticalIcon className="size-4" />
+          <GripVertical className="size-4" />
         </span>
       ) : null}
       <button
@@ -53,9 +54,7 @@ export function GroupHeader({
         <CategoryIcon category={category} className="size-4 shrink-0 text-accent" />
         {label}
         <span className="font-normal text-ink-3">{count}</span>
-        <ChevronDownIcon
-          className={`size-4 shrink-0 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`}
-        />
+        <ChevronDown className={`size-4 shrink-0 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
       </button>
     </h2>
   );

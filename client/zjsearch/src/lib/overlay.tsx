@@ -7,8 +7,8 @@
  * that a direct visit would use.
  */
 
+import { X } from "lucide-react";
 import { createContext, type ReactNode, Suspense, useCallback, useContext, useEffect, useState } from "react";
-import { CloseIcon } from "../components/icons.tsx";
 import { InfoPage, PreferencesPage, StatsPage } from "../pages/lazyPages.ts";
 import { useT } from "./i18n.ts";
 import { extractPageData } from "./pageData.ts";
@@ -124,7 +124,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
                 onClick={closeOverlay}
                 type="button"
               >
-                <CloseIcon className="size-[18px]" />
+                <X className="size-[18px]" />
               </button>
             </div>
             <div

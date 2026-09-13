@@ -6,19 +6,10 @@
     slot and the magnet/torrent action sits in the tile center like the
     media play buttons. */
 
+import { ArrowDown, ArrowUp, Calendar, Download, FileText, Film, Magnet, Music } from "lucide-react";
 import { formatDate } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  CalendarIcon,
-  DownloadIcon,
-  FileIcon,
-  FilmIcon,
-  MagnetIcon,
-  MusicIcon,
-} from "../icons.tsx";
 import { ResultLink } from "./cardParts.tsx";
 import { TileBadge, TileFavicon } from "./Tile.tsx";
 
@@ -30,12 +21,12 @@ function detectExtension(title: string): string | null {
 function TileIcon({ result, large = false }: { result: ResultItem; large?: boolean }) {
   const size = large ? "size-10" : "size-5";
   if (result.mtype === "audio") {
-    return <MusicIcon className={size} />;
+    return <Music className={size} />;
   }
   if (result.mtype === "video") {
-    return <FilmIcon className={size} />;
+    return <Film className={size} />;
   }
-  return <FileIcon className={size} />;
+  return <FileText className={size} />;
 }
 
 export function FilesGrid({
@@ -93,7 +84,7 @@ export function FilesGrid({
                   {...(result.magnetlink ? {} : { download: true })}
                   title={primaryLabel}
                 >
-                  {result.magnetlink ? <MagnetIcon className="size-5" /> : <DownloadIcon className="size-5" />}
+                  {result.magnetlink ? <Magnet className="size-5" /> : <Download className="size-5" />}
                 </a>
               ) : null}
             </div>
@@ -111,13 +102,13 @@ export function FilesGrid({
                 <span className="inline-flex items-center gap-2">
                   {result.seed !== undefined ? (
                     <span className="inline-flex items-center gap-0.5 font-medium text-ok">
-                      <ArrowUpIcon className="size-3" />
+                      <ArrowUp className="size-3" />
                       {result.seed}
                     </span>
                   ) : null}
                   {result.leech !== undefined ? (
                     <span className="inline-flex items-center gap-0.5 font-medium text-danger">
-                      <ArrowDownIcon className="size-3" />
+                      <ArrowDown className="size-3" />
                       {result.leech}
                     </span>
                   ) : null}
@@ -128,7 +119,7 @@ export function FilesGrid({
                 </span>
               )}
               <span className="flex shrink-0 items-center gap-1">
-                <CalendarIcon className="size-3" />
+                <Calendar className="size-3" />
                 {date}
               </span>
             </div>

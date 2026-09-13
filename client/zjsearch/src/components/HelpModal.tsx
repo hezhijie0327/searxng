@@ -2,9 +2,9 @@
 
 /** Keyboard shortcuts help dialog (opened with "?"). */
 
+import { X } from "lucide-react";
 import { useEffect } from "react";
 import { type Translate, useT } from "../lib/i18n.ts";
-import { CloseIcon } from "./icons.tsx";
 
 interface HelpColumn {
   title: string;
@@ -110,7 +110,7 @@ export function HelpModal({ layout, onClose }: { layout: "default" | "vim"; onCl
               onClick={onClose}
               type="button"
             >
-              <CloseIcon className="size-[18px]" />
+              <X className="size-[18px]" />
             </button>
           </div>
           <div className="grid gap-8 md:grid-cols-3">

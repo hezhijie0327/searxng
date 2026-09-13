@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { Calendar, Image, Package, Play, X } from "lucide-react";
 import { useState } from "react";
 import { THEME_STATIC } from "../../lib/constants.ts";
 import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { CalendarIcon, CloseIcon, ImageIcon, PackageIcon, PlayIcon } from "../icons.tsx";
 import { ResultLink } from "./cardParts.tsx";
 import { TileBadge, TileFavicon } from "./Tile.tsx";
 
@@ -34,7 +34,7 @@ export function ProductGrid({ results, globals }: { results: ResultItem[]; globa
               />
             ) : (
               <span className="grid size-full place-items-center text-ink-3">
-                <PackageIcon className="size-8" />
+                <Package className="size-8" />
               </span>
             )}
           </ResultLink>
@@ -102,7 +102,7 @@ export function VideoGrid({
               />
             ) : (
               <span className="grid size-full place-items-center text-ink-3">
-                <PlayIcon className="size-8" />
+                <Play className="size-8" />
               </span>
             )}
             {length ? <TileBadge>{length}</TileBadge> : null}
@@ -129,7 +129,7 @@ export function VideoGrid({
               title={t("hide_video")}
               type="button"
             >
-              <CloseIcon className="size-3.5" />
+              <X className="size-3.5" />
             </button>
           ) : result.iframe_src ? (
             <button
@@ -141,7 +141,7 @@ export function VideoGrid({
               title={t("play")}
               type="button"
             >
-              <PlayIcon className="size-5 translate-x-px" />
+              <Play className="size-5 translate-x-px" />
             </button>
           ) : null}
         </div>
@@ -163,7 +163,7 @@ export function VideoGrid({
             <span className="flex items-center gap-1">
               {result.published_date ? (
                 <>
-                  <CalendarIcon className="size-3" />
+                  <Calendar className="size-3" />
                   {formatDate(result.published_date)}
                 </>
               ) : null}
@@ -216,7 +216,7 @@ export function PosterGrid({
             />
           ) : (
             <span className="grid size-full place-items-center text-ink-3">
-              <PlayIcon className="size-8" />
+              <Play className="size-8" />
             </span>
           )}
           {result.favicon ? <TileFavicon src={result.favicon} /> : null}
@@ -284,7 +284,7 @@ export function AppsGrid({
               />
             ) : (
               <span className="grid size-14 place-items-center rounded-xl border border-line bg-surface-2 text-ink-3">
-                <ImageIcon className="size-6" />
+                <Image className="size-6" />
               </span>
             )}
           </ResultLink>

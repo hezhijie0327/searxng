@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "../../lib/i18n.ts";
-import { ChevronLeftIcon, ChevronRightIcon } from "../icons.tsx";
 
 /** Numbered pagination window (up to 11 pages, sliding after page 5). */
 export function Pagination({
@@ -40,7 +40,7 @@ export function Pagination({
           }}
           type="button"
         >
-          <ChevronLeftIcon className="size-4" />
+          <ChevronLeft className="size-4" />
           <span className="hidden sm:inline">{t("previous_page")}</span>
         </button>
       ) : null}
@@ -72,7 +72,7 @@ export function Pagination({
           type="button"
         >
           <span className="hidden sm:inline">{t("next_page")}</span>
-          <ChevronRightIcon className="size-4" />
+          <ChevronRight className="size-4" />
         </button>
       ) : null}
     </nav>

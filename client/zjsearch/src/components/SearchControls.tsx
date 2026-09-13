@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { Clock, Languages, Shield } from "lucide-react";
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
 import type { GlobalData } from "../lib/types.ts";
+import { CategoryIcon } from "./CategoryIcon.tsx";
 import type { DropdownOption } from "./Dropdown.tsx";
 import { Dropdown } from "./Dropdown.tsx";
-import { CategoryIcon, ClockIcon, LanguagesIcon, ShieldIcon } from "./icons.tsx";
 
 interface CategoryTabsProps {
   globals: GlobalData;
@@ -143,7 +144,7 @@ export function SearchFilters({
     // their icons stay aligned with the tab icons and the meta line below
     <div className="-ms-4 flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
       <SelectField
-        icon={<LanguagesIcon className="size-3.5 shrink-0" />}
+        icon={<Languages className="size-3.5 shrink-0" />}
         label={t("search_language")}
         onChange={(language) => onChange({ language })}
         options={[
@@ -161,7 +162,7 @@ export function SearchFilters({
       />
 
       <SelectField
-        icon={<ClockIcon className="size-3.5 shrink-0" />}
+        icon={<Clock className="size-3.5 shrink-0" />}
         label={t("time_range")}
         onChange={(time_range) => {
           onChange({ time_range });
@@ -177,7 +178,7 @@ export function SearchFilters({
       />
 
       <SelectField
-        icon={<ShieldIcon className="size-3.5 shrink-0" />}
+        icon={<Shield className="size-3.5 shrink-0" />}
         label={t("safesearch")}
         onChange={(value) => {
           onChange({ safesearch: Number(value) });

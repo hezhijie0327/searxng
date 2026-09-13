@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Search } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../../lib/i18n.ts";
 import { newTabLinkProps } from "../../lib/link.ts";
 import { useOverlay } from "../../lib/overlay.tsx";
 import type { GlobalData, InfoboxData, SearchPageData } from "../../lib/types.ts";
 import { CopyButton } from "../CopyButton.tsx";
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, SearchIcon } from "../icons.tsx";
 
 function Box({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -97,7 +97,7 @@ export function Infobox({
                   href={url.url}
                 >
                   <span className="truncate">{url.title}</span>
-                  <ExternalLinkIcon className="size-3 shrink-0" />
+                  <ExternalLink className="size-3 shrink-0" />
                 </a>
               </li>
             ))}
@@ -141,7 +141,7 @@ export function Infobox({
         type="button"
       >
         {expanded ? t("collapse") : t("expand")}
-        <ChevronDownIcon className={`size-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        <ChevronDown className={`size-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
       </button>
     </div>
   );
@@ -200,7 +200,7 @@ export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSea
         }}
         type="button"
       >
-        <ChevronLeftIcon className="size-3.5" />
+        <ChevronLeft className="size-3.5" />
       </button>
       <div
         className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -217,7 +217,7 @@ export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSea
             }}
             type="button"
           >
-            <SearchIcon className="size-3.5 shrink-0 text-ink-3" />
+            <Search className="size-3.5 shrink-0 text-ink-3" />
             <span className="max-w-40 truncate">{suggestion.title}</span>
           </button>
         ))}
@@ -231,7 +231,7 @@ export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSea
         }}
         type="button"
       >
-        <ChevronRightIcon className="size-3.5" />
+        <ChevronRight className="size-3.5" />
       </button>
     </div>
   );
@@ -261,7 +261,7 @@ export function DebugPanels({ data, leading }: { data: SearchPageData; leading?:
             type="button"
           >
             {roundedTime !== null ? `${t("took")} ${roundedTime} ${t("seconds")}` : t("engines_messages")}
-            <ChevronDownIcon className={`size-3 transition-transform ${openPanel === "engines" ? "rotate-180" : ""}`} />
+            <ChevronDown className={`size-3 transition-transform ${openPanel === "engines" ? "rotate-180" : ""}`} />
           </button>
         ) : null}
       </div>

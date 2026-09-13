@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
-import { BrandMark, SpinnerIcon } from "./components/icons.tsx";
+import { BrandMark } from "./components/Brand.tsx";
 import { Shell } from "./components/Shell.tsx";
 import { I18nContext, useT } from "./lib/i18n.ts";
 import { OverlayProvider } from "./lib/overlay.tsx";
@@ -72,7 +73,7 @@ function Pages() {
 function PageFallback() {
   return (
     <div className="grid min-h-[60vh] place-items-center">
-      <SpinnerIcon className="size-6 animate-spin-slow text-ink-3" />
+      <LoaderCircle className="size-6 animate-spin-slow text-ink-3" />
     </div>
   );
 }

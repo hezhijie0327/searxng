@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { Lightbulb, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { HelpModal } from "../components/HelpModal.tsx";
-import { LightbulbIcon, SlidersIcon } from "../components/icons.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
 import { Shell } from "../components/Shell.tsx";
@@ -97,7 +97,7 @@ export function IndexPage({ data }: { data: IndexData }) {
             }}
             type="button"
           >
-            <SlidersIcon className="size-3.5" />
+            <SlidersHorizontal className="size-3.5" />
             {t("search_options")}
           </button>
         </div>
@@ -133,7 +133,7 @@ export function IndexPage({ data }: { data: IndexData }) {
       {hintHidden ? null : (
         <div className="mx-auto mb-10 w-full max-w-xl px-4">
           <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm animate-fade-up">
-            <LightbulbIcon className="size-4 shrink-0 text-accent" />
+            <Lightbulb className="size-4 shrink-0 text-accent" />
             <button
               className="min-w-0 flex-1 truncate text-left text-ink-2 transition-colors hover:text-ink"
               onClick={() => {

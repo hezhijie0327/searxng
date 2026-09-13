@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ChevronLeft } from "lucide-react";
 import { useMemo, useState } from "react";
-import { ChevronLeftIcon } from "../components/icons.tsx";
 import { Link, Shell } from "../components/Shell.tsx";
 import { useT } from "../lib/i18n.ts";
 import type { EngineStat, StatsPageData } from "../lib/types.ts";
@@ -175,7 +175,7 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
               className="inline-flex items-center gap-1 text-xs text-ink-3 transition-colors hover:text-accent"
               href="/stats"
             >
-              <ChevronLeftIcon className="size-3.5" />
+              <ChevronLeft className="size-3.5" />
               {t("engine_stats")}
             </Link>
             <h2 className="mt-2 text-xl font-semibold tracking-tight text-ink" dir="auto">

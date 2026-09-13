@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { AlertTriangle, ExternalLink, Sparkle } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
+import { CategoryIcon } from "../../components/CategoryIcon.tsx";
 import type { DropdownOption } from "../../components/Dropdown.tsx";
 import { Dropdown } from "../../components/Dropdown.tsx";
-import { AlertIcon, CategoryIcon, ExternalLinkIcon, SparkIcon } from "../../components/icons.tsx";
 import { Link } from "../../components/Shell.tsx";
 import { loadEngineDescriptions } from "../../lib/engineDescriptions.ts";
 import type { EngineEntry } from "../../lib/types.ts";
@@ -165,7 +166,7 @@ export function PluginRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <SettingRow description={plugin.description} icon={<SparkIcon className="size-4.5" />} title={plugin.name}>
+    <SettingRow description={plugin.description} icon={<Sparkle className="size-4.5" />} title={plugin.name}>
       <Switch checked={enabled} label={plugin.name} onChange={onChange} />
     </SettingRow>
   );
@@ -218,13 +219,13 @@ export function EngineTooltip({ engine }: { engine: EngineEntry }) {
             target="_blank"
           >
             {engine.website}
-            <ExternalLinkIcon className="size-3" />
+            <ExternalLink className="size-3" />
           </a>
         </p>
       ) : null}
       {engine.enable_http ? (
         <p className="mt-1.5 inline-flex items-center gap-1 text-warning">
-          <AlertIcon className="size-3.5" /> No HTTPS
+          <AlertTriangle className="size-3.5" /> No HTTPS
         </p>
       ) : null}
       <p className="mt-1.5 flex flex-wrap gap-1">

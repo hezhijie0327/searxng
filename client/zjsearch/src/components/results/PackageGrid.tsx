@@ -4,10 +4,10 @@
     language of FilesGrid applied to software packages - icon tile with the
     version badge, author/updated meta row, homepage/source actions. */
 
+import { Calendar, Code, ExternalLink, Package as PackageIcon } from "lucide-react";
 import { formatDate } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { CalendarIcon, CodeIcon, ExternalLinkIcon, PackageIcon } from "../icons.tsx";
 import { ResultLink } from "./cardParts.tsx";
 import { TileFavicon } from "./Tile.tsx";
 
@@ -57,7 +57,7 @@ function PackageCell({
         <span className="flex shrink-0 items-center gap-1">
           {result.published_date ? (
             <>
-              <CalendarIcon className="size-3" />
+              <Calendar className="size-3" />
               {formatDate(result.published_date)}
             </>
           ) : null}
@@ -74,7 +74,7 @@ function PackageCell({
               target="_blank"
               title={t("homepage")}
             >
-              <ExternalLinkIcon className="size-3.5" />
+              <ExternalLink className="size-3.5" />
             </a>
           ) : null}
           {result.source_code_url ? (
@@ -86,7 +86,7 @@ function PackageCell({
               target="_blank"
               title={t("repository")}
             >
-              <CodeIcon className="size-3.5" />
+              <Code className="size-3.5" />
             </a>
           ) : null}
           <span className="truncate text-xs text-ink-3">{result.engines[0]}</span>

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { Calendar, Clock, Music, Play } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { THEME_STATIC } from "../../lib/constants.ts";
 import { formatDate, formatLength } from "../../lib/format.ts";
 import { useT } from "../../lib/i18n.ts";
 import { newTabLinkProps } from "../../lib/link.ts";
 import type { GlobalData, ResultItem } from "../../lib/types.ts";
-import { CalendarIcon, ClockIcon, MusicIcon, PlayIcon } from "../icons.tsx";
 
 // ------------------------------------------------------------- shared parts
 
@@ -87,7 +87,7 @@ export function MetaLine({ result }: { result: ResultItem }) {
   if (result.published_date) {
     bits.push(
       <span className="inline-flex items-center gap-1" key="date">
-        <CalendarIcon className="size-3" />
+        <Calendar className="size-3" />
         {formatDate(result.published_date)}
       </span>,
     );
@@ -106,7 +106,7 @@ export function MetaLine({ result }: { result: ResultItem }) {
   if (length) {
     bits.push(
       <span className="inline-flex items-center gap-1" key="length">
-        <ClockIcon className="size-3" />
+        <Clock className="size-3" />
         {length}
       </span>,
     );
@@ -238,7 +238,7 @@ export function MediaCollapse({
         }}
         type="button"
       >
-        <PlayIcon className="size-3" />
+        <Play className="size-3" />
         {open ? hideLabel : showLabel}
       </button>
       {open ? <div className="mt-2 animate-fade-in">{children(open)}</div> : null}
@@ -264,7 +264,7 @@ export function MediaPreview({ src, video = false }: { src: string; video?: bool
   return (
     <div className="flex max-w-3xl items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
       <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
-        <MusicIcon className="size-4" />
+        <Music className="size-4" />
       </span>
       <audio
         className="h-9 w-full"
