@@ -84,9 +84,10 @@ export function IndexPage({ data }: { data: IndexData }) {
             variant="hero"
           />
         </div>
-        {/* single stable toggle: opens the tabs + filter rows, highlights
-            while expanded, clicks again to collapse */}
-        <div className="mt-3 flex w-full justify-end animate-fade-up [animation-delay:120ms]">
+        {/* single stable toggle: opens the tabs + filter rows as a popover
+            anchored below it — the panel is out of the document flow, so the
+            vertically-centered hero never shifts when it opens */}
+        <div className="relative z-10 mt-3 flex w-full justify-end animate-fade-up [animation-delay:120ms]">
           <button
             aria-expanded={optionsOpen}
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
@@ -100,13 +101,8 @@ export function IndexPage({ data }: { data: IndexData }) {
             <SlidersHorizontal className="size-3.5" />
             {t("search_options")}
           </button>
-        </div>
-        {optionsOpen ? (
-          <>
-            {/* raised stacking level: the kebab menu must paint over the
-                filter row below (fade-up leaves a residual transform on
-                siblings, which would bury this row's z-40 menu) */}
-            <div className="relative z-10 mt-3 w-full animate-fade-up [animation-delay:120ms]">
+          {optionsOpen ? (
+            <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-2xl border border-line bg-surface p-3 shadow-pop animate-fade-in">
               <CategoryTabs
                 globals={globals}
                 onSearch={(categories) => {
@@ -117,18 +113,18 @@ export function IndexPage({ data }: { data: IndexData }) {
                 selected={selected}
                 wrap
               />
+              <div className="mt-2 flex w-full flex-wrap items-center gap-1.5 ps-6">
+                <SearchFilters
+                  globals={globals}
+                  onChange={(next) => {
+                    setFilters((prev) => ({ ...prev, ...next }));
+                  }}
+                  values={filters}
+                />
+              </div>
             </div>
-            <div className="relative z-10 mt-2 flex w-full flex-wrap items-center gap-1.5 ps-6 animate-fade-in">
-              <SearchFilters
-                globals={globals}
-                onChange={(next) => {
-                  setFilters((prev) => ({ ...prev, ...next }));
-                }}
-                values={filters}
-              />
-            </div>
-          </>
-        ) : null}
+          ) : null}
+        </div>
       </main>
       {hintHidden ? null : (
         <div className="mx-auto mb-10 w-full max-w-xl px-4">
