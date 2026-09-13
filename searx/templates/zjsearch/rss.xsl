@@ -132,7 +132,10 @@
             </article>
           </xsl:for-each>
         </main>
-        <footer>© 2026 Zhijie Online</footer>
+        <footer>© <span id="year">2026</span> Zhijie Online</footer>
+        <script>
+          document.getElementById("year").textContent = new Date().getFullYear();
+        </script>
       </body>
     </html>
   </xsl:template>
