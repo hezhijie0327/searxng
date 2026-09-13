@@ -37,10 +37,8 @@
             color: var(--ink); background: var(--bg);
           }
           .brand {
-            display: flex; align-items: center; gap: 0.6rem;
             padding: 2rem 0 1.5rem; border-bottom: 2px solid var(--accent-strong);
           }
-          .brand svg { width: 30px; height: 30px; border-radius: 22%; }
           .brand .wordmark { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
           .brand .wordmark .dot { color: var(--accent-strong); }
           h1 { font-size: 1.25rem; font-weight: 600; margin: 1.4rem 0 0.2rem; }
@@ -78,16 +76,6 @@
       <body>
         <header>
           <div class="brand">
-            <svg viewBox="0 0 100 100" aria-hidden="true">
-              <defs>
-                <linearGradient id="rss-brand-gradient" x1="0" x2="1" y1="0" y2="1">
-                  <stop offset="0" stop-color="#ffd76b" />
-                  <stop offset="1" stop-color="#f0b429" />
-                </linearGradient>
-              </defs>
-              <circle cx="42" cy="42" fill="url(#rss-brand-gradient)" r="30" />
-              <path d="M63 63 L84 84" stroke="currentColor" stroke-linecap="round" stroke-width="12" />
-            </svg>
             <span class="wordmark">ZJSearch<span class="dot">.</span></span>
           </div>
           <h1><xsl:value-of select="$q" /></h1>
