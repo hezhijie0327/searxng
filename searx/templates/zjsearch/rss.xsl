@@ -2,9 +2,19 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" version="5" encoding="UTF-8" indent="yes" />
   <xsl:template match="rss">
+    <xsl:variable name="q">
+      <xsl:choose>
+        <xsl:when test="contains(channel/title, 'search: ')">
+          <xsl:value-of select="substring-after(channel/title, 'search: ')" />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="channel/title" />
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
-        <title><xsl:value-of select="channel/title" />RSS Feed</title>
+        <title><xsl:value-of select="$q" /> - ZJSearch RSS Feed</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <style>
@@ -80,17 +90,7 @@
             </svg>
             <span class="wordmark">ZJSearch<span class="dot">.</span></span>
           </div>
-          <xsl:variable name="feedtitle" select="channel/title" />
-          <h1>
-            <xsl:choose>
-              <xsl:when test="contains($feedtitle, ' - ZJSearch')">
-                <xsl:value-of select="substring-before($feedtitle, ' - ZJSearch')" />
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="$feedtitle" />
-              </xsl:otherwise>
-            </xsl:choose>
-          </h1>
+          <h1><xsl:value-of select="$q" /></h1>
           <p class="meta">
             <span class="count"><xsl:value-of select="count(channel/item)" /></span>
             <xsl:text> results · RSS</xsl:text>
