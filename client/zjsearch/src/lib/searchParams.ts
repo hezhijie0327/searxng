@@ -56,9 +56,10 @@ export function buildSearchUrl(params: SearchParams): string {
 }
 
 /** Shareable URL rebuilt from a results payload - the address bar carries no
-    query in POST mode, so the meta line and the sidebar both offer this. */
+    query in POST mode, so the meta line and the sidebar both offer this.
+    Absolute on purpose: the result is meant to be copied or shared. */
 export function shareableSearchUrl(data: SearchPageData): string {
-  return buildSearchUrl({
+  return `${window.location.origin}${buildSearchUrl({
     q: data.q,
     categories: data.selected_categories.length > 0 ? data.selected_categories : undefined,
     pageno: data.pageno,
@@ -66,7 +67,7 @@ export function shareableSearchUrl(data: SearchPageData): string {
     time_range: data.time_range || undefined,
     timeout_limit: data.timeout_limit || undefined,
     safesearch: data.globals.safesearch,
-  });
+  })}`;
 }
 
 /** The same parameters as a multipart form body (POST-mode searches). */

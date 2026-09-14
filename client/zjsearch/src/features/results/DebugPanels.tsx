@@ -34,6 +34,15 @@ const FORMAT_ICONS: Record<string, LucideIcon> = {
   xml: FileCode2,
 };
 
+/** Display priority for the export chips (config order is arbitrary);
+    unknown formats keep their config order at the end. */
+const FORMAT_ORDER = ["rss", "json", "csv", "xml"];
+
+function formatOrder(format: string): number {
+  const index = FORMAT_ORDER.indexOf(format);
+  return index === -1 ? FORMAT_ORDER.length : index;
+}
+
 const metaToggle = "inline-flex items-center gap-1 transition-colors hover:text-ink";
 const stripChip =
   "inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink";
@@ -113,34 +122,57 @@ export function DebugPanels({
       </div>
 
       {openPanel === "results" ? (
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          <button
-            aria-label={t("copy_search_url")}
-            className={stripChip}
-            onClick={copyUrl}
-            title={t("copy_search_url")}
-            type="button"
-          >
-            {copied ? <Check className="size-3 shrink-0 text-ok" /> : <Link2 className="size-3 shrink-0" />}
-            {copied ? t("copied") : t("copy_link")}
-          </button>
-          {searchUrl
-            ? data.globals.search_formats.map((format) => {
-                const Icon = FORMAT_ICONS[format] ?? FileCode2;
-                return (
-                  <a
-                    className={stripChip}
-                    href={`${searchUrl}&format=${format}`}
-                    key={format}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    <Icon className="size-3 shrink-0 text-ink-3" />
-                    {format.toUpperCase()}
-                  </a>
-                );
-              })
-            : null}
+        <div className="mt-2 rounded-2xl border border-line bg-surface px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span
+              className={`grid size-9 shrink-0 place-items-center rounded-full transition-colors ${
+                copied ? "bg-ok/10 text-ok" : "bg-accent-soft text-accent"
+              }`}
+            >
+              {copied ? <Check className="size-[18px]" /> : <Link2 className="size-[18px]" />}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-medium text-ink">{copied ? t("copied") : t("copy_search_url")}</p>
+              {searchUrl ? (
+                <p className="mt-0.5 truncate font-mono text-[11px] text-ink-3" dir="ltr" title={searchUrl}>
+                  {searchUrl}
+                </p>
+              ) : null}
+            </div>
+            <button
+              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                copied ? "border-ok/40 text-ok" : "border-line text-ink-2 hover:border-accent hover:text-accent"
+              }`}
+              onClick={copyUrl}
+              type="button"
+            >
+              {copied ? t("copied") : t("copy_link")}
+            </button>
+          </div>
+          {searchUrl && data.globals.search_formats.length > 0 ? (
+            <div className="mt-3 border-t border-line pt-3">
+              <p className="text-[11px] font-medium text-ink-3">{t("export_formats")}</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {[...data.globals.search_formats]
+                  .sort((a, b) => formatOrder(a) - formatOrder(b))
+                  .map((format) => {
+                    const Icon = FORMAT_ICONS[format] ?? FileCode2;
+                    return (
+                      <a
+                        className={stripChip}
+                        href={`${searchUrl}&format=${format}`}
+                        key={format}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <Icon className="size-3 shrink-0 text-ink-3" />
+                        {format.toUpperCase()}
+                      </a>
+                    );
+                  })}
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 

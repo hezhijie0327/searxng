@@ -241,6 +241,7 @@ export const EN = {
   page_search_syntax: "Search syntax",
   page_about_searxng: "About SearXNG",
   cached: "Cached",
+  export_formats: "Export formats",
 };
 
 export type StringKey = keyof typeof EN;
