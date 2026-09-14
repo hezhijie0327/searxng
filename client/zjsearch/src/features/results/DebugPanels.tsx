@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
+import { useCopyFeedback } from "@/lib/clipboard.ts";
 import { useT } from "@/lib/i18n.ts";
 import { shareableSearchUrl } from "@/lib/searchParams.ts";
 import type { SearchPageData } from "@/lib/types.ts";
@@ -66,29 +67,13 @@ export function DebugPanels({
   const [openPanel, setOpenPanel] = useState<null | "engines" | "results">(() =>
     hasEnginesPanel && data.results.length === 0 ? "engines" : null,
   );
-  const [copied, setCopied] = useState(false);
+  const { copy, isCopied } = useCopyFeedback();
+  const copied = isCopied(searchUrl ?? "");
   const toggle = (panel: "engines" | "results") => {
     setOpenPanel((current) => (current === panel ? null : panel));
   };
   const roundedTime = data.max_response_time ? Math.round(data.max_response_time * 10) / 10 : null;
   const maxTime = data.max_response_time ?? 0;
-
-  const copyUrl = () => {
-    if (!searchUrl) {
-      return;
-    }
-    void navigator.clipboard
-      .writeText(searchUrl)
-      .then(() => {
-        setCopied(true);
-        window.setTimeout(() => {
-          setCopied(false);
-        }, 1500);
-      })
-      .catch(() => {
-        /* clipboard unavailable */
-      });
-  };
 
   return (
     <div>
@@ -143,7 +128,11 @@ export function DebugPanels({
               className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
                 copied ? "border-ok/40 text-ok" : "border-line text-ink-2 hover:border-accent hover:text-accent"
               }`}
-              onClick={copyUrl}
+              onClick={() => {
+                if (searchUrl) {
+                  copy(searchUrl);
+                }
+              }}
               type="button"
             >
               {copied ? t("copied") : t("copy_link")}
