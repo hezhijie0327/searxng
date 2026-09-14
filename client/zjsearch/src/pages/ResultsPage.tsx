@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { List } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/BackToTop.tsx";
 import { HelpModal } from "@/components/HelpModal.tsx";
@@ -25,7 +24,7 @@ import { readCookie } from "@/lib/cookies.ts";
 import { useT } from "@/lib/i18n.ts";
 import { scrollBehavior } from "@/lib/motion.ts";
 import { useRouter } from "@/lib/router.tsx";
-import { fetchSearchPage, parseSearchUrl } from "@/lib/searchParams.ts";
+import { fetchSearchPage, parseSearchUrl, shareableSearchUrl } from "@/lib/searchParams.ts";
 import { useHasPlugin, useSettings } from "@/lib/settings.ts";
 import type { ResultItem, SearchPageData } from "@/lib/types.ts";
 
@@ -271,15 +270,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             {!showSkeletons && !error ? (
               <>
                 <div className="mt-2">
-                  <DebugPanels
-                    data={data}
-                    leading={
-                      <span className="inline-flex items-center gap-1">
-                        <List className="size-3 shrink-0" />
-                        {t("meta_found")} {allResults.length} {t("meta_results")}
-                      </span>
-                    }
-                  />
+                  <DebugPanels data={data} resultCount={allResults.length} searchUrl={shareableSearchUrl(data)} />
                 </div>
                 <div className="mt-3.5">
                   <SuggestionsBox data={data} onSearch={submitQuery} />

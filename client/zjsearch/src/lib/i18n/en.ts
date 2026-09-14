@@ -228,6 +228,15 @@ export const EN = {
   widget_ip: "Show your IP or user agent",
   widget_hash: "Hash a string (MD5, SHA-1, SHA-256, …)",
   widget_random: "Random UUID, string, int, float or color",
+  // meta-line actions (results) and the info page
+  copy_link: "Copy link",
+  copy_search_url: "Copy search URL",
+  privacypolicy: "Privacy policy",
+  contact: "Contact",
+  public_instances: "Public instances",
+  about_instance: "About this instance",
+  categories: "Categories",
+  plugins: "Plugins",
 };
 
 export type StringKey = keyof typeof EN;

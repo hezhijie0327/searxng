@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import { ClickToCopy } from "@/components/CopyButton.tsx";
 import { Infobox } from "@/features/results/Infobox.tsx";
 import { useT } from "@/lib/i18n.ts";
-import { buildSearchUrl } from "@/lib/searchParams.ts";
+import { shareableSearchUrl } from "@/lib/searchParams.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
 function Box({ title, children }: { title: string; children: ReactNode }) {
@@ -32,15 +32,7 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
   const hasInfobox = data.infoboxes.length > 0;
   // POST mode keeps the query out of the address bar, so the sidebar offers
   // the shareable URL reconstructed from the current search (upstream parity)
-  const searchUrl = buildSearchUrl({
-    q: data.q,
-    categories: data.selected_categories.length > 0 ? data.selected_categories : undefined,
-    pageno: data.pageno,
-    language: data.current_language,
-    time_range: data.time_range || undefined,
-    timeout_limit: data.timeout_limit || undefined,
-    safesearch: globals.safesearch,
-  });
+  const searchUrl = shareableSearchUrl(data);
 
   return (
     <aside className="flex flex-col gap-3">

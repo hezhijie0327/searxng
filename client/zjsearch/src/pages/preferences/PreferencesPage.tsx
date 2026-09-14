@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { AlertTriangle, Check, Cookie, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
+import { AlertTriangle, Check, Cookie, Info, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
-import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
+import { AboutTab } from "@/pages/preferences/tabs/AboutTab.tsx";
 import { CookiesTab } from "@/pages/preferences/tabs/CookiesTab.tsx";
 import { EnginesPane } from "@/pages/preferences/tabs/EnginesPane.tsx";
 import { GeneralTab } from "@/pages/preferences/tabs/GeneralTab.tsx";
@@ -14,11 +14,10 @@ import { QueryTab } from "@/pages/preferences/tabs/QueryTab.tsx";
 import { UiTab } from "@/pages/preferences/tabs/UiTab.tsx";
 import { usePreferencesForm } from "@/pages/preferences/usePreferencesForm.ts";
 
-type PrefsTab = "general" | "ui" | "privacy" | "engines" | "query" | "cookies";
+type PrefsTab = "general" | "ui" | "privacy" | "engines" | "query" | "cookies" | "info";
 
 export function PreferencesPage({ data, embedded = false }: { data: PreferencesPageData; embedded?: boolean }) {
   const t = useT();
-  const { openDocument } = useOverlay();
   const globals = data.globals;
   const form = usePreferencesForm(data);
   const locked = useMemo(() => new Set(data.locked_preferences), [data.locked_preferences]);
@@ -35,6 +34,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
     { id: "engines", label: t("engines"), icon: <LayoutGrid className="size-3.5" /> },
     { id: "query", label: t("special_queries"), icon: <Terminal className="size-3.5" /> },
     { id: "cookies", label: t("cookies"), icon: <Cookie className="size-3.5" /> },
+    { id: "info", label: t("info"), icon: <Info className="size-3.5" /> },
   ] as const;
 
   return (
@@ -112,33 +112,7 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           ) : null}
           {tab === "query" ? <QueryTab data={data} form={form} /> : null}
           {tab === "cookies" ? <CookiesTab data={data} form={form} /> : null}
-        </div>
-        <div className="mt-6 space-y-1 text-center text-xs text-ink-3">
-          <p className="leading-5">
-            {t("powered_by")}{" "}
-            <a
-              className="transition-colors hover:text-accent hover:underline"
-              href={globals.git_url}
-              rel="noreferrer"
-              target="_blank"
-            >
-              SearXNG
-            </a>
-            {globals.version ? <span className="ms-1 opacity-70">v{globals.version}</span> : null}
-          </p>
-          <p className="leading-5">
-            {t("license")}:{" "}
-            <a
-              className="transition-colors hover:text-accent hover:underline"
-              href="/static/themes/zjsearch/LICENSE.txt"
-              onClick={(event) => {
-                event.preventDefault();
-                openDocument(t("license"), "/static/themes/zjsearch/LICENSE.txt");
-              }}
-            >
-              Apache-2.0 with Commons Clause v1.0
-            </a>
-          </p>
+          {tab === "info" ? <AboutTab globals={globals} /> : null}
         </div>
       </main>
     </Shell>

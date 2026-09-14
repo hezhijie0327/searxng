@@ -55,6 +55,20 @@ export function buildSearchUrl(params: SearchParams): string {
   return `/search?${new URLSearchParams(searchParamEntries(params)).toString()}`;
 }
 
+/** Shareable URL rebuilt from a results payload - the address bar carries no
+    query in POST mode, so the meta line and the sidebar both offer this. */
+export function shareableSearchUrl(data: SearchPageData): string {
+  return buildSearchUrl({
+    q: data.q,
+    categories: data.selected_categories.length > 0 ? data.selected_categories : undefined,
+    pageno: data.pageno,
+    language: data.current_language,
+    time_range: data.time_range || undefined,
+    timeout_limit: data.timeout_limit || undefined,
+    safesearch: data.globals.safesearch,
+  });
+}
+
 /** The same parameters as a multipart form body (POST-mode searches). */
 export function toSearchFormData(params: SearchParams): FormData {
   const body = new FormData();

@@ -333,10 +333,16 @@ Python edits — the repo policy forbids them):
   `webutils.get_static_file_list()` returns `themes\zjsearch\...` while
   `webapp.custom_url_for` compares with forward slashes, so `/static/zjsearch.min.js`
   is served unmapped and 404s (works fine on POSIX). Workaround: hardlink the
-  built assets into `searx/static/` with `cmd //c "mklink /H zjsearch.min.js
-  themes\zjsearch\zjsearch.min.js"` (same for `.css`). These links are
-  untracked, must not be committed, and go stale after every rebuild (vite
-  replaces the target file) — delete and recreate them.
+  built assets into `searx/static/` — `zjsearch.min.js`, `zjsearch.min.css`
+  AND the whole `chunk/` directory (vite splits lazy pages into it; the
+  preferences chunk landing there makes the preferences drawer 404 without
+  this step). Sync everything after EVERY rebuild (vite replaces the target
+  files, breaking the links); they are untracked and git-ignored. `mklink`
+  backslash escaping is unreliable from Git Bash — use Python `os.link`:
+  `local/py3/Scripts/python -c "import os,shutil;src='themes/zjsearch/chunk';dst='chunk';shutil.rmtree(dst,ignore_errors=True);os.makedirs(dst);[os.link(os.path.join(src,f),os.path.join(dst,f)) for f in os.listdir(src)]"`
+  (run inside `searx/static`). Junctions (`mklink /J`) do NOT work —
+  WhiteNoise's directory walk skips them. Symptom of a stale link: curl the
+  URL and get HTML instead of JS. See `HANDOVER.md` for the full recipe.
 - Start the app directly, mirroring `manage`'s `webapp.run` env vars:
   `SEARXNG_SETTINGS_PATH=<settings.yml> GRANIAN_INTERFACE=wsgi
   GRANIAN_HOST=127.0.0.1 GRANIAN_PORT=8888 local/py3/Scripts/granian

@@ -226,4 +226,13 @@ export const ZH_CN: Record<StringKey, string> = {
   widget_ip: "显示你的 IP 或 User-Agent",
   widget_hash: "计算字符串哈希(MD5、SHA-1、SHA-256…)",
   widget_random: "随机 UUID、字符串、整数、浮点数、颜色",
+  // meta-line actions (results) and the info page
+  copy_link: "复制链接",
+  copy_search_url: "复制搜索 URL",
+  privacypolicy: "隐私政策",
+  contact: "联系方式",
+  public_instances: "公共实例",
+  about_instance: "关于本实例",
+  categories: "分类",
+  plugins: "插件",
 };

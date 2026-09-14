@@ -1,31 +1,107 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { ChevronDown, Timer } from "lucide-react";
-import { type ReactNode, useState } from "react";
+/**
+ * The results meta line: 「found N results」 and 「took X s」 toggles, each
+ * expanding its own strip in place — the result strip carries the utility
+ * actions (copy the shareable URL, machine-readable download formats), the
+ * engine strip the per-engine timings and errors.
+ */
+
+import {
+  Check,
+  ChevronDown,
+  FileCode2,
+  FileJson,
+  FileSpreadsheet,
+  Link2,
+  List,
+  type LucideIcon,
+  Rss,
+  Timer,
+} from "lucide-react";
+import { useState } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { shareableSearchUrl } from "@/lib/searchParams.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
-export function DebugPanels({ data, leading }: { data: SearchPageData; leading?: ReactNode }) {
+/** per-format icons for the download strip; unknown configured formats fall
+    back to the code-file icon */
+const FORMAT_ICONS: Record<string, LucideIcon> = {
+  csv: FileSpreadsheet,
+  json: FileJson,
+  rss: Rss,
+  xml: FileCode2,
+};
+
+const metaToggle = "inline-flex items-center gap-1 transition-colors hover:text-ink";
+const stripChip =
+  "inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink";
+
+export function DebugPanels({
+  data,
+  resultCount,
+  searchUrl,
+}: {
+  data: SearchPageData;
+  /** number of rendered results (payload + appended infinite-scroll pages) */
+  resultCount: number;
+  /** shareable search URL: enables the copy action and the download formats
+      (GET /search?format=…, machine-readable results) */
+  searchUrl?: string;
+}) {
   const t = useT();
   const { openOverlay } = useOverlay();
   const hasEnginesPanel = data.unresponsive_engines.length > 0 || data.timings.length > 0;
   // with zero results the engine messages matter most — start expanded
-  const [openPanel, setOpenPanel] = useState<null | "engines">(() =>
+  const [openPanel, setOpenPanel] = useState<null | "engines" | "results">(() =>
     hasEnginesPanel && data.results.length === 0 ? "engines" : null,
   );
+  const [copied, setCopied] = useState(false);
+  const toggle = (panel: "engines" | "results") => {
+    setOpenPanel((current) => (current === panel ? null : panel));
+  };
   const roundedTime = data.max_response_time ? Math.round(data.max_response_time * 10) / 10 : null;
   const maxTime = data.max_response_time ?? 0;
+
+  const copyUrl = () => {
+    if (!searchUrl) {
+      return;
+    }
+    void navigator.clipboard
+      .writeText(searchUrl)
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => {
+          setCopied(false);
+        }, 1500);
+      })
+      .catch(() => {
+        /* clipboard unavailable */
+      });
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-3">
-        {leading}
+        <button
+          aria-expanded={openPanel === "results"}
+          className={metaToggle}
+          onClick={() => {
+            toggle("results");
+          }}
+          type="button"
+        >
+          <List className="size-3 shrink-0" />
+          {t("meta_found")} {resultCount} {t("meta_results")}
+          <ChevronDown className={`size-3 transition-transform ${openPanel === "results" ? "rotate-180" : ""}`} />
+        </button>
         {hasEnginesPanel ? (
           <button
             aria-expanded={openPanel === "engines"}
-            className="inline-flex items-center gap-1 transition-colors hover:text-ink"
+            className={metaToggle}
             onClick={() => {
-              setOpenPanel((current) => (current === "engines" ? null : "engines"));
+              toggle("engines");
             }}
             type="button"
           >
@@ -35,6 +111,38 @@ export function DebugPanels({ data, leading }: { data: SearchPageData; leading?:
           </button>
         ) : null}
       </div>
+
+      {openPanel === "results" ? (
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <button
+            aria-label={t("copy_search_url")}
+            className={stripChip}
+            onClick={copyUrl}
+            title={t("copy_search_url")}
+            type="button"
+          >
+            {copied ? <Check className="size-3 shrink-0 text-ok" /> : <Link2 className="size-3 shrink-0" />}
+            {copied ? t("copied") : t("copy_link")}
+          </button>
+          {searchUrl
+            ? data.globals.search_formats.map((format) => {
+                const Icon = FORMAT_ICONS[format] ?? FileCode2;
+                return (
+                  <a
+                    className={stripChip}
+                    href={`${searchUrl}&format=${format}`}
+                    key={format}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <Icon className="size-3 shrink-0 text-ink-3" />
+                    {format.toUpperCase()}
+                  </a>
+                );
+              })
+            : null}
+        </div>
+      ) : null}
 
       {openPanel === "engines" ? (
         <div className="mt-2 rounded-2xl border border-line bg-surface px-4 py-3">
