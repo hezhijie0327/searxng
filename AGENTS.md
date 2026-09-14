@@ -38,6 +38,10 @@ make run                    # dev instance on http://127.0.0.1:8888 (granian, re
 - Local instance for theme work (default_theme: zjsearch, all search formats on):
   `SEARXNG_SETTINGS_PATH=$PWD/client/zjsearch/dev-settings.yml ./manage webapp.run`
 - First setup: `./manage pyenv.install` (Python venv in `./local/py3`).
+- No test infrastructure by design: `client/zjsearch` has no vitest/jest setup
+  and must not gain `*.test.*` files or test dependencies (user decision).
+  Quality gates are `make themes.zjsearch.lint` (biome + tsc) and a successful
+  `make themes.zjsearch` build.
 - Theme changes require `make themes.zjsearch`; the browser caches assets for 30 s
   (WhiteNoise), reload twice or wait after rebuilding.
 - Deployment to another host: `client/zjsearch/make-patch.sh` (PowerShell twin
