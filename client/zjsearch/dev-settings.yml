@@ -22,6 +22,25 @@ search:
 ui:
   default_theme: zjsearch
 
+# preference locks — locked rows vanish from the preferences UI
+# (server also ignores their posted values). Lockable keys: categories,
+# language, autocomplete, favicon_resolver, safesearch, doi_resolver,
+# locale, theme, simple_style, center_alignment, results_on_new_tab,
+# search_on_category_select, method, image_proxy, query_in_title.
+# NOTE: hotkeys / url_formatting are NOT lockable server-side.
+# preferences:
+#   lock: [simple_style, safesearch, image_proxy]
+preferences:
+  lock: []
+
+# hide categories from the tabs (bangs like !it still reach them);
+# overriding replaces the default tab set, keep the ones you want:
+# categories_as_tabs:
+#   general:
+#   images:
+#   videos:
+#   news:
+
 # public instances link + custom links for the info page links card
 brand:
   public_instances: https://searx.space

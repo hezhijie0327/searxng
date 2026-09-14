@@ -5,7 +5,6 @@ import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { CategoryIcon } from "@/components/CategoryIcon.tsx";
 import type { DropdownOption } from "@/components/Dropdown.tsx";
 import { Dropdown } from "@/components/Dropdown.tsx";
-import { VISIBLE_CATEGORY_TABS } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import { useSettings } from "@/lib/settings.ts";
 import type { GlobalData } from "@/lib/types.ts";
@@ -59,11 +58,14 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   };
 
   const tabs = globals.categories_as_tabs.length > 0 ? globals.categories_as_tabs : globals.categories;
-  // high-frequency categories stay visible; everything else (and any future
-  // category) folds into the "more" menu.  When a folded category is the
-  // active selection the trigger itself shows its name, Google-style.
-  const visibleTabs = tabs.filter((category) => VISIBLE_CATEGORY_TABS.includes(category));
-  const overflowTabs = tabs.filter((category) => !VISIBLE_CATEGORY_TABS.includes(category));
+  // config order decides visibility: up to seven tabs lay out flat (a
+  // "more" trigger would only waste a slot); beyond that the first six stay
+  // visible and the rest folds into the "more" menu.  When a folded
+  // category is the active selection the trigger itself shows its name,
+  // Google-style.
+  const FLAT_TAB_LIMIT = 7;
+  const visibleTabs = tabs.length <= FLAT_TAB_LIMIT ? tabs : tabs.slice(0, FLAT_TAB_LIMIT - 1);
+  const overflowTabs = tabs.length <= FLAT_TAB_LIMIT ? [] : tabs.slice(FLAT_TAB_LIMIT - 1);
   const foldedSelected = overflowTabs.filter((category) => selected.includes(category));
   const label = (category: string) => globals.category_labels[category] ?? category;
   // trigger mirrors the folded selection: "更多" -> "科学" -> "科学 +1" (the

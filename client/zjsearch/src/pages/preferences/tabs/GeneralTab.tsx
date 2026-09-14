@@ -22,7 +22,9 @@ export function GeneralTab({
       {!locked.has("categories") ? (
         <SettingRow icon={<LayoutGrid className="size-4.5" />} stacked title={t("default_categories")}>
           <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
-            {globals.categories_as_tabs.map((category) => (
+            {/* globals.categories = tabs filtered to categories with enabled
+                engines — mirrors upstream simple preferences behaviour */}
+            {globals.categories.map((category) => (
               <CategoryTab
                 active={form.categories.includes(category)}
                 category={category}

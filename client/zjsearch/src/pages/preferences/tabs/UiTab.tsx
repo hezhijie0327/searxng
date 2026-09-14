@@ -58,37 +58,39 @@ export function UiTab({
           />
         </SettingRow>
       ) : null}
-      <SettingRow description={t("choose_auto")} icon={<Sun className="size-4.5" />} title={t("theme_style")}>
-        <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
-          {(
-            [
-              ["auto", cap(t("auto")), <Sun className="size-4" key="a" />],
-              ["light", cap(t("light")), <Sun className="size-4" key="l" />],
-              ["dark", cap(t("dark")), <Moon className="size-4" key="d" />],
-              ["black", cap(t("black")), <Moon className="size-4" key="b" />],
-            ] as const
-          ).map(([value, label, icon]) => (
-            <button
-              aria-pressed={form.themeStyle === value}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${
-                form.themeStyle === value
-                  ? "bg-accent-strong font-medium text-accent-contrast"
-                  : "text-ink-2 hover:text-ink"
-              }`}
-              key={value}
-              onClick={() => {
-                form.setThemeStyle(value);
-                applyThemeStyle(value as ThemeStyle);
-              }}
-              title={label}
-              type="button"
-            >
-              {icon}
-              <span className="hidden md:inline">{label}</span>
-            </button>
-          ))}
-        </div>
-      </SettingRow>
+      {!locked.has("simple_style") ? (
+        <SettingRow description={t("choose_auto")} icon={<Sun className="size-4.5" />} title={t("theme_style")}>
+          <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
+            {(
+              [
+                ["auto", cap(t("auto")), <Sun className="size-4" key="a" />],
+                ["light", cap(t("light")), <Sun className="size-4" key="l" />],
+                ["dark", cap(t("dark")), <Moon className="size-4" key="d" />],
+                ["black", cap(t("black")), <Moon className="size-4" key="b" />],
+              ] as const
+            ).map(([value, label, icon]) => (
+              <button
+                aria-pressed={form.themeStyle === value}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${
+                  form.themeStyle === value
+                    ? "bg-accent-strong font-medium text-accent-contrast"
+                    : "text-ink-2 hover:text-ink"
+                }`}
+                key={value}
+                onClick={() => {
+                  form.setThemeStyle(value);
+                  applyThemeStyle(value as ThemeStyle);
+                }}
+                title={label}
+                type="button"
+              >
+                {icon}
+                <span className="hidden md:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+        </SettingRow>
+      ) : null}
       {!locked.has("center_alignment") ? (
         <SettingRow
           description={t("center_alignment_desc")}
