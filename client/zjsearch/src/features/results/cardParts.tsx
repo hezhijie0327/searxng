@@ -143,7 +143,21 @@ export function CacheUrlProvider({ cacheUrl, children }: { cacheUrl?: string; ch
   return <CacheUrlContext.Provider value={cacheUrl}>{children}</CacheUrlContext.Provider>;
 }
 
-export function EnginesLine({ result, leading }: { result: ResultItem; leading?: ReactNode }) {
+/** Renderers outside EnginesLine (image lightbox) read the prefix directly. */
+export function useCacheUrl(): string | undefined {
+  return useContext(CacheUrlContext);
+}
+
+export function EnginesLine({
+  result,
+  leading,
+  compact = false,
+}: {
+  result: ResultItem;
+  leading?: ReactNode;
+  /** tile views: single-line row that swipes horizontally instead of wrapping */
+  compact?: boolean;
+}) {
   const t = useT();
   const cacheUrl = useContext(CacheUrlContext);
   const [expanded, setExpanded] = useState(false);
@@ -154,7 +168,13 @@ export function EnginesLine({ result, leading }: { result: ResultItem; leading?:
   const hidden = engines.length - 1;
   const pill = "inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5";
   return (
-    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+    <div
+      className={`mt-2 flex min-w-0 items-center text-xs text-ink-3 ${
+        compact
+          ? "flex-nowrap gap-x-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0"
+          : "flex-wrap gap-x-2 gap-y-1"
+      }`}
+    >
       {typeof result.score === "number" ? (
         <span className={`${pill} tabular-nums`} title={t("scores")}>
           <Award className="size-3 shrink-0" />

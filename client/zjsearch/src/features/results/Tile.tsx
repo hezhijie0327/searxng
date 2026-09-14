@@ -39,9 +39,10 @@ export function TileFavicon({ src }: { src: string }) {
 }
 
 /** Compact engine attribution for tile views: the unified EnginesLine
-    ([score] [first engine] [+N]). */
+    ([score] [first engine] [+N]); the cached link is icon-only so the row
+    stays on one line. */
 export function TileEngines({ result }: { result: ResultItem }) {
-  return <EnginesLine result={result} />;
+  return <EnginesLine compact result={result} />;
 }
 
 /** Tile thumbnail with graceful failure: a missing/broken/hung thumbnail

@@ -40,7 +40,7 @@ export function ProductGrid({ results, globals }: { results: ResultItem[]; globa
               {result.price}
             </p>
           ) : null}
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink-3">
+          <div className="mt-0.5 flex flex-nowrap items-center gap-x-2 overflow-x-auto text-xs text-ink-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
             {result.shipping ? (
               <span className="inline-flex items-center gap-1">
                 <Truck className="size-3" />

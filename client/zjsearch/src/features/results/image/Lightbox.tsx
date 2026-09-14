@@ -6,8 +6,9 @@
  * drag-pan, and an #image-viewer hash so the back button dismisses it.
  */
 
-import { Award, ChevronLeft, ChevronRight, Download, ExternalLink, ImageOff, Server, X } from "lucide-react";
+import { Archive, Award, ChevronLeft, ChevronRight, Download, ExternalLink, ImageOff, Server, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useCacheUrl } from "@/features/results/cardParts.tsx";
 import { formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
@@ -73,6 +74,7 @@ export function Lightbox({
 }) {
   const t = useT();
   const settings = useSettings();
+  const cacheUrl = useCacheUrl();
   const result = results[index];
   const touchStartX = useRef<number | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -347,6 +349,16 @@ export function Lightbox({
                 >
                   {enginesExpanded ? t("show_less") : `+${result.engines.length - 1}`}
                 </button>
+              ) : null}
+              {cacheUrl ? (
+                <a
+                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300 transition-colors hover:text-white"
+                  href={cacheUrl + result.url}
+                  {...newTabLinkProps(true)}
+                >
+                  <Archive className="size-3 shrink-0" />
+                  {t("cached")}
+                </a>
               ) : null}
             </div>
           ) : null}
