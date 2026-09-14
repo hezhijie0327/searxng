@@ -10,7 +10,7 @@ import { tryEvaluateExpression } from "@/features/calculator.ts";
 import { useHotkeys } from "@/features/hotkeys.ts";
 import { Answers } from "@/features/results/answers/Answers.tsx";
 import { CalculatorAnswer } from "@/features/results/answers/Calculator.tsx";
-import { ResultSkeleton } from "@/features/results/cardParts.tsx";
+import { CacheUrlProvider, ResultSkeleton } from "@/features/results/cardParts.tsx";
 import { DebugPanels } from "@/features/results/DebugPanels.tsx";
 import { Corrections, NoResults } from "@/features/results/EmptyStates.tsx";
 import { InfiniteScrollSentinel } from "@/features/results/InfiniteScroll.tsx";
@@ -313,16 +313,18 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                     <NoResults hasInfobox={data.infoboxes.length > 0} pageno={data.pageno} />
                   </div>
                 ) : (
-                  <ResultsView
-                    collapsedBlocks={collapsedBlocks}
-                    globals={globals}
-                    layout={layout}
-                    onToggleBlock={(key) => {
-                      setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
-                    }}
-                    results={allResults}
-                    selected={hotkeysSelected}
-                  />
+                  <CacheUrlProvider cacheUrl={globals.cache_url}>
+                    <ResultsView
+                      collapsedBlocks={collapsedBlocks}
+                      globals={globals}
+                      layout={layout}
+                      onToggleBlock={(key) => {
+                        setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
+                      }}
+                      results={allResults}
+                      selected={hotkeysSelected}
+                    />
+                  </CacheUrlProvider>
                 )}
 
                 {infiniteScroll &&

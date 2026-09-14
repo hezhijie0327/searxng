@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Award, Calendar, Clock, Eye, Globe, ImageOff, Music, Play, Server, User } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { Archive, Award, Calendar, Clock, Eye, Globe, ImageOff, Music, Play, Server, User } from "lucide-react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { formatDate, formatLength, formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
@@ -134,8 +134,18 @@ export function MetaLine({ result }: { result: ResultItem }) {
 /** Unified engine attribution for EVERY view: [score] [first engine] [+N],
     expanding inline on demand.  The score leads as a tabular pill; the
     first pill's title always carries the full engine list. */
+/** Instance-wide cache-link prefix (search.cache_url) — provided once around
+    the results area; EnginesLine turns it into a per-result "cached" pill,
+    mirroring upstream simple's result_sub_footer. */
+const CacheUrlContext = createContext<string | undefined>(undefined);
+
+export function CacheUrlProvider({ cacheUrl, children }: { cacheUrl?: string; children: ReactNode }) {
+  return <CacheUrlContext.Provider value={cacheUrl}>{children}</CacheUrlContext.Provider>;
+}
+
 export function EnginesLine({ result, leading }: { result: ResultItem; leading?: ReactNode }) {
   const t = useT();
+  const cacheUrl = useContext(CacheUrlContext);
   const [expanded, setExpanded] = useState(false);
   const engines = result.engines;
   if (engines.length === 0 && !leading) {
@@ -177,6 +187,16 @@ export function EnginesLine({ result, leading }: { result: ResultItem; leading?:
         >
           {expanded ? t("show_less") : `+${hidden}`}
         </button>
+      ) : null}
+      {cacheUrl ? (
+        <a
+          className={`${pill} transition-colors hover:text-ink`}
+          href={cacheUrl + result.url}
+          {...newTabLinkProps(true)}
+        >
+          <Archive className="size-3 shrink-0" />
+          {t("cached")}
+        </a>
       ) : null}
     </div>
   );

@@ -238,4 +238,5 @@ export const ZH_CN: Record<StringKey, string> = {
   about: "关于",
   page_search_syntax: "搜索语法",
   page_about_searxng: "关于 SearXNG",
+  cached: "缓存页",
 };

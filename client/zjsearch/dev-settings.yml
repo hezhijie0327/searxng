@@ -21,6 +21,8 @@ search:
 
 ui:
   default_theme: zjsearch
+  # result "cached" pill prefix — defaults to https://web.archive.org/web/
+  # cache_url: "https://webcache.googleusercontent.com/search?q=cache:"
 
 # preference locks — locked rows vanish from the preferences UI
 # (server also ignores their posted values). Lockable keys: categories,

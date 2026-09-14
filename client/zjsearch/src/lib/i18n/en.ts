@@ -240,6 +240,7 @@ export const EN = {
   about: "About",
   page_search_syntax: "Search syntax",
   page_about_searxng: "About SearXNG",
+  cached: "Cached",
 };
 
 export type StringKey = keyof typeof EN;
