@@ -22,7 +22,13 @@ set -euo pipefail
 
 base=${1:-}
 if [ -z "$base" ]; then
-  for ref in master origin/master; do
+  # a stale remote-tracking ref would sweep upstream-only changes into the
+  # patch (e.g. engine fixes made upstream after the last fetch); refresh it
+  # best-effort - offline runs keep whatever ref they already have
+  if ! git fetch --quiet origin +refs/heads/master:refs/remotes/origin/master 2>/dev/null; then
+    echo "note: could not refresh origin/master - using the local ref as-is" >&2
+  fi
+  for ref in origin/master master; do
     if git rev-parse -q --verify "$ref" >/dev/null 2>&1; then
       base=$ref
       break
