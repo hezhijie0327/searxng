@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { ArrowDown, ArrowUp, ChevronLeft } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronLeft } from "lucide-react";
+import { useMemo } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
+import { SortHeader } from "@/components/SortHeader.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { useSortState } from "@/lib/tableSort.ts";
 import type { EngineStat, StatsPageData } from "@/lib/types.ts";
 
 type SortKey = "name" | "score" | "result_count" | "time" | "reliability";
@@ -110,15 +112,14 @@ function ErrorTable({ errors, title }: { errors: StatsPageData["errors"]; title:
 export function StatsPage({ data, embedded = false }: { data: StatsPageData; embedded?: boolean }) {
   const t = useT();
   const globals = data.globals;
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortAsc, setSortAsc] = useState(true);
+  const { sort, cycleSort } = useSortState<SortKey>();
 
   const engines = useMemo(() => {
-    if (!sortKey) {
+    if (!sort.key) {
       return data.engines;
     }
-    const dir = sortAsc ? 1 : -1;
-    const key = sortKey === "time" ? "total" : sortKey;
+    const dir = sort.asc ? 1 : -1;
+    const key = sort.key === "time" ? "total" : sort.key;
     return [...data.engines].sort((a, b) => {
       const av = a[key];
       const bv = b[key];
@@ -129,29 +130,7 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
       const bn = bv ?? (key === "name" ? "" : -1);
       return (Number(an) - Number(bn)) * dir;
     });
-  }, [data.engines, sortKey, sortAsc]);
-
-  const sortButton = (key: SortKey, label: string) => (
-    <button
-      className="inline-flex items-center gap-1 hover:text-ink"
-      onClick={() => {
-        if (sortKey === key) {
-          setSortAsc((prev) => !prev);
-        } else {
-          setSortKey(key);
-          setSortAsc(true);
-        }
-      }}
-      type="button"
-    >
-      {label}
-      {sortKey === key ? (
-        <span aria-hidden="true" className="inline-flex">
-          {sortAsc ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
-        </span>
-      ) : null}
-    </button>
-  );
+  }, [data.engines, sort]);
 
   const selectedErrors = data.errors.filter((error) => !error.secondary);
   const warnings = data.errors.filter((error) => error.secondary);
@@ -196,34 +175,34 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
               <thead className="bg-surface-2 text-xs text-ink-3">
                 <tr>
                   <th
-                    aria-sort={sortKey === "name" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    aria-sort={sort.key === "name" ? (sort.asc ? "ascending" : "descending") : undefined}
                     className="px-4 py-2.5 font-medium"
                   >
-                    {sortButton("name", t("engine_name"))}
+                    <SortHeader columnKey="name" label={t("engine_name")} onCycle={cycleSort} sort={sort} />
                   </th>
                   <th
-                    aria-sort={sortKey === "score" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    aria-sort={sort.key === "score" ? (sort.asc ? "ascending" : "descending") : undefined}
                     className="px-4 py-2.5 font-medium"
                   >
-                    {sortButton("score", t("scores"))}
+                    <SortHeader columnKey="score" label={t("scores")} onCycle={cycleSort} sort={sort} />
                   </th>
                   <th
-                    aria-sort={sortKey === "result_count" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    aria-sort={sort.key === "result_count" ? (sort.asc ? "ascending" : "descending") : undefined}
                     className="px-4 py-2.5 font-medium"
                   >
-                    {sortButton("result_count", t("result_count"))}
+                    <SortHeader columnKey="result_count" label={t("result_count")} onCycle={cycleSort} sort={sort} />
                   </th>
                   <th
-                    aria-sort={sortKey === "time" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    aria-sort={sort.key === "time" ? (sort.asc ? "ascending" : "descending") : undefined}
                     className="px-4 py-2.5 font-medium"
                   >
-                    {sortButton("time", t("response_time"))}
+                    <SortHeader columnKey="time" label={t("response_time")} onCycle={cycleSort} sort={sort} />
                   </th>
                   <th
-                    aria-sort={sortKey === "reliability" ? (sortAsc ? "ascending" : "descending") : undefined}
+                    aria-sort={sort.key === "reliability" ? (sort.asc ? "ascending" : "descending") : undefined}
                     className="px-4 py-2.5 font-medium"
                   >
-                    {sortButton("reliability", t("reliability"))}
+                    <SortHeader columnKey="reliability" label={t("reliability")} onCycle={cycleSort} sort={sort} />
                   </th>
                 </tr>
               </thead>
