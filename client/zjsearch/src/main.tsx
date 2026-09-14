@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { createRoot } from "react-dom/client";
-import { App } from "./app.tsx";
-import { extractPageData, parseClientSettings, parseEmbeddedPageData } from "./lib/pageData.ts";
-import { watchSystemTheme } from "./lib/theme.ts";
-import type { AnyPageData } from "./lib/types.ts";
+import { App } from "@/app.tsx";
+import { extractPageData, parseClientSettings, parseEmbeddedPageData } from "@/lib/pageData.ts";
+import { watchSystemTheme } from "@/lib/theme.ts";
+import type { AnyPageData } from "@/lib/types.ts";
 import "./styles/global.css";
 
 /**

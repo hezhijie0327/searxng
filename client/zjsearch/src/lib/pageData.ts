@@ -6,9 +6,9 @@
  * fetches the same URLs and extracts the payload from the HTML response.
  */
 
-import type { ClientSettings } from "./settings.ts";
-import { DEFAULT_CLIENT_SETTINGS } from "./settings.ts";
-import type { AnyPageData } from "./types.ts";
+import type { ClientSettings } from "@/lib/settings.ts";
+import { DEFAULT_CLIENT_SETTINGS } from "@/lib/settings.ts";
+import type { AnyPageData } from "@/lib/types.ts";
 
 export type { AnyPageData };
 

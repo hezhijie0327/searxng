@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useT } from "../lib/i18n.ts";
+import { useT } from "@/lib/i18n.ts";
 
 /** Copy-to-clipboard button with a transient "copied" confirmation.
     Pass `className` to restyle (defaults to the muted surface chip). */

@@ -2,33 +2,32 @@
 
 import { List } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BackToTop } from "../components/BackToTop.tsx";
-import { HelpModal } from "../components/HelpModal.tsx";
-import { Answers, CalculatorAnswer } from "../components/results/Answers.tsx";
-import { collectBlocks } from "../components/results/blocks.ts";
-import { ResultSkeleton } from "../components/results/cardParts.tsx";
-import { DictionaryCard, PaperCard, ResultCard } from "../components/results/cards.tsx";
-import { Corrections, NoResults } from "../components/results/EmptyStates.tsx";
-import { FilesGrid } from "../components/results/FilesGrid.tsx";
-import { GroupHeader } from "../components/results/GroupHeader.tsx";
-import { AppsGrid, PosterGrid, ProductGrid, VideoGrid } from "../components/results/grids.tsx";
-import { ImageGrid } from "../components/results/ImageGrid.tsx";
-import { InfiniteScrollSentinel } from "../components/results/InfiniteScroll.tsx";
-import { MusicGrid } from "../components/results/MusicGrid.tsx";
-import { PackageGrid } from "../components/results/PackageGrid.tsx";
-import { Pagination } from "../components/results/Pagination.tsx";
-import { DebugPanels, Infobox, Sidebar, SuggestionsBox } from "../components/results/Sidebar.tsx";
-import { SearchBox } from "../components/SearchBox.tsx";
-import { CategoryTabs, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
-import { HeaderActions, Link, Shell } from "../components/Shell.tsx";
-import { tryEvaluateExpression } from "../features/calculator.ts";
-import { useHotkeys } from "../features/hotkeys.ts";
-import { useT } from "../lib/i18n.ts";
-import { scrollBehavior } from "../lib/motion.ts";
-import { extractPageData } from "../lib/pageData.ts";
-import { buildSearchUrl, parseSearchUrl, toSearchFormData, useRouter } from "../lib/router.tsx";
-import { useHasPlugin, useSettings } from "../lib/settings.ts";
-import type { ResultItem, SearchPageData } from "../lib/types.ts";
+import { BackToTop } from "@/components/BackToTop.tsx";
+import { HelpModal } from "@/components/HelpModal.tsx";
+import { SearchBox } from "@/components/SearchBox.tsx";
+import { CategoryTabs, type FilterValues, SearchFilters } from "@/components/SearchControls.tsx";
+import { HeaderActions, Link, Shell } from "@/components/Shell.tsx";
+import { tryEvaluateExpression } from "@/features/calculator.ts";
+import { useHotkeys } from "@/features/hotkeys.ts";
+import { Answers } from "@/features/results/answers/Answers.tsx";
+import { CalculatorAnswer } from "@/features/results/answers/Calculator.tsx";
+import { ResultSkeleton } from "@/features/results/cardParts.tsx";
+import { DebugPanels } from "@/features/results/DebugPanels.tsx";
+import { Corrections, NoResults } from "@/features/results/EmptyStates.tsx";
+import { InfiniteScrollSentinel } from "@/features/results/InfiniteScroll.tsx";
+import { Infobox } from "@/features/results/Infobox.tsx";
+import { detectResultsLayout } from "@/features/results/layout.ts";
+import { Pagination } from "@/features/results/Pagination.tsx";
+import { ResultsView } from "@/features/results/ResultsView.tsx";
+import { Sidebar } from "@/features/results/Sidebar.tsx";
+import { SuggestionsBox } from "@/features/results/SuggestionsBox.tsx";
+import { readCookie } from "@/lib/cookies.ts";
+import { useT } from "@/lib/i18n.ts";
+import { scrollBehavior } from "@/lib/motion.ts";
+import { useRouter } from "@/lib/router.tsx";
+import { fetchSearchPage, parseSearchUrl } from "@/lib/searchParams.ts";
+import { useHasPlugin, useSettings } from "@/lib/settings.ts";
+import type { ResultItem, SearchPageData } from "@/lib/types.ts";
 
 export function ResultsPage({ data }: { data: SearchPageData }) {
   const t = useT();
@@ -89,6 +88,11 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     }
   }, [href]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
+  useEffect(() => {
+    setHotkeysSelected(-1);
+  }, [href]);
+
   const buildParams = (
     overrides?: Partial<{
       q: string;
@@ -115,10 +119,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     // (the preferences cookie) instead of silently keeping the bang's
     const previousWasBang = data.q.trim().startsWith("!");
     const nextIsBang = q.trim().startsWith("!");
-    const cookieDefault = document.cookie
-      .match(/(?:^|; *)categories=([^;]*)/)?.[1]
-      ?.split(",")
-      .filter(Boolean);
+    const cookieDefault = readCookie("categories")?.split(",").filter(Boolean);
     const categories =
       previousWasBang && !nextIsBang
         ? cookieDefault && cookieDefault.length > 0
@@ -152,17 +153,8 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     }
     setAppendState("loading");
     const nextParams = buildParams({ pageno: data.pageno + 1 });
-    // POST mode: page the query through the request body, not the URL
-    const request =
-      globals.method === "POST"
-        ? fetch("/search", { method: "POST", body: toSearchFormData(nextParams), headers: { Accept: "text/html" } })
-        : fetch(buildSearchUrl(nextParams), { headers: { Accept: "text/html" } });
-    void request
-      .then(async (resp) => {
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
-        const next = extractPageData(await resp.text()) as SearchPageData;
+    void fetchSearchPage(nextParams, globals.method)
+      .then((next) => {
         setAppended((prev) => [...prev, ...next.results]);
         setAppendState(next.paging ? "idle" : "done");
       })
@@ -224,57 +216,10 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
   });
 
   const allResults = useMemo(() => [...data.results, ...appended], [data.results, appended]);
-
-  // Page-level layout intent (Kagi-style per-category presentation): a single
-  // selected category signals intent, `only_template` additionally catches
-  // bang-limited searches where every result shares one template.
-  const singleCategory = selectedCategories.length === 1 ? selectedCategories[0] : null;
-  // engine bangs (`!imdb bat`) run with the pseudo category "none"; every
-  // result still carries its real category, so a bang search whose results
-  // all agree on one category inherits that category's presentation
-  const firstResult = allResults[0];
-  const bangCategory =
-    singleCategory === "none" &&
-    firstResult !== undefined &&
-    allResults.every((result) => result.category === firstResult.category)
-      ? firstResult.category
-      : null;
-  const isImagePage =
-    (data.only_template === "images" || singleCategory === "images" || bangCategory === "images") &&
-    allResults.every((result) => result.template === "images" || result.thumbnail_src || result.img_src);
-  const isVideoPage = data.only_template === "videos" || singleCategory === "videos" || bangCategory === "videos";
-  const isProductPage =
-    (data.only_template === "products" || singleCategory === "products" || bangCategory === "products") && !isVideoPage;
-  const isMapPage = (singleCategory === "map" || bangCategory === "map") && !isImagePage && !isVideoPage;
-  const isMusicPage = (singleCategory === "music" || bangCategory === "music") && !isImagePage && !isVideoPage;
-  const isMoviesPage = (singleCategory === "movies" || bangCategory === "movies") && !isImagePage && !isVideoPage;
-  const isDictionaryPage =
-    singleCategory === "dictionaries" ||
-    singleCategory === "define" ||
-    bangCategory === "dictionaries" ||
-    bangCategory === "define";
-  const isAppsPage = singleCategory === "apps" || bangCategory === "apps";
-  const isPackagesPage = singleCategory === "packages" || bangCategory === "packages";
-  // science intent renders every result in the scholarly layout; a
-  // paper-only bang search (`!pubmed ...`) gets the same treatment
-  const isSciencePage =
-    (singleCategory === "science" || bangCategory === "science" || data.only_template === "paper") &&
-    !isImagePage &&
-    !isVideoPage &&
-    !isMusicPage;
-  // files intent (or a torrent-only bang search) gets the file-tile grid;
-  // torrents keep the transfer card inside mixed searches
-  const isFilesPage =
-    (singleCategory === "files" || bangCategory === "files" || data.only_template === "torrent") &&
-    !isImagePage &&
-    !isVideoPage &&
-    !isMusicPage &&
-    !isSciencePage;
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: href is the trigger
-  useEffect(() => {
-    setHotkeysSelected(-1);
-  }, [href]);
+  const layout = useMemo(
+    () => detectResultsLayout(data, selectedCategories, allResults),
+    [data, selectedCategories, allResults],
+  );
 
   // client-side calculator answer (server plugin "calculator" enabled)
   const calc = useMemo(() => {
@@ -376,193 +321,17 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
                   <div className="mt-6">
                     <NoResults hasInfobox={data.infoboxes.length > 0} pageno={data.pageno} />
                   </div>
-                ) : isImagePage ? (
-                  <div className="mt-4">
-                    <ImageGrid results={allResults} />
-                  </div>
-                ) : isVideoPage ? (
-                  <div className="mt-4">
-                    <VideoGrid globals={globals} results={allResults} selected={hotkeysSelected} />
-                  </div>
-                ) : isMusicPage ? (
-                  <div className="mt-4">
-                    <MusicGrid globals={globals} results={allResults} selected={hotkeysSelected} />
-                  </div>
-                ) : isMoviesPage ? (
-                  <div className="mt-4">
-                    <PosterGrid globals={globals} results={allResults} selected={hotkeysSelected} />
-                  </div>
-                ) : isDictionaryPage ? (
-                  <div className="mt-2 space-y-1">
-                    {allResults.map((result, index) => (
-                      <div
-                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
-                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                        }`}
-                        data-hotkey-index={index}
-                        key={index}
-                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
-                      >
-                        <DictionaryCard globals={globals} result={result} />
-                      </div>
-                    ))}
-                  </div>
-                ) : isAppsPage ? (
-                  <div className="mt-4">
-                    <AppsGrid globals={globals} results={allResults} selected={hotkeysSelected} />
-                  </div>
-                ) : isPackagesPage ? (
-                  <div className="mt-4">
-                    <PackageGrid globals={globals} results={allResults} selected={hotkeysSelected} />
-                  </div>
-                ) : isSciencePage ? (
-                  <div className="mt-2 space-y-1">
-                    {allResults.map((result, index) => (
-                      <div
-                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
-                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                        }`}
-                        data-hotkey-index={index}
-                        key={index}
-                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
-                      >
-                        <PaperCard globals={globals} result={result} />
-                      </div>
-                    ))}
-                  </div>
-                ) : isFilesPage ? (
-                  <div className="mt-4">
-                    <FilesGrid globals={globals} results={allResults} selected={hotkeysSelected} />
-                  </div>
-                ) : isProductPage ? (
-                  <div className="mt-4">
-                    <ProductGrid globals={globals} results={allResults} />
-                  </div>
-                ) : singleCategory !== null ? (
-                  // category intent page: a pure relevance-ordered list in
-                  // which every type keeps its own card - extracting a type
-                  // into a strip would break the relevance order.
-                  // space-y keeps highlighted (selected / hovered) cards from
-                  // touching, matching the mixed-block lists.
-                  <div className="mt-2 space-y-1">
-                    {allResults.map((result, index) => (
-                      <div
-                        className={`${index < 12 ? "animate-fade-up" : ""} rounded-2xl ${
-                          index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                        }`}
-                        data-hotkey-index={index}
-                        key={index}
-                        style={index < 12 ? { animationDelay: `${Math.min(index * 30, 300)}ms` } : undefined}
-                      >
-                        <ResultCard autoOpenMap={isMapPage} eager={index < 4} globals={globals} result={result} />
-                      </div>
-                    ))}
-                  </div>
                 ) : (
-                  <div className="relative mt-2">
-                    {(() => {
-                      // Mixed search: one collapsible block per original
-                      // search category (pure relevance order inside), in tab
-                      // order by default; every block renders the same full
-                      // presentation as its single-category page and can be
-                      // folded away via its header.
-                      const blocks = collectBlocks(allResults);
-                      // persisted user order first (tab order is the
-                      // fallback), then categories never seen before
-                      const orderedKeys = [...blocks.keys()];
-                      const isCollapsed = (key: string) => Boolean(collapsedBlocks[key]);
-                      const toggle = (key: string) => setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
-                      return (
-                        <>
-                          {orderedKeys.map((key) => {
-                            const items = blocks.get(key) ?? [];
-                            const collapsed = isCollapsed(key);
-                            const results = items.map(({ result }) => result);
-                            const indexOffset = items[0]?.index ?? 0;
-                            return (
-                              <section className="mt-6 first:mt-0" data-block-key={key} key={key}>
-                                <GroupHeader
-                                  category={key}
-                                  collapsed={collapsed}
-                                  count={items.length}
-                                  label={globals.category_labels[key] ?? key}
-                                  onToggle={() => {
-                                    toggle(key);
-                                  }}
-                                />
-                                {!collapsed ? (
-                                  <div className="mt-1 space-y-1">
-                                    {key === "images" ? (
-                                      <ImageGrid results={results} />
-                                    ) : key === "videos" ? (
-                                      <VideoGrid
-                                        globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
-                                        selected={hotkeysSelected}
-                                      />
-                                    ) : key === "music" ? (
-                                      <MusicGrid
-                                        globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
-                                        selected={hotkeysSelected}
-                                      />
-                                    ) : key === "files" ? (
-                                      <FilesGrid
-                                        globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
-                                        selected={hotkeysSelected}
-                                      />
-                                    ) : key === "movies" ? (
-                                      <PosterGrid
-                                        globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
-                                        selected={hotkeysSelected}
-                                      />
-                                    ) : key === "packages" ? (
-                                      <PackageGrid
-                                        globals={globals}
-                                        indexOffset={indexOffset}
-                                        results={results}
-                                        selected={hotkeysSelected}
-                                      />
-                                    ) : (
-                                      <div>
-                                        {items.map(({ result, index }) => (
-                                          <div
-                                            className={`rounded-2xl ${
-                                              index === hotkeysSelected ? "bg-surface ring-1 ring-accent-strong" : ""
-                                            } ${index < 12 ? "animate-fade-up" : ""}`}
-                                            data-hotkey-index={index}
-                                            key={index}
-                                            style={
-                                              index < 12
-                                                ? { animationDelay: `${Math.min(index * 30, 300)}ms` }
-                                                : undefined
-                                            }
-                                          >
-                                            <ResultCard
-                                              autoOpenMap={isMapPage}
-                                              eager={index < 4}
-                                              globals={globals}
-                                              result={result}
-                                            />
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                ) : null}
-                              </section>
-                            );
-                          })}
-                        </>
-                      );
-                    })()}
-                  </div>
+                  <ResultsView
+                    collapsedBlocks={collapsedBlocks}
+                    globals={globals}
+                    layout={layout}
+                    onToggleBlock={(key) => {
+                      setCollapsedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
+                    }}
+                    results={allResults}
+                    selected={hotkeysSelected}
+                  />
                 )}
 
                 {infiniteScroll &&

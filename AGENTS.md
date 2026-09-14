@@ -61,18 +61,53 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   HTML — render with `dangerouslySetInnerHTML`).
 - Client-side navigation (`src/lib/router.tsx`) fetches the same URLs and extracts
   the embedded page-data JSON from the HTML response; on network failure it falls
-  back to a full page load.
+  back to a full page load. Search parameter encode/decode + the shared page
+  fetch live in `src/lib/searchParams.ts` (GET URL, POST form body and the
+  infinite-scroll pager all derive from one entry list).
 - Client settings come from the base64 `client_settings` attribute on the module
   script tag (`get_client_settings()` in webapp.py). Note: its `theme_static_path`
-  is hardcoded to the simple theme — zjsearch uses its own `THEME_STATIC` constant.
-- i18n is theme-owned: `client/zjsearch/src/lib/i18n.ts` holds the whole UI
-  string catalog (English sources + Simplified Chinese; every other locale
-  falls back to English). `globals.strings` is gone from the page-data
-  contract. Add new keys to BOTH maps and render via `useT()` / `t("key")`.
-- About/Stats/Preferences open as slide-in drawers (`src/lib/overlay.tsx`); the
-  panel fetches page-data and renders the same page components with
-  `embedded`/`hideTopNav` props. Internal links inside a panel are browsed within
-  the panel (click-capture in overlay.tsx).
+  is hardcoded to the simple theme; zjsearch resolves its own assets from the
+  theme root and does not use that field.
+- i18n is theme-owned: `client/zjsearch/src/lib/i18n.ts` is the runtime (context,
+  `useT()`, locale fallback) and `src/lib/i18n/` holds one catalog file per
+  locale — `en.ts` is the source and defines the `StringKey` union, `zh-CN.ts`
+  must implement it fully; every other locale falls back to English. Add new
+  keys to `en.ts` first (then the other catalogs), render via `useT()` /
+  `t("key")` — unknown keys are compile errors. Adding a language = one new
+  catalog file + one entry in `CATALOGS` / `themeLocaleTag()`.
+- About/Stats/Preferences open as slide-in drawers
+  (`src/features/overlay/OverlayProvider.tsx`); the panel fetches page-data and
+  renders the same page components with `embedded`/`hideTopNav` props. Which
+  payload opens as which page is injected by `app.tsx` (`renderPage`) — the
+  overlay module never imports pages (keeps lib→page cycles impossible).
+  Internal links inside a panel are browsed within the panel (click-capture in
+  OverlayProvider.tsx).
+
+## Client code organization (keep it this way)
+
+Four layers, dependencies point strictly downwards; imports use the `@/`
+alias (`tsconfig.paths` + vite `resolve.alias`), never deep relative paths:
+
+- `src/lib/` — foundations: `types.ts` (server contract), `pageData.ts`,
+  `searchParams.ts`, `router.tsx`, `i18n/`, `categories.ts`, `cookies.ts`,
+  `settings.ts`, `theme.ts`, `format.ts`, `link.ts`, `motion.ts`.
+  Never imports from `components/` / `features/` / `pages/`.
+- `src/components/` — UI shared across pages (Shell, Link, SearchBox,
+  SearchControls, Dropdown, CopyButton, HelpModal, BackToTop, Brand,
+  CategoryIcon).
+- `src/features/<domain>/` — cohesive feature modules with colocated views,
+  pure logic and hooks: `overlay/` (drawer, panels injected by app.tsx),
+  `results/` (layout.ts detection, ResultsView, CategoryBlocks, CardList,
+  ResultRow, cards/, answers/, image/, grids, infobox/debug/suggestions),
+  `hotkeys.ts`, `calculator.ts`.
+- `src/pages/` — thin route composition roots (state + event handlers +
+  layout wiring); page-private pieces sit next to the page
+  (`preferences/` → PreferencesPage + `usePreferencesForm` + `tabs/`).
+
+Naming: components PascalCase (one primary export per file), hooks
+`useXxx.ts`, pure logic camelCase `.ts`, locale catalogs named by their
+BCP-47 tag. Export only what other modules need. Full rationale and the
+"add a language" recipe: `client/zjsearch/README.rst`.
 
 ## Conventions & gotchas
 
@@ -99,17 +134,19 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   `shortcut`) and external DDG bangs (`!!w`, redirect off-site — the SPA
   fetch fails cross-origin and falls back to a full page load, which is the
   desired behaviour).  Engine bangs run with selected category `"none"`, so
-  ResultsPage derives the presentation category from the results' common
-  category (`bangCategory`) — that is how `!imdb` lands on the movies
-  PosterGrid.  Movies = tmdb/imdb/moviepilot/rottentomatoes/senscritique;
-  tmdb is disabled upstream, dev-settings.yml enables it.  Dictionary bangs
-  (`!dictionaries` / `!define`) render DictionaryCard word entries; wordnik
-  definitions additionally arrive as a translations answer.
+  `detectResultsLayout()` (features/results/layout.ts) derives the
+  presentation category from the results' common category (bangCategory) —
+  that is how `!imdb` lands on the movies PosterGrid.  Movies =
+  tmdb/imdb/moviepilot/rottentomatoes/senscritique; tmdb is disabled
+  upstream, dev-settings.yml enables it.  Dictionary bangs (`!dictionaries`
+  / `!define`) render DictionaryCard word entries; wordnik definitions
+  additionally arrive as a translations answer.
 - POST method preference (`globals.method === "POST"`): the app drops SPA
   navigation entirely and mirrors the upstream form flow — searches are real
   hidden-form POST submissions (`router.search()`), other links become
   native `location.assign`, and infinite-scroll page fetches POST the
-  params in the body (`toSearchFormData`).  Reason: the POST results URL is
+  params in the body (via `fetchSearchPage` in `src/lib/searchParams.ts`).
+  Reason: the POST results URL is
   a query-less `/search`, so no SPA popstate could ever restore a search
   page from it; the browser's own history + bfcache takes over.  The
   sidebar Search-URL box (POST only) shows the shareable URL rebuilt from
@@ -150,8 +187,8 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
 ## zjsearch UI design system
 
 A consistent control/typography language is enforced across all pages —
-reuse these tokens instead of inventing sizes. The catalog lives in
-`client/zjsearch/src/lib/i18n.ts`; strings are looked up by key with
+reuse these tokens instead of inventing sizes. The string catalog lives in
+`client/zjsearch/src/lib/i18n/`; strings are looked up by key with
 `t("key")`.
 
 Type scale — one size per text role:
@@ -189,7 +226,7 @@ Controls:
   `CategoryTab`/`CategoryTabs` styling.  Other choices (options, toggles)
   keep the bordered chip language.
 
-Instant answers (Answers.tsx) are tiered:
+Instant answers (`features/results/answers/`, one file per kind) are tiered:
 
 - Answers without a source url (calculator, time, ip, hash, random) render
   uncarded in the results column — gray lead-in expression, value at 4xl,
@@ -200,7 +237,8 @@ Instant answers (Answers.tsx) are tiered:
   answers.
 
 Category-specific result presentations (single-category intent pages, see
-`ResultsPage.tsx` `is*Page` flags) — each category gets the layout that fits
+`detectResultsLayout` in `features/results/layout.ts`, rendered by
+`features/results/ResultsView.tsx`) — each category gets the layout that fits
 its content, all sharing one visual language:
 
 - images → masonry `ImageGrid`; videos → `VideoGrid`; music → `MusicGrid`;
@@ -225,7 +263,8 @@ its content, all sharing one visual language:
   extension, the filesize takes the badge slot, seed/leech health reads as
   colored ↑↓ counts, and the magnet link is an accent circle button.
 - Mixed searches render one **collapsible block per original search
-  category** (`collectBlocks` / `blockKeyOf` in `ResultsPage`): general,
+  category** (`collectBlocks` / `blockKeyOf` in `features/results/blocks.ts`,
+  rendered by `features/results/CategoryBlocks.tsx`): general,
   images, videos, news, map, music, it, science, files, social media,
   other — pure relevance order inside each block, in tab order by
   default.  Blocks are titled with the bare category name (综合 / 图片 /
@@ -240,7 +279,7 @@ its content, all sharing one visual language:
   Single-category intent pages (it, ...) keep a plain
   relevance-ordered list instead — extracting a type into a block there
   would break the relevance order (see the `singleCategory` gate in
-  `ResultsPage`).  Infinite scroll appends results into their matching
+  `features/results/layout.ts`).  Infinite scroll appends results into their matching
   block; loading pauses while the general block is collapsed.
 
 Results right rail (desktop): the infobox scrolls inside its own area
@@ -268,14 +307,13 @@ background only — color marks the term, no bold.
   `loading="eager" fetchPriority="high"` (LCP).
 - Route-level code splitting: Preferences/Stats/Info pages load through
   `src/pages/lazyPages.ts` (`React.lazy` + `Suspense` skeleton fallbacks in
-  app.tsx and overlay.tsx); OpenLayers is dynamically imported only when a
-  map result expands. Keep heavy features out of the eager graph.
-- No webfonts (system font stack) and no third-party scripts; icons are
-  SVG components from `lucide-react`, re-exported with theme defaults
-  (aria-hidden, focusable=false) by `src/components/icons.tsx` — usage
-  sites import `*Icon` from there and never import lucide directly.
-  Only BrandMark (the logo) remains hand-drawn in the same file.
-  Never add an icon font.
+  app.tsx and features/overlay/OverlayProvider.tsx); OpenLayers is dynamically
+  imported only when a map result expands. Keep heavy features out of the
+  eager graph.
+- No webfonts (system font stack) and no third-party scripts; icons come
+  from `lucide-react` (tree-shaken, imported directly per usage site with
+  `aria-hidden`); BrandMark (the logo) is hand-drawn in
+  `src/components/Brand.tsx`. Never add an icon font.
 - Drawer/lightbox overlays render conditionally (zero cost when closed).
 
 ## Windows (Git Bash) development notes

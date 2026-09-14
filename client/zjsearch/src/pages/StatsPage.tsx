@@ -2,9 +2,9 @@
 
 import { ArrowDown, ArrowUp, ChevronLeft } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link, Shell } from "../components/Shell.tsx";
-import { useT } from "../lib/i18n.ts";
-import type { EngineStat, StatsPageData } from "../lib/types.ts";
+import { Link, Shell } from "@/components/Shell.tsx";
+import { useT } from "@/lib/i18n.ts";
+import type { EngineStat, StatsPageData } from "@/lib/types.ts";
 
 type SortKey = "name" | "score" | "result_count" | "time" | "reliability";
 

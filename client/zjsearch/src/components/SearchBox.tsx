@@ -2,9 +2,9 @@
 
 import { LoaderCircle, Search, X } from "lucide-react";
 import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
-import { useT } from "../lib/i18n.ts";
-import { useRouter } from "../lib/router.tsx";
-import { useSettings } from "../lib/settings.ts";
+import { useT } from "@/lib/i18n.ts";
+import { useRouter } from "@/lib/router.tsx";
+import { useSettings } from "@/lib/settings.ts";
 
 interface Suggestion {
   text: string;

@@ -2,11 +2,12 @@
 
 /** Light/dark theme handling shared by the quick toggle and the preferences UI. */
 
+import { readCookie } from "@/lib/cookies.ts";
+
 export type ThemeStyle = "auto" | "light" | "dark" | "black";
 
-export function readThemeStyle(): ThemeStyle {
-  const match = document.cookie.match(/(?:^|; *)simple_style=(\w+)/);
-  const value = match?.[1];
+function readThemeStyle(): ThemeStyle {
+  const value = readCookie("simple_style");
   if (value === "light" || value === "dark" || value === "black") {
     return value;
   }

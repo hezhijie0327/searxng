@@ -2,18 +2,18 @@
 
 import { LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
-import { BrandMark } from "./components/Brand.tsx";
-import { Shell } from "./components/Shell.tsx";
-import { I18nContext, useT } from "./lib/i18n.ts";
-import { OverlayProvider } from "./lib/overlay.tsx";
-import { RouterProvider, useRouter } from "./lib/router.tsx";
-import type { ClientSettings } from "./lib/settings.ts";
-import { SettingsContext } from "./lib/settings.ts";
-import type { AnyPageData } from "./lib/types.ts";
-import { isInfoPageData, isPreferencesPageData, isSearchPageData, isStatsPageData } from "./lib/types.ts";
-import { IndexPage } from "./pages/IndexPage.tsx";
-import { InfoPage, PreferencesPage, StatsPage } from "./pages/lazyPages.ts";
-import { ResultsPage } from "./pages/ResultsPage.tsx";
+import { BrandMark } from "@/components/Brand.tsx";
+import { Shell } from "@/components/Shell.tsx";
+import { OverlayProvider } from "@/features/overlay/OverlayProvider.tsx";
+import { I18nContext, useT } from "@/lib/i18n.ts";
+import { RouterProvider, useRouter } from "@/lib/router.tsx";
+import type { ClientSettings } from "@/lib/settings.ts";
+import { SettingsContext } from "@/lib/settings.ts";
+import type { AnyPageData } from "@/lib/types.ts";
+import { isInfoPageData, isPreferencesPageData, isSearchPageData, isStatsPageData } from "@/lib/types.ts";
+import { IndexPage } from "@/pages/IndexPage.tsx";
+import { InfoPage, PreferencesPage, StatsPage } from "@/pages/lazyPages.ts";
+import { ResultsPage } from "@/pages/ResultsPage.tsx";
 
 function Pages() {
   const { data, error } = useRouter();
@@ -78,13 +78,29 @@ function PageFallback() {
   );
 }
 
+/** Which payloads can open as a drawer panel (URL unchanged). Panel chrome
+    and plumbing live in features/overlay; the page selection stays here
+    where the routing lives. Returns null for non-panel-able pages. */
+function renderOverlayPanel(data: AnyPageData) {
+  if (isPreferencesPageData(data)) {
+    return <PreferencesPage data={data} embedded />;
+  }
+  if (isStatsPageData(data)) {
+    return <StatsPage data={data} embedded />;
+  }
+  if (isInfoPageData(data)) {
+    return <InfoPage data={data} embedded />;
+  }
+  return null;
+}
+
 export function App({ initialData, settings }: { initialData: AnyPageData | null; settings: ClientSettings }) {
   const locale = initialData?.globals.locale ?? "en";
   return (
     <SettingsContext.Provider value={settings}>
       <I18nContext.Provider value={locale}>
         <RouterProvider initialData={initialData}>
-          <OverlayProvider>
+          <OverlayProvider panels={{ renderPage: renderOverlayPanel }}>
             <Pages />
           </OverlayProvider>
         </RouterProvider>

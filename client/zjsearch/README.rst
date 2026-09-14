@@ -25,14 +25,26 @@ Architecture
 - **Client-side navigation** — the React router (``src/lib/router.tsx``)
   fetches the same ``/search`` / ``/preferences`` / … URLs, extracts the
   embedded ``page-data`` JSON from the HTML response and swaps the page
-  via ``pushState``. A progress bar + skeletons cover the wait.
-- **i18n** — the UI string catalog is translated server-side with
-  ``_()`` and embedded in ``globals.strings``; the client only looks keys
-  up (``src/lib/i18n.ts``).
+  via ``pushState``. A progress bar + skeletons cover the wait. Search
+  parameter encoding/decoding and the page fetch live in
+  ``src/lib/searchParams.ts`` so the GET URL, the POST form body and the
+  infinite-scroll pager stay in sync.
+- **Overlay panels** — About/Stats/Preferences open as slide-in drawers
+  (``src/features/overlay/``). The panel knows the drawer chrome and the
+  fetch plumbing only; which page renders which payload is injected by
+  ``app.tsx`` (``renderPage``), so the overlay never imports pages.
+- **i18n** — the theme owns its UI string catalog
+  (``src/lib/i18n.ts`` + one file per locale in ``src/lib/i18n/``):
+  English (``en.ts``) is the source and defines the ``StringKey`` union,
+  so ``t()`` calls and every translation are checked at compile time.
+  Adding a language = one new catalog file + one registry entry — see
+  *Code organization & conventions* below.
 - **Preferences** — the settings UI builds a ``FormData`` that mirrors the
-  upstream ``parse_form`` semantics (absent booleans are false, checked
-  ``engine_<name>__<category>`` boxes mean *allowed*, ``plugin_<id>``
-  means *enabled*) and POSTs it to ``/preferences``.
+  upstream ``parse_form`` semantics (absent booleans are false, the
+  ``engine_<name>__<category>`` / ``plugin_<id>`` keys are REVERSED — a
+  posted key marks that engine/plugin as *disabled* — and every omitted
+  key is re-enabled) and POSTs it to ``/preferences``. All form state and
+  the debounced auto-save live in the ``usePreferencesForm`` hook.
 - **Stack** — React 19, TypeScript, Vite (rolldown), Tailwind CSS v4
   (warm Kagi-inspired palette, light/dark/auto via the ``simple_style``
   cookie), Biome for lint/format.
@@ -44,15 +56,61 @@ Layout of this workspace
 
    client/zjsearch/
    ├── dev-settings.yml     # local instance settings (default_theme: zjsearch)
-   ├── vite.config.ts       # build -> searx/static/themes/zjsearch, dev proxy
+   ├── vite.config.ts       # build -> searx/static/themes/zjsearch, dev proxy, @ alias
    ├── tools/assets.ts      # rasterizes brand SVGs into favicons/PWA icons
    └── src/
        ├── main.tsx         # boot: parse page-data + client_settings, mount
-       ├── app.tsx          # page switch (index/results/preferences/stats/…)
+       ├── app.tsx          # providers + page switch + overlay panel registry
        ├── styles/global.css  # Tailwind v4 theme tokens, light/dark, motion
-       ├── lib/             # router, page-data, settings, i18n, format
-       ├── components/      # shell, search box, filters, result cards, …
-       └── pages/           # Index / Results / Preferences / Stats / Info
+       ├── lib/             # app-wide foundations (no UI): types (server
+       │                    # contract), pageData, searchParams, router,
+       │                    # i18n/, categories, cookies, settings, theme,
+       │                    # format, link, motion, engineDescriptions
+       ├── components/      # shared UI used across pages: Shell, Link,
+       │                    # SearchBox, SearchControls, Dropdown, …
+       ├── features/        # one dir per cohesive feature domain:
+       │   ├── overlay/     #   drawer chrome + plumbing (panels injected)
+       │   ├── results/     #   result views: layout detection (layout.ts),
+       │   │                #   cards/, answers/, image/, grids, infobox,
+       │   │                #   blocks, CategoryBlocks/ResultsView, …
+       │   ├── hotkeys.ts   #   results keyboard navigation
+       │   └── calculator.ts
+       └── pages/           # route composition roots (thin):
+           ├── IndexPage / ResultsPage / StatsPage / InfoPage
+           ├── preferences/ #   PreferencesPage + usePreferencesForm +
+           │                #   parts + tabs/ (one component per tab)
+           └── lazyPages.ts #   React.lazy route chunks
+
+Code organization & conventions
+===============================
+
+Layering (dependencies only point downwards):
+
+- ``lib/`` — foundations: data contract, i18n, routing, cookies, format.
+  Never imports from ``components/``, ``features/`` or ``pages/``.
+- ``components/`` — UI shared by more than one page.
+- ``features/<domain>/`` — everything only one feature domain needs,
+  colocated (views + pure logic + hooks). Results presentation is the
+  biggest one; ``layout.ts`` holds the category→presentation detection as
+  a pure, unit-testable function.
+- ``pages/`` — composition roots: state, event handlers, layout wiring.
+  Page-private pieces live next to the page (``preferences/``).
+
+Naming:
+
+- Components: PascalCase file named after the file's primary export, one
+  primary component per file (private helpers may share the file).
+- Hooks: ``useXxx.ts``.
+- Pure logic / catalogs: camelCase ``.ts`` (no JSX → ``.ts``).
+- Locale catalogs: named after their BCP-47 tag (``en.ts``, ``zh-CN.ts``).
+
+Adding a UI language takes two edits: create ``src/lib/i18n/<tag>.ts``
+exporting a ``Record<StringKey, string>`` (a ``Partial`` is fine —
+missing keys fall back to English) and register it in ``CATALOGS`` inside
+``src/lib/i18n.ts`` plus a mapping in ``themeLocaleTag()``.
+
+Imports use the ``@/`` alias (Vite + tsc) instead of deep relative
+paths; module boundaries export only what other modules need.
 
 Build & development
 ===================

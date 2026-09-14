@@ -9,6 +9,7 @@
  */
 
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 import manifest from "./package.json" with { type: "json" };
@@ -27,6 +28,12 @@ const DEV_BACKEND = process.env.ZJSEARCH_BACKEND || "http://127.0.0.1:8888";
 
 export default {
   base: "./",
+
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
 
   publicDir: "static/",
 

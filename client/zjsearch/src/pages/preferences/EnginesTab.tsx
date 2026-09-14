@@ -2,10 +2,10 @@
 
 import { AlertTriangle, Check, Minus } from "lucide-react";
 import type { ReactNode } from "react";
-import { loadEngineDescriptions } from "../../lib/engineDescriptions.ts";
-import { useT } from "../../lib/i18n.ts";
-import type { PreferencesPageData } from "../../lib/types.ts";
-import { EngineTooltip, reliabilityColor, Switch } from "./parts.tsx";
+import { loadEngineDescriptions } from "@/lib/engineDescriptions.ts";
+import { useT } from "@/lib/i18n.ts";
+import type { PreferencesPageData } from "@/lib/types.ts";
+import { EngineTooltip, reliabilityColor, Switch } from "@/pages/preferences/parts.tsx";
 
 export function EnginesTab({
   tab,

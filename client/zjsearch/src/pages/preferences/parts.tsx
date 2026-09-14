@@ -2,12 +2,12 @@
 
 import { AlertTriangle, ExternalLink, Sparkle } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
-import { CategoryIcon } from "../../components/CategoryIcon.tsx";
-import type { DropdownOption } from "../../components/Dropdown.tsx";
-import { Dropdown } from "../../components/Dropdown.tsx";
-import { Link } from "../../components/Shell.tsx";
-import { loadEngineDescriptions } from "../../lib/engineDescriptions.ts";
-import type { EngineEntry } from "../../lib/types.ts";
+import { CategoryIcon } from "@/components/CategoryIcon.tsx";
+import type { DropdownOption } from "@/components/Dropdown.tsx";
+import { Dropdown } from "@/components/Dropdown.tsx";
+import { Link } from "@/components/Shell.tsx";
+import { loadEngineDescriptions } from "@/lib/engineDescriptions.ts";
+import type { EngineEntry } from "@/lib/types.ts";
 
 // ------------------------------------------------------------- row primitives
 

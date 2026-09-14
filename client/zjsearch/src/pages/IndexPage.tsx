@@ -2,15 +2,15 @@
 
 import { Lightbulb, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
-import { HelpModal } from "../components/HelpModal.tsx";
-import { SearchBox } from "../components/SearchBox.tsx";
-import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "../components/SearchControls.tsx";
-import { Shell } from "../components/Shell.tsx";
-import { type HotkeyTarget, useHotkeys } from "../features/hotkeys.ts";
-import { useT } from "../lib/i18n.ts";
-import { useRouter } from "../lib/router.tsx";
-import { useSettings } from "../lib/settings.ts";
-import type { BasicPageData } from "../lib/types.ts";
+import { HelpModal } from "@/components/HelpModal.tsx";
+import { SearchBox } from "@/components/SearchBox.tsx";
+import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "@/components/SearchControls.tsx";
+import { Shell } from "@/components/Shell.tsx";
+import { type HotkeyTarget, useHotkeys } from "@/features/hotkeys.ts";
+import { useT } from "@/lib/i18n.ts";
+import { useRouter } from "@/lib/router.tsx";
+import { useSettings } from "@/lib/settings.ts";
+import type { BasicPageData } from "@/lib/types.ts";
 
 interface IndexData extends BasicPageData {
   selected_categories?: string[];

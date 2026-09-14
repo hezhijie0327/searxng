@@ -2,12 +2,13 @@
 
 import { Clock, Ellipsis, Languages, Shield } from "lucide-react";
 import { type ReactNode, useLayoutEffect, useRef } from "react";
-import { useT } from "../lib/i18n.ts";
-import { useSettings } from "../lib/settings.ts";
-import type { GlobalData } from "../lib/types.ts";
-import { CategoryIcon } from "./CategoryIcon.tsx";
-import type { DropdownOption } from "./Dropdown.tsx";
-import { Dropdown } from "./Dropdown.tsx";
+import { CategoryIcon } from "@/components/CategoryIcon.tsx";
+import type { DropdownOption } from "@/components/Dropdown.tsx";
+import { Dropdown } from "@/components/Dropdown.tsx";
+import { VISIBLE_CATEGORY_TABS } from "@/lib/categories.ts";
+import { useT } from "@/lib/i18n.ts";
+import { useSettings } from "@/lib/settings.ts";
+import type { GlobalData } from "@/lib/types.ts";
 
 interface CategoryTabsProps {
   globals: GlobalData;
@@ -27,9 +28,6 @@ interface CategoryTabsProps {
  * Every category is laid out flat - narrow viewports scroll the row.
  */
 export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, wrap = false }: CategoryTabsProps) {
-  /** Categories that stay visible in the tab row; the rest fold into the
-    "more" menu (including any future category). */
-  const DEFAULT_VISIBLE_CATEGORIES = ["general", "images", "videos", "news", "map", "music"];
   const t = useT();
   const settings = useSettings();
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -64,8 +62,8 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   // high-frequency categories stay visible; everything else (and any future
   // category) folds into the "more" menu.  When a folded category is the
   // active selection the trigger itself shows its name, Google-style.
-  const visibleTabs = tabs.filter((category) => DEFAULT_VISIBLE_CATEGORIES.includes(category));
-  const overflowTabs = tabs.filter((category) => !DEFAULT_VISIBLE_CATEGORIES.includes(category));
+  const visibleTabs = tabs.filter((category) => VISIBLE_CATEGORY_TABS.includes(category));
+  const overflowTabs = tabs.filter((category) => !VISIBLE_CATEGORY_TABS.includes(category));
   const foldedSelected = overflowTabs.filter((category) => selected.includes(category));
   const label = (category: string) => globals.category_labels[category] ?? category;
   // trigger mirrors the folded selection: "更多" -> "科学" -> "科学 +1" (the

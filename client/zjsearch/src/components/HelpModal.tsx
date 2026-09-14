@@ -4,7 +4,7 @@
 
 import { X } from "lucide-react";
 import { useEffect } from "react";
-import { type Translate, useT } from "../lib/i18n.ts";
+import { type Translate, useT } from "@/lib/i18n.ts";
 
 interface HelpColumn {
   title: string;

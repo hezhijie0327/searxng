@@ -6,10 +6,10 @@
 
 import { lazy } from "react";
 
-export const InfoPage = lazy(() => import("./InfoPage.tsx").then((m) => ({ default: m.InfoPage })));
+export const InfoPage = lazy(() => import("@/pages/InfoPage.tsx").then((m) => ({ default: m.InfoPage })));
 
 export const PreferencesPage = lazy(() =>
-  import("./PreferencesPage.tsx").then((m) => ({ default: m.PreferencesPage })),
+  import("@/pages/preferences/PreferencesPage.tsx").then((m) => ({ default: m.PreferencesPage })),
 );
 
-export const StatsPage = lazy(() => import("./StatsPage.tsx").then((m) => ({ default: m.StatsPage })));
+export const StatsPage = lazy(() => import("@/pages/StatsPage.tsx").then((m) => ({ default: m.StatsPage })));

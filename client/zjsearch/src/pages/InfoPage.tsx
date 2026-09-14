@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Link, Shell } from "../components/Shell.tsx";
-import type { InfoPageData } from "../lib/types.ts";
+import { Link, Shell } from "@/components/Shell.tsx";
+import type { InfoPageData } from "@/lib/types.ts";
 
 export function InfoPage({ data, embedded = false }: { data: InfoPageData; embedded?: boolean }) {
   const globals = data.globals;

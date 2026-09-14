@@ -3,11 +3,11 @@
 import { ChartColumn, Heart, SlidersHorizontal } from "lucide-react";
 import type { MouseEvent, ReactNode } from "react";
 import { useEffect } from "react";
-import { useT } from "../lib/i18n.ts";
-import { newTabLinkProps } from "../lib/link.ts";
-import { useOverlay } from "../lib/overlay.tsx";
-import { useRouter } from "../lib/router.tsx";
-import type { GlobalData } from "../lib/types.ts";
+import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
+import { useT } from "@/lib/i18n.ts";
+import { newTabLinkProps } from "@/lib/link.ts";
+import { useRouter } from "@/lib/router.tsx";
+import type { GlobalData } from "@/lib/types.ts";
 
 /** Anchor that performs SPA navigation for internal URLs. */
 export function Link({

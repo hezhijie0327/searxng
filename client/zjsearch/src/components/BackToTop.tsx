@@ -2,8 +2,8 @@
 
 import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useT } from "../lib/i18n.ts";
-import { scrollBehavior } from "../lib/motion.ts";
+import { useT } from "@/lib/i18n.ts";
+import { scrollBehavior } from "@/lib/motion.ts";
 
 export function BackToTop() {
   const t = useT();
