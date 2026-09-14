@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { ChartColumn, Heart, SlidersHorizontal } from "lucide-react";
+import { ChartColumn, Heart, Info, SlidersHorizontal } from "lucide-react";
 import type { MouseEvent, ReactNode } from "react";
 import { useEffect } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
@@ -65,7 +65,7 @@ function ProgressBar({ active }: { active: boolean }) {
 const iconBtn =
   "grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
 
-/** Right-side icon group: Stats / Preferences open as slide-in
+/** Right-side icon group: About / Stats / Preferences open as slide-in
     panels (URL unchanged); theme style lives in the preferences panel. */
 export function HeaderActions({ globals }: { globals: GlobalData }) {
   const t = useT();
@@ -82,6 +82,19 @@ export function HeaderActions({ globals }: { globals: GlobalData }) {
         >
           <Heart className="size-[18px]" />
         </a>
+      ) : null}
+      {globals.about_url ? (
+        <button
+          aria-label={t("about")}
+          className={iconBtn}
+          onClick={() => {
+            openOverlay(globals.about_url, t("about"));
+          }}
+          title={t("about")}
+          type="button"
+        >
+          <Info className="size-[18px]" />
+        </button>
       ) : null}
       {globals.enable_metrics ? (
         <button
@@ -130,11 +143,25 @@ function TopNav({ globals, hideBrand = false }: { globals: GlobalData; hideBrand
   );
 }
 
-function Footer() {
+function Footer({ globals }: { globals: GlobalData }) {
+  const t = useT();
+  const { openOverlay } = useOverlay();
   const year = new Date().getFullYear();
   return (
     <footer className="mx-auto w-full max-w-5xl px-4 pb-8 text-center text-xs text-ink-3 sm:px-6">
       <p className="leading-5">© {year} Zhijie Online</p>
+      <p className="leading-5">
+        {t("powered_by")}{" "}
+        <button
+          className="cursor-pointer transition-colors hover:text-accent hover:underline"
+          onClick={() => {
+            openOverlay(globals.about_url, t("about"), "about");
+          }}
+          type="button"
+        >
+          SearXNG
+        </button>
+      </p>
     </footer>
   );
 }
@@ -185,7 +212,7 @@ export function Shell({
             footer rides inside so it scrolls away with overflowing content */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex flex-1 flex-col justify-start pt-[20vh] sm:pt-[30vh]">{children}</div>
-          <Footer />
+          <Footer globals={globals} />
         </div>
       </div>
     );
@@ -195,7 +222,7 @@ export function Shell({
       <ProgressBar active={loading} />
       {hideTopNav ? null : <TopNav globals={globals} hideBrand={false} />}
       <div className="flex flex-1 flex-col">{children}</div>
-      <Footer />
+      <Footer globals={globals} />
     </div>
   );
 }

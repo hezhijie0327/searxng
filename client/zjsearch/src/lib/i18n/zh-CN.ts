@@ -235,4 +235,7 @@ export const ZH_CN: Record<StringKey, string> = {
   about_instance: "关于本实例",
   categories: "分类",
   plugins: "插件",
+  about: "关于",
+  page_search_syntax: "搜索语法",
+  page_about_searxng: "关于 SearXNG",
 };

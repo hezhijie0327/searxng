@@ -9,7 +9,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
-export function plgAssets(PATH: { brand: string; dist: string }): import("vite").Plugin {
+export function plgAssets(PATH: { brand: string; dist: string; root: string }): import("vite").Plugin {
   return {
     name: "zjsearch-assets",
     apply: "build",
@@ -20,6 +20,8 @@ export function plgAssets(PATH: { brand: string; dist: string }): import("vite")
 
       // serve the license so the footer link resolves
       await fs.copyFile(path.resolve("LICENSE.txt"), path.join(PATH.dist, "LICENSE.txt"));
+      // serve SearXNG's own license next to it (instance info page)
+      await fs.copyFile(path.resolve(PATH.root, "LICENSE"), path.join(PATH.dist, "LICENSE-SearXNG.txt"));
 
       const copies = ["favicon.svg", "empty_favicon.svg"] as const;
       for (const file of copies) {

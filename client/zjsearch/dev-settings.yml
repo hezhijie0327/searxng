@@ -7,6 +7,10 @@ use_default_settings: true
 general:
   instance_name: ZJSearch
   debug: false
+  # instance URLs exercised by the info page (links card + header heart)
+  privacypolicy_url: https://example.com/privacy
+  donation_url: https://example.com/donate
+  contact_url: mailto:contact@example.com
 
 search:
   formats:
@@ -17,6 +21,14 @@ search:
 
 ui:
   default_theme: zjsearch
+
+# public instances link + custom links for the info page links card
+brand:
+  public_instances: https://searx.space
+  custom:
+    links:
+      Uptime: https://uptime.searxng.org/history/darmarit-org
+      Blog: https://example.com/blog
 
 server:
   secret_key: "zjsearch-local-dev-secret-key"

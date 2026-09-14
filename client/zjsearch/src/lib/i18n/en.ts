@@ -237,6 +237,9 @@ export const EN = {
   about_instance: "About this instance",
   categories: "Categories",
   plugins: "Plugins",
+  about: "About",
+  page_search_syntax: "Search syntax",
+  page_about_searxng: "About SearXNG",
 };
 
 export type StringKey = keyof typeof EN;

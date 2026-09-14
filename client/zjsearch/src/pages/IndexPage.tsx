@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { ArrowUpRight, Lightbulb, SlidersHorizontal } from "lucide-react";
+import { Lightbulb, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { HelpModal } from "@/components/HelpModal.tsx";
 import { SearchBox } from "@/components/SearchBox.tsx";
 import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "@/components/SearchControls.tsx";
-import { Link, Shell } from "@/components/Shell.tsx";
+import { Shell } from "@/components/Shell.tsx";
 import { type HotkeyTarget, useHotkeys } from "@/features/hotkeys.ts";
 import { useT } from "@/lib/i18n.ts";
 import { useRouter } from "@/lib/router.tsx";
@@ -84,23 +84,6 @@ export function IndexPage({ data }: { data: IndexData }) {
             variant="hero"
           />
         </div>
-        {/* operator-configured shortcut links (settings.yml custom_links);
-            nothing renders when the instance defines none */}
-        {globals.custom_links.length > 0 ? (
-          <div className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-1.5 animate-fade-up [animation-delay:90ms]">
-            {globals.custom_links.map((link) => (
-              <Link
-                className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-ink-3 hover:text-ink"
-                external
-                href={link.url}
-                key={link.url}
-              >
-                {link.title}
-                <ArrowUpRight className="size-3 shrink-0 text-ink-3" />
-              </Link>
-            ))}
-          </div>
-        ) : null}
         {/* single stable toggle: opens the tabs + filter rows in flow; the
             hero is top-anchored (30vh), so growth extends downward only and
             the brand/search box never move */}

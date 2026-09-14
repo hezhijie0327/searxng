@@ -81,7 +81,7 @@ function PageFallback() {
 /** Which payloads can open as a drawer panel (URL unchanged). Panel chrome
     and plumbing live in features/overlay; the page selection stays here
     where the routing lives. Returns null for non-panel-able pages. */
-function renderOverlayPanel(data: AnyPageData) {
+function renderOverlayPanel(data: AnyPageData, hint?: string) {
   if (isPreferencesPageData(data)) {
     return <PreferencesPage data={data} embedded />;
   }
@@ -89,7 +89,7 @@ function renderOverlayPanel(data: AnyPageData) {
     return <StatsPage data={data} embedded />;
   }
   if (isInfoPageData(data)) {
-    return <InfoPage data={data} embedded />;
+    return <InfoPage data={data} embedded initialPagename={hint} />;
   }
   return null;
 }

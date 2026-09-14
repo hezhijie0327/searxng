@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { AlertTriangle, Check, Cookie, Info, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
+import { AlertTriangle, Check, Cookie, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
-import { AboutTab } from "@/pages/preferences/tabs/AboutTab.tsx";
 import { CookiesTab } from "@/pages/preferences/tabs/CookiesTab.tsx";
 import { EnginesPane } from "@/pages/preferences/tabs/EnginesPane.tsx";
 import { GeneralTab } from "@/pages/preferences/tabs/GeneralTab.tsx";
@@ -14,7 +13,7 @@ import { QueryTab } from "@/pages/preferences/tabs/QueryTab.tsx";
 import { UiTab } from "@/pages/preferences/tabs/UiTab.tsx";
 import { usePreferencesForm } from "@/pages/preferences/usePreferencesForm.ts";
 
-type PrefsTab = "general" | "ui" | "privacy" | "engines" | "query" | "cookies" | "info";
+type PrefsTab = "general" | "ui" | "privacy" | "engines" | "query" | "cookies";
 
 export function PreferencesPage({ data, embedded = false }: { data: PreferencesPageData; embedded?: boolean }) {
   const t = useT();
@@ -34,7 +33,6 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
     { id: "engines", label: t("engines"), icon: <LayoutGrid className="size-3.5" /> },
     { id: "query", label: t("special_queries"), icon: <Terminal className="size-3.5" /> },
     { id: "cookies", label: t("cookies"), icon: <Cookie className="size-3.5" /> },
-    { id: "info", label: t("info"), icon: <Info className="size-3.5" /> },
   ] as const;
 
   return (
@@ -112,7 +110,6 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
           ) : null}
           {tab === "query" ? <QueryTab data={data} form={form} /> : null}
           {tab === "cookies" ? <CookiesTab data={data} form={form} /> : null}
-          {tab === "info" ? <AboutTab globals={globals} /> : null}
         </div>
       </main>
     </Shell>

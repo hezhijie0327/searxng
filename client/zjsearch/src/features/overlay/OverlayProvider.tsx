@@ -18,7 +18,7 @@ import type { AnyPageData } from "@/lib/types.ts";
 /** Panels the app can render inside the drawer. Returning null means "this
     payload is not panel-able" and shows the fallback with an escape link. */
 export interface OverlayPanels {
-  renderPage: (data: AnyPageData) => ReactNode;
+  renderPage: (data: AnyPageData, hint?: string) => ReactNode;
 }
 
 interface OverlayState {
@@ -30,10 +30,12 @@ interface OverlayState {
   text: string | null;
   loading: boolean;
   error: string | null;
+  /** free-form render hint forwarded to renderPage (e.g. the info tab to open) */
+  hint?: string;
 }
 
 interface OverlayContextValue {
-  openOverlay: (url: string, title: string) => void;
+  openOverlay: (url: string, title: string, hint?: string) => void;
   /** open a plain-text document (LICENSE.txt ...) rendered inside the panel */
   openDocument: (title: string, url: string) => void;
   closeOverlay: () => void;
@@ -57,8 +59,8 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
     setState(null);
   }, []);
 
-  const openOverlay = useCallback((url: string, title: string) => {
-    setState({ url, title, mode: "page", data: null, text: null, loading: true, error: null });
+  const openOverlay = useCallback((url: string, title: string, hint?: string) => {
+    setState({ url, title, mode: "page", data: null, text: null, loading: true, error: null, hint });
   }, []);
 
   const openDocument = useCallback((title: string, url: string) => {
@@ -189,7 +191,7 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
                 </article>
               ) : state.data ? (
                 <Suspense fallback={<PanelSkeleton />}>
-                  {panels.renderPage(state.data) ?? <PanelFallback data={state.data} />}
+                  {panels.renderPage(state.data, state.hint) ?? <PanelFallback data={state.data} />}
                 </Suspense>
               ) : null}
             </div>

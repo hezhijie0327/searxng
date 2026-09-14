@@ -20,6 +20,7 @@ const ROOT = "../../"; // root of the git repository
 const PATH = {
   brand: "src/brand/",
   dist: resolve(ROOT, "searx/static/themes/zjsearch/"),
+  root: ROOT,
   src: "src/",
 } as const;
 
