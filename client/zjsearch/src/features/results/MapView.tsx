@@ -200,12 +200,12 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
       {open ? (
         <div className="relative mt-2">
           <div
-            className="zjs-map h-72 w-full overflow-hidden rounded-xl border border-line animate-fade-in"
+            className="zjs-map h-72 w-full overflow-hidden rounded-2xl border border-line animate-fade-in"
             ref={containerRef}
           />
           {longitude && latitude ? (
             <CopyButton
-              className="absolute end-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 font-mono text-[11px] text-white transition-colors hover:bg-black/80"
+              className="absolute end-2 top-2 z-10 bg-surface font-mono"
               icon={<MapPin className="size-3 shrink-0" />}
               label={`${Number(latitude).toFixed(4)}, ${Number(longitude).toFixed(4)}`}
               value={`${latitude}, ${longitude}`}
@@ -214,14 +214,14 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
           {longitude && latitude ? (
             <button
               aria-label={t("recenter")}
-              className="absolute left-[0.75rem] top-[4.4rem] z-10 flex size-7 items-center justify-center rounded-lg bg-black/70 text-white transition-colors hover:bg-black/85"
+              className="absolute left-[12px] top-[79px] z-10 flex size-[30px] items-center justify-center rounded-lg border border-line bg-surface text-ink-2 transition-colors hover:border-accent hover:bg-surface-2 hover:text-accent"
               onClick={() => {
                 restoreRef.current?.();
               }}
               title={t("recenter")}
               type="button"
             >
-              <Crosshair className="size-4" />
+              <Crosshair className="size-[18px]" />
             </button>
           ) : null}
         </div>

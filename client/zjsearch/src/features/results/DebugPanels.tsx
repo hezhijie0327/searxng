@@ -23,7 +23,6 @@ import { useState } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
 import { useCopyFeedback } from "@/lib/clipboard.ts";
 import { useT } from "@/lib/i18n.ts";
-import { shareableSearchUrl } from "@/lib/searchParams.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
 /** per-format icons for the download strip; unknown configured formats fall

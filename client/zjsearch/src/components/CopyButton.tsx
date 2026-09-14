@@ -12,8 +12,9 @@ const ACTION_COPIED = "border-ok/40 text-ok";
 
 /** Copy-to-clipboard button in the unified share-card language: a bordered
     pill that flips to a green check + 「已复制」 while the confirmation is
-    up.  Pass `className` to restyle (e.g. the map's floating dark chip) —
-    the copied feedback still applies. */
+    up.  `className` is merged on top (for positioning / surface tweaks like
+    the map's floating chip) — the pill shape and copied feedback always
+    apply. */
 export function CopyButton({
   value,
   label,
@@ -30,7 +31,7 @@ export function CopyButton({
   const copied = isCopied(value);
   return (
     <button
-      className={className ?? `${ACTION_PILL} ${copied ? ACTION_COPIED : ACTION_IDLE}`}
+      className={`${ACTION_PILL} ${copied ? ACTION_COPIED : ACTION_IDLE} ${className ?? ""}`}
       onClick={() => {
         copy(value);
       }}
