@@ -37,15 +37,16 @@ export function VideoCard({ eager, result, globals }: CardProps) {
             </div>
           ) : null}
           <p
-            className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
+            className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
             dangerouslySetInnerHTML={{ __html: result.content_html || t("no_description") }}
             dir="auto"
           />
         </div>
         {result.thumbnail ? (
           // the player replaces the thumbnail in place - same behaviour as
-          // the video grid, never expanding below the text
-          <div className={`relative shrink-0 transition-all ${previewOpen && hasMedia ? "w-72" : "w-40"}`}>
+          // the video grid, never expanding below the text; on phones the
+          // wide size would eat the whole text column, so it stays w-40
+          <div className={`relative shrink-0 transition-all ${previewOpen && hasMedia ? "sm:w-72" : "w-40"}`}>
             <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-2">
               <ResultLink className="block size-full" globals={globals} result={result}>
                 <Thumb
@@ -67,7 +68,7 @@ export function VideoCard({ eager, result, globals }: CardProps) {
                   />
                   <button
                     aria-label={t("hide_video")}
-                    className="absolute end-1 top-1 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+                    className="absolute end-1 top-1 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-accent-contrast"
                     onClick={() => {
                       setPreviewOpen(false);
                     }}

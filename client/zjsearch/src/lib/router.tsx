@@ -105,6 +105,7 @@ export function RouterProvider({
         setData(pageData);
         setLoading(false);
         document.title = pageTitle(pageData);
+        // instant jump on purpose ("auto" never fights reduced motion)
         window.scrollTo(0, 0);
       } catch (err) {
         if (controller.signal.aborted || seq !== seqRef.current) {

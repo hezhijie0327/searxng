@@ -43,7 +43,7 @@ export function FilesGrid({
 }) {
   const t = useT();
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 @sm:grid-cols-3 @[46rem]:grid-cols-4 @5xl:grid-cols-5">
       {results.map((result, index) => {
         const extension = detectExtension(result.filename || result.title_text);
         const size = result.filesize || result.size || null;
@@ -71,7 +71,7 @@ export function FilesGrid({
               <span className="absolute left-3 top-3 flex items-center gap-1.5 text-ink-3">
                 <TileIcon result={result} />
                 {extension ? (
-                  <span className="text-[10px] font-semibold uppercase tracking-widest">{extension}</span>
+                  <span className="text-[11px] font-medium uppercase tracking-widest">{extension}</span>
                 ) : null}
               </span>
               {size ? <TileBadge>{size}</TileBadge> : null}
@@ -79,7 +79,7 @@ export function FilesGrid({
               {primaryHref ? (
                 <a
                   aria-label={primaryLabel}
-                  className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/70 text-white shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-ink"
+                  className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/70 text-white shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-accent-contrast"
                   href={primaryHref}
                   {...(result.magnetlink ? {} : { download: true })}
                   title={primaryLabel}
@@ -117,8 +117,12 @@ export function FilesGrid({
                 <span />
               )}
               <span className="flex shrink-0 items-center gap-1">
-                <Calendar className="size-3" />
-                {date}
+                {date ? (
+                  <>
+                    <Calendar className="size-3" />
+                    {date}
+                  </>
+                ) : null}
               </span>
             </div>
             <div className="mt-auto pt-1.5">

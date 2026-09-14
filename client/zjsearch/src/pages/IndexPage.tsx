@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Lightbulb, SlidersHorizontal } from "lucide-react";
+import { Lightbulb, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { HelpModal } from "@/components/HelpModal.tsx";
 import { SearchBox } from "@/components/SearchBox.tsx";
 import { CategoryTabs, defaultFilterValues, type FilterValues, SearchFilters } from "@/components/SearchControls.tsx";
 import { Shell } from "@/components/Shell.tsx";
-import { type HotkeyTarget, useHotkeys } from "@/features/hotkeys.ts";
+import { focusSearchInput, type HotkeyTarget, useHotkeys } from "@/features/hotkeys.ts";
 import { useT } from "@/lib/i18n.ts";
 import { useRouter } from "@/lib/router.tsx";
 import { useSettings } from "@/lib/settings.ts";
@@ -53,11 +53,9 @@ export function IndexPage({ data }: { data: IndexData }) {
   const hotkeyTarget: HotkeyTarget = {
     move: () => {},
     open: () => {},
-    yank: () => null,
+    yank: () => {},
     page: () => {},
-    focusSearch: () => {
-      (document.querySelector('input[name="q"]') as HTMLInputElement | null)?.focus();
-    },
+    focusSearch: focusSearchInput,
   };
   useHotkeys(settings.hotkeys, hotkeyTarget, () => {
     setHelpOpen((open) => !open);
@@ -68,7 +66,7 @@ export function IndexPage({ data }: { data: IndexData }) {
       <main className="mx-auto flex w-full max-w-2xl flex-col items-center px-4 pb-24">
         <h1 className="animate-fade-up text-6xl font-extrabold tracking-tight text-ink sm:text-7xl">
           {globals.instance_name}
-          <span className="text-accent-strong">.</span>
+          <span className="text-accent">.</span>
         </h1>
         {/* raised stacking level: fade-up leaves a residual transform (a
             stacking context) on every animated sibling, which would let the
@@ -143,14 +141,14 @@ export function IndexPage({ data }: { data: IndexData }) {
             </button>
             <button
               aria-label={t("close")}
-              className="shrink-0 rounded-lg px-2 py-1 text-xs text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+              className="grid size-7 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
               onClick={() => {
                 window.localStorage.setItem("zjs-hint-hidden", "1");
                 setHintHidden(true);
               }}
               type="button"
             >
-              {t("close")}
+              <X aria-hidden="true" className="size-3.5" />
             </button>
           </div>
         </div>

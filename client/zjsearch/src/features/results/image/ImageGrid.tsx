@@ -91,7 +91,9 @@ export function ImageGrid({ results }: { results: ResultItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="columns-2 gap-2 sm:columns-3 lg:columns-4 xl:columns-5 [&>*]:mb-2">
+    // masonry density keys off the column width (container queries), like
+    // every other grid: 3 base steps + a 5th/6th column on wide containers
+    <div className="columns-2 gap-2 @[27rem]:columns-3 @[40rem]:columns-4 @[48rem]:columns-5 @5xl:columns-6 [&>*]:mb-2">
       {results.map((result, index) => {
         const thumbSrc = result.thumbnail_src || result.img_src || "";
         return (

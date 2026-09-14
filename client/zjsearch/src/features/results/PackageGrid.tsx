@@ -36,12 +36,12 @@ function PackageCell({
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-ink-3">
           <PackageIcon className="size-10" />
           {result.version ? (
-            <span className="font-mono text-[11px] font-semibold tracking-wide">{result.version}</span>
+            <span className="font-mono text-[11px] font-medium tracking-wide">{result.version}</span>
           ) : null}
         </span>
         {result.favicon ? <TileFavicon src={result.favicon} /> : null}
       </ResultLink>
-      <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
+      <h3 className="mt-2.5 line-clamp-2 min-h-[2.75rem] text-base font-medium leading-snug">
         <ResultLink
           className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
           globals={globals}
@@ -51,10 +51,14 @@ function PackageCell({
         </ResultLink>
       </h3>
       <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-ink-3">
-        <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
-          <User className="size-3 shrink-0" />
-          {result.maintainer || result.author}
-        </span>
+        {result.maintainer || result.author ? (
+          <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
+            <User className="size-3 shrink-0" />
+            {result.maintainer || result.author}
+          </span>
+        ) : (
+          <span />
+        )}
         <span className="flex shrink-0 items-center gap-1">
           {result.published_date ? (
             <>
@@ -120,5 +124,9 @@ export function PackageGrid({
       selected={selected}
     />
   ));
-  return <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">{cells}</div>;
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 @sm:grid-cols-3 @[46rem]:grid-cols-4 @5xl:grid-cols-5">
+      {cells}
+    </div>
+  );
 }

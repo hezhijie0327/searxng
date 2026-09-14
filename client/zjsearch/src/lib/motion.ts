@@ -6,6 +6,10 @@
  * reach JS-initiated smooth scrolling — every `scrollTo`/`scrollIntoView`/
  * `scrollBy` call must pass this as its `behavior`.
  */
+export function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function scrollBehavior(): ScrollBehavior {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  return reducedMotion() ? "auto" : "smooth";
 }

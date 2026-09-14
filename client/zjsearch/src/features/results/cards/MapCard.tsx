@@ -11,6 +11,7 @@ import {
 } from "@/features/results/cardParts.tsx";
 import { MapResult } from "@/features/results/MapView.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { META_ROW } from "@/lib/styles.ts";
 
 export function MapCard({ result, globals, autoOpenMap }: CardProps) {
   const t = useT();
@@ -31,7 +32,7 @@ export function MapCard({ result, globals, autoOpenMap }: CardProps) {
       </div>
       {result.content_html ? (
         <p
-          className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
+          className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
           dangerouslySetInnerHTML={{ __html: result.content_html }}
           dir="auto"
         />
@@ -43,7 +44,7 @@ export function MapCard({ result, globals, autoOpenMap }: CardProps) {
         </p>
       ) : null}
       {result.data && result.data.length > 0 ? (
-        <dl className="mt-2 flex items-center gap-x-4 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 text-xs text-ink-3">
+        <dl className={`${META_ROW} mt-1 gap-x-4 text-xs text-ink-3`}>
           {result.data.map((item) => (
             <div className="flex gap-1" key={item.label}>
               <dt>{item.label}:</dt>

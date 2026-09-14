@@ -64,5 +64,9 @@ export function AppsGrid({
       </article>
     );
   });
-  return <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">{cells}</div>;
+  return (
+    <div className="grid grid-cols-1 gap-x-4 gap-y-6 @sm:grid-cols-2 @[46rem]:grid-cols-3 @5xl:grid-cols-4">
+      {cells}
+    </div>
+  );
 }

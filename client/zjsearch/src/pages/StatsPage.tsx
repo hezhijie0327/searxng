@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { ChevronLeft } from "lucide-react";
+import { ChartColumn, ChevronLeft } from "lucide-react";
 import { useMemo } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
 import { SortHeader } from "@/components/SortHeader.tsx";
@@ -65,14 +65,16 @@ function ErrorTable({ errors, title }: { errors: StatsPageData["errors"]; title:
       <h2 className="mb-2 text-lg font-semibold text-ink">{title}</h2>
       <div className="space-y-3">
         {errors.map((error, index) => (
-          <div className="overflow-hidden rounded-xl border border-line" key={index}>
+          <div className="overflow-x-auto rounded-xl border border-line" key={index}>
             <table className="w-full text-left text-xs">
               <tbody>
                 <tr className="border-b border-line">
                   <th className="w-28 bg-surface-2 px-3 py-1.5 font-medium text-ink-3" scope="row">
                     {error.exception_classname ? t("exception") : t("message")}
                   </th>
-                  <td className="px-3 py-1.5 font-medium text-ink">{error.exception_classname || error.log_message}</td>
+                  <td className="break-all px-3 py-1.5 font-medium text-ink">
+                    {error.exception_classname || error.log_message}
+                  </td>
                   <th className="w-28 bg-surface-2 px-3 py-1.5 font-medium text-ink-3" scope="row">
                     {t("percentage")}
                   </th>
@@ -139,7 +141,8 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
     <Shell embedded={embedded} globals={globals}>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-16 sm:px-6">
         {embedded ? null : (
-          <h1 className="py-5 text-2xl font-semibold tracking-tight text-ink">
+          <h1 className="flex items-center gap-2.5 py-5 text-2xl font-semibold tracking-tight text-ink">
+            <ChartColumn aria-hidden="true" className="size-5 shrink-0 text-accent" />
             {data.selected_engine_name ? (
               <>
                 <Link className="hover:text-accent" href="/stats">

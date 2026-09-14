@@ -45,7 +45,7 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
         </p>
         <div className="mt-1 flex items-center justify-between gap-3">
           <ClickToCopy className="mt-1" value={data.result}>
-            <p className="text-2xl font-semibold text-ink" dir="ltr">
+            <p className="break-all text-2xl font-semibold text-ink" dir="ltr">
               {data.result}
             </p>
           </ClickToCopy>
@@ -80,10 +80,7 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
         <p className="text-xs text-ink-3">{data.label}</p>
         <div className="mt-1 flex items-center justify-between gap-3">
           <ClickToCopy className="mt-1" value={data.value}>
-            <p
-              className={`min-w-0 text-ink ${data.value.includes(" ") ? "break-all font-mono text-sm" : "font-mono text-lg"}`}
-              dir="ltr"
-            >
+            <p className="min-w-0 break-all font-mono text-sm text-ink" dir="ltr">
               {data.value}
             </p>
           </ClickToCopy>

@@ -13,6 +13,7 @@ import type VectorSource from "ol/source/Vector.js";
 import { useEffect, useRef, useState } from "react";
 import { CopyButton } from "@/components/CopyButton.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { reducedMotion } from "@/lib/motion.ts";
 
 interface MapResultProps {
   longitude?: string;
@@ -73,6 +74,8 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
           new VectorLayer({
             source: vectorSource,
             style: new Style({
+              // route/area colors are map graphics locked to the tile palette
+              // (readable on every OSM style), not theme surfaces
               stroke: new StrokeStyle({ color: "#5457d6", width: 2 }),
               fill: new FillStyle({ color: "rgba(84, 87, 214, 0.15)" }),
             }),
@@ -117,6 +120,8 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
           new Style({
             image: new CircleStyle({
               radius: 7,
+              // accent-strong (marker) over ink (rim): matches the theme's
+              // accent dot language; rims stay dark on any tile
               fill: new Fill({ color: "#fec843" }),
               stroke: new Stroke({ color: "#201d17", width: 2 }),
             }),
@@ -140,7 +145,7 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
       // user prefers reduced motion)
       restoreRef.current = () => {
         const view = map.getView();
-        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 400;
+        const duration = reducedMotion() ? 0 : 400;
         if (pointLonLat) {
           view.animate({ center: pointLonLat, zoom: 16, duration });
         } else if (Array.isArray(boundingbox) && boundingbox.length === 4) {
@@ -188,7 +193,7 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
     <div className="mt-2">
       <button
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:text-ink"
         onClick={() => {
           setOpen((prev) => !prev);
         }}
@@ -214,14 +219,14 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
           {longitude && latitude ? (
             <button
               aria-label={t("recenter")}
-              className="absolute left-[12px] top-[79px] z-10 flex size-[30px] items-center justify-center rounded-lg border border-line bg-surface text-ink-2 transition-colors hover:border-accent hover:bg-surface-2 hover:text-accent"
+              className="absolute left-[12px] top-[79px] z-10 flex size-8 items-center justify-center rounded-lg border border-line bg-surface text-ink-2 transition-colors hover:border-accent hover:bg-surface-2 hover:text-accent"
               onClick={() => {
                 restoreRef.current?.();
               }}
               title={t("recenter")}
               type="button"
             >
-              <Crosshair className="size-[18px]" />
+              <Crosshair aria-hidden="true" className="size-4.5" />
             </button>
           ) : null}
         </div>

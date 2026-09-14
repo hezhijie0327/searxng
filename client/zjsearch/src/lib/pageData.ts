@@ -10,8 +10,6 @@ import type { ClientSettings } from "@/lib/settings.ts";
 import { DEFAULT_CLIENT_SETTINGS } from "@/lib/settings.ts";
 import type { AnyPageData } from "@/lib/types.ts";
 
-export type { AnyPageData };
-
 export function parseEmbeddedPageData(): AnyPageData | null {
   const el = document.getElementById("page-data");
   const text = el?.textContent?.trim();

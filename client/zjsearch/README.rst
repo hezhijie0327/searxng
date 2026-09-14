@@ -49,6 +49,75 @@ Architecture
   (warm Kagi-inspired palette, light/dark/auto via the ``simple_style``
   cookie), Biome for lint/format.
 
+Design system
+=============
+
+The visual language is tokenized and audited; keep new UI on these rails
+instead of inventing sizes/colours:
+
+- **Type scale** — one size per role: 12px ``text-xs`` meta/chips/mono
+  chrome, 13px ``text-[13px]`` interactive controls (tabs, dropdowns,
+  pills, suggestions) and dialog copy, 14px ``text-sm`` body text and
+  settings rows, 16px ``text-base`` result titles + search inputs,
+  20px infobox title, 24px page headings. Weights: ``font-extrabold``
+  brand only, ``font-semibold`` headings, ``font-medium``
+  emphasis/selected, body regular. Card margin rhythm: ``mt-1`` title &
+  meta, ``mt-1.5`` snippet & tags, ``mt-2`` engines row. Answer values
+  are tiered (4xl calculator/stats heroes, xl time/translation heroes,
+  ``text-sm`` ``font-mono`` copyable values) — pick the tier, don't
+  invent a size.
+- **Colour tokens** — only the ``--*`` custom properties from
+  ``styles/global.css`` (``bg``/``surface``/``surface-2``/``line``/
+  ``ink``/``ink-2``/``ink-3``/``accent``*``/``danger``/``warning``/
+  ``ok``). Every ink token keeps ≥4.5:1 against every surface in all
+  three palettes (light / ``.dark`` / ``.black`` OLED). Rules that keep
+  the palettes in sync: ``accent`` is the light-mode *text* accent
+  (``#8c6800``, AA on white/surface-2/accent-soft); ``accent-strong`` is
+  a fill/border accent only — text on an ``accent-strong`` fill is always
+  ``accent-contrast`` (including hover states over dark media chips);
+  fixed-dark media chrome (lightbox, tile badges, scrims, map graphics)
+  is intentionally theme-independent and says so in a comment at its
+  definition site.
+- **Grid density via container queries** — the results column is an
+  ``@container``; every grid keys its column count off the *column*
+  width (``@[24rem]``/``@[40rem]``/``@[46rem]``/``@[54rem]``/``@5xl``
+  steps), so widescreen mode (90rem cap) grows a column, centered mode
+  (72rem) drops one, and the sidebar/empty-rail changes re-flow grids
+  automatically. New grids must use container variants, not ``sm:``/
+  ``xl:`` viewport breakpoints.
+- **Icons** — lucide-react, imported per usage site with
+  ``aria-hidden``; 18px (``size-4.5``) in 36px round buttons, 14px
+  (``size-3.5``) leading icons in tabs/pills, 12px (``size-3``) inside
+  meta rows and chips, 20px (``size-5``) in large round buttons. Same
+  concept = same icon everywhere (Search submits, X dismisses, Check
+  confirms copy, ExternalLink leaves the site, ChevronDown discloses).
+- **Motion** — entrance/exit animations use the ``animate-*`` theme
+  tokens only; every JS-initiated scroll passes ``scrollBehavior()``
+  (``lib/motion.ts``, also exports ``reducedMotion()``); the stylesheet
+  guards ``prefers-reduced-motion`` for CSS.
+- **Accessibility** — global ``:focus-visible`` outline (never remove it
+  without an equivalent ring); icon-only buttons always carry an
+  ``aria-label``; modal dialogs (drawer, lightbox, help modal) mount
+  through ``useDialogFocus`` (``lib/dialogFocus.ts``) with a
+  ``data-dialog-close`` control — focus moves in on open, is trapped
+  inside via Tab and restored on close; listbox options carry
+  ``role="option"`` on the interactive element itself, never a parent
+  ``li``; touch targets keep WCAG 2.5.8's 24px minimum (28px+ in
+  practice).
+- **Shared class fragments** — recurring Tailwind strings live in
+  ``lib/styles.ts`` (``SCROLLBAR_NONE``, ``SWIPE_ROW``, ``META_ROW``,
+  ``CHIP``, ``ICON_BTN``); import them instead of re-typing the
+  mega-strings. All HTTP calls go through ``lib/http.ts``
+  (``fetchText``/``fetchJson``, uniform ``HTTP <status>`` errors).
+- **Floating feedback** — one-shot confirmations that own no render loop
+  (hotkey yank, the preferences auto-save) call ``flashToast()`` from
+  ``lib/toast.ts``: a stacked, auto-dismissing pill fixed at the bottom of
+  the viewport with configurable ``tone`` (``ok`` for every copy/save
+  confirmation, ``accent`` neutral, ``danger`` failure) — never render such
+  feedback in flow, it would shift the page. Every copy action confirms
+  through the green toast; no component keeps its own inline "copied"
+  state.
+
 Layout of this workspace
 ========================
 
@@ -65,7 +134,9 @@ Layout of this workspace
        ├── lib/             # app-wide foundations (no UI): types (server
        │                    # contract), pageData, searchParams, router,
        │                    # i18n/, categories, cookies, settings, theme,
-       │                    # format, link, motion, engineDescriptions
+       │                    # format, link, motion, http, dialogFocus,
+       │                    # clipboard, engineDescriptions, styles (shared
+       │                    # class fragments)
        ├── components/      # shared UI used across pages: Shell, Link,
        │                    # SearchBox, SearchControls, Dropdown, …
        ├── features/        # one dir per cohesive feature domain:

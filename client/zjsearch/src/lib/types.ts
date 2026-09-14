@@ -8,7 +8,7 @@
 
 // ------------------------------------------------------------------ globals
 
-export interface LocaleInfo {
+interface LocaleInfo {
   tag: string;
   name: string;
   country: string;
@@ -16,7 +16,7 @@ export interface LocaleInfo {
   flag: string;
 }
 
-export interface CustomLink {
+interface CustomLink {
   title: string;
   url: string;
 }
@@ -173,12 +173,12 @@ export interface ResultItem {
   source_country?: string;
 }
 
-export interface SuggestionItem {
+interface SuggestionItem {
   q: string;
   title: string;
 }
 
-export interface TranslationItem {
+interface TranslationItem {
   text: string;
   transliteration: string;
   examples: string[];
@@ -299,20 +299,20 @@ export interface EngineEntry {
   supports_time_range: boolean;
 }
 
-export interface EngineGroup {
+interface EngineGroup {
   group: string;
   group_bang: string;
   engines: EngineEntry[];
 }
 
-export interface EngineTab {
+interface EngineTab {
   category: string;
   label: string;
   is_default: boolean;
   groups: EngineGroup[];
 }
 
-export interface PluginInfo {
+interface PluginInfo {
   id: string;
   name: string;
   description: string;
@@ -378,7 +378,7 @@ export interface EngineStat {
   reliability: number | null;
 }
 
-export interface EngineError {
+interface EngineError {
   secondary: boolean;
   exception_classname: string;
   log_message: string;

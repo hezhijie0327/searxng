@@ -6,6 +6,7 @@ import { CategoryIcon } from "@/components/CategoryIcon.tsx";
 import type { DropdownOption } from "@/components/Dropdown.tsx";
 import { Dropdown } from "@/components/Dropdown.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { scrollBehavior } from "@/lib/motion.ts";
 import { useSettings } from "@/lib/settings.ts";
 import { SCROLLBAR_NONE } from "@/lib/styles.ts";
 import type { GlobalData } from "@/lib/types.ts";
@@ -42,7 +43,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
     }
     scrollerRef.current
       ?.querySelector('button[aria-pressed="true"]')
-      ?.scrollIntoView({ block: "nearest", inline: "center" });
+      ?.scrollIntoView({ block: "nearest", inline: "center", behavior: scrollBehavior() });
   }, [wrap, selected]);
 
   const toggle = (category: string) => {

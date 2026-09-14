@@ -45,7 +45,7 @@ export function DefaultCard({ eager, result, globals, mediaOpen }: CardProps) {
             </div>
           ) : null}
           <p
-            className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
+            className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
             dangerouslySetInnerHTML={{
               __html: result.content_html || t("no_description"),
             }}
@@ -59,7 +59,7 @@ export function DefaultCard({ eager, result, globals, mediaOpen }: CardProps) {
           <ResultLink className="shrink-0 self-start" globals={globals} result={result}>
             <Thumb
               alt={result.title_text}
-              className="h-24 w-40"
+              className="h-24 w-28 sm:w-40"
               eager={eager}
               lengthDisplay={formatLength(result.length_display, result.length_seconds)}
               src={result.thumbnail}

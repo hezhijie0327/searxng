@@ -15,12 +15,17 @@ export interface HotkeyTarget {
   move: (delta: number) => void;
   /** open the selected result (same tab or new tab) */
   open: (newTab: boolean) => void;
-  /** copy the url of the selected result */
-  yank: () => string | null;
+  /** copy the url of the selected result (write + feedback owned by the page) */
+  yank: () => void;
   /** paginate */
   page: (delta: number) => void;
   /** focus the search input */
   focusSearch: () => void;
+}
+
+/** Focus the page's search box (hotkey `i` / `/` on every page that has one). */
+export function focusSearchInput(): void {
+  (document.querySelector('input[name="q"]') as HTMLInputElement | null)?.focus();
 }
 
 const TEXT_ENTRY = new Set(["INPUT", "TEXTAREA", "SELECT"]);
@@ -111,10 +116,7 @@ export function useHotkeys(layout: "default" | "vim", target: HotkeyTarget, onHe
       }
       if (key === "y") {
         event.preventDefault();
-        const url = t.yank();
-        if (url) {
-          void navigator.clipboard.writeText(url).catch(() => {});
-        }
+        t.yank();
         return;
       }
       if (key === "i" || key === "/" || key === "／") {

@@ -51,7 +51,7 @@ export function Infobox({
         {infobox.img_src ? (
           <img
             alt={infobox.title}
-            className="aspect-square w-32 shrink-0 rounded-lg border border-line bg-surface-2 object-contain p-1 sm:w-36"
+            className="aspect-square w-32 shrink-0 rounded-lg border border-line bg-surface-2 object-contain p-1 sm:w-36 2xl:w-40"
             decoding="async"
             loading="lazy"
             src={infobox.img_src}
@@ -102,7 +102,10 @@ export function Infobox({
                   </div>
                 ) : (
                   <div className="flex gap-2" key={index}>
-                    <dt className="shrink-0 text-ink-3">{attribute.label}:</dt>
+                    {/* dt capped: a long label must not squeeze the value out */}
+                    <dt className="max-w-[40%] shrink-0 truncate text-ink-3" title={attribute.label}>
+                      {attribute.label}:
+                    </dt>
                     <dd className="min-w-0 text-ink-2">
                       <span dir="auto">{attribute.value}</span>
                     </dd>
@@ -114,7 +117,7 @@ export function Infobox({
 
           {infobox.content_html ? (
             <div
-              className="mt-3 text-[13px] leading-relaxed text-ink-2 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-2"
+              className="mt-3 text-sm leading-relaxed text-ink-2 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-2"
               dangerouslySetInnerHTML={{ __html: infobox.content_html }}
               dir="auto"
             />
@@ -123,13 +126,13 @@ export function Infobox({
           {infobox.urls && infobox.urls.length > 0 ? (
             <ul className="mt-3 space-y-1 text-xs">
               {infobox.urls.map((url) => (
-                <li className="truncate" key={url.url}>
+                <li className="min-w-0" key={url.url}>
                   <a
-                    className="inline-flex items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
+                    className="flex min-w-0 max-w-full items-center gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
                     {...newTabLinkProps(globals.results_on_new_tab)}
                     href={url.url}
                   >
-                    <span className="truncate">{url.title}</span>
+                    <span className="min-w-0 truncate">{url.title}</span>
                     <ExternalLink className="size-3 shrink-0" />
                   </a>
                 </li>
@@ -141,13 +144,13 @@ export function Infobox({
             <div className="mt-4 space-y-2">
               {infobox.related_topics.map((topic) => (
                 <div key={topic.name}>
-                  <h4 className="text-xs font-medium text-ink" dir="auto">
+                  <h4 className="text-xs font-semibold text-ink" dir="auto">
                     {topic.name}
                   </h4>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     {topic.suggestions.map((suggestion) => (
                       <button
-                        className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
+                        className="rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:bg-accent-soft hover:text-accent"
                         key={suggestion}
                         onClick={() => {
                           onSearch(suggestion);
@@ -175,7 +178,7 @@ export function Infobox({
         <button
           aria-controls={contentId}
           aria-expanded={expanded}
-          className="mt-2 flex w-full items-center justify-center gap-1 border-t border-line pt-2.5 text-xs text-ink-3 transition-colors hover:text-ink"
+          className="mt-2 flex w-full items-center justify-center gap-1 border-t border-line pt-2.5 text-[13px] text-ink-3 transition-colors hover:text-ink"
           onClick={() => {
             setExpanded((value) => !value);
           }}

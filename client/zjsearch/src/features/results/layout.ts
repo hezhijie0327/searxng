@@ -10,7 +10,7 @@
 import { NO_CATEGORY } from "@/lib/categories.ts";
 import type { ResultItem, SearchPageData } from "@/lib/types.ts";
 
-export type ResultsLayoutKind =
+type ResultsLayoutKind =
   | "images"
   | "videos"
   | "music"

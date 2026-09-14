@@ -6,3 +6,15 @@
 export function newTabLinkProps(onNewTab: boolean | undefined): { target?: string; rel: string } {
   return onNewTab ? { target: "_blank", rel: "noopener noreferrer" } : { rel: "noreferrer" };
 }
+
+/** True when the click carries a modifier (new tab / window) or is not a
+    plain left click — SPA link handlers must let the browser take over. */
+export function isModifiedClick(event: {
+  altKey: boolean;
+  button: number;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  shiftKey: boolean;
+}): boolean {
+  return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+}

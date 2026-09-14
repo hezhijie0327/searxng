@@ -34,7 +34,8 @@ export function Pagination({
     <nav aria-label={t("pagination")} className="mt-6 flex flex-wrap items-center justify-center gap-1.5 pb-4">
       {hasPrev ? (
         <button
-          className="flex h-9 items-center gap-1 rounded-full border border-line bg-surface px-3 text-sm text-ink-2 transition-colors hover:border-accent hover:text-accent"
+          aria-label={t("previous_page")}
+          className="flex h-9 items-center gap-1 rounded-full border border-line bg-surface px-3 text-[13px] text-ink-2 transition-colors hover:border-accent hover:text-accent"
           onClick={() => {
             onPage(pageno - 1);
           }}
@@ -47,7 +48,7 @@ export function Pagination({
       {pages.map((page) => (
         <button
           aria-current={page === pageno ? "page" : undefined}
-          className={`grid size-9 place-items-center rounded-full text-sm transition-colors ${
+          className={`grid size-9 place-items-center rounded-full text-[13px] transition-colors ${
             page === pageno
               ? "bg-accent-strong font-medium text-accent-contrast"
               : "border border-line bg-surface text-ink-2 hover:border-accent hover:text-accent"
@@ -65,7 +66,8 @@ export function Pagination({
       ))}
       {hasNext ? (
         <button
-          className="flex h-9 items-center gap-1 rounded-full border border-line bg-surface px-3 text-sm text-ink-2 transition-colors hover:border-accent hover:text-accent"
+          aria-label={t("next_page")}
+          className="flex h-9 items-center gap-1 rounded-full border border-line bg-surface px-3 text-[13px] text-ink-2 transition-colors hover:border-accent hover:text-accent"
           onClick={() => {
             onPage(pageno + 1);
           }}

@@ -16,7 +16,7 @@
  * translations honest at compile time.
  */
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { EN, type StringKey } from "@/lib/i18n/en.ts";
 import { ZH_CN } from "@/lib/i18n/zh-CN.ts";
 
@@ -46,6 +46,10 @@ export const I18nContext = createContext<string>("en");
 
 export function useT(): Translate {
   const locale = useContext(I18nContext);
-  const catalog = CATALOGS[themeLocaleTag(locale)] ?? EN;
-  return (key: StringKey) => catalog[key] ?? EN[key] ?? key;
+  // memoized so `t` keeps a stable identity across renders — callers put it
+  // in effect deps, and an unstable identity would re-run them needlessly
+  return useMemo(() => {
+    const catalog = CATALOGS[themeLocaleTag(locale)] ?? EN;
+    return (key: StringKey) => catalog[key] ?? EN[key] ?? key;
+  }, [locale]);
 }

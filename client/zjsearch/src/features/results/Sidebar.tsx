@@ -6,6 +6,7 @@
  * never reaches the address bar there.
  */
 
+import { ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 import { ClickToCopy } from "@/components/CopyButton.tsx";
 import { Infobox } from "@/features/results/Infobox.tsx";
@@ -16,9 +17,12 @@ import type { SearchPageData } from "@/lib/types.ts";
 function Box({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-surface">
-      <details>
-        <summary className="cursor-pointer select-none px-4 py-2.5 text-xs font-semibold tracking-wide text-ink-3 uppercase transition-colors hover:text-ink">
+      {/* same ChevronDown disclosure language as every other collapsible in
+          the app — the browser-default triangle is suppressed */}
+      <details className="group">
+        <summary className="flex cursor-pointer select-none list-none items-center justify-between gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-3 transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
           {title}
+          <ChevronDown aria-hidden="true" className="size-3.5 shrink-0 transition-transform group-open:rotate-180" />
         </summary>
         <div className="px-4 pb-3">{children}</div>
       </details>

@@ -7,10 +7,11 @@ import { SearchBox } from "@/components/SearchBox.tsx";
 import { CategoryTabs, type FilterValues, SearchFilters } from "@/components/SearchControls.tsx";
 import { HeaderActions, Link, Shell } from "@/components/Shell.tsx";
 import { tryEvaluateExpression } from "@/features/calculator.ts";
-import { useHotkeys } from "@/features/hotkeys.ts";
+import { focusSearchInput, useHotkeys } from "@/features/hotkeys.ts";
 import { Answers } from "@/features/results/answers/Answers.tsx";
 import { CalculatorAnswer } from "@/features/results/answers/Calculator.tsx";
-import { CacheUrlProvider, ResultSkeleton } from "@/features/results/cardParts.tsx";
+import { CacheUrlProvider } from "@/features/results/cacheUrl.tsx";
+import { ResultSkeleton } from "@/features/results/cardParts.tsx";
 import { DebugPanels } from "@/features/results/DebugPanels.tsx";
 import { Corrections, NoResults } from "@/features/results/EmptyStates.tsx";
 import { InfiniteScrollSentinel } from "@/features/results/InfiniteScroll.tsx";
@@ -20,12 +21,14 @@ import { Pagination } from "@/features/results/Pagination.tsx";
 import { ResultsView } from "@/features/results/ResultsView.tsx";
 import { Sidebar } from "@/features/results/Sidebar.tsx";
 import { SuggestionsBox } from "@/features/results/SuggestionsBox.tsx";
+import { writeClipboard } from "@/lib/clipboard.ts";
 import { readCookie } from "@/lib/cookies.ts";
 import { useT } from "@/lib/i18n.ts";
 import { scrollBehavior } from "@/lib/motion.ts";
 import { useRouter } from "@/lib/router.tsx";
 import { fetchSearchPage, parseSearchUrl, shareableSearchUrl } from "@/lib/searchParams.ts";
 import { useHasPlugin, useSettings } from "@/lib/settings.ts";
+import { flashToast } from "@/lib/toast.ts";
 import type { ResultItem, SearchPageData } from "@/lib/types.ts";
 
 export function ResultsPage({ data }: { data: SearchPageData }) {
@@ -52,22 +55,20 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     }
   }, [href]);
 
-  const [filterValues, setFilterValues] = useState<FilterValues>(() => ({
+  // one literal for the URL→filter mapping so init and re-sync cannot drift
+  const filterValuesFrom = (): FilterValues => ({
     language: urlParams?.language ?? data.current_language ?? globals.language,
     time_range: urlParams?.time_range ?? data.time_range ?? "",
     safesearch: urlParams?.safesearch ?? globals.safesearch,
     search_language: data.search_language,
-  }));
+  });
+
+  const [filterValues, setFilterValues] = useState<FilterValues>(filterValuesFrom);
 
   // re-sync filters after any navigation (back/forward, payload change)
   // biome-ignore lint/correctness/useExhaustiveDependencies: URL is the source of truth
   useEffect(() => {
-    setFilterValues({
-      language: urlParams?.language ?? data.current_language ?? globals.language,
-      time_range: urlParams?.time_range ?? data.time_range ?? "",
-      safesearch: urlParams?.safesearch ?? globals.safesearch,
-      search_language: data.search_language,
-    });
+    setFilterValues(filterValuesFrom());
   }, [href]);
 
   const settings = useSettings();
@@ -199,16 +200,23 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
         }
       }
     },
-    yank: () => selectedCard()?.querySelector("a[href]")?.getAttribute("href") ?? null,
+    yank: () => {
+      const url = selectedCard()?.querySelector("a[href]")?.getAttribute("href");
+      if (url) {
+        void writeClipboard(url).then((ok) => {
+          if (ok) {
+            flashToast(t("copied"), { tone: "ok" });
+          }
+        });
+      }
+    },
     page: (delta: number) => {
       const next = data.pageno + delta;
       if (next >= 1 && (delta < 0 || data.paging)) {
         onPageRef.current(next);
       }
     },
-    focusSearch: () => {
-      (document.querySelector('input[name="q"]') as HTMLInputElement | null)?.focus();
-    },
+    focusSearch: focusSearchInput,
   };
   useHotkeys(settings.hotkeys, hotkeyTarget, () => {
     setHelpOpen((open) => !open);
@@ -242,9 +250,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             title={globals.instance_name}
           >
             {globals.instance_name}
-            <span className="text-accent-strong">.</span>
+            <span className="text-accent">.</span>
           </Link>
-          <div className="min-w-0 flex-1 max-w-2xl">
+          <div className="min-w-0 flex-1 max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
             <SearchBox initialQuery={data.q} onSubmitQuery={submitQuery} />
           </div>
           <div className="ms-auto">
@@ -255,7 +263,9 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
 
       <main className="zjs-results-main mx-auto w-full flex-1 px-4 sm:px-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-          <div className="min-w-0 flex-1 pt-4" ref={listRef}>
+          {/* @container: grid density keys off the actual column width, so
+              widescreen adds a column and centered mode drops one */}
+          <div className="@container min-w-0 flex-1 pt-4" ref={listRef}>
             {/* Kagi layout: the tabs and filters live in the results column so
                 the infobox sidebar rises to the top of the page */}
             <CategoryTabs
@@ -345,9 +355,13 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 lg:pb-6">
-            {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
-          </div>
+          {/* the rail area disappears entirely when it has no content (e.g.
+              "test"-style searches) so blank space never pushes content down */}
+          {showSkeletons || data.infoboxes.length > 0 || globals.method === "POST" ? (
+            <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 xl:w-96 lg:pb-6">
+              {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
+            </div>
+          ) : null}
         </div>
       </main>
 

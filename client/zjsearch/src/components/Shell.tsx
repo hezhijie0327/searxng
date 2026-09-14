@@ -5,8 +5,9 @@ import type { MouseEvent, ReactNode } from "react";
 import { useEffect } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
 import { useT } from "@/lib/i18n.ts";
-import { newTabLinkProps } from "@/lib/link.ts";
+import { isModifiedClick, newTabLinkProps } from "@/lib/link.ts";
 import { useRouter } from "@/lib/router.tsx";
+import { ICON_BTN } from "@/lib/styles.ts";
 import type { GlobalData } from "@/lib/types.ts";
 
 /** Anchor that performs SPA navigation for internal URLs. */
@@ -29,7 +30,7 @@ export function Link({
   const internal = href.startsWith("/") && !external;
 
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (!internal || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+    if (!internal || isModifiedClick(event)) {
       return;
     }
     event.preventDefault();
@@ -62,9 +63,6 @@ function ProgressBar({ active }: { active: boolean }) {
   );
 }
 
-const iconBtn =
-  "grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink";
-
 /** Right-side icon group: About / Stats / Preferences open as slide-in
     panels (URL unchanged); theme style lives in the preferences panel. */
 export function HeaderActions({ globals }: { globals: GlobalData }) {
@@ -75,50 +73,50 @@ export function HeaderActions({ globals }: { globals: GlobalData }) {
       {globals.donation_url ? (
         <a
           aria-label={t("donate")}
-          className={iconBtn}
+          className={ICON_BTN}
           href={globals.donation_url}
           rel="noreferrer"
           title={t("donate")}
         >
-          <Heart className="size-[18px]" />
+          <Heart className="size-4.5" />
         </a>
       ) : null}
       {globals.about_url ? (
         <button
           aria-label={t("about")}
-          className={iconBtn}
+          className={ICON_BTN}
           onClick={() => {
             openOverlay(globals.about_url, t("about"));
           }}
           title={t("about")}
           type="button"
         >
-          <Info className="size-[18px]" />
+          <Info className="size-4.5" />
         </button>
       ) : null}
       {globals.enable_metrics ? (
         <button
           aria-label={t("engine_stats")}
-          className={iconBtn}
+          className={ICON_BTN}
           onClick={() => {
             openOverlay("/stats", t("engine_stats"));
           }}
           title={t("engine_stats")}
           type="button"
         >
-          <ChartColumn className="size-[18px]" />
+          <ChartColumn className="size-4.5" />
         </button>
       ) : null}
       <button
         aria-label={t("preferences")}
-        className={iconBtn}
+        className={ICON_BTN}
         onClick={() => {
           openOverlay("/preferences", t("preferences"));
         }}
         title={t("preferences")}
         type="button"
       >
-        <SlidersHorizontal className="size-[18px]" />
+        <SlidersHorizontal className="size-4.5" />
       </button>
     </div>
   );
@@ -134,7 +132,7 @@ function TopNav({ globals, hideBrand = false }: { globals: GlobalData; hideBrand
         <Link ariaLabel={globals.instance_name} className="shrink-0 select-none" href="/" title={globals.instance_name}>
           <span className="text-xl font-extrabold tracking-tight text-ink">
             {globals.instance_name}
-            <span className="text-accent-strong">.</span>
+            <span className="text-accent">.</span>
           </span>
         </Link>
       )}

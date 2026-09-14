@@ -8,7 +8,7 @@
  */
 
 import {
-  Check,
+  AlertTriangle,
   ChevronDown,
   FileCode2,
   FileJson,
@@ -21,8 +21,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
-import { useCopyFeedback } from "@/lib/clipboard.ts";
+import { writeClipboard } from "@/lib/clipboard.ts";
 import { useT } from "@/lib/i18n.ts";
+import { flashToast } from "@/lib/toast.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
 /** per-format icons for the download strip; unknown configured formats fall
@@ -45,7 +46,7 @@ function formatOrder(format: string): number {
 
 const metaToggle = "inline-flex items-center gap-1 transition-colors hover:text-ink";
 const stripChip =
-  "inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink";
+  "inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:text-ink";
 
 export function DebugPanels({
   data,
@@ -66,8 +67,6 @@ export function DebugPanels({
   const [openPanel, setOpenPanel] = useState<null | "engines" | "results">(() =>
     hasEnginesPanel && data.results.length === 0 ? "engines" : null,
   );
-  const { copy, isCopied } = useCopyFeedback();
-  const copied = isCopied(searchUrl ?? "");
   const toggle = (panel: "engines" | "results") => {
     setOpenPanel((current) => (current === panel ? null : panel));
   };
@@ -87,7 +86,7 @@ export function DebugPanels({
         >
           <List className="size-3 shrink-0" />
           {t("meta_found")} {resultCount} {t("meta_results")}
-          <ChevronDown className={`size-3 transition-transform ${openPanel === "results" ? "rotate-180" : ""}`} />
+          <ChevronDown className={`size-3.5 transition-transform ${openPanel === "results" ? "rotate-180" : ""}`} />
         </button>
         {hasEnginesPanel ? (
           <button
@@ -100,7 +99,7 @@ export function DebugPanels({
           >
             <Timer className="size-3 shrink-0" />
             {roundedTime !== null ? `${t("took")} ${roundedTime} ${t("seconds")}` : t("engines_messages")}
-            <ChevronDown className={`size-3 transition-transform ${openPanel === "engines" ? "rotate-180" : ""}`} />
+            <ChevronDown className={`size-3.5 transition-transform ${openPanel === "engines" ? "rotate-180" : ""}`} />
           </button>
         ) : null}
       </div>
@@ -108,38 +107,37 @@ export function DebugPanels({
       {openPanel === "results" ? (
         <div className="mt-2 rounded-2xl border border-line bg-surface px-4 py-3">
           <div className="flex items-center gap-3">
-            <span
-              className={`grid size-9 shrink-0 place-items-center rounded-full transition-colors ${
-                copied ? "bg-ok/10 text-ok" : "bg-accent-soft text-accent"
-              }`}
-            >
-              {copied ? <Check className="size-[18px]" /> : <Link2 className="size-[18px]" />}
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
+              <Link2 className="size-4.5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-medium text-ink">{copied ? t("copied") : t("copy_search_url")}</p>
+              <p className="text-[13px] font-medium text-ink">{t("copy_search_url")}</p>
               {searchUrl ? (
-                <p className="mt-0.5 truncate font-mono text-[11px] text-ink-3" dir="ltr" title={searchUrl}>
+                <p className="mt-0.5 truncate font-mono text-xs text-ink-3" dir="ltr" title={searchUrl}>
                   {searchUrl}
                 </p>
               ) : null}
             </div>
+            {/* confirmation comes from the shared green flashToast */}
             <button
-              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                copied ? "border-ok/40 text-ok" : "border-line text-ink-2 hover:border-accent hover:text-accent"
-              }`}
+              className="shrink-0 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-accent"
               onClick={() => {
                 if (searchUrl) {
-                  copy(searchUrl);
+                  void writeClipboard(searchUrl).then((ok) => {
+                    if (ok) {
+                      flashToast(t("copied"), { tone: "ok" });
+                    }
+                  });
                 }
               }}
               type="button"
             >
-              {copied ? t("copied") : t("copy_link")}
+              {t("copy_link")}
             </button>
           </div>
           {searchUrl && data.globals.search_formats.length > 0 ? (
             <div className="mt-3 border-t border-line pt-3">
-              <p className="text-[11px] font-medium text-ink-3">{t("export_formats")}</p>
+              <p className="text-xs font-medium text-ink-3">{t("export_formats")}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {[...data.globals.search_formats]
                   .sort((a, b) => formatOrder(a) - formatOrder(b))
@@ -166,13 +164,14 @@ export function DebugPanels({
 
       {openPanel === "engines" ? (
         <div className="mt-2 rounded-2xl border border-line bg-surface px-4 py-3">
-          {/* one table for every engine: timings get seconds + bar, unresponsive
-              engines get their error label + an empty track on the same grid */}
-          <table className="w-full text-xs">
+          {/* one fixed-layout table for every engine: timings get seconds +
+              bar, unresponsive engines their error label + an empty track on
+              the same grid; table-fixed makes the w-24 truncation real */}
+          <table className="w-full table-fixed text-xs">
             <tbody>
               {data.unresponsive_engines.map(([name, errorMessage]) => (
                 <tr key={name}>
-                  <td className="w-24 py-0.5 pr-2 truncate">
+                  <td className="w-24 truncate py-0.5 pr-2">
                     <button
                       className="text-left font-medium text-ink-2 hover:text-accent"
                       onClick={() => {
@@ -187,8 +186,13 @@ export function DebugPanels({
                     <div className="flex items-center gap-2">
                       {/* right-aligned into the seconds column: the error's
                           right edge lines up with the digits / bar start */}
-                      <span className="w-24 shrink-0 truncate text-right text-danger" dir="auto" title={errorMessage}>
-                        {errorMessage}
+                      <span
+                        className="inline-flex w-24 shrink-0 items-center justify-end gap-1 truncate text-danger"
+                        dir="auto"
+                        title={errorMessage}
+                      >
+                        <AlertTriangle aria-hidden="true" className="size-3 shrink-0" />
+                        <span className="truncate">{errorMessage}</span>
                       </span>
                       <span className="h-1.5 flex-1 rounded-full bg-surface-2" />
                     </div>
@@ -197,7 +201,7 @@ export function DebugPanels({
               ))}
               {data.timings.map((timing) => (
                 <tr key={timing.name}>
-                  <td className="w-24 py-0.5 pr-2 truncate">
+                  <td className="w-24 truncate py-0.5 pr-2">
                     <button
                       className="text-left text-ink-2 hover:text-accent"
                       onClick={() => {

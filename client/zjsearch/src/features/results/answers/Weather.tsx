@@ -184,7 +184,7 @@ export function WeatherAnswer({
       <WeatherTrend forecasts={answer.forecasts} />
       <WeatherDaily forecasts={answer.forecasts} />
       {sources.length > 0 ? (
-        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
           {shownSources.map((source) =>
             source.url ? (
               <a
@@ -204,6 +204,7 @@ export function WeatherAnswer({
           )}
           {!sourcesExpanded && hiddenSources > 0 ? (
             <button
+              aria-label={t("more")}
               className="rounded-full bg-surface-2 px-2 py-0.5 transition-colors hover:text-ink"
               onClick={() => {
                 setSourcesExpanded(true);

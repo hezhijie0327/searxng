@@ -73,7 +73,7 @@ function AudioTilePlayer({ src, onClose, onError }: { src: string; onClose: () =
       />
       <button
         aria-label={t("close")}
-        className="absolute end-2 top-2 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+        className="absolute end-2 top-2 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-accent-contrast"
         onClick={onClose}
         title={t("close")}
         type="button"
@@ -83,12 +83,14 @@ function AudioTilePlayer({ src, onClose, onError }: { src: string; onClose: () =
       <div className="flex flex-1 items-center justify-center">
         <button
           aria-label={playing ? t("pause") : t("play")}
+          // always-white disc: the player backdrop is fixed-dark in every
+          // palette, so a themed surface token would vanish in dark mode
           className="grid size-14 place-items-center rounded-full bg-white text-black shadow-pop transition-transform hover:scale-105"
           onClick={toggle}
           title={playing ? t("pause") : t("play")}
           type="button"
         >
-          {playing ? <Pause className="size-6" /> : <Play className="size-6 translate-x-0.5" />}
+          {playing ? <Pause className="size-6" /> : <Play className="size-6 translate-x-px" />}
         </button>
       </div>
       <div className="flex items-center gap-2 px-3 pb-3 text-[11px] font-medium tabular-nums">
@@ -124,7 +126,7 @@ function EmbedTile({ src, title, onClose }: { src: string; title: string; onClos
       <iframe allowFullScreen className="size-full" referrerPolicy="origin" src={src} title={title} />
       <button
         aria-label={t("close")}
-        className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+        className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-accent-contrast"
         onClick={onClose}
         title={t("close")}
         type="button"
@@ -210,7 +212,7 @@ export function MusicGrid({
           {playable && !isPlaying ? (
             <button
               aria-label={t("play")}
-              className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-ink group-hover:opacity-100"
+              className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-accent-contrast group-hover:opacity-100"
               onClick={() => {
                 setMode(audioSrc ? "audio" : "embed");
                 setPlaying(index);
@@ -232,10 +234,14 @@ export function MusicGrid({
           </ResultLink>
         </h3>
         <div className="mt-1.5 flex items-center justify-between gap-3 text-xs text-ink-3">
-          <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
-            <User className="size-3 shrink-0" />
-            {result.author}
-          </span>
+          {result.author ? (
+            <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
+              <User className="size-3 shrink-0" />
+              {result.author}
+            </span>
+          ) : (
+            <span />
+          )}
           <span className="flex shrink-0 items-center gap-1">
             {result.published_date ? (
               <>
@@ -251,5 +257,9 @@ export function MusicGrid({
       </article>
     );
   });
-  return <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">{cells}</div>;
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 @sm:grid-cols-3 @[46rem]:grid-cols-4 @5xl:grid-cols-5">
+      {cells}
+    </div>
+  );
 }

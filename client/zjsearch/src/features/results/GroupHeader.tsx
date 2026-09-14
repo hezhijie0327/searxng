@@ -22,7 +22,7 @@ export function GroupHeader({
     <h2 className="group flex items-center gap-1 pb-1 pt-2">
       <button
         aria-expanded={!collapsed}
-        className="flex min-w-0 flex-1 items-center gap-1.5 text-left text-sm font-semibold text-ink"
+        className="flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left text-base font-semibold text-ink"
         onClick={onToggle}
         type="button"
       >

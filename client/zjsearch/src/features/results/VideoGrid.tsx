@@ -56,7 +56,7 @@ export function VideoGrid({
           {result.iframe_src && isPlaying ? (
             <button
               aria-label={t("hide_video")}
-              className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-ink"
+              className="absolute end-2 top-2 z-20 grid size-7 place-items-center rounded-full bg-black/70 text-white transition-colors hover:bg-accent-strong hover:text-accent-contrast"
               onClick={() => {
                 setPlaying(null);
               }}
@@ -68,7 +68,7 @@ export function VideoGrid({
           ) : result.iframe_src ? (
             <button
               aria-label={t("play")}
-              className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-ink group-hover:opacity-100"
+              className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-accent-contrast group-hover:opacity-100"
               onClick={() => {
                 setPlaying(index);
               }}
@@ -89,10 +89,14 @@ export function VideoGrid({
           </ResultLink>
         </h3>
         <div className="mt-1.5 flex items-center justify-between gap-3 text-xs text-ink-3">
-          <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
-            <User className="size-3 shrink-0" />
-            {result.author}
-          </span>
+          {result.author ? (
+            <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
+              <User className="size-3 shrink-0" />
+              {result.author}
+            </span>
+          ) : (
+            <span />
+          )}
           <span className="flex shrink-0 items-center gap-2">
             {result.views ? (
               <span className="inline-flex items-center gap-1">
@@ -116,5 +120,11 @@ export function VideoGrid({
       </article>
     );
   });
-  return <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{cells}</div>;
+  // density keys off the column width (container queries from the results
+  // wrapper): widescreen grows to 4 columns, centered mode drops to 2-3
+  return (
+    <div className="grid grid-cols-1 gap-x-4 gap-y-8 @sm:grid-cols-2 @[46rem]:grid-cols-3 @[54rem]:grid-cols-4">
+      {cells}
+    </div>
+  );
 }

@@ -11,6 +11,7 @@ import {
   Thumb,
   Title,
 } from "@/features/results/cardParts.tsx";
+import { META_ROW } from "@/lib/styles.ts";
 
 export function ProductCard({ result, globals }: CardProps) {
   return (
@@ -24,7 +25,7 @@ export function ProductCard({ result, globals }: CardProps) {
           <div className="mt-1">
             <MetaLine result={result} />
           </div>
-          <div className="mt-2 flex items-baseline gap-x-3 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
+          <div className={`${META_ROW} mt-1 gap-x-3`}>
             {result.price ? (
               <span className="inline-flex items-center gap-1 text-lg font-semibold text-ink">
                 <Tag className="size-4 shrink-0 text-ink-3" />
@@ -46,7 +47,7 @@ export function ProductCard({ result, globals }: CardProps) {
           </div>
           {result.content_html ? (
             <p
-              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />

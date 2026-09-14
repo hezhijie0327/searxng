@@ -104,7 +104,7 @@ export function TranslationsAnswer({
             ))}
           </div>
         ) : null}
-        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
           <span className="rounded-full bg-surface-2 px-2 py-0.5">{answer.engine}</span>
         </div>
       </div>

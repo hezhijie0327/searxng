@@ -10,6 +10,7 @@ import {
   Title,
 } from "@/features/results/cardParts.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { META_ROW } from "@/lib/styles.ts";
 
 /** General file-download layout, sharing the transfer-card language of the
     torrent card: type icon tile, compact stat strip, primary action. */
@@ -44,13 +45,13 @@ export function FileCard({ result, globals }: CardProps) {
           <div className="mt-1">
             <Title globals={globals} result={result} />
           </div>
-          <div className="mt-1.5 flex items-center gap-x-4 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 text-xs text-ink-3">
+          <div className={`${META_ROW} mt-1 gap-x-4 text-xs text-ink-3`}>
             {stats
               .filter(([, value]) => Boolean(value))
               .map(([label, value]) => (
-                <span className="inline-flex min-w-0 items-center gap-1" key={label}>
+                <span className="inline-flex items-center gap-1" key={label}>
                   {label}:
-                  <span className="truncate text-ink-2" dir="auto">
+                  <span className="text-ink-2" dir="auto">
                     {value}
                   </span>
                 </span>
@@ -58,14 +59,14 @@ export function FileCard({ result, globals }: CardProps) {
           </div>
           {result.abstract_html ? (
             <p
-              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.abstract_html }}
               dir="auto"
             />
           ) : null}
           {result.content_html ? (
             <p
-              className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />
@@ -94,7 +95,7 @@ export function FileCard({ result, globals }: CardProps) {
               )
             ) : (
               <a
-                className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
+                className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent-soft px-3 py-1.5 text-[13px] font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
                 download
                 href={result.embedded}
                 rel="noreferrer"

@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { ExternalLink, Info, Link2, LoaderCircle, Mail, Network, Scale, Search, Server, Shield } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell.tsx";
+import { fetchJson, fetchText } from "@/lib/http.ts";
 import { type StringKey, useT } from "@/lib/i18n.ts";
 import { extractPageData } from "@/lib/pageData.ts";
 import { type GlobalData, type InfoPageData, isInfoPageData } from "@/lib/types.ts";
@@ -20,13 +21,10 @@ function useInstanceConfig(): InstanceConfig | null {
   const [config, setConfig] = useState<InstanceConfig | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    void fetch("/config", { headers: { Accept: "application/json" }, signal: controller.signal })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
-        return resp.json() as Promise<InstanceConfig>;
-      })
+    void fetchJson<InstanceConfig>("/config", {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    })
       .then(setConfig)
       .catch(() => {
         /* quiet: sections that need it simply stay hidden */
@@ -72,13 +70,7 @@ function LicenseText({ url }: { url: string }) {
   const [text, setText] = useState("");
   useEffect(() => {
     const controller = new AbortController();
-    void fetch(url, { signal: controller.signal })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
-        return resp.text();
-      })
+    void fetchText(url, { signal: controller.signal })
       .then(setText)
       .catch(() => {
         /* quiet: the label row still renders */
@@ -91,7 +83,7 @@ function LicenseText({ url }: { url: string }) {
     return null;
   }
   return (
-    <pre className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-line bg-surface p-4 font-mono text-[11.5px] leading-relaxed text-ink-2">
+    <pre className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-line bg-surface p-4 font-mono text-xs leading-relaxed text-ink-2">
       {text}
     </pre>
   );
@@ -152,7 +144,7 @@ function InstancePage({ globals }: { globals: GlobalData }) {
   return (
     <article className="prose-basic animate-fade-up" dir="auto">
       <h1 className="flex items-center gap-2">
-        <Server className="size-5 shrink-0" />
+        <Server aria-hidden="true" className="size-5 shrink-0 text-accent" />
         {globals.instance_name}
       </h1>
       <p className="font-mono text-xs text-ink-3" dir="ltr">
@@ -257,13 +249,7 @@ export function InfoPage({
     }
     const seq = ++seqRef.current;
     setSwitching(true);
-    void fetch(href, { headers: { Accept: "text/html" } })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
-        return resp.text();
-      })
+    void fetchText(href, { headers: { Accept: "text/html" } })
       .then((html) => {
         const pageData = extractPageData(html);
         if (!isInfoPageData(pageData)) {
@@ -321,7 +307,7 @@ export function InfoPage({
         </nav>
         {switching ? (
           <div className="flex justify-center py-20 text-ink-3">
-            <LoaderCircle className="size-5 animate-spin" />
+            <LoaderCircle className="size-5 animate-spin-slow" />
           </div>
         ) : active.html !== null ? (
           <article

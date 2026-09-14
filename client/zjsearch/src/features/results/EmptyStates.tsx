@@ -57,7 +57,7 @@ export function Corrections({ data, onSearch }: { data: SearchPageData; onSearch
       <span className="text-ink-3">{t("try_searching_for")}</span>
       {data.corrections.map((correction) => (
         <button
-          className="rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
+          className="rounded-full bg-accent-soft px-3 py-1.5 font-medium text-[13px] text-accent transition-colors hover:bg-accent-strong hover:text-accent-contrast"
           dir="auto"
           key={correction.q}
           onClick={() => {
@@ -65,7 +65,7 @@ export function Corrections({ data, onSearch }: { data: SearchPageData; onSearch
           }}
           type="button"
         >
-          <Search className="size-3 shrink-0" />
+          <Search className="size-3.5 shrink-0" />
           {correction.title}
         </button>
       ))}

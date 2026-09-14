@@ -22,6 +22,11 @@ export function EnginesPane({
 }) {
   const t = useT();
   const currentEngineTab = data.engine_tabs[engineTab];
+  const tabEngineKeys = currentEngineTab
+    ? currentEngineTab.groups.flatMap((group) =>
+        group.engines.map((engine) => `${engine.name}__${currentEngineTab.category}`),
+      )
+    : [];
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -34,12 +39,7 @@ export function EnginesPane({
             <button
               className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-ok hover:text-ok"
               onClick={() => {
-                form.setAllEngines(
-                  currentEngineTab.groups.flatMap((group) =>
-                    group.engines.map((engine) => `${engine.name}__${currentEngineTab.category}`),
-                  ),
-                  true,
-                );
+                form.setAllEngines(tabEngineKeys, true);
               }}
               type="button"
             >
@@ -49,12 +49,7 @@ export function EnginesPane({
             <button
               className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-danger hover:text-danger"
               onClick={() => {
-                form.setAllEngines(
-                  currentEngineTab.groups.flatMap((group) =>
-                    group.engines.map((engine) => `${engine.name}__${currentEngineTab.category}`),
-                  ),
-                  false,
-                );
+                form.setAllEngines(tabEngineKeys, false);
               }}
               type="button"
             >

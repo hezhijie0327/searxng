@@ -14,11 +14,12 @@ import {
   Server,
   User,
 } from "lucide-react";
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { type ReactNode, useState } from "react";
+import { useCacheUrl } from "@/features/results/cacheUrl.tsx";
 import { formatDate, formatLength, formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
-import { SWIPE_ROW } from "@/lib/styles.ts";
+import { CHIP, META_ROW, SWIPE_ROW } from "@/lib/styles.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 // ------------------------------------------------------------- shared parts
@@ -106,7 +107,7 @@ export function MetaLine({ result }: { result: ResultItem }) {
   }
   if (result.author) {
     bits.push(
-      <span className="inline-flex min-w-0 items-center gap-1 truncate" key="author">
+      <span className="inline-flex items-center gap-1" key="author">
         <User className="size-3 shrink-0" />
         {result.author}
       </span>,
@@ -133,7 +134,7 @@ export function MetaLine({ result }: { result: ResultItem }) {
     return null;
   }
   return (
-    <div className="flex items-center gap-x-3 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 text-xs text-ink-3">
+    <div className={`${META_ROW} gap-x-3 text-xs text-ink-3`}>
       {bits}
       {result.metadata ? (
         <span className="rounded bg-accent-soft px-1.5 py-0.5 text-accent" dir="auto">
@@ -148,20 +149,6 @@ export function MetaLine({ result }: { result: ResultItem }) {
 /** Unified engine attribution for EVERY view: [score] [first engine] [+N],
     expanding inline on demand.  The score leads as a tabular pill; the
     first pill's title always carries the full engine list. */
-/** Instance-wide cache-link prefix (search.cache_url) — provided once around
-    the results area; EnginesLine turns it into a per-result "cached" pill,
-    mirroring upstream simple's result_sub_footer. */
-const CacheUrlContext = createContext<string | undefined>(undefined);
-
-export function CacheUrlProvider({ cacheUrl, children }: { cacheUrl?: string; children: ReactNode }) {
-  return <CacheUrlContext.Provider value={cacheUrl}>{children}</CacheUrlContext.Provider>;
-}
-
-/** Renderers outside EnginesLine (image lightbox) read the prefix directly. */
-export function useCacheUrl(): string | undefined {
-  return useContext(CacheUrlContext);
-}
-
 export function EnginesLine({
   result,
   leading,
@@ -173,14 +160,13 @@ export function EnginesLine({
   compact?: boolean;
 }) {
   const t = useT();
-  const cacheUrl = useContext(CacheUrlContext);
+  const cacheUrl = useCacheUrl();
   const [expanded, setExpanded] = useState(false);
   const engines = result.engines;
   if (engines.length === 0 && !leading) {
     return null;
   }
   const hidden = engines.length - 1;
-  const pill = "inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5";
   return (
     <div
       className={`mt-2 flex min-w-0 items-center gap-x-2 text-xs text-ink-3 ${
@@ -188,21 +174,21 @@ export function EnginesLine({
       }`}
     >
       {typeof result.score === "number" ? (
-        <span className={`${pill} tabular-nums`} title={t("scores")}>
+        <span className={`${CHIP} tabular-nums`} title={t("scores")}>
           <Award className="size-3 shrink-0" />
           {formatScore(result.score)}
         </span>
       ) : null}
       {leading}
       {engines.length > 0 ? (
-        <span className={`${pill} max-w-full truncate`} title={engines.join(", ")}>
+        <span className={`${CHIP} max-w-full truncate`} title={engines.join(", ")}>
           <Server className="size-3 shrink-0" />
           {engines[0]}
         </span>
       ) : null}
       {expanded
         ? engines.slice(1).map((engine) => (
-            <span className={pill} key={engine}>
+            <span className={CHIP} key={engine}>
               <Server className="size-3 shrink-0" />
               {engine}
             </span>
@@ -211,7 +197,7 @@ export function EnginesLine({
       {hidden > 0 ? (
         <button
           aria-expanded={expanded}
-          className={`${pill} transition-colors hover:text-ink`}
+          className={`${CHIP} transition-colors hover:text-ink`}
           onClick={() => {
             setExpanded((value) => !value);
           }}
@@ -229,7 +215,7 @@ export function EnginesLine({
       ) : null}
       {cacheUrl ? (
         <a
-          className={`${pill} transition-colors hover:text-ink`}
+          className={`${CHIP} transition-colors hover:text-ink`}
           href={cacheUrl + result.url}
           {...newTabLinkProps(true)}
         >
@@ -311,7 +297,7 @@ export function MediaCollapse({
     <div>
       <button
         aria-expanded={open}
-        className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-2 transition-colors hover:text-ink"
+        className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:text-ink"
         onClick={() => {
           setOpen((prev) => !prev);
         }}
@@ -327,7 +313,9 @@ export function MediaCollapse({
 
 export function EmbedFrame({ src }: { src: string }) {
   return (
-    <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-black">
+    // the embed grows with the results column (container queries on the
+    // results wrapper) instead of capping at the list-text width
+    <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-black @4xl:max-w-4xl @5xl:max-w-5xl">
       <iframe allowFullScreen className="size-full" referrerPolicy="origin" src={src} title="embedded content" />
     </div>
   );
@@ -341,7 +329,7 @@ export function MediaPreview({ src, video = false }: { src: string; video?: bool
     return <EmbedFrame src={src} />;
   }
   return (
-    <div className="flex max-w-3xl items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
+    <div className="flex max-w-3xl items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 @4xl:max-w-4xl @5xl:max-w-5xl">
       <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
         <Music className="size-4" />
       </span>
@@ -378,6 +366,8 @@ export function ResultSkeleton() {
       <div className="zjs-skeleton mt-3 h-3 w-full" />
       <div className="zjs-skeleton mt-2 h-3 w-5/6" />
       <div className="zjs-skeleton mt-4 h-3 w-24" />
+      {/* engines-row slot so the skeleton matches the loaded card height */}
+      <div className="zjs-skeleton mt-2 h-3.5 w-28 rounded-full" />
     </div>
   );
 }

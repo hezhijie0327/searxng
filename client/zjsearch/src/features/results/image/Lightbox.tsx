@@ -8,12 +8,17 @@
 
 import { Archive, Award, ChevronLeft, ChevronRight, Download, ExternalLink, ImageOff, Server, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCacheUrl } from "@/features/results/cardParts.tsx";
+import { useCacheUrl } from "@/features/results/cacheUrl.tsx";
+import { useDialogFocus } from "@/lib/dialogFocus.ts";
 import { formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
 import { useSettings } from "@/lib/settings.ts";
 import type { ResultItem } from "@/lib/types.ts";
+
+/** The viewer is a fixed DARK media overlay in every palette (like photo
+    viewers everywhere): tiles-over-image chrome uses its own zinc scale at
+    AA contrast instead of the theme tokens. */
 
 const IMAGE_VIEWER_HASH = "#image-viewer";
 
@@ -43,7 +48,7 @@ function ProgressiveImage({ thumbnail, full, alt }: { thumbnail: string; full: s
   const [failed, setFailed] = useState(!src);
   if (failed) {
     return (
-      <div className="flex h-[60vh] w-full items-center justify-center text-zinc-500">
+      <div className="flex h-[60vh] w-full items-center justify-center text-zinc-400">
         <ImageOff className="size-10" />
       </div>
     );
@@ -83,6 +88,7 @@ export function Lightbox({
   const [dragging, setDragging] = useState(false);
   const dragStart = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const [enginesExpanded, setEnginesExpanded] = useState(false);
+  const dialogRef = useDialogFocus<HTMLDivElement>();
 
   const resetZoom = useCallback(() => {
     setZoom(1);
@@ -205,23 +211,26 @@ export function Lightbox({
       onTouchStart={(event) => {
         touchStartX.current = event.changedTouches[0]?.clientX ?? null;
       }}
+      ref={dialogRef}
       role="dialog"
+      tabIndex={-1}
     >
       {/* top bar */}
       <div className="flex items-center justify-between p-3">
-        <span className="text-xs text-zinc-500" dir="ltr">
+        <span className="text-xs text-zinc-400" dir="ltr">
           {index + 1} / {results.length}
           {zoom !== 1 ? <span className="ms-2 opacity-80">{Math.round(zoom * 100)}%</span> : null}
         </span>
         <button
           aria-label={t("close")}
           className="grid size-9 place-items-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          data-dialog-close=""
           onClick={() => {
             close(true);
           }}
           type="button"
         >
-          <X className="size-5" />
+          <X className="size-4.5" />
         </button>
       </div>
 
@@ -308,7 +317,7 @@ export function Lightbox({
             </p>
           )}
           {hostname ? (
-            <p className="truncate text-xs text-zinc-500" dir="ltr">
+            <p className="truncate text-xs text-zinc-400" dir="ltr">
               {hostname}
             </p>
           ) : null}
@@ -316,21 +325,21 @@ export function Lightbox({
             <div className="mt-2.5 flex flex-wrap items-center gap-1" title={result.engines.join(", ")}>
               {typeof result.score === "number" ? (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300 tabular-nums"
+                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300 tabular-nums"
                   title={t("scores")}
                 >
                   <Award className="size-3 shrink-0" />
                   {formatScore(result.score)}
                 </span>
               ) : null}
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300">
                 <Server className="size-3 shrink-0" />
                 {result.engines[0]}
               </span>
               {enginesExpanded
                 ? result.engines.slice(1).map((engine) => (
                     <span
-                      className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300"
+                      className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300"
                       key={engine}
                     >
                       <Server className="size-3 shrink-0" />
@@ -341,7 +350,7 @@ export function Lightbox({
               {result.engines.length > 1 ? (
                 <button
                   aria-expanded={enginesExpanded}
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300 transition-colors hover:text-white"
                   onClick={() => {
                     setEnginesExpanded((value) => !value);
                   }}
@@ -359,7 +368,7 @@ export function Lightbox({
               ) : null}
               {cacheUrl ? (
                 <a
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300 transition-colors hover:text-white"
                   href={cacheUrl + result.url}
                   {...newTabLinkProps(true)}
                 >
@@ -371,10 +380,10 @@ export function Lightbox({
           ) : null}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 text-xs">
+        <div className="flex shrink-0 items-center gap-2 text-[13px]">
           {result.img_src ? (
             <a
-              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 px-3.5 py-1.5 text-zinc-200 transition-colors hover:border-zinc-400"
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 px-3.5 py-1.5 font-medium text-zinc-200 transition-colors hover:border-zinc-400"
               href={result.img_src}
               {...linkProps}
             >
@@ -410,7 +419,7 @@ function Label({ label, value }: { label: string; value: string | null | undefin
   }
   return (
     <p className="whitespace-nowrap leading-5">
-      <span className="text-zinc-500">{label} </span>
+      <span className="text-zinc-400">{label} </span>
       <span className="text-zinc-200">{value}</span>
     </p>
   );

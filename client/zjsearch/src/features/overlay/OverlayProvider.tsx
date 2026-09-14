@@ -11,8 +11,12 @@
 
 import { X } from "lucide-react";
 import { createContext, type ReactNode, Suspense, useCallback, useContext, useEffect, useState } from "react";
+import { useDialogFocus } from "@/lib/dialogFocus.ts";
+import { fetchText } from "@/lib/http.ts";
 import { useT } from "@/lib/i18n.ts";
+import { isModifiedClick } from "@/lib/link.ts";
 import { extractPageData } from "@/lib/pageData.ts";
+import { ICON_BTN } from "@/lib/styles.ts";
 import type { AnyPageData } from "@/lib/types.ts";
 
 /** Panels the app can render inside the drawer. Returning null means "this
@@ -54,6 +58,7 @@ export function useOverlay(): OverlayContextValue {
 export function OverlayProvider({ panels, children }: { panels: OverlayPanels; children: ReactNode }) {
   const t = useT();
   const [state, setState] = useState<OverlayState | null>(null);
+  const dialogRef = useDialogFocus<HTMLDivElement>();
 
   const closeOverlay = useCallback(() => {
     setState(null);
@@ -87,12 +92,11 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
     }
     const controller = new AbortController();
     const isDocument = state.mode === "document";
-    void fetch(state.url, { headers: { Accept: isDocument ? "text/plain" : "text/html" }, signal: controller.signal })
-      .then(async (resp) => {
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
-        const body = await resp.text();
+    void fetchText(state.url, {
+      headers: { Accept: isDocument ? "text/plain" : "text/html" },
+      signal: controller.signal,
+    })
+      .then(async (body) => {
         if (isDocument) {
           setState((prev) => (prev && prev.url === state.url ? { ...prev, text: body, loading: false } : prev));
           return;
@@ -136,23 +140,37 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
     <OverlayContext.Provider value={{ openOverlay, openDocument, closeOverlay }}>
       {children}
       {state ? (
-        <div aria-label={state.title} aria-modal="true" className="fixed inset-0 z-50" role="dialog">
+        <div
+          aria-label={state.title}
+          aria-modal="true"
+          className="fixed inset-0 z-50"
+          ref={dialogRef}
+          role="dialog"
+          tabIndex={-1}
+        >
           <button
             aria-label={t("close")}
             className="absolute inset-0 cursor-default bg-black/60 animate-fade-in"
             onClick={closeOverlay}
             type="button"
           />
-          <div className="absolute inset-y-0 end-0 flex w-full max-w-3xl flex-col bg-bg shadow-pop animate-slide-in-right">
+          {/* data-zjs-overlay-panel: flashToast hosts floating feedback here
+              so pills center in the drawer instead of the viewport (the
+              entrance animation's residual transform contains `fixed`) */}
+          <div
+            className="absolute inset-y-0 end-0 flex w-full max-w-3xl flex-col bg-bg shadow-pop animate-slide-in-right"
+            data-zjs-overlay-panel=""
+          >
             <div className="flex items-center justify-between border-b border-line px-5 py-3">
-              <span className="text-sm font-semibold text-ink">{state.title}</span>
+              <h2 className="text-lg font-semibold text-ink">{state.title}</h2>
               <button
                 aria-label={t("close")}
-                className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+                className={ICON_BTN}
+                data-dialog-close=""
                 onClick={closeOverlay}
                 type="button"
               >
-                <X className="size-[18px]" />
+                <X className="size-4.5" />
               </button>
             </div>
             <div
@@ -167,10 +185,7 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
                   anchor.hasAttribute("download") ||
                   // /static/ holds files (LICENSE.txt...), not SPA pages
                   href.startsWith("/static/") ||
-                  event.metaKey ||
-                  event.ctrlKey ||
-                  event.shiftKey ||
-                  event.altKey
+                  isModifiedClick(event)
                 ) {
                   return;
                 }
@@ -185,7 +200,7 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
                 <p className="p-6 text-sm text-danger">{state.error}</p>
               ) : state.mode === "document" ? (
                 <article className="px-5 pb-8">
-                  <pre className="whitespace-pre-wrap break-words font-mono text-[11.5px] leading-relaxed text-ink-2">
+                  <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-ink-2">
                     {state.text}
                   </pre>
                 </article>

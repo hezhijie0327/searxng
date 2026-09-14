@@ -60,7 +60,7 @@ export function CalculatorAnswer({ calc }: { calc: CalculationAnswer }) {
               key.kind === "eq"
                 ? "row-span-2 bg-accent-strong text-base text-accent-contrast hover:opacity-90"
                 : key.kind === "op"
-                  ? "bg-surface-2 text-accent-strong hover:bg-line/40"
+                  ? "bg-surface-2 text-accent hover:bg-line/40"
                   : "bg-surface-2 text-ink hover:bg-line/40"
             } ${key.span ?? ""}`}
             key={key.label}

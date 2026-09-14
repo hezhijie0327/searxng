@@ -17,8 +17,10 @@
   /* muted tier: must keep 4.5:1 against every surface it sits on (worst case
      surface-2 #f1efe8) */
   --ink-3: #716c61;
-  --accent: #a67c00;
-  --accent-hover: #8c6800;
+  /* text accent doubles as small-text colour (links, chips) — #8c6800 keeps
+     ≥4.5:1 on white / surface-2 / accent-soft, so light mode passes AA */
+  --accent: #8c6800;
+  --accent-hover: #7a5c00;
   --accent-strong: #f5c84c;
   --accent-strong-hover: #eebd35;
   --accent-soft: #faf0cf;

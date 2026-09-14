@@ -10,14 +10,19 @@ export function CodeCard({ result, globals }: CardProps) {
         <Title globals={globals} result={result} />
         {result.filename ? (
           <span className="text-xs text-ink-3">
-            {t("filename")}: <code className="font-mono">{result.filename}</code>
+            {t("filename")}: <code className="break-all font-mono">{result.filename}</code>
           </span>
         ) : null}
       </div>
       {result.repository ? (
         <p className="mt-1 text-xs text-ink-3">
           {t("repository")}:{" "}
-          <a className="text-accent hover:underline" href={result.repository} rel="noreferrer" target="_blank">
+          <a
+            className="break-all text-accent hover:underline"
+            href={result.repository}
+            rel="noreferrer"
+            target="_blank"
+          >
             {result.repository}
           </a>
         </p>

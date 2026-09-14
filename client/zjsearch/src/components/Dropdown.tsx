@@ -6,7 +6,7 @@
  * dismissal.
  */
 
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { type CSSProperties, type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -168,7 +168,7 @@ export function Dropdown({
         aria-label={ariaLabel}
         className={
           iconOnly
-            ? `flex size-8 items-center justify-center rounded-full transition-colors ${
+            ? `flex size-9 items-center justify-center rounded-full transition-colors ${
                 open ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink"
               }`
             : variant === "bare"
@@ -177,7 +177,7 @@ export function Dropdown({
                     ? "bg-surface-2 text-ink"
                     : (triggerClassName ?? "text-ink-2 hover:bg-surface-2/70 hover:text-ink")
                 }`
-              : `flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 text-sm transition-colors ${
+              : `flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 text-[13px] transition-colors ${
                   open ? "border-ink-3" : "border-line hover:border-ink-3"
                 } bg-surface text-ink ${triggerClassName ?? ""}`
         }
@@ -199,16 +199,10 @@ export function Dropdown({
           <span aria-hidden="true" className="absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-accent-strong" />
         ) : null}
         {iconOnly ? null : (
-          <svg
+          <ChevronDown
             aria-hidden="true"
             className={`size-3 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          />
         )}
       </button>
 
@@ -224,9 +218,12 @@ export function Dropdown({
               {options.map((option, index) => {
                 const selected = multiple ? (isSelected?.(option.value) ?? false) : option.value === value;
                 return (
-                  <li aria-selected={selected} key={option.value} role="option">
+                  <li key={option.value}>
+                    {/* the option role sits on the button itself: role=option
+                        must not nest interactive descendants */}
                     <button
-                      className={`flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm ${
+                      aria-selected={selected}
+                      className={`flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-[13px] ${
                         index === active ? "bg-surface-2" : ""
                       }`}
                       onClick={() => {
@@ -235,6 +232,7 @@ export function Dropdown({
                       onMouseEnter={() => {
                         setActive(index);
                       }}
+                      role="option"
                       type="button"
                     >
                       <span className="flex min-w-0 items-center gap-2">

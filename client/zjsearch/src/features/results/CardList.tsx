@@ -7,7 +7,7 @@ import { ResultRow } from "@/features/results/ResultRow.tsx";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 /** One entry per rendered row, carrying its page-global hotkey index. */
-export interface CardListEntry {
+interface CardListEntry {
   result: ResultItem;
   index: number;
 }

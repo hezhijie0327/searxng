@@ -85,7 +85,11 @@ and boots `zjsearch.min.js`; React renders 100% of the interface.
   payload opens as which page is injected by `app.tsx` (`renderPage`) — the
   overlay module never imports pages (keeps lib→page cycles impossible).
   Internal links inside a panel are browsed within the panel (click-capture in
-  OverlayProvider.tsx).
+  OverlayProvider.tsx). `features/overlay` is the one sanctioned cross-cutting
+  capability: its `useOverlay()` context may be consumed from `components/`
+  (Shell header actions, footer) and other features (DebugPanels) — a context
+  provider consumed via hooks is the accepted decoupling; do not thread
+  `openOverlay` callbacks through props instead.
 
 ## Client code organization (keep it this way)
 
@@ -158,7 +162,8 @@ BCP-47 tag. Export only what other modules need. Full rationale and the
 - Respect `prefers-reduced-motion`: the global stylesheet guard covers CSS
   transitions/animations, but JS-initiated smooth scrolling (BackToTop,
   hotkey navigation, suggestion pager) must pass `scrollBehavior()` from
-  `src/lib/motion.ts` as its `behavior` — the stylesheet cannot reach it.
+  `src/lib/motion.ts` as its `behavior` — the stylesheet cannot reach it
+  (the module also exports `reducedMotion()` for durations).
   RTL uses Tailwind logical properties (`ps-`, `me-`, `start-`, `end-`)
   against a single stylesheet; `translate-x` is NOT logical — pair it with
   the `rtl:` variant when direction matters (see the Switch knob).
@@ -166,7 +171,25 @@ BCP-47 tag. Export only what other modules need. Full rationale and the
   against every surface it sits on in its palette (worst case is usually
   `surface-2`); do not lighten `ink-3` or use `accent-strong` as text on
   light surfaces (it is a fill/border accent, light-mode text accent is
-  `accent`).
+  `accent` — `#8c6800`, AA for the 12-13px chips it colours). Text on an
+  `accent-strong` fill is ALWAYS `accent-contrast`, including the
+  hover states of dark media chips (`hover:bg-accent-strong
+  hover:text-accent-contrast`) — `hover:text-ink` breaks in dark/black.
+- Modal dialogs (overlay drawer, image lightbox, help modal) mount through
+  `useDialogFocus` (`src/lib/dialogFocus.ts`): focus moves to the element
+  marked `data-dialog-close` on open, Tab is trapped inside, focus returns
+  to the trigger on close. Escape stays with each dialog's own handler.
+- All HTTP calls go through `lib/http.ts` (`fetchText`/`fetchJson` with the
+  uniform `HTTP <status>` error); don't hand-roll `resp.ok` guards.
+  Recurring Tailwind mega-strings live as constants in `lib/styles.ts`
+  (`SCROLLBAR_NONE`, `SWIPE_ROW`, `META_ROW`, `CHIP`, `ICON_BTN`) — import,
+  don't re-type. One-shot floating feedback (copy/save confirmations) goes
+  through `flashToast()` in `lib/toast.ts` (tone: accent/ok/danger) — never
+  render such confirmations in flow (layout shift).
+- Jinja inline-`if` output is AUTOESCAPED: `{{ ' class="centered"' if cond }}`
+  emitted `class=&#34;centered&#34;` (a broken literal-quote class token that
+  silently disabled centered alignment). Conditional HTML fragments in
+  templates must use `{% if %}` blocks, never inline-`if` string literals.
 - Text result cards keep fixed height slots so every card in a list is the
   same height: pretty URL 1 line, title `line-clamp-1`, snippet capped at
   `line-clamp-2` (never reserve empty lines below short snippets — the gap
@@ -198,16 +221,26 @@ reuse these tokens instead of inventing sizes. The string catalog lives in
 Type scale — one size per text role:
 
 - 12px `text-xs`: meta/captions — engine chips, pretty URLs, answers meta,
-  mono blocks (URL/hash), footer.
+  mono chrome (URL preview, license `<pre>`, document overlays), footer.
 - 13px `text-[13px]`: interactive controls & compact descriptions — category
-  tabs, dropdown triggers, pills, help dialog copy, sidebar suggestions,
-  preference section tabs.
-- 14px `text-sm`: body text and settings row titles.
+  tabs, dropdown triggers AND option rows, pills, suggestions (autocomplete
+  and results-strip alike), help dialog copy, preference section tabs,
+  pagination. If it clicks, it is 13px.
+- 14px `text-sm`: body text (card snippets — capped `max-w-prose` so
+  widescreen list lines stay readable), infobox abstract, settings row
+  titles.
 - 16px `text-base`: result titles (list/news/product/video grids all share
-  the `Title`/h3 token) and search inputs.
-- 20px `text-xl`: infobox title; 24px `text-2xl`: page headings.
-- Brand marks: hero `text-6xl/7xl`, header `text-xl`, both `font-extrabold`.
-- Thumbnail corner badges (duration, image count): 11px `font-medium`.
+  the `Title`/h3 token) and ALL search inputs (hero included).
+- 20px `text-xl`: infobox title; 24px `text-2xl`: page headings; section
+  headings in between are `text-base`/`text-lg` `font-semibold`.
+- Brand marks: hero `text-6xl/7xl`, header `text-xl`, both `font-extrabold`
+  (the brand dot span is `text-accent` — readable in every palette).
+- Thumbnail corner badges / floating overlay chips: 11px `font-medium`
+  (badge tier, the sanctioned sub-12px exception along with the mini
+  player's tabular clock and the weather SVG chart labels).
+- Answer values are tiered: `text-4xl` calculator/stat heroes, `text-xl`
+  time/translation heroes, `text-sm font-mono` copyable values (hash/ip) —
+  always with `break-all` on unbreakable payloads.
 
 Weights: `font-extrabold` brand only, `font-semibold` headings,
 `font-medium` emphasis/selected states; body stays regular.
@@ -215,20 +248,30 @@ Weights: `font-extrabold` brand only, `font-semibold` headings,
 Controls:
 
 - Circular ghost icon buttons: 36px (`size-9`) with 18px icons
-  (`size-[18px]`) — header actions, drawer/help closes, search clear. The
-  search submit is the accent-filled circle, also 36px. BackToTop is the
-  one floating exception (40px).
+  (`size-4.5` — the canonical 18px token; don't use `size-[18px]`) —
+  header actions, drawer/help closes, search clear. The search submit is
+  the accent-filled circle, also 36px. BackToTop is the one floating
+  exception (40px), icon-chip closes over media sit at 28px with 14px
+  icons.
 - Tab-style buttons (category tabs, filter triggers, preference section
   tabs): `px-4 py-2 text-[13px]`, leading icon 14px.
 - Pills/chips (choices, enable/disable, suggestions): `px-3 py-1.5
-  text-[13px]` rounded-full; category chips carry `CategoryIcon`; selection
-  = `border-accent-strong bg-accent-soft font-medium text-accent`.
-- Boxed form selects (preferences): `h-9 text-sm`.
+  text-[13px]` rounded-full; tiny non-interactive meta chips use the
+  `CHIP` constant (`px-2 py-0.5`); category chips carry `CategoryIcon`;
+  selection = `border-accent-strong bg-accent-soft font-medium
+  text-accent`.
+- Boxed form selects (preferences): `h-9 text-[13px]`.
 - Category selection uses the tab language (icon + label, selected =
   accent text + amber underline) everywhere — results-page tabs, hero
   grid, preferences default-categories and engine tabs all share
   `CategoryTab`/`CategoryTabs` styling.  Other choices (options, toggles)
   keep the bordered chip language.
+- Icon size tiers: 18px `size-4.5` round-button icons, 14px `size-3.5`
+  tab/pill leading icons and disclosure chevrons, 12px `size-3` meta-row
+  icons, 20px `size-5` large round buttons; same concept = same icon
+  (Search submits, X dismisses, Check confirms copy, ExternalLink for
+  outbound links, ChevronDown discloses — `<details>` summaries use the
+  `group-open:rotate-180` chevron, never the browser marker).
 
 Instant answers (`features/results/answers/`, one file per kind) are tiered:
 
@@ -287,12 +330,21 @@ its content, all sharing one visual language:
   block; loading pauses while the general block is collapsed.
 
 Results right rail (desktop): the infobox scrolls inside its own area
-(`min-h-0 flex-1 overflow-y-auto`); hide the rail area entirely when its
-content is empty (e.g. "test"-style searches with no infobox) so blank
-space never pushes content down. Diagnostics (`DebugPanels`) live in the
+(`min-h-0 flex-1 overflow-y-auto`); the rail wrapper renders ONLY when it
+has content (infoboxes present or POST mode) so blank space never pushes
+content down. The sidebar itself grows on wide screens (`lg:w-80
+xl:w-96`) instead of giving everything to the text column. Grid density
+is container-query driven: the results column is an `@container` and
+every grid steps its columns by container width (`@[24rem]`/`@[40rem]`/
+`@[46rem]`/`@[54rem]`/`@5xl` per grid, tuned so tiles stay ~180–320px) —
+widescreen (90rem cap) gains a column, centered (72rem) drops one, and an
+empty rail automatically widens the grids. Never convert these back to
+`sm:`/`xl:` viewport breakpoints (that is what broke centered mode's
+density). Diagnostics (`DebugPanels`) live in the
 results meta line on both desktop and mobile: the line reads 「找到 N 条
 相关结果 · 耗时 X.X 秒 ▾」 and clicking it expands a single engine-timing
-table — unresponsive engines share the same grid (red error label + empty
+table (`table-fixed` so the `w-24` name truncation works) — unresponsive
+engines share the same grid (AlertTriangle + red error label + empty
 bar, seconds column aligned); the panel starts expanded when there are
 zero results. Suggestions render as a single-row chip strip
 under the results meta line (`SuggestionsBox`, all breakpoints): chips

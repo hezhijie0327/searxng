@@ -55,7 +55,7 @@ export function PosterGrid({
         </h3>
         {result.content_html ? (
           <p
-            className="mt-1 line-clamp-2 text-xs leading-relaxed text-ink-2"
+            className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-ink-2"
             dangerouslySetInnerHTML={{ __html: result.content_html }}
             dir="auto"
           />
@@ -67,7 +67,7 @@ export function PosterGrid({
     );
   });
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 @sm:grid-cols-3 @[40rem]:grid-cols-4 @[46rem]:grid-cols-5 @5xl:grid-cols-6">
       {cells}
     </div>
   );

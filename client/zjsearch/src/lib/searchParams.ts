@@ -7,6 +7,7 @@
  * body and the parser in sync.
  */
 
+import { fetchText } from "@/lib/http.ts";
 import { extractPageData } from "@/lib/pageData.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
@@ -71,7 +72,7 @@ export function shareableSearchUrl(data: SearchPageData): string {
 }
 
 /** The same parameters as a multipart form body (POST-mode searches). */
-export function toSearchFormData(params: SearchParams): FormData {
+function toSearchFormData(params: SearchParams): FormData {
   const body = new FormData();
   for (const [key, value] of searchParamEntries(params)) {
     body.append(key, value);
@@ -112,12 +113,9 @@ export function parseSearchUrl(url: URL): SearchParams {
 /** Fetch one results page through the current effective method: POST mode
     pages the query through the request body, GET mode through the URL. */
 export async function fetchSearchPage(params: SearchParams, method: "GET" | "POST"): Promise<SearchPageData> {
-  const response =
+  const html =
     method === "POST"
-      ? await fetch("/search", { body: toSearchFormData(params), headers: { Accept: "text/html" }, method: "POST" })
-      : await fetch(buildSearchUrl(params), { headers: { Accept: "text/html" } });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-  return extractPageData(await response.text()) as SearchPageData;
+      ? await fetchText("/search", { body: toSearchFormData(params), headers: { Accept: "text/html" }, method: "POST" })
+      : await fetchText(buildSearchUrl(params), { headers: { Accept: "text/html" } });
+  return extractPageData(html) as SearchPageData;
 }

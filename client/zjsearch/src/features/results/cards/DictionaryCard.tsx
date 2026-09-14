@@ -12,7 +12,7 @@ export function DictionaryCard({ result, globals }: CardProps) {
   return (
     <ResultArticle priority={result.priority}>
       <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h3 className="text-lg font-semibold leading-snug">
+        <h3 className="line-clamp-2 min-w-0 text-base font-medium leading-snug">
           <ResultLink
             className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
             globals={globals}

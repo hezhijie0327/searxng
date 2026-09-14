@@ -13,6 +13,7 @@ import {
 } from "@/features/results/cardParts.tsx";
 import { formatDate } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
+import { META_ROW } from "@/lib/styles.ts";
 
 /** Scholarly layout (science intent, arxiv/pubmed/...): authors · venue ·
     date meta line, clamped abstract, PDF/HTML actions and a compact DOI
@@ -90,10 +91,7 @@ export function PaperCard({ result, globals }: CardProps) {
             // single line that swipes horizontally when it overflows (same
             // interaction as the filter rows) - touch users can reach the
             // truncated tail, no hover needed
-            <p
-              className="mt-1 flex items-center gap-1 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 text-xs text-ink-3"
-              dir="auto"
-            >
+            <p className={`${META_ROW} mt-1 gap-1 text-xs text-ink-3`} dir="auto">
               {metaBits.filter(Boolean).map((bit, index) => (
                 <span key={index}>
                   {index > 0 ? <span className="text-ink-3"> · </span> : null}
@@ -104,7 +102,7 @@ export function PaperCard({ result, globals }: CardProps) {
           ) : null}
           {result.content_html ? (
             <p
-              className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
+              className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
               dangerouslySetInnerHTML={{ __html: result.content_html }}
               dir="auto"
             />
@@ -139,7 +137,7 @@ export function PaperCard({ result, globals }: CardProps) {
                   ) : null}
                   {result.doi ? (
                     <a
-                      className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 font-mono text-[11px] leading-4 text-ink-2 hover:text-ink"
+                      className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2 hover:text-ink"
                       dir="ltr"
                       href={doiHref}
                       rel="noreferrer"
@@ -147,7 +145,7 @@ export function PaperCard({ result, globals }: CardProps) {
                       title={`DOI ${result.doi}`}
                     >
                       <Fingerprint className="size-3 shrink-0" />
-                      {result.doi}
+                      <span className="truncate">{result.doi}</span>
                     </a>
                   ) : null}
                 </div>

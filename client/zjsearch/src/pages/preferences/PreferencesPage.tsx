@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { AlertTriangle, Check, Cookie, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { AlertTriangle, Cookie, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { flashToast } from "@/lib/toast.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
 import { CookiesTab } from "@/pages/preferences/tabs/CookiesTab.tsx";
 import { EnginesPane } from "@/pages/preferences/tabs/EnginesPane.tsx";
@@ -24,6 +25,15 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
   const [tab, setTab] = useState<PrefsTab>("general");
   const [engineTab, setEngineTab] = useState(0);
 
+  // transient save confirmation in the shared floating-toast language —
+  // nothing in flow, so its appearance never shifts the form
+  const savedAt = form.savedAt;
+  useEffect(() => {
+    if (savedAt > 0) {
+      flashToast(t("saved"), { tone: "ok", timeoutMs: 2000 });
+    }
+  }, [savedAt, t]);
+
   const isPreview = new URLSearchParams(window.location.search).get("preferences_preview_only") === "true";
 
   const tabs = [
@@ -39,23 +49,8 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
     <Shell embedded={embedded} globals={globals}>
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-20 sm:px-6">
         {!embedded ? (
-          <div className="flex items-center justify-between py-6">
+          <div className="flex items-center py-6">
             <h1 className="text-2xl font-semibold tracking-tight text-ink">{t("preferences")}</h1>
-            <div className="flex items-center gap-3">
-              {form.savedAt > 0 ? (
-                <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
-                  <Check className="size-3.5" />
-                  {t("saved")}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        ) : form.savedAt > 0 ? (
-          <div className="flex justify-end py-3">
-            <span className="inline-flex items-center gap-1 text-xs text-ok animate-fade-in">
-              <Check className="size-3.5" />
-              {t("saved")}
-            </span>
           </div>
         ) : null}
 

@@ -156,8 +156,8 @@ export function SearchBox({
       <form
         className={`flex w-full items-center gap-1 rounded-full border border-line bg-surface transition-shadow ${
           variant === "hero"
-            ? "h-14 ps-6 pe-2.5 shadow-card focus-within:shadow-pop focus-within:border-ink-3/40"
-            : "h-12 ps-5 pe-2 focus-within:shadow-card"
+            ? "h-14 ps-6 pe-2.5 shadow-card focus-within:border-ink-3/40 focus-within:shadow-pop"
+            : "h-12 ps-5 pe-2 shadow-card focus-within:border-ink-3/40"
         }`}
         onSubmit={onSubmit}
         role="search"
@@ -170,9 +170,7 @@ export function SearchBox({
           aria-label={t("search")}
           autoCapitalize="none"
           autoComplete="off"
-          className={`min-w-0 flex-1 bg-transparent outline-none placeholder:text-ink-3 ${
-            variant === "hero" ? "text-lg" : "text-base"
-          }`}
+          className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ink-3"
           dir="auto"
           name="q"
           onChange={(event) => {
@@ -198,7 +196,7 @@ export function SearchBox({
             }}
             type="button"
           >
-            <X className="size-[18px] text-ink-2" />
+            <X className="size-4.5 text-ink-2" />
           </button>
         ) : null}
         <button
@@ -207,7 +205,7 @@ export function SearchBox({
           disabled={loading}
           type="submit"
         >
-          {loading ? <LoaderCircle className="size-4 animate-spin-slow" /> : <Search className="size-[18px]" />}
+          {loading ? <LoaderCircle className="size-4 animate-spin-slow" /> : <Search className="size-4.5" />}
         </button>
       </form>
 
@@ -219,11 +217,15 @@ export function SearchBox({
           role="listbox"
         >
           {suggestions.map((suggestion, index) => (
-            <li aria-selected={index === active} id={`${listboxId}-${index}`} key={suggestion.text} role="option">
+            <li key={suggestion.text}>
+              {/* option role on the button: role=option must not nest
+                  interactive descendants (activedescendant targets this id) */}
               <button
-                className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm ${
+                aria-selected={index === active}
+                className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] ${
                   index === active ? "bg-surface-2" : ""
                 } hover:bg-surface-2/70`}
+                id={`${listboxId}-${index}`}
                 onMouseDown={(event) => {
                   // prevent blur before submit
                   event.preventDefault();
@@ -233,6 +235,7 @@ export function SearchBox({
                 onMouseEnter={() => {
                   setActive(index);
                 }}
+                role="option"
                 type="button"
               >
                 <Search className="size-3.5 shrink-0 text-ink-3" />
