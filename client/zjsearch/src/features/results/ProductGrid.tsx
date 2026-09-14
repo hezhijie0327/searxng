@@ -3,6 +3,7 @@
 import { Globe, Package, Tag, Truck } from "lucide-react";
 import { ResultLink } from "@/features/results/cardParts.tsx";
 import { TileEngines, TileThumb } from "@/features/results/Tile.tsx";
+import { SWIPE_ROW } from "@/lib/styles.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 export function ProductGrid({ results, globals }: { results: ResultItem[]; globals: GlobalData }) {
@@ -40,7 +41,7 @@ export function ProductGrid({ results, globals }: { results: ResultItem[]; globa
               {result.price}
             </p>
           ) : null}
-          <div className="mt-0.5 flex flex-nowrap items-center gap-x-2 overflow-x-auto text-xs text-ink-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
+          <div className={`mt-0.5 text-xs text-ink-3 ${SWIPE_ROW} gap-x-2`}>
             {result.shipping ? (
               <span className="inline-flex items-center gap-1">
                 <Truck className="size-3" />

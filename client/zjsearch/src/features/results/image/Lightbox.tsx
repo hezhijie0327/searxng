@@ -341,13 +341,20 @@ export function Lightbox({
               {result.engines.length > 1 ? (
                 <button
                   aria-expanded={enginesExpanded}
-                  className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-zinc-300 transition-colors hover:text-white"
                   onClick={() => {
                     setEnginesExpanded((value) => !value);
                   }}
                   type="button"
                 >
-                  {enginesExpanded ? t("show_less") : `+${result.engines.length - 1}`}
+                  {enginesExpanded ? (
+                    <>
+                      <ChevronLeft className="size-3 shrink-0" />
+                      {t("show_less")}
+                    </>
+                  ) : (
+                    `+${result.engines.length - 1}`
+                  )}
                 </button>
               ) : null}
               {cacheUrl ? (

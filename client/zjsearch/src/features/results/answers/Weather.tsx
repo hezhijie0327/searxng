@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { MapPin } from "lucide-react";
+import { ChevronLeft, MapPin } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n.ts";
 import type { AnswerData, WeatherItem } from "@/lib/types.ts";
@@ -216,12 +216,13 @@ export function WeatherAnswer({
           ) : null}
           {sourcesExpanded && hiddenSources > 0 ? (
             <button
-              className="transition-colors hover:text-ink"
+              className="inline-flex items-center gap-1 transition-colors hover:text-ink"
               onClick={() => {
                 setSourcesExpanded(false);
               }}
               type="button"
             >
+              <ChevronLeft className="size-3 shrink-0" />
               {t("show_less")}
             </button>
           ) : null}

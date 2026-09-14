@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Calendar, Code, ExternalLink, Scale, Star, User } from "lucide-react";
+import { Calendar, ChevronLeft, Code, ExternalLink, Scale, Star, User } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { type CardProps, EnginesLine, PrettyUrl, ResultArticle, Title } from "@/features/results/cardParts.tsx";
 import { formatDate } from "@/lib/format.ts";
@@ -92,14 +92,21 @@ export function PackageCard({ result, globals }: CardProps) {
           {result.tags.length > 4 ? (
             <button
               aria-expanded={tagsExpanded}
-              className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-3 transition-colors hover:text-ink"
+              className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-ink-3 transition-colors hover:text-ink"
               onClick={() => {
                 setTagsExpanded((value) => !value);
               }}
               title={result.tags.join(", ")}
               type="button"
             >
-              {tagsExpanded ? t("show_less") : `+${result.tags.length - 4}`}
+              {tagsExpanded ? (
+                <>
+                  <ChevronLeft className="size-3 shrink-0" />
+                  {t("show_less")}
+                </>
+              ) : (
+                `+${result.tags.length - 4}`
+              )}
             </button>
           ) : null}
         </div>

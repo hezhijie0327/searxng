@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { BookOpen, Calendar, ExternalLink, FileText, Fingerprint, Quote, User } from "lucide-react";
+import { BookOpen, Calendar, ChevronLeft, ExternalLink, FileText, Fingerprint, Quote, User } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import {
   type CardProps,
@@ -162,14 +162,21 @@ export function PaperCard({ result, globals }: CardProps) {
                   {tags.length > maxTags ? (
                     <button
                       aria-expanded={tagsExpanded}
-                      className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-3 transition-colors hover:text-ink"
+                      className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-ink-3 transition-colors hover:text-ink"
                       onClick={() => {
                         setTagsExpanded((value) => !value);
                       }}
                       title={tags.join(", ")}
                       type="button"
                     >
-                      {tagsExpanded ? t("show_less") : `+${tags.length - maxTags}`}
+                      {tagsExpanded ? (
+                        <>
+                          <ChevronLeft className="size-3 shrink-0" />
+                          {t("show_less")}
+                        </>
+                      ) : (
+                        `+${tags.length - maxTags}`
+                      )}
                     </button>
                   ) : null}
                 </div>

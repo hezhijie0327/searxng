@@ -1,10 +1,24 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Archive, Award, Calendar, Clock, Eye, Globe, ImageOff, Music, Play, Server, User } from "lucide-react";
+import {
+  Archive,
+  Award,
+  Calendar,
+  ChevronLeft,
+  Clock,
+  Eye,
+  Globe,
+  ImageOff,
+  Music,
+  Play,
+  Server,
+  User,
+} from "lucide-react";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { formatDate, formatLength, formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
+import { SWIPE_ROW } from "@/lib/styles.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 // ------------------------------------------------------------- shared parts
@@ -169,10 +183,8 @@ export function EnginesLine({
   const pill = "inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5";
   return (
     <div
-      className={`mt-2 flex min-w-0 items-center text-xs text-ink-3 ${
-        compact
-          ? "flex-nowrap gap-x-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0"
-          : "flex-wrap gap-x-2 gap-y-1"
+      className={`mt-2 flex min-w-0 items-center gap-x-2 text-xs text-ink-3 ${
+        compact ? SWIPE_ROW : "flex-wrap gap-y-1"
       }`}
     >
       {typeof result.score === "number" ? (
@@ -205,7 +217,14 @@ export function EnginesLine({
           }}
           type="button"
         >
-          {expanded ? t("show_less") : `+${hidden}`}
+          {expanded ? (
+            <>
+              <ChevronLeft className="size-3 shrink-0" />
+              {t("show_less")}
+            </>
+          ) : (
+            `+${hidden}`
+          )}
         </button>
       ) : null}
       {cacheUrl ? (
