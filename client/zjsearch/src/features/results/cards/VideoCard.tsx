@@ -37,7 +37,7 @@ export function VideoCard({ eager, result, globals }: CardProps) {
             </div>
           ) : null}
           <p
-            className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-2"
+            className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-2"
             dangerouslySetInnerHTML={{ __html: result.content_html || t("no_description") }}
             dir="auto"
           />

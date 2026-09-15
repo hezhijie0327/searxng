@@ -13,7 +13,7 @@ export function ResultRow({ index, selected, children }: { index: number; select
   const animate = index < FADE_UP_SLOTS;
   return (
     <div
-      className={`break-inside-avoid rounded-2xl ${selected ? "bg-surface ring-1 ring-accent-strong" : ""} ${
+      className={`rounded-2xl ${selected ? "bg-surface ring-1 ring-accent-strong" : ""} ${
         animate ? "animate-fade-up" : ""
       }`}
       data-hotkey-index={index}
