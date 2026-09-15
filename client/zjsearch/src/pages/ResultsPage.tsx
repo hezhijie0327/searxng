@@ -355,13 +355,12 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
             )}
           </div>
 
-          {/* the rail area disappears entirely when it has no content (e.g.
-              "test"-style searches) so blank space never pushes content down */}
-          {showSkeletons || data.infoboxes.length > 0 || globals.method === "POST" ? (
-            <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 xl:w-96 lg:pb-6">
-              {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
-            </div>
-          ) : null}
+          {/* the right rail is reserved on desktop so the two-column layout
+              stays stable: the infobox fills it when the query has one,
+              otherwise the column sits empty by design */}
+          <div className="hidden w-full shrink-0 pt-4 lg:flex lg:flex-col lg:gap-3 lg:w-80 xl:w-96 lg:pb-6">
+            {showSkeletons ? null : <Sidebar data={data} onSearch={submitQuery} />}
+          </div>
         </div>
       </main>
 
