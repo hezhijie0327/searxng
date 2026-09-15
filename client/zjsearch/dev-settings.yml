@@ -62,34 +62,39 @@ outgoing:
   request_timeout: 5.0
   # proxies:
   #   all://:
+  #     - http://10.192.7.1:7890
   #     - http://192.168.20.23:7890
 
 # tor_check plugin: fetches check.torproject.org through the outgoing proxy
 # above (reachable that way on this network).  NOTE: a `plugins:` override
-# REPLACES the default set (settings_loader.update_settings), so the
-# previously-default active plugins are mirrored here.
+# REPLACES the default set (settings_loader.update_settings), so every shipped
+# plugin is listed here explicitly (all active, alphabetized).
 plugins:
+  searx.plugins.advanced_search_syntax.SXNGPlugin:
+    active: true
+  searx.plugins.ahmia_filter.SXNGPlugin:
+    active: true
   searx.plugins.calculator.SXNGPlugin:
     active: true
   searx.plugins.currency_convert.SXNGPlugin:
     active: true
   searx.plugins.hash_plugin.SXNGPlugin:
     active: true
-  searx.plugins.self_info.SXNGPlugin:
-    active: true
-  searx.plugins.unit_converter.SXNGPlugin:
-    active: true
-  searx.plugins.advanced_search_syntax.SXNGPlugin:
-    active: true
-  searx.plugins.ahmia_filter.SXNGPlugin:
-    active: true
   searx.plugins.hostnames.SXNGPlugin:
+    active: true
+  searx.plugins.infinite_scroll.SXNGPlugin:
+    active: true
+  searx.plugins.oa_doi_rewrite.SXNGPlugin:
+    active: true
+  searx.plugins.self_info.SXNGPlugin:
     active: true
   searx.plugins.time_zone.SXNGPlugin:
     active: true
+  searx.plugins.tor_check.SXNGPlugin:
+    active: true
   searx.plugins.tracker_url_remover.SXNGPlugin:
     active: true
-  searx.plugins.tor_check.SXNGPlugin:
+  searx.plugins.unit_converter.SXNGPlugin:
     active: true
 
 # movie engines for the !movies poster wall (both disabled upstream)
