@@ -2,7 +2,6 @@
 
 import { LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
-import { BrandMark } from "@/components/Brand.tsx";
 import { Shell } from "@/components/Shell.tsx";
 import { OverlayProvider } from "@/features/overlay/OverlayProvider.tsx";
 import { I18nContext, useT } from "@/lib/i18n.ts";
@@ -61,7 +60,6 @@ function Pages() {
       return (
         <Shell globals={globals}>
           <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 px-4 pb-24 text-center animate-fade-up">
-            <BrandMark className="size-14 rounded-[22%]" />
             <h1 className="text-5xl font-semibold tracking-tight text-ink">404</h1>
             <p className="text-sm text-ink-2">{t("page_not_found")}</p>
           </main>

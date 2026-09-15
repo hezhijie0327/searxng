@@ -1,7 +1,9 @@
 {% extends "zjsearch/base.html" %}
 {% from "zjsearch/data/macros.html" import page_preferences with context %}
-{% block title %}{{ _('Preferences') }} - {% endblock %}
+{% from "zjsearch/noscript.html" import ns_prefs with context %}
+{% block title %}Preferences - {% endblock %}
 {% block head %}{% endblock %}
+{% block noscript %}{{ ns_prefs() }}{% endblock %}
 {% block page_data -%}
 {{- page_preferences(preferences, selected_categories, locales, current_locale,
                      engines_by_category, stats, max_rate95, reliabilities,

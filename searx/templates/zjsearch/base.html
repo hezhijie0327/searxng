@@ -47,15 +47,13 @@ module script tag.  See ``client/zjsearch/`` for the UI implementation. -#}
 <body>
   <div id="app"></div>
   <noscript>
+    {% block noscript %}
     <div class="zjs-noscript">
       <h1>{{ instance_name }}</h1>
-      <p>{{ _('JavaScript is disabled or not supported. The zjsearch interface needs JavaScript.') }}</p>
-      <p>
-        <a href="{{ url_for('search') }}?q=" >{{ _('Search without JavaScript (basic theme)') }}</a>
-        &middot;
-        <a href="{{ url_for('preferences') }}?preferences=eJwryUjNTbUtzswtyEkFAB-OBNs=">{{ _('Switch to the simple theme') }}</a>
-      </p>
+      <p>JavaScript is disabled or not supported — the ZJSearch interface needs it.</p>
+      <p><a href="{{ url_for('index') }}">Back to search</a></p>
     </div>
+    {% endblock %}
   </noscript>
   <script id="page-data" type="application/json">{% block page_data %}{}{% endblock %}</script>
   <script type="module" src="{{ url_for('static', filename='zjsearch.min.js') }}" client_settings="{{ client_settings }}"></script>
