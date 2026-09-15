@@ -79,6 +79,8 @@ plugins:
     active: true
   searx.plugins.unit_converter.SXNGPlugin:
     active: true
+  searx.plugins.advanced_search_syntax.SXNGPlugin:
+    active: true
   searx.plugins.ahmia_filter.SXNGPlugin:
     active: true
   searx.plugins.hostnames.SXNGPlugin:
