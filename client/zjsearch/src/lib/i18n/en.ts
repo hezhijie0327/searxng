@@ -294,6 +294,7 @@ export const EN = {
   answerer_stats_desc: "Compute min/max/avg/sum over the arguments",
   answerer_random: "Random value generator",
   answerer_random_desc: "Generate a random UUID, string, integer, float or color",
+  back_to_search: "Back to search",
   widget_tor: "Check if you are using Tor",
   tor_using: "You are using Tor",
   tor_not_using: "You are not using Tor",

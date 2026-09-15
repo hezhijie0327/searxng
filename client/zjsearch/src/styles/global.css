@@ -359,12 +359,12 @@
     line-height: 1.35;
   }
 
-  .zjs-ns-article h3 a {
+  .zjs-ns-title-link {
     color: var(--ns-ink);
     text-decoration: none;
   }
 
-  .zjs-ns-article h3 a:hover {
+  .zjs-ns-title-link:hover {
     color: var(--ns-accent);
     text-decoration: underline;
     text-underline-offset: 2px;

@@ -8,7 +8,7 @@
     self-contained document style with its own light/dark palette. -#}
 
 {% macro ns_brand() -%}
-<div class="zjs-ns-brand"><span class="zjs-ns-wordmark">ZJSearch<span class="zjs-ns-dot">.</span></span></div>
+<div class="zjs-ns-brand"><span class="zjs-ns-wordmark">{{ instance_name }}<span class="zjs-ns-dot">.</span></span></div>
 {%- endmacro %}
 
 {% macro ns_form(q) -%}
@@ -41,7 +41,7 @@
     {%- for result in results %}
     <article class="zjs-ns-article">
       <div class="zjs-ns-host">{{ result.pretty_url or result.url }}</div>
-      <h3><a href="{{ result.url }}" rel="noreferrer">{% if result.title %}{{ result.title|safe }}{% else %}{{ result.url }}{% endif %}</a></h3>
+      <h3><a class="zjs-ns-title-link" href="{{ result.url }}" rel="noreferrer">{% if result.title %}{{ result.title|safe }}{% else %}{{ result.url }}{% endif %}</a></h3>
       {%- if result.content %}<p>{{ result.content|safe }}</p>{% endif %}
       {%- if result.publishedDate %}<time>{{ result.publishedDate.strftime('%Y-%m-%d') }}</time>{% endif %}
     </article>

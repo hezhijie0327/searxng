@@ -2,7 +2,7 @@
 
 import { LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
-import { Shell } from "@/components/Shell.tsx";
+import { Link, Shell } from "@/components/Shell.tsx";
 import { OverlayProvider } from "@/features/overlay/OverlayProvider.tsx";
 import { I18nContext, useT } from "@/lib/i18n.ts";
 import { RouterProvider, useRouter } from "@/lib/router.tsx";
@@ -57,11 +57,18 @@ function Pages() {
     case "index":
       return <IndexPage data={data} />;
     default:
+      // no top nav on the 404 shell: its links (engine stats, info, instance
+      // URLs) are instance details a prober shouldn't get served for free
       return (
-        <Shell globals={globals}>
+        <Shell globals={globals} hideTopNav>
           <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 px-4 pb-24 text-center animate-fade-up">
             <h1 className="text-5xl font-semibold tracking-tight text-ink">404</h1>
             <p className="text-sm text-ink-2">{t("page_not_found")}</p>
+            <p className="text-sm">
+              <Link className="text-accent hover:underline" href="/">
+                {t("back_to_search")}
+              </Link>
+            </p>
           </main>
         </Shell>
       );

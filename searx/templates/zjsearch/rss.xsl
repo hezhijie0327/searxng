@@ -2,6 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" version="5" encoding="UTF-8" indent="yes" />
   <xsl:template match="rss">
+    <xsl:variable name="instance" select="channel/instance_name" />
     <xsl:variable name="q">
       <xsl:choose>
         <xsl:when test="contains(channel/title, 'search: ')">
@@ -14,7 +15,7 @@
     </xsl:variable>
     <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
-        <title><xsl:value-of select="$q" /> - ZJSearch RSS Feed</title>
+        <title><xsl:value-of select="$q" /> - <xsl:value-of select="$instance" /> RSS Feed</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <style>
@@ -77,7 +78,7 @@
       <body>
         <header>
           <div class="brand">
-            <span class="wordmark">ZJSearch<span class="dot">.</span></span>
+            <span class="wordmark"><xsl:value-of select="$instance" /><span class="dot">.</span></span>
           </div>
           <h1><xsl:value-of select="$q" /></h1>
           <p class="meta">
@@ -121,7 +122,7 @@
             </article>
           </xsl:for-each>
         </main>
-        <footer>© <span id="year"></span> Zhijie Online</footer>
+        <footer>© <span id="year"></span> <xsl:value-of select="$instance" /></footer>
         <script>
           document.getElementById("year").textContent = new Date().getFullYear();
         </script>

@@ -288,6 +288,7 @@ export const ZH_CN: Record<StringKey, string> = {
   answerer_stats_desc: "对参数计算最小值/最大值/平均值/总和",
   answerer_random: "随机数生成器",
   answerer_random_desc: "生成随机 UUID、字符串、整数、浮点数、颜色",
+  back_to_search: "返回搜索",
   widget_tor: "检测是否正在使用 Tor",
   tor_using: "你正在使用 Tor",
   tor_not_using: "你未使用 Tor",
