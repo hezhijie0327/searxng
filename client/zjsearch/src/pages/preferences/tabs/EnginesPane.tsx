@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Check, LayoutGrid, X } from "lucide-react";
+import { Check, Key, LayoutGrid, X } from "lucide-react";
 import { categoryLabel } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
 import { EnginesTab } from "@/pages/preferences/EnginesTab.tsx";
-import { CategoryTab } from "@/pages/preferences/parts.tsx";
+import { Card, CategoryTab, SettingRow } from "@/pages/preferences/parts.tsx";
 import type { PreferencesForm } from "@/pages/preferences/usePreferencesForm.ts";
 
-/** Engines tab pane: per-category engine tables plus the enable/disable-all
-    shortcuts for the visible category. */
+/** Engines tab pane: the private-engine tokens up top, then the per-category
+    engine tables with the enable/disable-all shortcuts — in the shared
+    Card + GroupHeader language of the other tabs. */
 export function EnginesPane({
   data,
   form,
@@ -29,12 +30,27 @@ export function EnginesPane({
       )
     : [];
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex items-center gap-2 text-sm text-ink-2">
-          <LayoutGrid className="size-4 text-ink-3" />
-          {t("currently_used_engines")}
-        </p>
+    <Card>
+      {/* access tokens unlock private engines — kept first so they are found
+          without scrolling past the tables */}
+      <SettingRow description={t("access_tokens")} icon={<Key className="size-4.5" />} title={t("engine_tokens")}>
+        <input
+          aria-label={t("engine_tokens")}
+          autoComplete="off"
+          className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-sm transition-colors hover:border-ink-3 sm:w-60"
+          onChange={(event) => {
+            form.setTokens(event.target.value);
+          }}
+          spellCheck={false}
+          type="text"
+          value={form.tokens}
+        />
+      </SettingRow>
+      <SettingRow
+        description={t("engines_list_desc")}
+        icon={<LayoutGrid className="size-4.5" />}
+        title={t("engines_list")}
+      >
         {currentEngineTab ? (
           <div className="flex items-center gap-1.5">
             <button
@@ -59,19 +75,21 @@ export function EnginesPane({
             </button>
           </div>
         ) : null}
-      </div>
-      <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
-        {data.engine_tabs.map((tabInfo, index) => (
-          <CategoryTab
-            active={index === engineTab}
-            category={tabInfo.category}
-            key={tabInfo.category}
-            label={categoryLabel(tabInfo.category, t)}
-            onClick={() => {
-              onEngineTab(index);
-            }}
-          />
-        ))}
+      </SettingRow>
+      <div className="px-5 py-3 sm:px-6">
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+          {data.engine_tabs.map((tabInfo, index) => (
+            <CategoryTab
+              active={index === engineTab}
+              category={tabInfo.category}
+              key={tabInfo.category}
+              label={categoryLabel(tabInfo.category, t)}
+              onClick={() => {
+                onEngineTab(index);
+              }}
+            />
+          ))}
+        </div>
       </div>
       {currentEngineTab ? (
         <EnginesTab
@@ -81,6 +99,6 @@ export function EnginesPane({
           toggleEngine={form.toggleEngine}
         />
       ) : null}
-    </div>
+    </Card>
   );
 }

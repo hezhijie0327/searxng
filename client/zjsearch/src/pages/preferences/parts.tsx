@@ -68,8 +68,8 @@ export function SettingRow({
 }: {
   icon: ReactNode;
   title: string;
-  description?: string;
-  children: ReactNode;
+  description?: ReactNode;
+  children?: ReactNode;
   stacked?: boolean;
 }) {
   if (stacked) {
@@ -82,7 +82,7 @@ export function SettingRow({
             {description ? <p className="mt-0.5 text-xs leading-relaxed text-ink-3">{description}</p> : null}
           </div>
         </div>
-        <div className="mt-4 sm:pl-14">{children}</div>
+        {children ? <div className="mt-4 sm:pl-14">{children}</div> : null}
       </div>
     );
   }
@@ -95,7 +95,7 @@ export function SettingRow({
           {description ? <p className="mt-0.5 text-xs leading-relaxed text-ink-3">{description}</p> : null}
         </div>
       </div>
-      <div className="shrink-0">{children}</div>
+      {children ? <div className="shrink-0">{children}</div> : null}
     </div>
   );
 }
@@ -106,6 +106,12 @@ export function Card({ children }: { children: ReactNode }) {
       {children}
     </div>
   );
+}
+
+/** Section header inside a Card — Card's divide-y draws the separators, so a
+    Fragment of header + rows works as one group. */
+export function GroupHeader({ label }: { label: string }) {
+  return <p className="bg-surface-2/60 px-5 py-2.5 text-xs font-medium text-ink-3 sm:px-6">{label}</p>;
 }
 
 export function Switch({
@@ -177,6 +183,8 @@ const PLUGIN_I18N: Record<string, { description: StringKey; name: StringKey }> =
   currency_convert: { description: "plugin_currency_convert_desc", name: "plugin_currency_convert" },
   hash_plugin: { description: "plugin_hash_plugin_desc", name: "plugin_hash_plugin" },
   hostnames: { description: "plugin_hostnames_desc", name: "plugin_hostnames" },
+  infiniteScroll: { description: "plugin_infinite_scroll_desc", name: "plugin_infinite_scroll" },
+  oa_doi_rewrite: { description: "plugin_oa_doi_rewrite_desc", name: "plugin_oa_doi_rewrite" },
   self_info: { description: "plugin_self_info_desc", name: "plugin_self_info" },
   time_zone: { description: "plugin_time_zone_desc", name: "plugin_time_zone" },
   tor_check: { description: "plugin_tor_check_desc", name: "plugin_tor_check" },
@@ -201,15 +209,36 @@ export function PluginRow({
   plugin,
   enabled,
   onChange,
+  icon,
+  keywords,
 }: {
   plugin: { id: string; name: string; description: string };
   enabled: boolean;
   onChange: (checked: boolean) => void;
+  icon?: ReactNode;
+  keywords?: string[];
 }) {
   const t = useT();
   const labels = pluginLabels(plugin, t);
+  // query plugins carry their trigger keywords — show them as code chips so
+  // the plugins tab keeps the documentation the old query table had
+  const description: ReactNode =
+    keywords && keywords.length > 0 ? (
+      <>
+        {labels.description}
+        <span className="mt-1 flex flex-wrap gap-1">
+          {keywords.map((keyword) => (
+            <code className="rounded bg-surface-2 px-1.5 py-0.5" key={keyword}>
+              {keyword}
+            </code>
+          ))}
+        </span>
+      </>
+    ) : (
+      labels.description
+    );
   return (
-    <SettingRow description={labels.description} icon={<Sparkle className="size-4.5" />} title={labels.name}>
+    <SettingRow description={description} icon={icon ?? <Sparkle className="size-4.5" />} title={labels.name}>
       <Switch checked={enabled} label={labels.name} onChange={onChange} />
     </SettingRow>
   );

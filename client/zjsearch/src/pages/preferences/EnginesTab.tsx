@@ -191,7 +191,8 @@ export function EnginesTab({
   const ariaSort = (key: EngineSortKey) => (sort.key === key ? (sort.asc ? "ascending" : "descending") : undefined);
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-line">
+    /* no own border — the enclosing preferences Card frames the table */
+    <div className="overflow-x-auto">
       <table className="w-full min-w-[680px] text-left text-xs">
         <thead className="bg-surface-2 text-ink-3">
           <tr>

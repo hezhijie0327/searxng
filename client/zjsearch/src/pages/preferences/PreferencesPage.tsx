@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { AlertTriangle, Cookie, LayoutGrid, Shield, SlidersHorizontal, Sun, Terminal } from "lucide-react";
+import { AlertTriangle, Cookie, LayoutGrid, Palette, Puzzle, SlidersHorizontal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
 import { useT } from "@/lib/i18n.ts";
 import { flashToast } from "@/lib/toast.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
-import { CookiesTab } from "@/pages/preferences/tabs/CookiesTab.tsx";
+import { CookieTab } from "@/pages/preferences/tabs/CookieTab.tsx";
 import { EnginesPane } from "@/pages/preferences/tabs/EnginesPane.tsx";
 import { GeneralTab } from "@/pages/preferences/tabs/GeneralTab.tsx";
-import { PrivacyTab } from "@/pages/preferences/tabs/PrivacyTab.tsx";
-import { QueryTab } from "@/pages/preferences/tabs/QueryTab.tsx";
+import { PluginsTab } from "@/pages/preferences/tabs/PluginsTab.tsx";
 import { UiTab } from "@/pages/preferences/tabs/UiTab.tsx";
 import { usePreferencesForm } from "@/pages/preferences/usePreferencesForm.ts";
 
-type PrefsTab = "general" | "ui" | "privacy" | "engines" | "query" | "cookies";
+type PrefsTab = "general" | "ui" | "engines" | "plugins" | "cookies";
 
 export function PreferencesPage({ data, embedded = false }: { data: PreferencesPageData; embedded?: boolean }) {
   const t = useT();
@@ -38,10 +37,9 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
 
   const tabs = [
     { id: "general", label: t("general"), icon: <SlidersHorizontal className="size-3.5" /> },
-    { id: "ui", label: t("user_interface"), icon: <Sun className="size-3.5" /> },
-    { id: "privacy", label: t("privacy"), icon: <Shield className="size-3.5" /> },
+    { id: "ui", label: t("user_interface"), icon: <Palette className="size-3.5" /> },
+    { id: "plugins", label: t("plugins"), icon: <Puzzle className="size-3.5" /> },
     { id: "engines", label: t("engines"), icon: <LayoutGrid className="size-3.5" /> },
-    { id: "query", label: t("special_queries"), icon: <Terminal className="size-3.5" /> },
     { id: "cookies", label: t("cookies"), icon: <Cookie className="size-3.5" /> },
   ] as const;
 
@@ -99,12 +97,11 @@ export function PreferencesPage({ data, embedded = false }: { data: PreferencesP
         <div aria-labelledby={`prefs-tab-${tab}`} id={`prefs-panel-${tab}`} key={tab} role="tabpanel">
           {tab === "general" ? <GeneralTab data={data} form={form} locked={locked} /> : null}
           {tab === "ui" ? <UiTab data={data} form={form} locked={locked} /> : null}
-          {tab === "privacy" ? <PrivacyTab data={data} form={form} locked={locked} /> : null}
           {tab === "engines" ? (
             <EnginesPane data={data} engineTab={engineTab} form={form} onEngineTab={setEngineTab} />
           ) : null}
-          {tab === "query" ? <QueryTab data={data} form={form} /> : null}
-          {tab === "cookies" ? <CookiesTab data={data} form={form} /> : null}
+          {tab === "plugins" ? <PluginsTab data={data} form={form} /> : null}
+          {tab === "cookies" ? <CookieTab data={data} form={form} /> : null}
         </div>
       </main>
     </Shell>
