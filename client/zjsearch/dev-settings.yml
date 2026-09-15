@@ -57,11 +57,12 @@ server:
   image_proxy: true
 
 # proxy so region-blocked engines are reachable from this network
+# (LAN-specific: uncomment and set your own proxy when needed)
 outgoing:
   request_timeout: 5.0
-  proxies:
-    all://:
-      - http://10.192.7.1:7890
+  # proxies:
+  #   all://:
+  #     - http://192.168.20.23:7890
 
 # tor_check plugin: fetches check.torproject.org through the outgoing proxy
 # above (reachable that way on this network).  NOTE: a `plugins:` override

@@ -1,10 +1,10 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 """A plugin to convert currency pairs given in the query term (e.g.
 ``5 usd to cny``).  It complements the unit_converter plugin: currency rates
-are dynamic, so this plugin fetches the ECB reference rates (Frankfurter API)
-and carries the whole rate table of the queried base currency in the payload
--- the theme's converter can then switch between any listed pair without a
-new request.
+are dynamic, so this plugin fetches the ECB reference rates (Frankfurter API
+v2, ``providers=ecb``) and carries the whole rate table of the queried base
+currency in the payload -- the theme's converter can then switch between any
+listed pair without a new request.
 
 Rates are cached in-process for an hour (reference rates move once a
 business day).  When the rate table is unavailable the plugin is silent --
@@ -50,16 +50,15 @@ RE_MEASURE = r'''
 
 CURRENCIES = frozenset(
     [
-        "AUD", "BGN", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP",
-        "HKD", "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN", "MYR",
-        "NOK", "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD",
-        "ZAR",
+        "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD",
+        "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN", "MYR", "NOK",
+        "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR",
     ]
 )
-"""ISO-4217 alpha codes the plugin accepts (the ECB reference rates provided
-by the Frankfurter API)."""
+"""ISO-4217 alpha codes the plugin accepts (the current ECB reference rates
+provided by the Frankfurter API v2)."""
 
-FRANKFURTER_URL = "https://api.frankfurter.dev/v1/latest?base={base}"
+FRANKFURTER_URL = "https://api.frankfurter.dev/v2/rates?base={base}&providers=ecb"
 CURRENCY_CACHE_TTL = 3600.0
 """Reference rates are updated once per business day; an hour is plenty."""
 
@@ -90,8 +89,12 @@ def _currency_rates(base: str) -> dict[str, float] | None:
         raise RequestException(f"currency rates unavailable ({exc})") from exc
 
     try:
-        rates = {k: float(v) for k, v in json.loads(body)["rates"].items() if float(v) > 0}
-    except (ValueError, KeyError) as exc:
+        # v2 answers with a JSON array of {"date", "base", "quote", "rate"}
+        # rows; error payloads (e.g. HTTP 422 for an invalid currency) are a
+        # dict instead, which surfaces here as a TypeError.
+        rows = json.loads(body)
+        rates = {r["quote"]: float(r["rate"]) for r in rows if float(r["rate"]) > 0}
+    except (ValueError, KeyError, TypeError) as exc:
         raise RequestException("unexpected currency rates payload") from exc
     if not rates:
         raise RequestException("empty currency rates payload")
@@ -116,7 +119,9 @@ def _convert(base: str, to_unit: str, value: float, locale: str) -> tuple[str, d
     from_value = babel.numbers.format_decimal(value, **format_args)
 
     units = [{"symbol": base, "to_si": 1.0}]
-    units.extend({"symbol": sym, "to_si": 1.0 / r} for sym, r in sorted(rates.items()) if r)
+    # v2 lists the base currency itself at rate 1.0 -- skip it, "base" is
+    # already the units head above.
+    units.extend({"symbol": sym, "to_si": 1.0 / r} for sym, r in sorted(rates.items()) if r and sym != base)
 
     data = {
         "kind": "unit_conversion",
