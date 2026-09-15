@@ -260,7 +260,6 @@ export const ZH_CN: Record<StringKey, string> = {
   ui_group_look: "外观与语言",
   ui_group_display: "结果展示",
   cookie_group_share: "偏好分享与恢复",
-  cookie_group_share_desc: "把当前偏好设置带到其他浏览器或设备",
   engines_list_desc: "按分类启用或禁用搜索引擎",
   cat_general: "综合",
   cat_images: "图片",

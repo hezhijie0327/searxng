@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { Cookie, ExternalLink, Key, Link as LinkIcon, RefreshCw, Share2, Trash2 } from "lucide-react";
+import { Cookie, ExternalLink, Key, Link as LinkIcon, RefreshCw, Trash2 } from "lucide-react";
 import { ClickToCopy } from "@/components/CopyButton.tsx";
 import { Link } from "@/components/Shell.tsx";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
-import { Card, SettingRow } from "@/pages/preferences/parts.tsx";
+import { Card, GroupHeader, SettingRow } from "@/pages/preferences/parts.tsx";
 import type { PreferencesForm } from "@/pages/preferences/usePreferencesForm.ts";
 
 /** Cookie transparency: what this instance stores in the visitor's browser,
@@ -45,11 +45,7 @@ export function CookieTab({ data, form }: { data: PreferencesPageData; form: Pre
         </p>
       )}
 
-      <SettingRow
-        description={t("cookie_group_share_desc")}
-        icon={<Share2 className="size-4.5" />}
-        title={t("cookie_group_share")}
-      />
+      <GroupHeader label={t("cookie_group_share")} />
       <SettingRow
         description={t("prefs_url_privacy_note")}
         icon={<LinkIcon className="size-4.5" />}

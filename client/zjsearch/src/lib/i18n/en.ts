@@ -265,7 +265,6 @@ export const EN = {
   ui_group_look: "Appearance & language",
   ui_group_display: "Results display",
   cookie_group_share: "Preference sharing",
-  cookie_group_share_desc: "Carry these preferences to another browser or device",
   engines_list_desc: "Enable or disable engines per category",
   cat_general: "General",
   cat_images: "Images",
