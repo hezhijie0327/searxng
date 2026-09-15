@@ -16,6 +16,7 @@ export function CookieTab({ data, form }: { data: PreferencesPageData; form: Pre
   const shareOrigin = window.location.origin;
   return (
     <Card>
+      <GroupHeader label={t("cookie_group_stored")} />
       <SettingRow description={t("cookies_list_desc")} icon={<Cookie className="size-4.5" />} title={t("cookies")} />
       {data.cookies.length > 0 ? (
         <div className="w-full overflow-x-auto">

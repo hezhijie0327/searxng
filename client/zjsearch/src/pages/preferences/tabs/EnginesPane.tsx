@@ -5,7 +5,7 @@ import { categoryLabel } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
 import { EnginesTab } from "@/pages/preferences/EnginesTab.tsx";
-import { Card, CategoryTab, SettingRow } from "@/pages/preferences/parts.tsx";
+import { Card, CategoryTab, GroupHeader, SettingRow } from "@/pages/preferences/parts.tsx";
 import type { PreferencesForm } from "@/pages/preferences/usePreferencesForm.ts";
 
 /** Engines tab pane: the private-engine tokens up top, then the per-category
@@ -31,6 +31,7 @@ export function EnginesPane({
     : [];
   return (
     <Card>
+      <GroupHeader label={t("engines_group_list")} />
       {/* access tokens unlock private engines — kept first so they are found
           without scrolling past the tables */}
       <SettingRow description={t("access_tokens")} icon={<Key className="size-4.5" />} title={t("engine_tokens")}>
