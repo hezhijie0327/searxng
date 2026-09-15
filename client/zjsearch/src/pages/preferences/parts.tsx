@@ -121,7 +121,10 @@ export function Switch({
       aria-checked={checked}
       aria-label={label}
       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${
-        checked ? "bg-accent-strong" : "bg-surface-2 ring-1 ring-line"
+        // the knob must keep >=3:1 against its track in every palette: light
+        // pairs the amber track with the dark accent-contrast knob, dark and
+        // black invert it — dark amber track with the amber knob on top
+        checked ? "bg-accent-strong dark:bg-accent-soft" : "bg-surface-2 ring-1 ring-line"
       }`}
       onClick={() => {
         onChange(!checked);
@@ -132,7 +135,9 @@ export function Switch({
       <span
         className={`size-5 rounded-full shadow transition-transform ${
           // translate-x is physical: RTL tracks must move the knob the other way
-          checked ? "translate-x-5 rtl:-translate-x-5 bg-accent-contrast" : "translate-x-0 bg-ink-3"
+          checked
+            ? "translate-x-5 rtl:-translate-x-5 bg-accent-contrast dark:bg-accent-strong"
+            : "translate-x-0 bg-ink-3"
         }`}
       />
     </button>

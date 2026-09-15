@@ -71,9 +71,11 @@ function widgetRows(t: Translate): Array<[string, string]> {
     ["random uuid", t("widget_random")],
     ["avg 123 548 2.04", t("widget_stats")],
     ["1+2", t("widget_calc")],
+    ["5m to cm", t("widget_unit")],
     ["time Berlin", t("widget_time")],
     ["user-agent", t("widget_ip")],
     ["md5 lorem ipsum", t("widget_hash")],
+    ["tor-check", t("widget_tor")],
   ];
 }
 

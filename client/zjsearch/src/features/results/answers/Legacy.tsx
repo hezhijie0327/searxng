@@ -1,16 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { ShieldAlert } from "lucide-react";
 import { ClickToCopy } from "@/components/CopyButton.tsx";
+import { OnionIcon } from "@/components/OnionIcon.tsx";
+import { UnitConverterAnswer } from "@/features/results/answers/UnitConverter.tsx";
+import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
 import { useSettings } from "@/lib/settings.ts";
 import type { AnswerData } from "@/lib/types.ts";
 
-/** Special-query answers (random, statistics, hash, self-info, time zone)
-    carry a structured *data* payload emitted by their plugins; the layouts
-    below render strictly from those fields — no parsing of the localized
-    *answer* text — and unknown payloads fall back to plain text. */
+/** Special-query answers (random, statistics, hash, self-info, time zone,
+    unit conversion, tor check) carry a structured *data* payload emitted by
+    their plugins; the layouts below render strictly from those fields — no
+    parsing of the localized *answer* text — and unknown payloads fall back
+    to plain text. */
 export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { template: "answer/legacy.html" }> }) {
   const settings = useSettings();
+  const t = useT();
   const text = answer.answer;
   const data = answer.data;
   let hostname = "";
@@ -20,6 +26,43 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
     } catch {
       hostname = answer.url;
     }
+  }
+  if (data?.kind === "unit_conversion") {
+    return <UnitConverterAnswer data={data} />;
+  }
+  if (data?.kind === "tor_check") {
+    if (data.status === "error") {
+      return (
+        <p className="flex items-center gap-2 text-sm text-danger">
+          <ShieldAlert className="size-4 shrink-0" />
+          {t("tor_check_failed")}
+        </p>
+      );
+    }
+    const usingTor = data.status === "using_tor";
+    return (
+      <div>
+        <p className={`flex items-center gap-2 text-sm font-medium ${usingTor ? "text-ok" : "text-ink"}`}>
+          <OnionIcon className="size-4 shrink-0" />
+          {usingTor ? t("tor_using") : t("tor_not_using")}
+        </p>
+        {data.ip ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-3">
+            <span>{t("tor_external_ip")}:</span>
+            <ClickToCopy value={data.ip}>
+              <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2" dir="ltr">
+                {data.ip}
+              </span>
+            </ClickToCopy>
+          </div>
+        ) : null}
+        {data.nodes ? (
+          <p className="mt-1 text-xs text-ink-3">
+            {t("tor_exit_nodes")}: {data.nodes}
+          </p>
+        ) : null}
+      </div>
+    );
   }
   if (data?.kind === "hash") {
     return (

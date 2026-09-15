@@ -186,15 +186,34 @@ interface TranslationItem {
   synonyms: string[];
 }
 
+/** One convertible unit of the unit-converter's dimension (same SI unit).
+    Special (callable) converters — °C / °F / Bft — carry no factor and are
+    implemented client-side. */
+export interface UnitEntry {
+  symbol: string;
+  /** multiplier to the dimension's SI unit */
+  to_si?: number;
+  special?: boolean;
+}
+
 /** Structured payload of the special-query answers (see
-    searx/plugins/{hash_plugin,self_info,time_zone}.py and
-    searx/answerers/{random,statistics}.py). */
+    searx/plugins/{hash_plugin,self_info,time_zone,unit_converter,tor_check}.py
+    and searx/answerers/{random,statistics}.py). */
 export type LegacyAnswerData =
   | { kind: "hash"; algo: string; digest: string }
   | { kind: "stats"; func: string; args: string; result: string }
   | { kind: "time"; zone?: string; time: string; abbr?: string }
   | { kind: "self"; label: string; value: string }
-  | { kind: "value"; value: string; swatch?: string };
+  | { kind: "value"; value: string; swatch?: string }
+  | {
+      kind: "unit_conversion";
+      from_value: string;
+      from_unit: string;
+      to_value: string;
+      to_unit: string;
+      units: UnitEntry[];
+    }
+  | { kind: "tor_check"; status: "error" | "not_tor" | "using_tor"; ip?: string; nodes?: string };
 
 export interface WeatherItem {
   summary: string;
