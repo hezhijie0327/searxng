@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 """A plugin to convert currency pairs given in the query term (e.g.
 ``5 usd to cny``).  It complements the unit_converter plugin: currency rates
-are dynamic, so this plugin fetches the ECB reference rates (Frankfurter API
-v2, ``providers=ecb``) and carries the whole rate table of the queried base
-currency in the payload -- the theme's converter can then switch between any
-listed pair without a new request.
+are dynamic, so this plugin fetches the Frankfurter API v2 aggregated rates
+and carries the whole rate table of the queried base currency in the payload
+-- the theme's converter can then switch between any listed pair without a
+new request.
+
+The accepted currency codes are not hardcoded: the plugin caches the API's
+currency list (``/v2/currencies``) for a day and gates queries against it.
 
 Rates are cached in-process for an hour (reference rates move once a
 business day).  When the rate table is unavailable the plugin is silent --
@@ -48,22 +51,55 @@ RE_MEASURE = r'''
 (?P<unit>\S+)           # unit of measure (ISO-4217 alpha code)
 '''
 
-CURRENCIES = frozenset(
-    [
-        "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD",
-        "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN", "MYR", "NOK",
-        "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR",
-    ]
-)
-"""ISO-4217 alpha codes the plugin accepts (the current ECB reference rates
-provided by the Frankfurter API v2)."""
-
-FRANKFURTER_URL = "https://api.frankfurter.dev/v2/rates?base={base}&providers=ecb"
+FRANKFURTER_URL = "https://api.frankfurter.dev/v2/rates?base={base}"
+CURRENCIES_URL = "https://api.frankfurter.dev/v2/currencies"
 CURRENCY_CACHE_TTL = 3600.0
 """Reference rates are updated once per business day; an hour is plenty."""
 
+CURRENCY_LIST_TTL = 86400.0
+"""The currency catalogue is static in practice; refreshing once a day is plenty."""
+
 _currency_cache: dict[str, tuple[float, dict[str, float]]] = {}
 """base currency -> (monotonic fetch time, rates ``X per 1 base``)."""
+
+_currency_codes: frozenset[str] | None = None
+"""Cached catalogue of ISO codes the API can serve, with fetch time."""
+
+
+def _supported_currencies() -> frozenset[str] | None:
+    """The ISO codes the API accepts (``/v2/currencies``), cached for a day.
+    ``None`` while the catalogue is unavailable -- the plugin stays silent.
+
+    The fetch goes through the instance's default network, so the
+    ``outgoing.proxies`` settings apply like for every engine."""
+    global _currency_codes
+    now = time.monotonic()
+    if _currency_codes and now - _currency_codes[0] < CURRENCY_LIST_TTL:
+        return _currency_codes[1]
+
+    future = asyncio.run_coroutine_threadsafe(
+        get_network().request("GET", CURRENCIES_URL, allow_redirects=True, timeout=8),
+        get_loop(),
+    )
+    try:
+        body = future.result(timeout=12).text
+    except (concurrent.futures.TimeoutError, RequestException) as exc:
+        # no user-facing message -- silence is fine, the query simply gets no answer
+        logger.warning("currency list fetch failed: %r", exc)
+        return None
+
+    try:
+        # v2 answers with a JSON array of currency objects ("iso_code", ...)
+        codes = frozenset(c["iso_code"].upper() for c in json.loads(body))
+    except (ValueError, KeyError, AttributeError, TypeError) as exc:
+        logger.warning("unexpected currency list payload: %r", exc)
+        return None
+    if not codes:
+        logger.warning("empty currency list payload")
+        return None
+
+    _currency_codes = (now, codes)
+    return codes
 
 
 def _currency_rates(base: str) -> dict[str, float] | None:
@@ -146,7 +182,7 @@ class SXNGPlugin(Plugin):
         self.info = PluginInfo(
             id=self.id,
             name=gettext("Currency converter plugin"),
-            description=gettext("Convert between currencies (ECB reference rates)"),
+            description=gettext("Convert between currencies (Frankfurter aggregated rates)"),
             preference_section="general",
         )
 
@@ -185,7 +221,8 @@ def _parse_and_convert(from_query, to_query) -> tuple[str, dict] | None:
 
     from_cur = (measured.group('unit') or '').upper()
     to_cur = to_query.strip().upper()
-    if from_cur not in CURRENCIES or to_cur not in CURRENCIES:
+    codes = _supported_currencies()
+    if not codes or from_cur not in codes or to_cur not in codes:
         return None
 
     locale = get_locale() or 'en_US'
