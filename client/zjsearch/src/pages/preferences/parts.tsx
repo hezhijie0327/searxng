@@ -7,6 +7,7 @@ import type { DropdownOption } from "@/components/Dropdown.tsx";
 import { Dropdown } from "@/components/Dropdown.tsx";
 import { Link } from "@/components/Shell.tsx";
 import { loadEngineDescriptions } from "@/lib/engineDescriptions.ts";
+import { type StringKey, type Translate, useT } from "@/lib/i18n.ts";
 import type { EngineEntry } from "@/lib/types.ts";
 
 // ------------------------------------------------------------- row primitives
@@ -162,6 +163,40 @@ export function Select({
   );
 }
 
+/** ZJSearch-side translations for the plugins our deployments ship (the
+    upstream server catalogs only cover upstream plugins and searx/ stays
+    untouched). Unknown plugin ids fall back to the server strings. */
+const PLUGIN_I18N: Record<string, { description: StringKey; name: StringKey }> = {
+  advanced_search_syntax: {
+    description: "plugin_advanced_search_syntax_desc",
+    name: "plugin_advanced_search_syntax",
+  },
+  ahmia_filter: { description: "plugin_ahmia_filter_desc", name: "plugin_ahmia_filter" },
+  bm25_reranker: { description: "plugin_bm25_reranker_desc", name: "plugin_bm25_reranker" },
+  calculator: { description: "plugin_calculator_desc", name: "plugin_calculator" },
+  currency_convert: { description: "plugin_currency_convert_desc", name: "plugin_currency_convert" },
+  hash_plugin: { description: "plugin_hash_plugin_desc", name: "plugin_hash_plugin" },
+  hostnames: { description: "plugin_hostnames_desc", name: "plugin_hostnames" },
+  self_info: { description: "plugin_self_info_desc", name: "plugin_self_info" },
+  time_zone: { description: "plugin_time_zone_desc", name: "plugin_time_zone" },
+  tor_check: { description: "plugin_tor_check_desc", name: "plugin_tor_check" },
+  tracker_url_remover: {
+    description: "plugin_tracker_url_remover_desc",
+    name: "plugin_tracker_url_remover",
+  },
+  unit_converter: { description: "plugin_unit_converter_desc", name: "plugin_unit_converter" },
+};
+
+export function pluginLabels(
+  plugin: { id: string; name: string; description: string },
+  t: Translate,
+): { description: string; name: string } {
+  const keys = PLUGIN_I18N[plugin.id];
+  return keys
+    ? { description: t(keys.description), name: t(keys.name) }
+    : { description: plugin.description, name: plugin.name };
+}
+
 export function PluginRow({
   plugin,
   enabled,
@@ -171,9 +206,11 @@ export function PluginRow({
   enabled: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  const t = useT();
+  const labels = pluginLabels(plugin, t);
   return (
-    <SettingRow description={plugin.description} icon={<Sparkle className="size-4.5" />} title={plugin.name}>
-      <Switch checked={enabled} label={plugin.name} onChange={onChange} />
+    <SettingRow description={labels.description} icon={<Sparkle className="size-4.5" />} title={labels.name}>
+      <Switch checked={enabled} label={labels.name} onChange={onChange} />
     </SettingRow>
   );
 }

@@ -28,18 +28,13 @@ pipeline features without any Python changes. -#}
   "contact_url": {{ (get_setting('general.contact_url') or '')|tojson }},
   "custom_links": [
     {%- for title, link in get_setting('brand.custom.links').items() -%}
-    {"title": {{ _(title)|tojson }}, "url": {{ link|tojson }}}{{ ", " if not loop.last }}
+    {"title": {{ title|tojson }}, "url": {{ link|tojson }}}{{ ", " if not loop.last }}
     {%- endfor -%}
   ],
   "search_formats": {{ search_formats|tojson }},
   "categories_as_tabs": {{ categories_as_tabs|tojson }},
   "categories": {{ categories|tojson }},
   "default_category": {{ DEFAULT_CATEGORY|tojson }},
-  "category_labels": {
-    {%- for c in categories_as_tabs -%}
-    {{ c|tojson }}: {{ _(c)|tojson }}{{ ", " if not loop.last }}
-    {%- endfor -%}
-  },
   "locales": [
     {%- for tag, name, country, english, flag in sxng_locales -%}
     {"tag": {{ tag|tojson }}, "name": {{ name|tojson }}, "country": {{ country|tojson }}, "english": {{ english|tojson }}, "flag": {{ flag|tojson }}}{{ ", " if not loop.last }}
@@ -231,20 +226,19 @@ pipeline features without any Python changes. -#}
   "summary": {{ (data.summary or '')|tojson }},
   "symbol": {{ (data.url or '')|tojson }},
   "location_name": {{ data.location.name|tojson }},
-  "condition_display": {{ _(data.condition.capitalize())|tojson }},
+  "timezone": {{ data.location.timezone|tojson }},
+  "condition": {{ (data.condition or '')|tojson }},
   "temp_c": {{ data.temperature.value("°C") }},
   "temp_f": {{ data.temperature.value("°F") }}
   {%- if data.datetime %},
-  "datetime_display": {{ data.datetime.l10n(locale=data.location, fmt='short')|tojson }},
-  "time": {{ data.datetime.l10n(locale=data.location, fmt='HH:mm')|tojson }},
-  "weekday": {{ data.datetime.l10n(locale=data.location, fmt='EEE')|tojson }},
+  "datetime_iso": {{ data.datetime.datetime.isoformat()|tojson }},
   "date_iso": {{ data.datetime.datetime.date().isoformat()|tojson }},
   "hour": {{ data.datetime.datetime.hour }}{% endif %}
-  {%- if data.feels_like %}, "feels_like": {{ data.feels_like.l10n(locale=data.location, unit="°C")|tojson }}{% endif %}
-  {%- if data.wind_from %}, "wind": {{ data.wind_from.l10n(locale=data.location)|tojson }}{% endif %}
-  {%- if data.wind_speed %}, "wind_speed": {{ data.wind_speed.l10n(locale=data.location)|tojson }}{% endif %}
-  {%- if data.pressure %}, "pressure": {{ data.pressure.l10n(locale=data.location)|tojson }}{% endif %}
-  {%- if data.humidity %}, "humidity": {{ data.humidity.l10n(locale=data.location)|tojson }}{% endif %}
+  {%- if data.feels_like %}, "feels_like": {{ data.feels_like.value("°C") }}{% endif %}
+  {%- if data.wind_from %}, "wind": {{ data.wind_from.value("Point")|tojson }}{% endif %}
+  {%- if data.wind_speed %}, "wind_speed": {{ data.wind_speed.value("km/h") }}{% endif %}
+  {%- if data.pressure %}, "pressure": {{ data.pressure.value("hPa") }}{% endif %}
+  {%- if data.humidity %}, "humidity": {{ data.humidity.value() }}{% endif %}
 }
 {%- endmacro %}
 
@@ -469,19 +463,18 @@ pipeline features without any Python changes. -#}
   ],
   "plugins": [
     {%- for plugin in plugins_storage -%}
-    {"id": {{ plugin.id|tojson }}, "name": {{ _(plugin.name)|tojson }}, "description": {{ _(plugin.description)|tojson }}, "section": {{ (plugin.preference_section or '')|tojson }}, "enabled": {{ 'true' if plugin.id in allowed_plugins else 'false' }}, "keywords": {{ ((plugin.keywords or []))|tojson }}, "examples": {{ ((plugin.examples or []))|tojson }}, "plugin": true}{{ ", " if not loop.last }}
+    {"id": {{ plugin.id|tojson }}, "name": {{ (plugin.name or '')|tojson }}, "description": {{ (plugin.description or '')|tojson }}, "section": {{ (plugin.preference_section or '')|tojson }}, "enabled": {{ 'true' if plugin.id in allowed_plugins else 'false' }}, "keywords": {{ ((plugin.keywords or []))|tojson }}, "examples": {{ ((plugin.examples or []))|tojson }}, "plugin": true}{{ ", " if not loop.last }}
     {%- endfor -%}
   ],
   "engine_tabs": [
     {%- for categ in categories_as_tabs + [DEFAULT_CATEGORY] -%}
     {
       "category": {{ categ|tojson }},
-      "label": {{ _(categ)|tojson }},
       "is_default": {{ 'true' if categ == DEFAULT_CATEGORY else 'false' }},
       "groups": [
         {%- for group, group_bang, group_engines in engines_by_category[categ] | group_engines_in_tab -%}
         {
-          "group": {{ _(group)|tojson }},
+          "group": {{ group|tojson }},
           "group_bang": {{ (group_bang or '')|tojson }},
           "engines": [
             {%- for engine in group_engines -%}

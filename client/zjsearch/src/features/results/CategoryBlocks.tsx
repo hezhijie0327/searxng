@@ -16,6 +16,8 @@ import { MusicGrid } from "@/features/results/MusicGrid.tsx";
 import { PackageGrid } from "@/features/results/PackageGrid.tsx";
 import { PosterGrid } from "@/features/results/PosterGrid.tsx";
 import { VideoGrid } from "@/features/results/VideoGrid.tsx";
+import { categoryLabel } from "@/lib/categories.ts";
+import { useT } from "@/lib/i18n.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 /** The grid views for the categories that have one; everything else falls
@@ -77,6 +79,7 @@ export function CategoryBlocks({
   collapsedBlocks: Record<string, boolean>;
   onToggleBlock: (key: string) => void;
 }) {
+  const t = useT();
   const blocks = collectBlocks(results);
   // persisted user order first (tab order is the fallback), then categories
   // never seen before
@@ -94,7 +97,7 @@ export function CategoryBlocks({
               category={key}
               collapsed={collapsed}
               count={items.length}
-              label={globals.category_labels[key] ?? key}
+              label={categoryLabel(key, t)}
               onToggle={() => {
                 onToggleBlock(key);
               }}

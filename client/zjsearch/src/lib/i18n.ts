@@ -44,6 +44,11 @@ function themeLocaleTag(locale: string): CatalogTag {
 
 export const I18nContext = createContext<string>("en");
 
+/** The active UI locale tag (server preference mirrored by the client). */
+export function useLocale(): string {
+  return useContext(I18nContext);
+}
+
 export function useT(): Translate {
   const locale = useContext(I18nContext);
   // memoized so `t` keeps a stable identity across renders — callers put it

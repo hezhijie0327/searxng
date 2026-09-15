@@ -3,6 +3,7 @@
 import { AlertTriangle, Check, Minus } from "lucide-react";
 import type { ReactNode } from "react";
 import { SortHeader } from "@/components/SortHeader.tsx";
+import { engineGroupLabel } from "@/lib/categories.ts";
 import { loadEngineDescriptions } from "@/lib/engineDescriptions.ts";
 import { useT } from "@/lib/i18n.ts";
 import { type SortState, useSortState } from "@/lib/tableSort.ts";
@@ -166,7 +167,7 @@ export function EnginesTab({
         rows.push(
           <tr className="bg-surface-2/60" key={`group-${group.group}`}>
             <td className="px-3 py-1.5 font-medium text-ink-2" colSpan={2}>
-              {group.group}
+              {engineGroupLabel(group.group, t)}
             </td>
             <td className="px-3 py-1.5" colSpan={showMetrics ? 7 : 5}>
               {group.group_bang ? <code className="rounded bg-surface-2 px-1">{group.group_bang}</code> : null}

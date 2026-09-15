@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { Book, Globe, Key, Languages, LayoutGrid, Search, Shield } from "lucide-react";
+import { categoryLabel } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
 import { Card, CategoryTab, PluginRow, Select, SettingRow } from "@/pages/preferences/parts.tsx";
@@ -29,7 +30,7 @@ export function GeneralTab({
                 active={form.categories.includes(category)}
                 category={category}
                 key={category}
-                label={globals.category_labels[category] ?? category}
+                label={categoryLabel(category, t)}
                 onClick={() => {
                   form.setCategories((prev) =>
                     prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category],

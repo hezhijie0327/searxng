@@ -37,7 +37,6 @@ export interface GlobalData {
   categories_as_tabs: string[];
   categories: string[];
   default_category: string;
-  category_labels: Record<string, string>;
   locales: LocaleInfo[];
   language: string;
   safesearch: 0 | 1 | 2;
@@ -219,24 +218,28 @@ export interface WeatherItem {
   summary: string;
   symbol: string;
   location_name: string;
-  condition_display: string;
+  /** raw upstream condition id ("light rain showers") — localized client-side */
+  condition: string;
   /** temperature in °C — trend chart and daily hi/lo */
   temp_c: number;
   /** temperature in °F — small secondary readout in the hero */
   temp_f: number;
-  datetime_display?: string;
-  /** localized HH:mm — hourly slots only */
-  time?: string;
-  /** localized weekday (EEE) — hourly slots only */
-  weekday?: string;
+  /** location-timezone ISO instant — hourly slots only */
+  datetime_iso?: string;
+  /** IANA timezone of the location — client-side date/time formatting */
+  timezone?: string;
   /** ISO date (YYYY-MM-DD) — hourly slots only, groups the daily strip */
   date_iso?: string;
   hour?: number;
-  feels_like?: string;
+  /** feels-like temperature in °C */
+  feels_like?: number;
   wind?: string;
-  wind_speed?: string;
-  pressure?: string;
-  humidity?: string;
+  /** wind speed in km/h */
+  wind_speed?: number;
+  /** pressure in hPa */
+  pressure?: number;
+  /** relative humidity in % */
+  humidity?: number;
 }
 
 export type AnswerData =
@@ -326,7 +329,6 @@ interface EngineGroup {
 
 interface EngineTab {
   category: string;
-  label: string;
   is_default: boolean;
   groups: EngineGroup[];
 }

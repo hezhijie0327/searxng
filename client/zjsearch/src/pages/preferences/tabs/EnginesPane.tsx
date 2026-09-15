@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import { Check, LayoutGrid, X } from "lucide-react";
+import { categoryLabel } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
 import { EnginesTab } from "@/pages/preferences/EnginesTab.tsx";
@@ -65,7 +66,7 @@ export function EnginesPane({
             active={index === engineTab}
             category={tabInfo.category}
             key={tabInfo.category}
-            label={tabInfo.label}
+            label={categoryLabel(tabInfo.category, t)}
             onClick={() => {
               onEngineTab(index);
             }}

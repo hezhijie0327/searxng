@@ -5,6 +5,7 @@ import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { CategoryIcon } from "@/components/CategoryIcon.tsx";
 import type { DropdownOption } from "@/components/Dropdown.tsx";
 import { Dropdown } from "@/components/Dropdown.tsx";
+import { categoryLabel } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import { scrollBehavior } from "@/lib/motion.ts";
 import { useSettings } from "@/lib/settings.ts";
@@ -69,7 +70,7 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
   const visibleTabs = tabs.length <= FLAT_TAB_LIMIT ? tabs : tabs.slice(0, FLAT_TAB_LIMIT - 1);
   const overflowTabs = tabs.length <= FLAT_TAB_LIMIT ? [] : tabs.slice(FLAT_TAB_LIMIT - 1);
   const foldedSelected = overflowTabs.filter((category) => selected.includes(category));
-  const label = (category: string) => globals.category_labels[category] ?? category;
+  const label = (category: string) => categoryLabel(category, t);
   // trigger mirrors the folded selection: "更多" -> "科学" -> "科学 +1" (the
   // same +N language as the engine pills), accent while anything is selected
   const firstFolded = foldedSelected[0];

@@ -2,10 +2,90 @@
 
 import { ChevronLeft, MapPin } from "lucide-react";
 import { useState } from "react";
-import { useT } from "@/lib/i18n.ts";
+import { useLocale, useT } from "@/lib/i18n.ts";
 import type { AnswerData, WeatherItem } from "@/lib/types.ts";
 
 const MAX_SOURCES_SHOWN = 3;
+
+/** zh labels for the upstream weather condition ids (WeatherConditionType in
+    searx/weather.py); other locales render the prettified id.  The theme owns
+    these — the server ships the raw id only. */
+const WEATHER_CONDITION_ZH: Record<string, string> = {
+  "clear sky": "晴",
+  fair: "晴朗",
+  "partly cloudy": "局部多云",
+  cloudy: "多云",
+  fog: "雾",
+  "light rain": "小雨",
+  rain: "雨",
+  "heavy rain": "大雨",
+  "light rain showers": "小阵雨",
+  "rain showers": "阵雨",
+  "heavy rain showers": "强阵雨",
+  "light rain and thunder": "小雨有雷",
+  "rain and thunder": "雷雨",
+  "heavy rain and thunder": "大雨有雷",
+  "light rain showers and thunder": "小阵雨有雷",
+  "rain showers and thunder": "雷阵雨",
+  "heavy rain showers and thunder": "强雷阵雨",
+  "light sleet": "小雨夹雪",
+  sleet: "雨夹雪",
+  "heavy sleet": "大雨夹雪",
+  "light sleet showers": "小阵雨夹雪",
+  "sleet showers": "阵雨夹雪",
+  "heavy sleet showers": "强阵雨夹雪",
+  "light sleet and thunder": "小雨夹雪有雷",
+  "sleet and thunder": "雨夹雪有雷",
+  "heavy sleet and thunder": "大雨夹雪有雷",
+  "light sleet showers and thunder": "小阵雨夹雪有雷",
+  "sleet showers and thunder": "雷阵雨夹雪",
+  "heavy sleet showers and thunder": "强阵雨夹雪有雷",
+  "light snow": "小雪",
+  snow: "雪",
+  "heavy snow": "大雪",
+  "light snow showers": "小阵雪",
+  "snow showers": "阵雪",
+  "heavy snow showers": "强阵雪",
+  "light snow and thunder": "小雪有雷",
+  "snow and thunder": "雪有雷",
+  "heavy snow and thunder": "大雪有雷",
+  "light snow showers and thunder": "小阵雪有雷",
+  "snow showers and thunder": "雷阵雪",
+  "heavy snow showers and thunder": "强阵雪有雷",
+};
+
+function conditionLabel(condition: string, locale: string): string {
+  if (locale.startsWith("zh")) {
+    return WEATHER_CONDITION_ZH[condition] ?? condition;
+  }
+  return condition.charAt(0).toUpperCase() + condition.slice(1);
+}
+
+/** The server datetime is location wall-clock (no offset): HH:mm is a plain
+    substring, the weekday comes from the date part. */
+function formatSlotTime(item: WeatherItem): string {
+  if (!item.datetime_iso) {
+    return "";
+  }
+  return item.datetime_iso.slice(11, 16);
+}
+
+function formatWeekday(item: WeatherItem, locale: string): string {
+  const fallback = item.date_iso ?? "";
+  if (!item.datetime_iso) {
+    return fallback;
+  }
+  const [y = NaN, m = NaN, d = NaN] = item.datetime_iso.slice(0, 10).split("-").map(Number);
+  if (![y, m, d].every(Number.isFinite)) {
+    return fallback;
+  }
+  const formatter = new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en-US", { weekday: "short" });
+  try {
+    return formatter.format(new Date(y, m - 1, d));
+  } catch {
+    return fallback;
+  }
+}
 
 /** SVG temperature trend over the next hourly slots (accent area line with
     temp / time labels every third slot), horizontally scrollable. */
@@ -34,7 +114,7 @@ function WeatherTrend({ forecasts }: { forecasts: WeatherItem[] }) {
   points.forEach((p, i) => {
     const slot = slots[i];
     if (slot && i % 3 === 0) {
-      labels.push({ x: p.x, y: p.y, temp: slot.temp_c, time: slot.time ?? "" });
+      labels.push({ x: p.x, y: p.y, temp: slot.temp_c, time: formatSlotTime(slot) });
     }
   });
   return (
@@ -61,6 +141,7 @@ function WeatherTrend({ forecasts }: { forecasts: WeatherItem[] }) {
 /** Daily strip grouped from the hourly slots: weekday, mid-day symbol and
     the day's high/low temperature (Google weather style). */
 function WeatherDaily({ forecasts }: { forecasts: WeatherItem[] }) {
+  const locale = useLocale();
   const days: Array<{
     date: string;
     weekday: string;
@@ -78,7 +159,7 @@ function WeatherDaily({ forecasts }: { forecasts: WeatherItem[] }) {
     if (!day) {
       day = {
         date: f.date_iso,
-        weekday: f.weekday ?? f.date_iso,
+        weekday: formatWeekday(f, locale),
         symbol: f.symbol,
         hi: f.temp_c,
         lo: f.temp_c,
@@ -132,6 +213,7 @@ export function WeatherAnswer({
   sources: Array<{ service: string; url: string }>;
 }) {
   const t = useT();
+  const locale = useLocale();
   // same cap-and-expand contract as EnginesLine: 3 pills + "+N"
   const [sourcesExpanded, setSourcesExpanded] = useState(false);
   const shownSources = sourcesExpanded ? sources : sources.slice(0, MAX_SOURCES_SHOWN);
@@ -140,17 +222,20 @@ export function WeatherAnswer({
   const heroC = Math.round(current.temp_c);
   const heroF = Math.round(current.temp_f);
   const meta: Array<[string, string]> = [];
-  if (current.feels_like) {
-    meta.push([t("feels_like"), current.feels_like]);
+  if (current.feels_like !== undefined) {
+    meta.push([t("feels_like"), `${Math.round(current.feels_like)} °C`]);
   }
   if (current.wind) {
-    meta.push([t("wind"), current.wind_speed ? `${current.wind} ${current.wind_speed}` : current.wind]);
+    meta.push([
+      t("wind"),
+      current.wind_speed !== undefined ? `${current.wind} ${Math.round(current.wind_speed)} km/h` : current.wind,
+    ]);
   }
-  if (current.humidity) {
-    meta.push([t("humidity"), current.humidity]);
+  if (current.humidity !== undefined) {
+    meta.push([t("humidity"), `${Math.round(current.humidity)}%`]);
   }
-  if (current.pressure) {
-    meta.push([t("pressure"), current.pressure]);
+  if (current.pressure !== undefined) {
+    meta.push([t("pressure"), `${Math.round(current.pressure)} hPa`]);
   }
   return (
     <div>
@@ -169,7 +254,7 @@ export function WeatherAnswer({
               </span>
               <span className="mt-1 border-s border-line ps-2 text-sm text-ink-3">{heroF} °F</span>
             </p>
-            <p className="mt-2 text-sm text-ink-2">{current.condition_display}</p>
+            <p className="mt-2 text-sm text-ink-2">{conditionLabel(current.condition, locale)}</p>
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-x-10 gap-y-1 text-xs">
