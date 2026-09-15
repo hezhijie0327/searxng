@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n.ts";
 import { scrollBehavior } from "@/lib/motion.ts";
-import { SCROLLBAR_NONE } from "@/lib/styles.ts";
+import { DISABLED, SCROLLBAR_NONE } from "@/lib/styles.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
 export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSearch: (q: string) => void }) {
@@ -47,8 +47,7 @@ export function SuggestionsBox({ data, onSearch }: { data: SearchPageData; onSea
 
   // buttons are persistent so flipping state never shifts the chips; a
   // larger touch target on mobile (36px) collapsing to 28px with a pointer
-  const arrowClass =
-    "flex size-9 shrink-0 items-center justify-center rounded-full text-ink-3 transition hover:bg-surface-2 hover:text-ink disabled:pointer-events-none disabled:opacity-30 sm:size-7";
+  const arrowClass = `flex size-9 shrink-0 items-center justify-center rounded-full text-ink-3 transition hover:bg-surface-2 hover:text-ink sm:size-7 ${DISABLED}`;
   return (
     <div className="flex items-center gap-1">
       <button

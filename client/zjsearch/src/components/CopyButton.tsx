@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
 import type { ReactNode } from "react";
-import { writeClipboard } from "@/lib/clipboard.ts";
+import { useCopyToast } from "@/lib/clipboard.ts";
 import { useT } from "@/lib/i18n.ts";
-import { flashToast } from "@/lib/toast.ts";
 
 const ACTION_PILL =
-  "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition-colors";
+  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors";
 const ACTION_IDLE = "border-line text-ink-2 hover:border-accent hover:text-accent";
 
 /** Copy-to-clipboard action pill (share card, map coordinates).  The
@@ -24,15 +23,15 @@ export function CopyButton({
   className?: string;
 }) {
   const t = useT();
-  const copy = () => {
-    void writeClipboard(value).then((ok) => {
-      if (ok) {
-        flashToast(t("copied"), { tone: "ok" });
-      }
-    });
-  };
+  const copyToast = useCopyToast();
   return (
-    <button className={`${ACTION_PILL} ${ACTION_IDLE} ${className ?? ""}`} onClick={copy} type="button">
+    <button
+      className={`${ACTION_PILL} ${ACTION_IDLE} ${className ?? ""}`}
+      onClick={() => {
+        copyToast(value);
+      }}
+      type="button"
+    >
       {icon}
       {label ?? t("copy")}
     </button>
@@ -52,22 +51,18 @@ export function ClickToCopy({
   children: ReactNode;
 }) {
   const t = useT();
-  const copy = () => {
-    void writeClipboard(value).then((ok) => {
-      if (ok) {
-        flashToast(t("copied"), { tone: "ok" });
-      }
-    });
-  };
+  const copyToast = useCopyToast();
   return (
     <div
       aria-label={t("copy")}
       className={`cursor-pointer ${className}`}
-      onClick={copy}
+      onClick={() => {
+        copyToast(value);
+      }}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          copy();
+          copyToast(value);
         }
       }}
       role="button"

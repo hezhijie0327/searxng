@@ -62,7 +62,7 @@ function Pages() {
       return (
         <Shell globals={globals} hideTopNav>
           <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 px-4 pb-24 text-center animate-fade-up">
-            <h1 className="text-5xl font-semibold tracking-tight text-ink">404</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">404</h1>
             <p className="text-sm text-ink-2">{t("page_not_found")}</p>
             <p className="text-sm">
               <Link className="text-accent hover:underline" href="/">

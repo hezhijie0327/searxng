@@ -21,9 +21,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useOverlay } from "@/features/overlay/OverlayProvider.tsx";
-import { writeClipboard } from "@/lib/clipboard.ts";
+import { useCopyToast } from "@/lib/clipboard.ts";
 import { useT } from "@/lib/i18n.ts";
-import { flashToast } from "@/lib/toast.ts";
 import type { SearchPageData } from "@/lib/types.ts";
 
 /** per-format icons for the download strip; unknown configured formats fall
@@ -61,6 +60,7 @@ export function DebugPanels({
   searchUrl?: string;
 }) {
   const t = useT();
+  const copyToast = useCopyToast();
   const { openOverlay } = useOverlay();
   const hasEnginesPanel = data.unresponsive_engines.length > 0 || data.timings.length > 0;
   // with zero results the engine messages matter most — start expanded
@@ -120,14 +120,10 @@ export function DebugPanels({
             </div>
             {/* confirmation comes from the shared green flashToast */}
             <button
-              className="shrink-0 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-accent"
+              className="shrink-0 rounded-full border border-line px-3 py-1.5 text-[13px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-accent"
               onClick={() => {
                 if (searchUrl) {
-                  void writeClipboard(searchUrl).then((ok) => {
-                    if (ok) {
-                      flashToast(t("copied"), { tone: "ok" });
-                    }
-                  });
+                  copyToast(searchUrl);
                 }
               }}
               type="button"
@@ -151,7 +147,7 @@ export function DebugPanels({
                         rel="noreferrer"
                         target="_blank"
                       >
-                        <Icon className="size-3 shrink-0 text-ink-3" />
+                        <Icon className="size-3.5 shrink-0 text-ink-3" />
                         {format.toUpperCase()}
                       </a>
                     );

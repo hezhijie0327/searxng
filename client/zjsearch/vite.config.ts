@@ -43,7 +43,6 @@ export default {
     proxy: Object.fromEntries(
       [
         "/search",
-        "/",
         "/autocompleter",
         "/preferences",
         "/clear_cookies",
@@ -59,6 +58,8 @@ export default {
         "/client",
         "/favicon.ico",
         "/logo",
+        // the catch-all goes last so the specific entries above win
+        "/",
       ].map((path) => [path, { target: DEV_BACKEND, changeOrigin: true }]),
     ),
   },

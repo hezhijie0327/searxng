@@ -42,7 +42,7 @@ function ImageTile({
     return (
       <button
         aria-label={result.title_text}
-        className="flex h-44 w-full items-center justify-center rounded-lg bg-surface-2 text-ink-3"
+        className="flex h-44 w-full items-center justify-center rounded-xl bg-surface-2 text-ink-3"
         onClick={() => {
           onOpen(index);
         }}
@@ -54,7 +54,7 @@ function ImageTile({
   }
   return (
     <button
-      className={`group relative block w-full break-inside-avoid overflow-hidden rounded-lg bg-surface-2 transition-opacity ${
+      className={`group relative block w-full break-inside-avoid overflow-hidden rounded-xl bg-surface-2 transition-opacity ${
         loaded ? "opacity-100" : "min-h-44 opacity-70 animate-pulse-soft"
       }`}
       onClick={() => {

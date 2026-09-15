@@ -51,7 +51,7 @@ export function Infobox({
         {infobox.img_src ? (
           <img
             alt={infobox.title}
-            className="aspect-square w-32 shrink-0 rounded-lg border border-line bg-surface-2 object-contain p-1 sm:w-36 2xl:w-40"
+            className="aspect-square w-32 shrink-0 rounded-xl border border-line bg-surface-2 object-contain p-1 sm:w-36 2xl:w-40"
             decoding="async"
             loading="lazy"
             src={infobox.img_src}
@@ -85,7 +85,7 @@ export function Infobox({
                     <dd className="mt-1.5">
                       <img
                         alt={attribute.image_alt || attribute.label}
-                        className="mx-auto max-h-56 max-w-full rounded-lg border border-line bg-surface-2 object-contain"
+                        className="mx-auto max-h-56 max-w-full rounded-xl border border-line bg-surface-2 object-contain"
                         decoding="async"
                         loading="lazy"
                         onError={(event) => {

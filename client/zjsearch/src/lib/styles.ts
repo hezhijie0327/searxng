@@ -27,3 +27,34 @@ export const ICON_BTN =
 /** Tiny meta chip (engine pills, mono tokens, tag pills): callers add their
     own text colour / font / hover on top of the shape. */
 export const CHIP = "inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5";
+
+/** Mono-token variant of CHIP (IPs, digests, language pairs, algo names):
+    same shape, monospace ink-2 text — the 12px meta tier for unbreakable
+    payloads, always with break-all/truncate on the content around it. */
+export const MONO_CHIP = `${CHIP} font-mono text-xs text-ink-2`;
+
+/** Shared disabled treatment for secondary controls (pager arrows, sliders):
+    dimmed and click-transparent, never invisible. */
+export const DISABLED = "disabled:pointer-events-none disabled:opacity-40";
+
+/** Corner badge over media (duration / filesize): the sanctioned 11px badge
+    tier on a fixed-dark scrim, readable over any thumbnail in every palette. */
+export const TILE_BADGE = "absolute rounded bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-white";
+
+/** Reliability column colour: green >=90, ink >=80, amber >=50, red below,
+    muted when unknown — shared by the stats page and the engine tables. */
+export function reliabilityColor(reliability: number | null): string {
+  if (reliability === null) {
+    return "text-ink-3";
+  }
+  if (reliability <= 50) {
+    return "text-danger";
+  }
+  if (reliability < 80) {
+    return "text-warning";
+  }
+  if (reliability < 90) {
+    return "text-ink-2";
+  }
+  return "text-ok";
+}

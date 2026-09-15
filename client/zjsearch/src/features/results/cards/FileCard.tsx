@@ -88,7 +88,7 @@ export function FileCard({ result, globals }: CardProps) {
               ) : (
                 // audio: inline player, no collapse - music results should be
                 // playable in one click (preload="none" keeps it cheap)
-                <div className="mt-2 flex max-w-md items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2">
+                <div className="mt-2 flex max-w-md items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
                   <Music className="size-4 shrink-0 text-accent" />
                   <audio className="h-8 w-full" controls preload="none" src={result.embedded} />
                 </div>
@@ -101,7 +101,7 @@ export function FileCard({ result, globals }: CardProps) {
                 rel="noreferrer"
                 target="_blank"
               >
-                <Download className="size-3" />
+                <Download className="size-3.5" />
                 {t("download")}
               </a>
             )

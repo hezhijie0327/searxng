@@ -62,10 +62,10 @@ export function UiTab({
               <div className="inline-flex rounded-xl border border-line bg-surface p-0.5">
                 {(
                   [
-                    ["auto", cap(t("auto")), <Sun className="size-4" key="a" />],
-                    ["light", cap(t("light")), <Sun className="size-4" key="l" />],
-                    ["dark", cap(t("dark")), <Moon className="size-4" key="d" />],
-                    ["black", cap(t("black")), <Moon className="size-4" key="b" />],
+                    ["auto", cap(t("auto")), <Sun className="size-3.5" key="a" />],
+                    ["light", cap(t("light")), <Sun className="size-3.5" key="l" />],
+                    ["dark", cap(t("dark")), <Moon className="size-3.5" key="d" />],
+                    ["black", cap(t("black")), <Moon className="size-3.5" key="b" />],
                   ] as const
                 ).map(([value, label, icon]) => (
                   <button

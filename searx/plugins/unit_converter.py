@@ -66,6 +66,7 @@ class SXNGPlugin(Plugin):
                     if converted:
                         answer, data = converted
                         results.add(results.types.Answer(answer=answer, data=data))
+                    break
 
         return results
 
@@ -89,7 +90,7 @@ def _parse_text_and_convert(from_query, to_query) -> tuple[str, dict] | None:
         return None
 
     measured = re.match(RE_MEASURE, from_query, re.VERBOSE)
-    if not (measured and measured.group('number'), measured.group('unit')):
+    if not (measured and measured.group('unit')):
         return None
 
     # Symbols are not unique, if there are several hits for the from-unit, then
@@ -128,7 +129,9 @@ def _parse_text_and_convert(from_query, to_query) -> tuple[str, dict] | None:
 
     _locale = get_locale() or 'en_US'
 
-    value = measured.group('sign') + measured.group('number') + (measured.group('E') or '')
+    # a value-less query ("kg to lb") converts 1 by default, like the search
+    # engines' own converters
+    value = measured.group('sign') + (measured.group('number') or '1') + (measured.group('E') or '')
     value = babel.numbers.parse_decimal(value, locale=_locale)
     value_in = float(value)
 

@@ -2,26 +2,29 @@
 
 import { LoaderCircle, Search, X } from "lucide-react";
 import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
+import { fetchJson } from "@/lib/http.ts";
 import { useT } from "@/lib/i18n.ts";
 import { useRouter } from "@/lib/router.tsx";
 import { useSettings } from "@/lib/settings.ts";
+import { ICON_BTN } from "@/lib/styles.ts";
 
 interface Suggestion {
   text: string;
 }
 
 async function fetchSuggestions(q: string, signal: AbortSignal): Promise<string[]> {
-  const resp = await fetch(`autocompleter?q=${encodeURIComponent(q)}`, { signal });
-  if (!resp.ok) {
-    return [];
-  }
-  const payload: unknown = await resp.json();
-  // server answers with [prefix, [suggestions], [], [], relevances] or a plain array
-  if (Array.isArray(payload) && Array.isArray(payload[1])) {
-    return payload[1].filter((item): item is string => typeof item === "string");
-  }
-  if (Array.isArray(payload)) {
-    return payload.filter((item): item is string => typeof item === "string");
+  // silent failure by design: suggestions are best-effort
+  try {
+    const payload = await fetchJson<unknown>(`autocompleter?q=${encodeURIComponent(q)}`, { signal });
+    // server answers with [prefix, [suggestions], [], [], relevances] or a plain array
+    if (Array.isArray(payload) && Array.isArray(payload[1])) {
+      return (payload[1] as unknown[]).filter((item): item is string => typeof item === "string");
+    }
+    if (Array.isArray(payload)) {
+      return payload.filter((item): item is string => typeof item === "string");
+    }
+  } catch {
+    /* aborted or failed - keep previous suggestions */
   }
   return [];
 }
@@ -189,14 +192,14 @@ export function SearchBox({
         {query ? (
           <button
             aria-label={t("clear")}
-            className="grid size-9 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+            className={ICON_BTN}
             onClick={() => {
               setQuery("");
               inputRef.current?.focus();
             }}
             type="button"
           >
-            <X className="size-4.5 text-ink-2" />
+            <X className="size-4.5" />
           </button>
         ) : null}
         <button
@@ -205,7 +208,7 @@ export function SearchBox({
           disabled={loading}
           type="submit"
         >
-          {loading ? <LoaderCircle className="size-4 animate-spin-slow" /> : <Search className="size-4.5" />}
+          {loading ? <LoaderCircle className="size-4.5 animate-spin-slow" /> : <Search className="size-4.5" />}
         </button>
       </form>
 

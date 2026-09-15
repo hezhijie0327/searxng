@@ -207,6 +207,7 @@ class SXNGPlugin(Plugin):
                     if converted:
                         answer, data = converted
                         results.add(results.types.Answer(answer=answer, data=data))
+                    break
 
         return results
 
@@ -216,7 +217,7 @@ def _parse_and_convert(from_query, to_query) -> tuple[str, dict] | None:
         return None
 
     measured = re.match(RE_MEASURE, from_query, re.VERBOSE)
-    if not measured:
+    if not (measured and measured.group('unit')):
         return None
 
     from_cur = (measured.group('unit') or '').upper()
@@ -226,7 +227,9 @@ def _parse_and_convert(from_query, to_query) -> tuple[str, dict] | None:
         return None
 
     locale = get_locale() or 'en_US'
-    value = measured.group('sign') + measured.group('number') + (measured.group('E') or '')
+    # a value-less query ("usd to cny") converts 1 by default, like the search
+    # engines' own converters
+    value = measured.group('sign') + (measured.group('number') or '1') + (measured.group('E') or '')
     value = babel.numbers.parse_decimal(value, locale=locale)
 
     return _convert(from_cur, to_cur, float(value), locale)

@@ -134,7 +134,10 @@ BCP-47 tag. Export only what other modules need. Full rationale and the
   key is re-enabled (a save must always post the complete disabled set);
   other absent key/value settings are left unchanged. The preferences UI
   auto-saves (debounced) with these semantics — no save button, and the
-  initial mount must NOT post (it would flip engines/plugins).
+  initial mount must NOT post (it would flip engines/plugins).  Saves go
+  through `fetchText` (`lib/http.ts`), so a failed POST shows the red
+  "save failed" toast instead of a false 「已保存」, and the next change
+  re-fires the debounced save.
 - Results hotkeys (default / vim, see `src/features/hotkeys.ts`) must not fire
   while focus is in text inputs; hash-only changes (`#image-viewer`) are ignored
   by the router's popstate handler.
@@ -185,7 +188,9 @@ BCP-47 tag. Export only what other modules need. Full rationale and the
   (`SCROLLBAR_NONE`, `SWIPE_ROW`, `META_ROW`, `CHIP`, `ICON_BTN`) — import,
   don't re-type. One-shot floating feedback (copy/save confirmations) goes
   through `flashToast()` in `lib/toast.ts` (tone: accent/ok/danger) — never
-  render such confirmations in flow (layout shift).
+  render such confirmations in flow (layout shift); from React use
+  `useCopyToast()` (`lib/clipboard.ts`) which pairs the clipboard write with
+  the green 「已复制」 toast.
 - Jinja inline-`if` output is AUTOESCAPED: `{{ ' class="centered"' if cond }}`
   emitted `class=&#34;centered&#34;` (a broken literal-quote class token that
   silently disabled centered alignment). Conditional HTML fragments in
@@ -256,16 +261,20 @@ Controls:
 - Tab-style buttons (category tabs, filter triggers, preference section
   tabs): `px-4 py-2 text-[13px]`, leading icon 14px.
 - Pills/chips (choices, enable/disable, suggestions): `px-3 py-1.5
-  text-[13px]` rounded-full; tiny non-interactive meta chips use the
-  `CHIP` constant (`px-2 py-0.5`); category chips carry `CategoryIcon`;
-  selection = `border-accent-strong bg-accent-soft font-medium
-  text-accent`.
+  text-[13px]` rounded-full; tiny meta chips use the `CHIP` constant
+  (`px-2 py-0.5`), mono tokens (IPs, digests, language pairs) the
+  `MONO_CHIP` variant; category chips carry `CategoryIcon`; selection =
+  `border-accent-strong bg-accent-soft font-medium text-accent`.  Two
+  sanctioned 12px-interactive exceptions stay: the results meta line
+  toggles and the `EnginesLine` `+N` / `cached` chips — they live inside
+  12px meta rows and would break the row rhythm at 13px.
 - Boxed form selects (preferences): `h-9 text-[13px]`.
 - Category selection uses the tab language (icon + label, selected =
   accent text + amber underline) everywhere — results-page tabs, hero
-  grid, preferences default-categories and engine tabs all share
-  `CategoryTab`/`CategoryTabs` styling.  Other choices (options, toggles)
-  keep the bordered chip language.
+  grid, preferences default-categories and engine tabs all render the
+  shared `components/CategoryTab.tsx` (results rows wrap it in
+  `CategoryTabs`).  Other choices (options, toggles) keep the bordered
+  chip language.
 - Icon size tiers: 18px `size-4.5` round-button icons, 14px `size-3.5`
   tab/pill leading icons and disclosure chevrons, 12px `size-3` meta-row
   icons, 20px `size-5` large round buttons; same concept = same icon
@@ -273,13 +282,17 @@ Controls:
   outbound links, ChevronDown discloses — `<details>` summaries use the
   `group-open:rotate-180` chevron, never the browser marker).
 
-Instant answers (`features/results/answers/`, one file per kind) are tiered:
+Instant answers (`features/results/answers/`, one file per kind) are tiered
+(the split lives in `Answers.tsx` — `isCarded()`):
 
-- Answers without a source url (calculator, time, ip, hash, random) render
-  uncarded in the results column — gray lead-in expression, value at 4xl,
-  `border-b` divider (Google-style).
-- Answers with a source url (definitions) and rich widgets (weather,
-  translations) keep the accent card.
+- Answers without a source url (calculator, time, ip, hash, random, stats,
+  tor) render uncarded in the results column — gray lead-in expression,
+  value at 4xl, `border-b` divider (Google-style).  The client-side
+  calculator (`CalculatorAnswer`) follows the same language.
+- Rich widgets keep the accent card: weather, translations AND the
+  interactive unit/currency converter — `UnitConverterAnswer` renders its
+  own single accent card (never nest it inside another), with borderless
+  `bg-surface` panels and bare (unboxed) unit dropdowns inside.
 - The sidebar hosts knowledge (infobox) and diagnostics only — never
   answers.
 
@@ -292,10 +305,15 @@ its content, all sharing one visual language:
   files (torrents) → `FilesGrid`; science → scholarly `PaperCard` list;
   products → `ProductGrid`. Bang-limited searches route the same way via
   `only_template` (`paper`, `torrent`).
-- Media grids share one tile anatomy: square/16:9 rounded tile, corner
-  badges bottom (duration / filesize bottom-right, favicon bottom-left),
-  title + one compact meta row below, cells carry `data-hotkey-index` and
-  the `selected` ring so results hotkeys walk grids like lists.  Engine
+- Media grids share one tile anatomy, enforced by the shared scaffold in
+  `features/results/Tile.tsx` — every grid cell renders through `TileCell`
+  (hotkey contract: `data-hotkey-index` + `selected` ring), titles through
+  `TileTitle`, tile-centered actions (play / magnet / download) through
+  `TileCenterAction`, corner badges through `TileBadge` (`TILE_BADGE` in
+  `lib/styles.ts`): square/16:9 rounded tile, badges bottom (duration /
+  filesize bottom-right, favicon bottom-left), title + one compact meta row
+  below, so results hotkeys walk grids like lists.  ProductGrid and
+  AppsGrid are part of this contract.  Engine
   attribution is unified in EVERY view as `EnginesLine` — `[score pill]
   [first engine] [+N]`, expanding inline on demand (score: tabular pill,
   one decimal, from the page-data `score` field; `TileEngines` in the
@@ -314,8 +332,9 @@ its content, all sharing one visual language:
   rendered by `features/results/CategoryBlocks.tsx`): general,
   images, videos, news, map, music, it, science, files, social media,
   other — pure relevance order inside each block, in tab order by
-  default.  Blocks are titled with the bare category name (综合 / 图片 /
-  ... via `category_labels`), never with a 结果 suffix.  Each block
+  default; apps and products blocks render their grids too.  Blocks are
+  titled with the bare category name (综合 / 图片 / ... via
+  `category_labels`), never with a 结果 suffix.  Each block
   header (category icon + label + count + chevron) toggles collapse —
   folding is the quick-locate mechanism and it works on mobile.  Blocks
   default to expanded; do not reintroduce compact strip previews or
@@ -356,6 +375,39 @@ never shifts the chips; uncapped — paging handles any count, honors
 Query-term highlighting (`.highlight` in global.css) is a tinted
 background only — color marks the term, no bold.
 
+## NoJS / RSS surface (same brand, own tokens)
+
+`noscript.html` + the `.zjs-noscript` block in `global.css` and `rss.xsl`
+are the JavaScript-free faces of the theme (basic search, results,
+pagination; the RSS feed renders through the XSL stylesheet).  Rules:
+
+- Their palettes mirror the app tokens exactly (light `--accent #8c6800`,
+  `--ink-3 #716c61`; dark tokens match `.dark`) — the earlier lighter
+  amber/grey variants are gone; keep them in sync when retuning tokens.
+  Dark mode there is `prefers-color-scheme` (no JS to set classes).
+- Radii follow the app scale (cards 16px = rounded-2xl), the wordmark is
+  1.25rem/800 like the header brand, and the brand dot is `.dot`
+  (accent), not an ad-hoc class.
+- Strings are English-only by design: the no-JS templates have no i18n
+  mechanism (adding per-server-locale template variants doesn't scale);
+  the React surface owns localisation for every JS locale.  Never wire
+  searxng's gettext catalogs into zjsearch chrome, on the server side
+  either.
+
+## Custom plugin behaviour (server side, keep with the theme)
+
+- `unit_converter` / `currency_convert`: value-less queries ("kg to lb",
+  "usd to cny") convert **1** by default; a keyword split stops at the
+  first match (no duplicate answers).  Both ship the sibling-unit table so
+  the client converter can re-pair without new requests.
+- `advanced_search_syntax`: bang/language tokens (`!wp`, `:fr`) are stripped
+  from the query the engines receive AND from the remaining-terms inclusion
+  filter — otherwise any "bang + syntax" combination filters everything
+  out (engines would search the literal "!wp …" string).  `after:`/`before:`
+  compare inclusively against the result's publication date.
+- `time_zone`: an unknown location is silence (ValueError swallowed), not a
+  plugin error.
+
 ## zjsearch performance notes
 
 - Every content `<img>` is `loading="lazy" decoding="async"` inside an
@@ -368,8 +420,8 @@ background only — color marks the term, no bold.
   eager graph.
 - No webfonts (system font stack) and no third-party scripts; icons come
   from `lucide-react` (tree-shaken, imported directly per usage site with
-  `aria-hidden`); BrandMark (the logo) is hand-drawn in
-  `src/components/Brand.tsx`. Never add an icon font.
+  `aria-hidden`); the brand is typeset text — instance_name + accent dot —
+  not an SVG mark. Never add an icon font.
 - Drawer/lightbox overlays render conditionally (zero cost when closed).
 
 ## Windows (Git Bash) development notes

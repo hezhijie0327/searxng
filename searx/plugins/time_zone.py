@@ -61,20 +61,25 @@ class SXNGPlugin(Plugin):
             )
             return results
 
-        geo = GeoLocation.by_query(search_term=search_term)
-        if geo:
-            date_time = DateTime(datetime.datetime.now(tz=geo.zoneinfo))
-            tz_name = geo.timezone.replace('_', ' ')
-            results.add(
-                results.types.Answer(
-                    answer=(f"{tz_name}:" f" {date_time.l10n()} ({date_time.datetime.strftime('%Z')})"),
-                    data={
-                        "kind": "time",
-                        "zone": tz_name,
-                        "time": date_time.l10n(),
-                        "abbr": date_time.datetime.strftime("%Z"),
-                    },
-                )
+        # GeoLocation.by_query raises ValueError for unknown locations
+        # (e.g. "time what is it") -- a miss means no answer, not an error
+        try:
+            geo = GeoLocation.by_query(search_term=search_term)
+        except ValueError:
+            return results
+
+        date_time = DateTime(datetime.datetime.now(tz=geo.zoneinfo))
+        tz_name = geo.timezone.replace('_', ' ')
+        results.add(
+            results.types.Answer(
+                answer=(f"{tz_name}:" f" {date_time.l10n()} ({date_time.datetime.strftime('%Z')})"),
+                data={
+                    "kind": "time",
+                    "zone": tz_name,
+                    "time": date_time.l10n(),
+                    "abbr": date_time.datetime.strftime("%Z"),
+                },
             )
+        )
 
         return results

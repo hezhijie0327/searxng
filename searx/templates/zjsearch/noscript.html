@@ -2,13 +2,17 @@
 
     The React application needs JavaScript; these macros render the same
     search context as plain HTML inside <noscript>, so a visitor without
-    JavaScript can still search, read results and paginate.  English-only by
-    design — this is the rarely-used basic mode (wired up in base.html,
-    index.html and results.html).  Visual language mirrors rss.xsl: a
-    self-contained document style with its own light/dark palette. -#}
+    JavaScript can still search, read results and paginate.
+
+    Strings are English-only by design: the no-JS surface is the
+    rarely-used basic mode and Jinja templates have no i18n mechanism —
+    adding a UI language touches ONLY client/zjsearch/src/lib/i18n/,
+    never these templates.  Visual language mirrors rss.xsl: a
+    self-contained document style with its own light/dark palette
+    (.zjs-noscript in global.css). -#}
 
 {% macro ns_brand() -%}
-<div class="zjs-ns-brand"><span class="zjs-ns-wordmark">{{ instance_name }}<span class="zjs-ns-dot">.</span></span></div>
+<div class="zjs-ns-brand"><span class="zjs-ns-wordmark">{{ instance_name }}<span class="dot">.</span></span></div>
 {%- endmacro %}
 
 {% macro ns_form(q) -%}

@@ -52,7 +52,7 @@ export function Sidebar({ data, onSearch }: { data: SearchPageData; onSearch: (q
         <Box title={t("search_url")}>
           <ClickToCopy value={searchUrl}>
             <pre
-              className="min-w-0 overflow-x-auto rounded-lg bg-surface-2 p-2 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap text-ink-2"
+              className="min-w-0 overflow-x-auto rounded-xl bg-surface-2 p-3 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap text-ink-2"
               dir="ltr"
             >
               {searchUrl}

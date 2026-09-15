@@ -18,3 +18,13 @@ export function isModifiedClick(event: {
 }): boolean {
   return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
 }
+
+/** Hostname of an arbitrary URL for compact source labels; a malformed URL
+    (plain-text "url" the server could not parse) is shown as-is. */
+export function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}

@@ -10,7 +10,7 @@ import { tryEvaluateExpression } from "@/features/calculator.ts";
 import { focusSearchInput, useHotkeys } from "@/features/hotkeys.ts";
 import { Answers } from "@/features/results/answers/Answers.tsx";
 import { CalculatorAnswer } from "@/features/results/answers/Calculator.tsx";
-import { CacheUrlProvider } from "@/features/results/cacheUrl.tsx";
+import { CacheUrlProvider } from "@/features/results/CacheUrlProvider.tsx";
 import { ResultSkeleton } from "@/features/results/cardParts.tsx";
 import { DebugPanels } from "@/features/results/DebugPanels.tsx";
 import { Corrections, NoResults } from "@/features/results/EmptyStates.tsx";
@@ -21,18 +21,18 @@ import { Pagination } from "@/features/results/Pagination.tsx";
 import { ResultsView } from "@/features/results/ResultsView.tsx";
 import { Sidebar } from "@/features/results/Sidebar.tsx";
 import { SuggestionsBox } from "@/features/results/SuggestionsBox.tsx";
-import { writeClipboard } from "@/lib/clipboard.ts";
+import { useCopyToast } from "@/lib/clipboard.ts";
 import { readCookie } from "@/lib/cookies.ts";
 import { useT } from "@/lib/i18n.ts";
 import { scrollBehavior } from "@/lib/motion.ts";
 import { useRouter } from "@/lib/router.tsx";
 import { fetchSearchPage, parseSearchUrl, shareableSearchUrl } from "@/lib/searchParams.ts";
 import { useHasPlugin, useSettings } from "@/lib/settings.ts";
-import { flashToast } from "@/lib/toast.ts";
 import type { ResultItem, SearchPageData } from "@/lib/types.ts";
 
 export function ResultsPage({ data }: { data: SearchPageData }) {
   const t = useT();
+  const copyToast = useCopyToast();
   const { search, loading, error, href } = useRouter();
   const hasPlugin = useHasPlugin();
   const infiniteScroll = hasPlugin("infiniteScroll");
@@ -203,11 +203,7 @@ export function ResultsPage({ data }: { data: SearchPageData }) {
     yank: () => {
       const url = selectedCard()?.querySelector("a[href]")?.getAttribute("href");
       if (url) {
-        void writeClipboard(url).then((ok) => {
-          if (ok) {
-            flashToast(t("copied"), { tone: "ok" });
-          }
-        });
+        copyToast(url);
       }
     },
     page: (delta: number) => {

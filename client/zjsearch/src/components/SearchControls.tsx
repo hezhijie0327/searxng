@@ -3,6 +3,7 @@
 import { Clock, Ellipsis, Languages, Shield } from "lucide-react";
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { CategoryIcon } from "@/components/CategoryIcon.tsx";
+import { CategoryTab } from "@/components/CategoryTab.tsx";
 import type { DropdownOption } from "@/components/Dropdown.tsx";
 import { Dropdown } from "@/components/Dropdown.tsx";
 import { categoryLabel } from "@/lib/categories.ts";
@@ -99,32 +100,18 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
         }`}
         ref={scrollerRef}
       >
-        {visibleTabs.map((category) => {
-          const isSelected = selected.includes(category);
-          return (
-            <button
-              aria-pressed={isSelected}
-              className={`relative flex shrink-0 items-center gap-1.5 px-4 py-2 text-[13px] transition-colors ${
-                isSelected ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
-              }`}
-              key={category}
-              onClick={(event) => {
-                onClick(category, event);
-              }}
-              title={settings.search_on_category_select ? undefined : t("search")}
-              type="button"
-            >
-              <CategoryIcon category={category} className="size-3.5 shrink-0" />
-              <span>{label(category)}</span>
-              <span
-                aria-hidden="true"
-                className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full transition-opacity ${
-                  isSelected ? "bg-accent-strong opacity-100" : "opacity-0"
-                }`}
-              />
-            </button>
-          );
-        })}
+        {visibleTabs.map((category) => (
+          <CategoryTab
+            category={category}
+            key={category}
+            label={label(category)}
+            onClick={(event) => {
+              onClick(category, event);
+            }}
+            selected={selected.includes(category)}
+            title={settings.search_on_category_select ? undefined : t("search")}
+          />
+        ))}
         {overflowTabs.length > 0 ? (
           <Dropdown
             align="start"
@@ -154,9 +141,6 @@ export function CategoryTabs({ globals, selected, onSelectionChange, onSearch, w
     </div>
   );
 }
-
-/** categories that stay in the tab row; everything else folds into the
-    kebab menu (Kagi-style) */
 
 export interface FilterValues {
   language: string;

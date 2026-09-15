@@ -5,8 +5,9 @@ import { ClickToCopy } from "@/components/CopyButton.tsx";
 import { OnionIcon } from "@/components/OnionIcon.tsx";
 import { UnitConverterAnswer } from "@/features/results/answers/UnitConverter.tsx";
 import { useT } from "@/lib/i18n.ts";
-import { newTabLinkProps } from "@/lib/link.ts";
+import { hostnameOf, newTabLinkProps } from "@/lib/link.ts";
 import { useSettings } from "@/lib/settings.ts";
+import { MONO_CHIP } from "@/lib/styles.ts";
 import type { AnswerData } from "@/lib/types.ts";
 
 /** Special-query answers (random, statistics, hash, self-info, time zone,
@@ -19,14 +20,7 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
   const t = useT();
   const text = answer.answer;
   const data = answer.data;
-  let hostname = "";
-  if (answer.url) {
-    try {
-      hostname = new URL(answer.url).hostname;
-    } catch {
-      hostname = answer.url;
-    }
-  }
+  const hostname = answer.url ? hostnameOf(answer.url) : "";
   if (data?.kind === "unit_conversion") {
     return <UnitConverterAnswer data={data} />;
   }
@@ -50,7 +44,7 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-3">
             <span>{t("tor_external_ip")}:</span>
             <ClickToCopy value={data.ip}>
-              <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2" dir="ltr">
+              <span className={MONO_CHIP} dir="ltr">
                 {data.ip}
               </span>
             </ClickToCopy>
@@ -67,11 +61,9 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
   if (data?.kind === "hash") {
     return (
       <div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2" dir="ltr">
-            {data.algo}
-          </span>
-        </div>
+        <span className={MONO_CHIP} dir="ltr">
+          {data.algo}
+        </span>
         <ClickToCopy className="mt-2" value={data.digest}>
           <p className="break-all font-mono text-sm text-ink-2" dir="ltr">
             {data.digest}
@@ -86,13 +78,11 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
         <p className="truncate text-xs text-ink-3" dir="ltr">
           <span className="font-mono font-medium text-accent">{data.func}</span>({data.args})
         </p>
-        <div className="mt-1 flex items-center justify-between gap-3">
-          <ClickToCopy className="mt-1" value={data.result}>
-            <p className="break-all text-2xl font-semibold text-ink" dir="ltr">
-              {data.result}
-            </p>
-          </ClickToCopy>
-        </div>
+        <ClickToCopy className="mt-1" value={data.result}>
+          <p className="break-all text-4xl font-semibold text-ink" dir="ltr">
+            {data.result}
+          </p>
+        </ClickToCopy>
       </div>
     );
   }
@@ -109,11 +99,7 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
             {data.time}
           </p>
         </div>
-        {data.abbr ? (
-          <span className="shrink-0 rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2">
-            {data.abbr}
-          </span>
-        ) : null}
+        {data.abbr ? <span className={`${MONO_CHIP} shrink-0`}>{data.abbr}</span> : null}
       </div>
     );
   }
@@ -121,13 +107,11 @@ export function LegacyAnswer({ answer }: { answer: Extract<AnswerData, { templat
     return (
       <div>
         <p className="text-xs text-ink-3">{data.label}</p>
-        <div className="mt-1 flex items-center justify-between gap-3">
-          <ClickToCopy className="mt-1" value={data.value}>
-            <p className="min-w-0 break-all font-mono text-sm text-ink" dir="ltr">
-              {data.value}
-            </p>
-          </ClickToCopy>
-        </div>
+        <ClickToCopy className="mt-1" value={data.value}>
+          <p className="min-w-0 break-all font-mono text-sm text-ink" dir="ltr">
+            {data.value}
+          </p>
+        </ClickToCopy>
       </div>
     );
   }

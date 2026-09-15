@@ -37,7 +37,7 @@ export function EnginesPane({
         <input
           aria-label={t("engine_tokens")}
           autoComplete="off"
-          className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-sm transition-colors hover:border-ink-3 sm:w-60"
+          className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-[13px] transition-colors hover:border-ink-3 sm:w-60"
           onChange={(event) => {
             form.setTokens(event.target.value);
           }}
@@ -80,13 +80,13 @@ export function EnginesPane({
         <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
           {data.engine_tabs.map((tabInfo, index) => (
             <CategoryTab
-              active={index === engineTab}
               category={tabInfo.category}
               key={tabInfo.category}
               label={categoryLabel(tabInfo.category, t)}
               onClick={() => {
                 onEngineTab(index);
               }}
+              selected={index === engineTab}
             />
           ))}
         </div>

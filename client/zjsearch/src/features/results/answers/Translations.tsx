@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useT } from "@/lib/i18n.ts";
+import { CHIP, MONO_CHIP } from "@/lib/styles.ts";
 import type { AnswerData } from "@/lib/types.ts";
 
 /** Translation engines stamp the language pair into their answer URLs in
@@ -69,10 +70,7 @@ export function TranslationsAnswer({
       <div>
         <div className="flex flex-wrap items-center gap-2">
           {langPair ? (
-            <span
-              className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-2"
-              dir="ltr"
-            >
+            <span className={MONO_CHIP} dir="ltr">
               {langPair.from}
               <ArrowRight className="size-3 shrink-0" />
               {langPair.to}
@@ -105,7 +103,7 @@ export function TranslationsAnswer({
           </div>
         ) : null}
         <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
-          <span className="rounded-full bg-surface-2 px-2 py-0.5">{answer.engine}</span>
+          <span className={CHIP}>{answer.engine}</span>
         </div>
       </div>
     );
@@ -144,16 +142,17 @@ export function TranslationsAnswer({
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
           <span>{t("synonyms")}:</span>
           {first.synonyms.slice(0, 6).map((synonym) => (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-2" dir="auto" key={synonym}>
+            <span className={CHIP} dir="auto" key={synonym}>
               {synonym}
             </span>
           ))}
         </div>
       ) : null}
       {hasMore ? (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-xs text-ink-3 transition-colors hover:text-ink">
+        <details className="group/def mt-2">
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-1 text-[13px] text-ink-3 transition-colors hover:text-ink">
             {t("definitions")}
+            <ChevronDown aria-hidden="true" className="size-3.5 transition-transform group-open/def:rotate-180" />
           </summary>
           <div className="mt-2 space-y-3">
             {first.definitions.length > 4 ? (
@@ -190,7 +189,7 @@ export function TranslationsAnswer({
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
                 <span>{t("synonyms")}:</span>
                 {first.synonyms.slice(6).map((synonym) => (
-                  <span className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-2" dir="auto" key={synonym}>
+                  <span className={CHIP} dir="auto" key={synonym}>
                     {synonym}
                   </span>
                 ))}

@@ -6,7 +6,7 @@ import { type CardProps, EnginesLine, ResultArticle } from "@/features/results/c
 export function KeyValueCard({ result }: CardProps) {
   return (
     <ResultArticle priority={result.priority}>
-      <div className="overflow-hidden rounded-xl border border-line">
+      <div className="overflow-hidden rounded-2xl border border-line">
         {/* table-fixed keeps long unbreakable cells from widening (and the
             overflow-hidden wrapper from silently clipping) the table */}
         <table className="w-full table-fixed text-sm">

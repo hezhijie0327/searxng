@@ -4,6 +4,11 @@
 
 const DAY_MS = 86_400_000;
 
+// the formatters are locale-less (runtime default) — build them once instead
+// of per result meta line (a full page renders ~100 meta lines)
+const relativeFormat = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+const absoluteFormat = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" });
+
 /** Relative date for recent timestamps, locale date otherwise.
     Future timestamps (sloppy engine metadata) get the absolute date too. */
 export function formatDate(iso: string): string {
@@ -11,22 +16,33 @@ export function formatDate(iso: string): string {
   if (Number.isNaN(date.getTime())) {
     return iso;
   }
-  const absolute = () => date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   const diff = Date.now() - date.getTime();
   if (diff < 0) {
-    return absolute();
+    return absoluteFormat.format(date);
   }
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
   if (diff < DAY_MS) {
-    return rtf.format(-Math.round(diff / 3_600_000), "hour");
+    return relativeFormat.format(-Math.round(diff / 3_600_000), "hour");
   }
   if (diff < 30 * DAY_MS) {
-    return rtf.format(-Math.round(diff / DAY_MS), "day");
+    return relativeFormat.format(-Math.round(diff / DAY_MS), "day");
   }
   if (diff < 365 * DAY_MS) {
-    return rtf.format(-Math.round(diff / (30 * DAY_MS)), "month");
+    return relativeFormat.format(-Math.round(diff / (30 * DAY_MS)), "month");
   }
-  return absolute();
+  return absoluteFormat.format(date);
+}
+
+/** h:mm:ss / m:ss player clock for in-tile audio positions; a non-finite
+    or negative position (stream without duration metadata) reads "--:--". */
+export function formatClock(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "--:--";
+  }
+  const total = Math.round(seconds);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = String(total % 60).padStart(2, "0");
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${secs}` : `${minutes}:${secs}`;
 }
 
 /** Video/audio duration: passthrough display string or seconds -> h:mm:ss. */
@@ -37,13 +53,7 @@ export function formatLength(lengthDisplay: string | undefined, lengthSeconds: n
   if (lengthSeconds === undefined || lengthSeconds <= 0) {
     return null;
   }
-  const total = Math.round(lengthSeconds);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
-  const mm = hours > 0 || minutes > 0 ? String(minutes).padStart(2, "0") : "0";
-  const ss = String(seconds).padStart(2, "0");
-  return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
+  return formatClock(lengthSeconds);
 }
 
 /** Result relevance score, one decimal (e.g. "3.5"). */

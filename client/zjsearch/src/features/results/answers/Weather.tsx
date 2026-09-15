@@ -240,7 +240,7 @@ export function WeatherAnswer({
   return (
     <div>
       <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
-        <MapPin className="size-4 shrink-0 text-ink-3" />
+        <MapPin className="size-3.5 shrink-0 text-ink-3" />
         {current.location_name}
       </p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
@@ -248,7 +248,7 @@ export function WeatherAnswer({
           {current.symbol ? <img alt="" className="size-16" src={current.symbol} /> : null}
           <div>
             <p className="flex items-start gap-2">
-              <span className="text-5xl font-semibold leading-none text-ink">
+              <span className="text-4xl font-semibold leading-none text-ink">
                 {heroC}
                 <span className="ms-0.5 align-top text-lg font-medium text-ink-3">°C</span>
               </span>

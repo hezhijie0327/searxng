@@ -23,7 +23,7 @@ export function BackToTop() {
   return (
     <button
       aria-label={t("back_to_top")}
-      className="fixed bottom-6 right-6 z-40 grid size-11 place-items-center rounded-full border border-line bg-surface text-ink-2 shadow-pop transition-colors hover:text-accent animate-fade-in"
+      className="fixed bottom-6 right-6 z-40 grid size-10 place-items-center rounded-full border border-line bg-surface text-ink-2 shadow-pop transition-colors hover:text-accent animate-fade-in"
       onClick={() => {
         window.scrollTo({ top: 0, behavior: scrollBehavior() });
       }}

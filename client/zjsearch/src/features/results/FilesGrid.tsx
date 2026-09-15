@@ -7,8 +7,14 @@
     media play buttons. */
 
 import { ArrowDown, ArrowUp, Calendar, Download, FileText, Film, Magnet, Music } from "lucide-react";
-import { ResultLink } from "@/features/results/cardParts.tsx";
-import { TileBadge, TileEngines, TileFavicon } from "@/features/results/Tile.tsx";
+import {
+  TileBadge,
+  TileCell,
+  TileCenterAction,
+  TileEngines,
+  TileFavicon,
+  TileTitle,
+} from "@/features/results/Tile.tsx";
 import { formatDate } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
@@ -60,13 +66,8 @@ export function FilesGrid({
           : result.torrentfile
             ? t("torrent_file")
             : t("download");
-        const hotkeyIndex = indexOffset + index;
         return (
-          <article
-            className={`group -m-2 flex flex-col rounded-2xl p-2 ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
-            data-hotkey-index={hotkeyIndex}
-            key={`${result.url}-${index}`}
-          >
+          <TileCell hotkeyIndex={indexOffset + index} key={`${result.url}-${index}`} selected={selected}>
             <div className="relative aspect-video overflow-hidden rounded-xl border border-line bg-gradient-to-br from-surface-2 to-surface">
               <span className="absolute left-3 top-3 flex items-center gap-1.5 text-ink-3">
                 <TileIcon result={result} />
@@ -77,26 +78,15 @@ export function FilesGrid({
               {size ? <TileBadge>{size}</TileBadge> : null}
               {result.favicon ? <TileFavicon src={result.favicon} /> : null}
               {primaryHref ? (
-                <a
-                  aria-label={primaryLabel}
-                  className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/70 text-white shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-accent-contrast"
+                <TileCenterAction
+                  download={!result.magnetlink}
                   href={primaryHref}
-                  {...(result.magnetlink ? {} : { download: true })}
-                  title={primaryLabel}
-                >
-                  {result.magnetlink ? <Magnet className="size-5" /> : <Download className="size-5" />}
-                </a>
+                  icon={result.magnetlink ? <Magnet className="size-5" /> : <Download className="size-5" />}
+                  label={primaryLabel}
+                />
               ) : null}
             </div>
-            <h3 className="mt-2.5 line-clamp-2 min-h-[2.75rem] text-base font-medium leading-snug">
-              <ResultLink
-                className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
-                globals={globals}
-                result={result}
-              >
-                <span dangerouslySetInnerHTML={{ __html: result.title_html }} dir="auto" />
-              </ResultLink>
-            </h3>
+            <TileTitle globals={globals} result={result} />
             <div className="mt-1.5 flex min-h-5 items-center justify-between gap-2 text-xs text-ink-3">
               {health ? (
                 <span className="inline-flex items-center gap-2">
@@ -128,7 +118,7 @@ export function FilesGrid({
             <div className="mt-auto pt-1.5">
               <TileEngines result={result} />
             </div>
-          </article>
+          </TileCell>
         );
       })}
     </div>

@@ -219,7 +219,7 @@ export function MapResult({ longitude, latitude, boundingbox, geojson, label, au
           {longitude && latitude ? (
             <button
               aria-label={t("recenter")}
-              className="absolute left-[12px] top-[79px] z-10 flex size-8 items-center justify-center rounded-lg border border-line bg-surface text-ink-2 transition-colors hover:border-accent hover:bg-surface-2 hover:text-accent"
+              className="absolute left-[12px] top-[79px] z-10 grid size-9 place-items-center rounded-full border border-line bg-surface text-ink-2 transition-colors hover:bg-surface-2 hover:text-accent"
               onClick={() => {
                 restoreRef.current?.();
               }}

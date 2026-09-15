@@ -230,8 +230,8 @@
     --ns-line: #e6e2d7;
     --ns-ink: #201d17;
     --ns-ink-2: #6b675c;
-    --ns-ink-3: #9a958a;
-    --ns-accent: #a67c00;
+    --ns-ink-3: #716c61;
+    --ns-accent: #8c6800;
     --ns-accent-strong: #f5c84c;
     box-sizing: border-box;
     min-height: 100vh;
@@ -250,7 +250,7 @@
       --ns-line: #38342f;
       --ns-ink: #eceae4;
       --ns-ink-2: #a8a399;
-      --ns-ink-3: #7b766c;
+      --ns-ink-3: #9b958a;
       --ns-accent: #fec843;
       --ns-accent-strong: #fec843;
     }
@@ -269,7 +269,7 @@
   }
 
   .zjs-ns-wordmark {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: -0.01em;
   }
@@ -325,7 +325,7 @@
   .zjs-ns-answer {
     background: var(--ns-surface);
     border: 1px solid var(--ns-line);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 0.9rem 1rem;
     margin: 0 0 0.7rem;
   }
@@ -333,7 +333,7 @@
   .zjs-ns-article {
     background: var(--ns-surface);
     border: 1px solid var(--ns-line);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 0.9rem 1rem;
     margin-bottom: 0.7rem;
     transition: border-color 0.15s ease;

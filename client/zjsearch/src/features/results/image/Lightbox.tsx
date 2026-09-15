@@ -6,13 +6,12 @@
  * drag-pan, and an #image-viewer hash so the back button dismisses it.
  */
 
-import { Archive, Award, ChevronLeft, ChevronRight, Download, ExternalLink, ImageOff, Server, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, ExternalLink, ImageOff, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCacheUrl } from "@/features/results/cacheUrl.tsx";
+import { EnginesLine } from "@/features/results/cardParts.tsx";
 import { useDialogFocus } from "@/lib/dialogFocus.ts";
-import { formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
-import { newTabLinkProps } from "@/lib/link.ts";
+import { hostnameOf, newTabLinkProps } from "@/lib/link.ts";
 import { useSettings } from "@/lib/settings.ts";
 import type { ResultItem } from "@/lib/types.ts";
 
@@ -79,7 +78,6 @@ export function Lightbox({
 }) {
   const t = useT();
   const settings = useSettings();
-  const cacheUrl = useCacheUrl();
   const result = results[index];
   const touchStartX = useRef<number | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -87,7 +85,6 @@ export function Lightbox({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const dragStart = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
-  const [enginesExpanded, setEnginesExpanded] = useState(false);
   const dialogRef = useDialogFocus<HTMLDivElement>();
 
   const resetZoom = useCallback(() => {
@@ -185,16 +182,7 @@ export function Lightbox({
   const thumbSrc = result.thumbnail_src || result.img_src || "";
   const linkProps = newTabLinkProps(settings.results_on_new_tab);
 
-  let hostname = "";
-  if (result.netloc) {
-    hostname = result.netloc;
-  } else if (result.url) {
-    try {
-      hostname = new URL(result.url).hostname;
-    } catch {
-      hostname = "";
-    }
-  }
+  const hostname = result.netloc || (result.url ? hostnameOf(result.url) : "");
 
   return (
     <div
@@ -321,69 +309,13 @@ export function Lightbox({
               {hostname}
             </p>
           ) : null}
-          {result.engines.length > 0 ? (
-            <div className="mt-2.5 flex flex-wrap items-center gap-1" title={result.engines.join(", ")}>
-              {typeof result.score === "number" ? (
-                <span
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300 tabular-nums"
-                  title={t("scores")}
-                >
-                  <Award className="size-3 shrink-0" />
-                  {formatScore(result.score)}
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300">
-                <Server className="size-3 shrink-0" />
-                {result.engines[0]}
-              </span>
-              {enginesExpanded
-                ? result.engines.slice(1).map((engine) => (
-                    <span
-                      className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300"
-                      key={engine}
-                    >
-                      <Server className="size-3 shrink-0" />
-                      {engine}
-                    </span>
-                  ))
-                : null}
-              {result.engines.length > 1 ? (
-                <button
-                  aria-expanded={enginesExpanded}
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300 transition-colors hover:text-white"
-                  onClick={() => {
-                    setEnginesExpanded((value) => !value);
-                  }}
-                  type="button"
-                >
-                  {enginesExpanded ? (
-                    <>
-                      <ChevronLeft className="size-3 shrink-0" />
-                      {t("show_less")}
-                    </>
-                  ) : (
-                    `+${result.engines.length - 1}`
-                  )}
-                </button>
-              ) : null}
-              {cacheUrl ? (
-                <a
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300 transition-colors hover:text-white"
-                  href={cacheUrl + result.url}
-                  {...newTabLinkProps(true)}
-                >
-                  <Archive className="size-3 shrink-0" />
-                  {t("cached")}
-                </a>
-              ) : null}
-            </div>
-          ) : null}
+          <EnginesLine result={result} tone="dark" />
         </div>
 
         <div className="flex shrink-0 items-center gap-2 text-[13px]">
           {result.img_src ? (
             <a
-              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 px-3.5 py-1.5 font-medium text-zinc-200 transition-colors hover:border-zinc-400"
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 px-3 py-1.5 font-medium text-zinc-200 transition-colors hover:border-zinc-400"
               href={result.img_src}
               {...linkProps}
             >
@@ -393,7 +325,7 @@ export function Lightbox({
           ) : null}
           {result.img_src ? (
             <a
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent-strong px-3.5 py-1.5 font-medium text-accent-contrast transition-colors hover:bg-accent-strong-hover"
+              className="inline-flex items-center gap-1.5 rounded-full bg-accent-strong px-3 py-1.5 font-medium text-accent-contrast transition-colors hover:bg-accent-strong-hover"
               href={result.img_src}
               {...linkProps}
             >

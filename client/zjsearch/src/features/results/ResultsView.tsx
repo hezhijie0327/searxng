@@ -82,7 +82,7 @@ export function ResultsView({
     case "products":
       return (
         <div className="mt-4">
-          <ProductGrid globals={globals} results={results} />
+          <ProductGrid globals={globals} results={results} selected={selected} />
         </div>
       );
     case "dictionary":

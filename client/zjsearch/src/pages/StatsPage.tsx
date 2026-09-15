@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Link, Shell } from "@/components/Shell.tsx";
 import { SortHeader } from "@/components/SortHeader.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { reliabilityColor } from "@/lib/styles.ts";
 import { useSortState } from "@/lib/tableSort.ts";
 import type { EngineStat, StatsPageData } from "@/lib/types.ts";
 
@@ -65,7 +66,7 @@ function ErrorTable({ errors, title }: { errors: StatsPageData["errors"]; title:
       <h2 className="mb-2 text-lg font-semibold text-ink">{title}</h2>
       <div className="space-y-3">
         {errors.map((error, index) => (
-          <div className="overflow-x-auto rounded-xl border border-line" key={index}>
+          <div className="overflow-x-auto rounded-2xl border border-line" key={index}>
             <table className="w-full text-left text-xs">
               <tbody>
                 <tr className="border-b border-line">
@@ -164,7 +165,7 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
               <ChevronLeft className="size-3.5" />
               {t("engine_stats")}
             </Link>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-ink" dir="auto">
+            <h2 className="mt-2 text-lg font-semibold tracking-tight text-ink" dir="auto">
               {data.selected_engine_name}
             </h2>
           </div>
@@ -236,19 +237,7 @@ export function StatsPage({ data, embedded = false }: { data: StatsPageData; emb
                     <td className="px-4 py-2.5">
                       <TimeCell engine={engine} maxTime={data.max_time} />
                     </td>
-                    <td
-                      className={`px-4 py-2.5 font-medium ${
-                        engine.reliability === null
-                          ? "text-ink-3"
-                          : engine.reliability <= 50
-                            ? "text-danger"
-                            : engine.reliability < 80
-                              ? "text-warning"
-                              : engine.reliability < 90
-                                ? "text-ink-2"
-                                : "text-ok"
-                      }`}
-                    >
+                    <td className={`px-4 py-2.5 font-medium ${reliabilityColor(engine.reliability)}`}>
                       {engine.reliability ?? "–"}
                     </td>
                   </tr>

@@ -44,7 +44,7 @@ export function flashToast(
 ): void {
   const chip = document.createElement("div");
   chip.setAttribute("role", "status");
-  chip.className = `inline-flex animate-fade-up items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium shadow-pop ${TONE_CLASS[tone]}`;
+  chip.className = `inline-flex animate-fade-up items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium shadow-pop ${TONE_CLASS[tone]}`;
   if (TONE_ICON[tone]) {
     chip.innerHTML = TONE_ICON[tone];
   }

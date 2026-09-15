@@ -117,5 +117,11 @@ export async function fetchSearchPage(params: SearchParams, method: "GET" | "POS
     method === "POST"
       ? await fetchText("/search", { body: toSearchFormData(params), headers: { Accept: "text/html" }, method: "POST" })
       : await fetchText(buildSearchUrl(params), { headers: { Accept: "text/html" } });
-  return extractPageData(html) as SearchPageData;
+  const data = extractPageData(html);
+  // a redirect could land on a non-results shell (e.g. the index page) — the
+  // caller dereferences results/paging, so fail loudly instead of crashing
+  if (data.globals.page !== "results") {
+    throw new Error("not a results page");
+  }
+  return data as SearchPageData;
 }

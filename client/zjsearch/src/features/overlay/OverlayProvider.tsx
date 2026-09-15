@@ -10,7 +10,7 @@
  */
 
 import { X } from "lucide-react";
-import { createContext, type ReactNode, Suspense, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, Suspense, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDialogFocus } from "@/lib/dialogFocus.ts";
 import { fetchText } from "@/lib/http.ts";
 import { useT } from "@/lib/i18n.ts";
@@ -136,8 +136,16 @@ export function OverlayProvider({ panels, children }: { panels: OverlayPanels; c
     };
   }, [state, onKeyDown]);
 
+  // stable context value: the callbacks are useCallback'd, and without the
+  // useMemo every open/close would re-render every useOverlay() consumer
+  // (Shell header actions, footer, DebugPanels) even while idle
+  const contextValue = useMemo(
+    () => ({ openOverlay, openDocument, closeOverlay }),
+    [openOverlay, openDocument, closeOverlay],
+  );
+
   return (
-    <OverlayContext.Provider value={{ openOverlay, openDocument, closeOverlay }}>
+    <OverlayContext.Provider value={contextValue}>
       {children}
       {state ? (
         <div
@@ -226,11 +234,12 @@ const PanelSkeleton = () => (
 );
 
 function PanelFallback({ data }: { data: AnyPageData }) {
+  const t = useT();
   return (
     <p className="p-6 text-sm text-ink-2">
-      This page cannot be shown as a panel.{" "}
+      {t("panel_unavailable")}{" "}
       <a className="text-accent" href={data.globals.about_url || "/"}>
-        Open it here
+        {t("open_here")}
       </a>
       .
     </p>

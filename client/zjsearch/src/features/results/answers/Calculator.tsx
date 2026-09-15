@@ -43,13 +43,15 @@ export function CalculatorAnswer({ calc }: { calc: CalculationAnswer }) {
     { label: ".", insert: "." },
   ];
   return (
-    <div className="rounded-2xl border border-accent/25 bg-accent-soft/50 px-4 py-3 animate-fade-up">
-      <div className="min-h-16 rounded-2xl border border-line bg-surface px-4 py-2 text-end">
-        <p className="truncate text-xs text-ink-3" dir="ltr">
+    // no source url → uncarded answer tier (gray expression, 4xl value,
+    // border-b divider), the keypad follows beneath
+    <div className="animate-fade-up border-b border-line px-4 pb-3">
+      <div className="rounded-xl bg-surface-2/60 px-4 py-2 text-end">
+        <p className="truncate font-mono text-xs text-ink-3" dir="ltr">
           {expression}
           {result ? " =" : ""}
         </p>
-        <p className="min-h-10 truncate text-4xl font-semibold text-ink" dir="ltr">
+        <p className="min-h-10 truncate text-4xl font-semibold tabular-nums text-ink" dir="ltr">
           {result ? result.value : ""}
         </p>
       </div>
@@ -58,7 +60,7 @@ export function CalculatorAnswer({ calc }: { calc: CalculationAnswer }) {
           <button
             className={`h-11 rounded-xl text-sm transition-colors ${
               key.kind === "eq"
-                ? "row-span-2 bg-accent-strong text-base text-accent-contrast hover:opacity-90"
+                ? "row-span-2 bg-accent-strong text-base text-accent-contrast hover:bg-accent-strong-hover"
                 : key.kind === "op"
                   ? "bg-surface-2 text-accent hover:bg-line/40"
                   : "bg-surface-2 text-ink hover:bg-line/40"

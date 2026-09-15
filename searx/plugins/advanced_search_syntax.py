@@ -309,6 +309,10 @@ class SXNGPlugin(Plugin):
         for word in all_words:
             if word.startswith('"') and word.endswith('"'):
                 continue  # Exact phrases are handled separately
+            # bang / language tokens (!wp, !!g, :fr) route the search -- they
+            # are not content terms, a result title never contains them
+            if word.startswith(("!", ":")):
+                continue
             if self._is_advanced_syntax_word(word):
                 continue
             if self._is_regex_in_advanced_context(f" {word} "):
@@ -535,6 +539,14 @@ class SXNGPlugin(Plugin):
         request.original_query = original_query
         request.search_syntax = syntax
 
+        # Bang / language tokens (!wp, !!g, :fr) were already resolved into the
+        # search context before plugins run -- they must not leak back into the
+        # query the engines receive, or e.g. "!photon paris site:…" would make
+        # the engines geocode the literal string "!photon paris" (zero hits).
+        engine_query = " ".join(
+            part for part in (cleaned_query or "").split() if not part.startswith(("!", ":"))
+        ).strip()
+
         # Update the query in form
         if hasattr(request, 'form') and 'q' in request.form:
             try:
@@ -549,7 +561,7 @@ class SXNGPlugin(Plugin):
                 pass
 
         if hasattr(search, 'search_query'):
-            search.search_query.query = cleaned_query or original_query
+            search.search_query.query = engine_query or original_query
 
         return True
 

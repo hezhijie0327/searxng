@@ -129,9 +129,9 @@ pipeline features without any Python changes. -#}
     },
     {%- endif %}
     {%- if result.links %}
-    "links": [
+    "map_links": [
       {%- for l in result.links -%}
-      {"label": {{ (l.get('label') or '')|tojson }}, "url": {{ (l.get('url') or '')|tojson }}}{{ ", " if not loop.last }}
+      {"label": {{ (l.get('label') or '')|tojson }}, "url": {{ (l.get('url') or '')|tojson }} }{{ ", " if not loop.last }}
       {%- endfor -%}
     ],
     {%- endif %}

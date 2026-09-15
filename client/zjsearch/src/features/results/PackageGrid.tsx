@@ -6,28 +6,26 @@
 
 import { Calendar, Code, ExternalLink, Package as PackageIcon, User } from "lucide-react";
 import { ResultLink } from "@/features/results/cardParts.tsx";
-import { TileEngines, TileFavicon } from "@/features/results/Tile.tsx";
+import { TileCell, TileEngines, TileFavicon, TileTitle } from "@/features/results/Tile.tsx";
 import { formatDate } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
-function PackageCell({
-  result,
+export function PackageGrid({
+  results,
   globals,
   selected,
-  hotkeyIndex,
+  indexOffset = 0,
 }: {
-  result: ResultItem;
+  results: ResultItem[];
   globals: GlobalData;
   selected?: number;
-  hotkeyIndex: number;
+  /** hotkey indices are page-global: offset by the grid's first result index */
+  indexOffset?: number;
 }) {
   const t = useT();
-  return (
-    <article
-      className={`group -m-2 flex flex-col rounded-2xl p-2 ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
-      data-hotkey-index={hotkeyIndex}
-    >
+  const cells = results.map((result, index) => (
+    <TileCell hotkeyIndex={indexOffset + index} key={`${result.url}-${index}`} selected={selected}>
       <ResultLink
         className="relative block aspect-square overflow-hidden rounded-xl border border-line bg-gradient-to-br from-surface-2 to-surface"
         globals={globals}
@@ -41,15 +39,7 @@ function PackageCell({
         </span>
         {result.favicon ? <TileFavicon src={result.favicon} /> : null}
       </ResultLink>
-      <h3 className="mt-2.5 line-clamp-2 min-h-[2.75rem] text-base font-medium leading-snug">
-        <ResultLink
-          className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
-          globals={globals}
-          result={result}
-        >
-          <span dangerouslySetInnerHTML={{ __html: result.title_html }} dir="auto" />
-        </ResultLink>
-      </h3>
+      <TileTitle globals={globals} result={result} />
       <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-ink-3">
         {result.maintainer || result.author ? (
           <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
@@ -99,30 +89,7 @@ function PackageCell({
           </div>
         ) : null}
       </div>
-    </article>
-  );
-}
-
-export function PackageGrid({
-  results,
-  globals,
-  selected,
-  indexOffset = 0,
-}: {
-  results: ResultItem[];
-  globals: GlobalData;
-  selected?: number;
-  /** hotkey indices are page-global: offset by the grid's first result index */
-  indexOffset?: number;
-}) {
-  const cells = results.map((result, index) => (
-    <PackageCell
-      globals={globals}
-      hotkeyIndex={indexOffset + index}
-      key={`${result.url}-${index}`}
-      result={result}
-      selected={selected}
-    />
+    </TileCell>
   ));
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-8 @sm:grid-cols-3 @[46rem]:grid-cols-4 @5xl:grid-cols-5">

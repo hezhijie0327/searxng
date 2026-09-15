@@ -6,9 +6,10 @@ import { SortHeader } from "@/components/SortHeader.tsx";
 import { engineGroupLabel } from "@/lib/categories.ts";
 import { loadEngineDescriptions } from "@/lib/engineDescriptions.ts";
 import { useT } from "@/lib/i18n.ts";
+import { reliabilityColor } from "@/lib/styles.ts";
 import { type SortState, useSortState } from "@/lib/tableSort.ts";
 import type { EngineEntry, PreferencesPageData } from "@/lib/types.ts";
-import { EngineTooltip, reliabilityColor, Switch } from "@/pages/preferences/parts.tsx";
+import { EngineTooltip, Switch } from "@/pages/preferences/parts.tsx";
 
 type EngineSortKey = "allow" | "name" | "safesearch" | "time_range" | "weight" | "time" | "timeout" | "reliability";
 

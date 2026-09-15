@@ -8,21 +8,19 @@
 import { Calendar, Music as MusicIcon, Pause, Play, User, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ResultLink } from "@/features/results/cardParts.tsx";
-import { TileBadge, TileEngines, TileFavicon, TileThumb } from "@/features/results/Tile.tsx";
-import { formatDate, formatLength } from "@/lib/format.ts";
+import {
+  TileBadge,
+  TileCell,
+  TileCenterAction,
+  TileEngines,
+  TileFavicon,
+  TileThumb,
+  TileTitle,
+} from "@/features/results/Tile.tsx";
+import { formatClock, formatDate, formatLength } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
+import { DISABLED } from "@/lib/styles.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
-
-function formatClock(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return "--:--";
-  }
-  const total = Math.round(seconds);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const secs = String(total % 60).padStart(2, "0");
-  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${secs}` : `${minutes}:${secs}`;
-}
 
 /** In-tile mini player for raw audio streams.  Reports playback failure so
     the grid can fall back to the embeddable player when one exists. */
@@ -97,7 +95,7 @@ function AudioTilePlayer({ src, onClose, onError }: { src: string; onClose: () =
         <span>{formatClock(time)}</span>
         <input
           aria-label={t("length")}
-          className="w-full accent-white disabled:opacity-40"
+          className={`w-full accent-white ${DISABLED}`}
           disabled={!hasDuration}
           max={hasDuration ? duration : 1}
           min={0}
@@ -155,16 +153,11 @@ export function MusicGrid({
   const cells = results.map((result, index) => {
     const length = formatLength(result.length_display, result.length_seconds);
     const isPlaying = playing === index;
-    const hotkeyIndex = indexOffset + index;
     const audioSrc = result.audio_src || "";
     const embedSrc = result.iframe_src || "";
     const playable = Boolean(audioSrc || embedSrc);
     return (
-      <article
-        className={`group -m-2 flex flex-col rounded-2xl p-2 ${selected === hotkeyIndex ? "bg-surface ring-1 ring-accent-strong" : ""}`}
-        data-hotkey-index={hotkeyIndex}
-        key={`${result.url}-${index}`}
-      >
+      <TileCell hotkeyIndex={indexOffset + index} key={`${result.url}-${index}`} selected={selected}>
         <div className="relative">
           <ResultLink
             className="relative block aspect-square overflow-hidden rounded-xl bg-surface-2"
@@ -210,29 +203,17 @@ export function MusicGrid({
             )
           ) : null}
           {playable && !isPlaying ? (
-            <button
-              aria-label={t("play")}
-              className="absolute left-1/2 top-1/2 z-10 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white opacity-85 shadow-pop transition-all hover:scale-105 hover:bg-accent-strong hover:text-accent-contrast group-hover:opacity-100"
+            <TileCenterAction
+              icon={<Play className="size-5 translate-x-px" />}
+              label={t("play")}
               onClick={() => {
                 setMode(audioSrc ? "audio" : "embed");
                 setPlaying(index);
               }}
-              title={t("play")}
-              type="button"
-            >
-              <Play className="size-5 translate-x-px" />
-            </button>
+            />
           ) : null}
         </div>
-        <h3 className="mt-2.5 line-clamp-2 min-h-[2.75rem] text-base font-medium leading-snug">
-          <ResultLink
-            className="text-ink decoration-accent/50 underline-offset-2 hover:text-accent hover:underline"
-            globals={globals}
-            result={result}
-          >
-            <span dangerouslySetInnerHTML={{ __html: result.title_html }} dir="auto" />
-          </ResultLink>
-        </h3>
+        <TileTitle globals={globals} result={result} />
         <div className="mt-1.5 flex items-center justify-between gap-3 text-xs text-ink-3">
           {result.author ? (
             <span className="inline-flex min-w-0 items-center gap-1 truncate" dir="auto">
@@ -254,7 +235,7 @@ export function MusicGrid({
         <div className="mt-auto pt-1.5">
           <TileEngines result={result} />
         </div>
-      </article>
+      </TileCell>
     );
   });
   return (

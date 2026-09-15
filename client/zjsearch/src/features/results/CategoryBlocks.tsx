@@ -7,6 +7,8 @@
  * via its header.
  */
 
+import { useMemo } from "react";
+import { AppsGrid } from "@/features/results/AppsGrid.tsx";
 import { collectBlocks } from "@/features/results/blocks.ts";
 import { CardList } from "@/features/results/CardList.tsx";
 import { FilesGrid } from "@/features/results/FilesGrid.tsx";
@@ -15,14 +17,15 @@ import { ImageGrid } from "@/features/results/image/ImageGrid.tsx";
 import { MusicGrid } from "@/features/results/MusicGrid.tsx";
 import { PackageGrid } from "@/features/results/PackageGrid.tsx";
 import { PosterGrid } from "@/features/results/PosterGrid.tsx";
+import { ProductGrid } from "@/features/results/ProductGrid.tsx";
 import { VideoGrid } from "@/features/results/VideoGrid.tsx";
 import { categoryLabel } from "@/lib/categories.ts";
 import { useT } from "@/lib/i18n.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 /** The grid views for the categories that have one; everything else falls
-    back to the standard card list.  Grid cells take `indexOffset` so hotkey
-    indices stay page-global. */
+    back to the standard card list (papers/packages cards dispatch inside).
+    Grid cells take `indexOffset` so hotkey indices stay page-global. */
 function CategoryCollectionView({
   category,
   results,
@@ -51,6 +54,10 @@ function CategoryCollectionView({
       return <PosterGrid globals={globals} indexOffset={indexOffset} results={results} selected={selected} />;
     case "packages":
       return <PackageGrid globals={globals} indexOffset={indexOffset} results={results} selected={selected} />;
+    case "apps":
+      return <AppsGrid globals={globals} indexOffset={indexOffset} results={results} selected={selected} />;
+    case "products":
+      return <ProductGrid globals={globals} indexOffset={indexOffset} results={results} selected={selected} />;
     default:
       return (
         <CardList
@@ -80,9 +87,8 @@ export function CategoryBlocks({
   onToggleBlock: (key: string) => void;
 }) {
   const t = useT();
-  const blocks = collectBlocks(results);
-  // persisted user order first (tab order is the fallback), then categories
-  // never seen before
+  // one block per original search category, in first-appearance (tab) order
+  const blocks = useMemo(() => collectBlocks(results), [results]);
   const orderedKeys = [...blocks.keys()];
   return (
     <>

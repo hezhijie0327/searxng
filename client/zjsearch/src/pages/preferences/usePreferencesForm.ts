@@ -10,10 +10,14 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { fetchText } from "@/lib/http.ts";
+import { useT } from "@/lib/i18n.ts";
+import { flashToast } from "@/lib/toast.ts";
 import type { PreferencesPageData } from "@/lib/types.ts";
 
 export function usePreferencesForm(data: PreferencesPageData) {
   const kv = data.kv;
+  const t = useT();
 
   const [savedAt, setSavedAt] = useState(0);
 
@@ -154,12 +158,15 @@ export function usePreferencesForm(data: PreferencesPageData) {
       if (pastedHash.trim()) {
         fd.set("preferences", pastedHash.trim());
       }
-      void fetch("/preferences", { body: fd, method: "POST", redirect: "follow" })
+      // fetchText throws on non-2xx, so "saved" only ever reports real
+      // successes; a failed POST leaves the state untouched and the next
+      // change re-fires the debounced save
+      void fetchText("/preferences", { body: fd, method: "POST", redirect: "follow" })
         .then(() => {
           setSavedAt(Date.now());
         })
         .catch(() => {
-          /* keep the UI state; changing any setting retries */
+          flashToast(t("save_failed"), { tone: "danger" });
         });
     }, 600);
     return () => {

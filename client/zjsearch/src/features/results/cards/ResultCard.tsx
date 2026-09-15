@@ -13,10 +13,8 @@ import { ProductCard } from "@/features/results/cards/ProductCard.tsx";
 import { TorrentCard } from "@/features/results/cards/TorrentCard.tsx";
 import { VideoCard } from "@/features/results/cards/VideoCard.tsx";
 
-/** Kagi-style video tiles for video-only result pages.  Tiles with an
-    embeddable source get a Spotify-style hover play button that expands the
-    player in place.  Cells carry data-hotkey-index so the results hotkeys
-    can walk the grid like the list layouts. */
+/** Per-template card dispatch for list views: one memoized component so
+    re-renders from hotkey navigation skip unchanged rows. */
 export const ResultCard = memo(function ResultCard(props: CardProps) {
   const { result } = props;
   switch (result.template) {

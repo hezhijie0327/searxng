@@ -41,7 +41,7 @@ export function Pagination({
           }}
           type="button"
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className="size-3.5" />
           <span className="hidden sm:inline">{t("previous_page")}</span>
         </button>
       ) : null}
@@ -74,7 +74,7 @@ export function Pagination({
           type="button"
         >
           <span className="hidden sm:inline">{t("next_page")}</span>
-          <ChevronRight className="size-4" />
+          <ChevronRight className="size-3.5" />
         </button>
       ) : null}
     </nav>

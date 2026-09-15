@@ -69,7 +69,6 @@ export const EN = {
   source: "Source",
   engines: "Engines",
   view_source: "View source",
-  address: "address",
   feels_like: "Feels Like",
   weather_trend: "Temperature trend",
   wind: "Wind",
@@ -95,7 +94,6 @@ export const EN = {
   allow: "Allow",
   name: "Name",
   description: "Description",
-  instant_answer_modules: "This is the list of ZJSearch's instant answering modules.",
   autocomplete: "Autocomplete",
   show_queries_as_you_type: "Show possible queries as you type",
   favicon_resolver: "Favicon Resolver",
@@ -169,7 +167,7 @@ export const EN = {
 
   homepage: "Project homepage",
   center_alignment: "Center Alignment",
-  center_alignment_desc: "Use a narrower results column centered on the page instead of the full width.",
+  center_alignment_desc: "Turn off for the full-width widescreen layout; on narrows the results column and centers it.",
   search_options: "Search options",
   meta_found: "Found",
   meta_results: "results",
@@ -329,6 +327,13 @@ export const EN = {
   page_about_searxng: "About SearXNG",
   cached: "Cached",
   export_formats: "Export formats",
+  // misc chrome
+  save_failed: "Saving failed — check your connection; changing a setting retries.",
+  embedded_content: "Embedded content",
+  no_https: "No HTTPS",
+  view_error_logs: "View error logs and submit a bug report",
+  panel_unavailable: "This page cannot be shown as a panel.",
+  open_here: "Open it here",
 };
 
 export type StringKey = keyof typeof EN;

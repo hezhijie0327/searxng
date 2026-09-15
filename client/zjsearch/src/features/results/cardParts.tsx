@@ -15,11 +15,11 @@ import {
   User,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { useCacheUrl } from "@/features/results/cacheUrl.tsx";
+import { useCacheUrl } from "@/features/results/CacheUrlProvider.tsx";
 import { formatDate, formatLength, formatScore } from "@/lib/format.ts";
 import { useT } from "@/lib/i18n.ts";
 import { newTabLinkProps } from "@/lib/link.ts";
-import { CHIP, META_ROW, SWIPE_ROW } from "@/lib/styles.ts";
+import { CHIP, META_ROW, SWIPE_ROW, TILE_BADGE } from "@/lib/styles.ts";
 import type { GlobalData, ResultItem } from "@/lib/types.ts";
 
 // ------------------------------------------------------------- shared parts
@@ -148,16 +148,20 @@ export function MetaLine({ result }: { result: ResultItem }) {
 
 /** Unified engine attribution for EVERY view: [score] [first engine] [+N],
     expanding inline on demand.  The score leads as a tabular pill; the
-    first pill's title always carries the full engine list. */
+    first pill's title always carries the full engine list.  `tone="dark"`
+    renders the fixed-dark chip language of the image lightbox. */
 export function EnginesLine({
   result,
   leading,
   compact = false,
+  tone = "light",
 }: {
   result: ResultItem;
   leading?: ReactNode;
   /** tile views: single-line row that swipes horizontally instead of wrapping */
   compact?: boolean;
+  /** light: theme chips; dark: the lightbox's fixed-dark media chrome */
+  tone?: "dark" | "light";
 }) {
   const t = useT();
   const cacheUrl = useCacheUrl();
@@ -167,28 +171,33 @@ export function EnginesLine({
     return null;
   }
   const hidden = engines.length - 1;
+  const chip =
+    tone === "dark"
+      ? "inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-300"
+      : CHIP;
+  const chipHover = tone === "dark" ? "transition-colors hover:text-white" : "transition-colors hover:text-ink";
   return (
     <div
-      className={`mt-2 flex min-w-0 items-center gap-x-2 text-xs text-ink-3 ${
-        compact ? SWIPE_ROW : "flex-wrap gap-y-1"
-      }`}
+      className={`mt-2 flex min-w-0 items-center gap-x-2 text-xs ${
+        tone === "dark" ? "text-zinc-300" : "text-ink-3"
+      } ${compact ? SWIPE_ROW : "flex-wrap gap-y-1"}`}
     >
       {typeof result.score === "number" ? (
-        <span className={`${CHIP} tabular-nums`} title={t("scores")}>
+        <span className={`${chip} tabular-nums`} title={t("scores")}>
           <Award className="size-3 shrink-0" />
           {formatScore(result.score)}
         </span>
       ) : null}
       {leading}
       {engines.length > 0 ? (
-        <span className={`${CHIP} max-w-full truncate`} title={engines.join(", ")}>
+        <span className={`${chip} max-w-full truncate`} title={engines.join(", ")}>
           <Server className="size-3 shrink-0" />
           {engines[0]}
         </span>
       ) : null}
       {expanded
         ? engines.slice(1).map((engine) => (
-            <span className={CHIP} key={engine}>
+            <span className={chip} key={engine}>
               <Server className="size-3 shrink-0" />
               {engine}
             </span>
@@ -197,7 +206,7 @@ export function EnginesLine({
       {hidden > 0 ? (
         <button
           aria-expanded={expanded}
-          className={`${CHIP} transition-colors hover:text-ink`}
+          className={`${chip} ${chipHover}`}
           onClick={() => {
             setExpanded((value) => !value);
           }}
@@ -214,11 +223,7 @@ export function EnginesLine({
         </button>
       ) : null}
       {cacheUrl ? (
-        <a
-          className={`${CHIP} transition-colors hover:text-ink`}
-          href={cacheUrl + result.url}
-          {...newTabLinkProps(true)}
-        >
+        <a className={`${chip} ${chipHover}`} href={cacheUrl + result.url} {...newTabLinkProps(true)}>
           <Archive className="size-3 shrink-0" />
           {t("cached")}
         </a>
@@ -260,11 +265,7 @@ export function Thumb({
         }}
         src={src}
       />
-      {lengthDisplay ? (
-        <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-white">
-          {lengthDisplay}
-        </span>
-      ) : null}
+      {lengthDisplay ? <span className={`bottom-1 right-1 ${TILE_BADGE}`}>{lengthDisplay}</span> : null}
     </div>
   );
 }
@@ -303,7 +304,7 @@ export function MediaCollapse({
         }}
         type="button"
       >
-        <Play className="size-3" />
+        <Play className="size-3.5" />
         {open ? hideLabel : showLabel}
       </button>
       {open ? <div className="mt-2 animate-fade-in">{children(open)}</div> : null}
@@ -312,11 +313,12 @@ export function MediaCollapse({
 }
 
 export function EmbedFrame({ src }: { src: string }) {
+  const t = useT();
   return (
     // the embed grows with the results column (container queries on the
     // results wrapper) instead of capping at the list-text width
-    <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-black @4xl:max-w-4xl @5xl:max-w-5xl">
-      <iframe allowFullScreen className="size-full" referrerPolicy="origin" src={src} title="embedded content" />
+    <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-2xl border border-line bg-black @4xl:max-w-4xl @5xl:max-w-5xl">
+      <iframe allowFullScreen className="size-full" referrerPolicy="origin" src={src} title={t("embedded_content")} />
     </div>
   );
 }
@@ -331,7 +333,7 @@ export function MediaPreview({ src, video = false }: { src: string; video?: bool
   return (
     <div className="flex max-w-3xl items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 @4xl:max-w-4xl @5xl:max-w-5xl">
       <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
-        <Music className="size-4" />
+        <Music className="size-4.5" />
       </span>
       <audio
         className="h-9 w-full"

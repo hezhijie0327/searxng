@@ -89,7 +89,7 @@ export function VideoCard({ eager, result, globals }: CardProps) {
                   type="button"
                 >
                   <span className="grid size-9 place-items-center rounded-full bg-black/70 shadow-pop">
-                    <Play className="size-4 translate-x-px" />
+                    <Play className="size-4.5 translate-x-px" />
                   </span>
                 </button>
               ) : null}

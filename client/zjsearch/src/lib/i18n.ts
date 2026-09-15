@@ -53,8 +53,12 @@ export function useT(): Translate {
   const locale = useContext(I18nContext);
   // memoized so `t` keeps a stable identity across renders — callers put it
   // in effect deps, and an unstable identity would re-run them needlessly
-  return useMemo(() => {
-    const catalog = CATALOGS[themeLocaleTag(locale)] ?? EN;
-    return (key: StringKey) => catalog[key] ?? EN[key] ?? key;
-  }, [locale]);
+  return useMemo(() => translateFor(locale), [locale]);
+}
+
+/** Context-free translate for non-React callers (document.title in the
+    router); resolves the catalog from an explicit locale tag. */
+export function translateFor(locale: string): Translate {
+  const catalog = CATALOGS[themeLocaleTag(locale)] ?? EN;
+  return (key: StringKey) => catalog[key] ?? EN[key] ?? key;
 }

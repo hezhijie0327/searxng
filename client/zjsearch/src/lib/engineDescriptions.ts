@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
+import { fetchJson } from "@/lib/http.ts";
+
 /**
  * Lazy engine descriptions (same source as the simple theme):
  * GET /engine_descriptions.json -> { engine: [description, source] }
@@ -13,9 +15,10 @@ export function loadEngineDescriptions(): Promise<Record<string, [string, string
     return Promise.resolve(cache);
   }
   if (!inflight) {
-    inflight = fetch("engine_descriptions.json")
-      .then(async (resp) => {
-        cache = resp.ok ? ((await resp.json()) as Record<string, [string, string]>) : {};
+    // silent failure by design: descriptions are best-effort chrome
+    inflight = fetchJson<Record<string, [string, string]>>("engine_descriptions.json")
+      .then((payload) => {
+        cache = payload;
         return cache;
       })
       .catch(() => {

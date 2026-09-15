@@ -11,7 +11,8 @@ export function CacheUrlProvider({ cacheUrl, children }: { cacheUrl?: string; ch
   return <CacheUrlContext.Provider value={cacheUrl}>{children}</CacheUrlContext.Provider>;
 }
 
-/** Renderers outside EnginesLine (image lightbox) read the prefix directly. */
+/** Renderers that build their own chip row outside EnginesLine read the
+    prefix directly. */
 export function useCacheUrl(): string | undefined {
   return useContext(CacheUrlContext);
 }

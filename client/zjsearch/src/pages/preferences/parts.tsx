@@ -2,7 +2,6 @@
 
 import { AlertTriangle, ExternalLink, Sparkle } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
-import { CategoryIcon } from "@/components/CategoryIcon.tsx";
 import type { DropdownOption } from "@/components/Dropdown.tsx";
 import { Dropdown } from "@/components/Dropdown.tsx";
 import { Link } from "@/components/Shell.tsx";
@@ -10,41 +9,9 @@ import { loadEngineDescriptions } from "@/lib/engineDescriptions.ts";
 import { type StringKey, type Translate, useT } from "@/lib/i18n.ts";
 import type { EngineEntry } from "@/lib/types.ts";
 
-// ------------------------------------------------------------- row primitives
+export { CategoryTab } from "@/components/CategoryTab.tsx";
 
-/** Category selector styled like the results-page category tabs: icon +
-    label, selected = accent text with an amber underline. */
-export function CategoryTab({
-  active,
-  category,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  category: string;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      aria-pressed={active}
-      className={`relative flex items-center gap-1.5 px-4 py-2 text-[13px] transition-colors ${
-        active ? "font-medium text-accent" : "text-ink-2 hover:text-ink"
-      }`}
-      onClick={onClick}
-      type="button"
-    >
-      <CategoryIcon category={category} className="size-3.5 shrink-0" />
-      {label}
-      <span
-        aria-hidden="true"
-        className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-accent-strong transition-opacity ${
-          active ? "opacity-100" : "opacity-0"
-        }`}
-      />
-    </button>
-  );
-}
+// ------------------------------------------------------------- row primitives
 
 // ------------------------------------------------------------ layout blocks
 
@@ -246,23 +213,8 @@ export function PluginRow({
 
 // ------------------------------------------------------------------ engines
 
-export function reliabilityColor(reliability: number | null): string {
-  if (reliability === null) {
-    return "text-ink-3";
-  }
-  if (reliability <= 50) {
-    return "text-danger";
-  }
-  if (reliability < 80) {
-    return "text-warning";
-  }
-  if (reliability < 90) {
-    return "text-ink-2";
-  }
-  return "text-ok";
-}
-
 export function EngineTooltip({ engine }: { engine: EngineEntry }) {
+  const t = useT();
   const [desc, setDesc] = useState<{ text: string; source: string } | null>(null);
   useEffect(() => {
     void loadEngineDescriptions().then((map) => {
@@ -277,7 +229,10 @@ export function EngineTooltip({ engine }: { engine: EngineEntry }) {
     <div className="pointer-events-none absolute start-0 top-full z-30 mt-1 hidden w-80 rounded-xl border border-line bg-surface p-3 text-xs shadow-pop group-hover/engine:block group-focus-within/engine:block">
       {desc ? (
         <p className="text-ink-2">
-          {desc.text} <i className="text-ink-3">(Source: {desc.source})</i>
+          {desc.text}{" "}
+          <i className="text-ink-3">
+            ({t("source")}: {desc.source})
+          </i>
         </p>
       ) : (
         <p className="text-ink-3">…</p>
@@ -297,7 +252,7 @@ export function EngineTooltip({ engine }: { engine: EngineEntry }) {
       ) : null}
       {engine.enable_http ? (
         <p className="mt-1.5 inline-flex items-center gap-1 text-warning">
-          <AlertTriangle className="size-3.5" /> No HTTPS
+          <AlertTriangle className="size-3.5" /> {t("no_https")}
         </p>
       ) : null}
       <p className="mt-1.5 flex flex-wrap gap-1">
@@ -311,7 +266,7 @@ export function EngineTooltip({ engine }: { engine: EngineEntry }) {
       {engine.errors.length > 0 ? (
         <p className="mt-1.5">
           <Link className="text-accent hover:underline" href={`/stats?engine=${encodeURIComponent(engine.name)}`}>
-            View error logs and submit a bug report
+            {t("view_error_logs")}
           </Link>
         </p>
       ) : null}

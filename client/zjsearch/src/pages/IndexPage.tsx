@@ -131,7 +131,7 @@ export function IndexPage({ data }: { data: IndexData }) {
           <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm animate-fade-up">
             <Lightbulb className="size-4 shrink-0 text-accent" />
             <button
-              className="min-w-0 flex-1 truncate text-left text-ink-2 transition-colors hover:text-ink"
+              className="min-w-0 flex-1 truncate text-left text-[13px] text-ink-2 transition-colors hover:text-ink"
               onClick={() => {
                 setHelpOpen(true);
               }}

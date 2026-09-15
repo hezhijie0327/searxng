@@ -201,7 +201,7 @@ export function Dropdown({
         {iconOnly ? null : (
           <ChevronDown
             aria-hidden="true"
-            className={`size-3 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
+            className={`size-3.5 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
           />
         )}
       </button>

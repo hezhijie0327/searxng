@@ -7,6 +7,7 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { translateFor } from "@/lib/i18n.ts";
 import { extractPageData } from "@/lib/pageData.ts";
 import { buildSearchUrl, type SearchParams, searchParamEntries } from "@/lib/searchParams.ts";
 import type { AnyPageData } from "@/lib/types.ts";
@@ -33,6 +34,7 @@ interface RouterContextValue {
 const RouterContext = createContext<RouterContextValue | null>(null);
 
 function pageTitle(data: AnyPageData): string {
+  const t = translateFor(data.globals.locale);
   const name = data.globals.instance_name;
   if (data.globals.page === "results" && "q" in data && data.q) {
     return `${data.q} - ${name}`;
@@ -40,11 +42,11 @@ function pageTitle(data: AnyPageData): string {
   if (data.globals.page === "index") {
     return name;
   }
-  const labels: Record<string, string> = {
-    preferences: "Preferences",
-    stats: "Engine stats",
-    info: "Info",
-    "404": "Page not found",
+  const labels: Partial<Record<typeof data.globals.page, string>> = {
+    preferences: t("preferences"),
+    stats: t("engine_stats"),
+    info: t("info"),
+    404: t("page_not_found"),
   };
   return `${labels[data.globals.page] ?? name} - ${name}`;
 }

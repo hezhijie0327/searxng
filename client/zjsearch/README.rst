@@ -106,9 +106,11 @@ instead of inventing sizes/colours:
   practice).
 - **Shared class fragments** — recurring Tailwind strings live in
   ``lib/styles.ts`` (``SCROLLBAR_NONE``, ``SWIPE_ROW``, ``META_ROW``,
-  ``CHIP``, ``ICON_BTN``); import them instead of re-typing the
+  ``CHIP``, ``MONO_CHIP``, ``ICON_BTN``, ``DISABLED``, ``TILE_BADGE``,
+  plus ``reliabilityColor()``); import them instead of re-typing the
   mega-strings. All HTTP calls go through ``lib/http.ts``
-  (``fetchText``/``fetchJson``, uniform ``HTTP <status>`` errors).
+  (``fetchText``/``fetchJson``, uniform ``HTTP <status>`` errors). Copy +
+  confirm is one idiom: ``useCopyToast()`` from ``lib/clipboard.ts``.
 - **Floating feedback** — one-shot confirmations that own no render loop
   (hotkey yank, the preferences auto-save) call ``flashToast()`` from
   ``lib/toast.ts``: a stacked, auto-dismissing pill fixed at the bottom of

@@ -26,10 +26,10 @@ export function GroupHeader({
         onClick={onToggle}
         type="button"
       >
-        <CategoryIcon category={category} className="size-4 shrink-0 text-accent" />
+        <CategoryIcon category={category} className="size-3.5 shrink-0 text-accent" />
         {label}
         <span className="font-normal text-ink-3">{count}</span>
-        <ChevronDown className={`size-4 shrink-0 text-ink-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+        <ChevronDown className={`size-3.5 shrink-0 text-ink-3 transition-transform ${collapsed ? "rotate-180" : ""}`} />
       </button>
     </h2>
   );

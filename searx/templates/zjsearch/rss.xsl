@@ -21,13 +21,13 @@
         <style>
           :root {
             --bg: #faf9f6; --surface: #ffffff; --surface-2: #f1efe8;
-            --line: #e6e2d7; --ink: #201d17; --ink-2: #6b675c; --ink-3: #9a958a;
-            --accent: #a67c00; --accent-strong: #f5c84c; color-scheme: light;
+            --line: #e6e2d7; --ink: #201d17; --ink-2: #6b675c; --ink-3: #716c61;
+            --accent: #8c6800; --accent-strong: #f5c84c; color-scheme: light;
           }
           @media (prefers-color-scheme: dark) {
             :root {
               --bg: #1b1a18; --surface: #232120; --surface-2: #2c2a27;
-              --line: #38342f; --ink: #eceae4; --ink-2: #a8a399; --ink-3: #7b766c;
+              --line: #38342f; --ink: #eceae4; --ink-2: #a8a399; --ink-3: #9b958a;
               --accent: #fec843; --accent-strong: #fec843; color-scheme: dark;
             }
           }
@@ -41,14 +41,14 @@
           .brand {
             padding: 2rem 0 1.5rem; border-bottom: 2px solid var(--accent-strong);
           }
-          .brand .wordmark { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+          .brand .wordmark { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
           .brand .wordmark .dot { color: var(--accent-strong); }
           h1 { font-size: 1.25rem; font-weight: 600; margin: 1.4rem 0 0.2rem; }
           .meta { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 1.1rem; }
           .meta .count { font-weight: 600; color: var(--ink-2); }
           article {
             background: var(--surface); border: 1px solid var(--line);
-            border-radius: 14px; padding: 0.9rem 1rem; margin-bottom: 0.7rem;
+            border-radius: 16px; padding: 0.9rem 1rem; margin-bottom: 0.7rem;
             transition: border-color 0.15s ease;
           }
           article:hover { border-color: var(--accent-strong); }

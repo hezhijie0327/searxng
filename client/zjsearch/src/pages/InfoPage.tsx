@@ -83,7 +83,7 @@ function LicenseText({ url }: { url: string }) {
     return null;
   }
   return (
-    <pre className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-line bg-surface p-4 font-mono text-xs leading-relaxed text-ink-2">
+    <pre className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-line bg-surface p-3 font-mono text-xs leading-relaxed text-ink-2">
       {text}
     </pre>
   );

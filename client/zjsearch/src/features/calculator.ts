@@ -29,7 +29,8 @@ export function tryEvaluateExpression(rawQuery: string): CalculationAnswer | nul
   }
   const js = expr.replace(/\^/g, "**").replace(/,/g, "");
   try {
-    // eslint-disable-next-line no-new-func -- input is sanitized to arithmetic characters above
+    // input is sanitized to arithmetic characters above — Function() is the
+    // sanctioned escape hatch here (no JS parser dependency for one feature)
     const value = Function(`"use strict"; return (${js});`)();
     if (typeof value !== "number" || !Number.isFinite(value)) {
       return null;

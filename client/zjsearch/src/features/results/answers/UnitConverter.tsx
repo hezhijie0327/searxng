@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause-1.0
 
-/** Interactive unit converter (the "unit_converter" plugin): Kagi-style twin
-    panels — from/to unit dropdowns with live recomputation and a swap
-    button.  The server payload lists the sibling units of the resolved
-    dimension (same SI unit); special (callable) converters — °C / °F / Bft —
-    are implemented here, the server can't ship them as factors. */
+/** Interactive unit/currency converter (the "unit_converter" and
+    "currency_convert" plugins): Kagi-style twin panels — from/to unit
+    dropdowns with live recomputation and a swap button.  The server payload
+    lists the sibling units of the resolved dimension (same SI unit) or the
+    fetched rate table; special (callable) converters — °C / °F / Bft — are
+    implemented here, the server can't ship them as factors. */
 
 import { ArrowLeftRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Dropdown, type DropdownOption } from "@/components/Dropdown.tsx";
 import { useT } from "@/lib/i18n.ts";
+import { ICON_BTN } from "@/lib/styles.ts";
 import type { LegacyAnswerData, UnitEntry } from "@/lib/types.ts";
 
 type UnitConversionData = Extract<LegacyAnswerData, { kind: "unit_conversion" }>;
@@ -94,22 +96,26 @@ export function UnitConverterAnswer({ data }: { data: UnitConversionData }) {
   };
 
   const unitOptions: DropdownOption[] = units.map((unit) => ({ value: unit.symbol, label: unit.symbol }));
+  // unit triggers read as text, not as boxed form controls — the panel is the
+  // frame; the negative margin lines the trigger up with the value below it
+  const unitTrigger = "-ms-3 px-3 font-medium text-ink hover:text-accent";
 
   return (
-    <div className="animate-fade-up rounded-2xl border border-accent/25 bg-accent-soft/50 px-4 py-4">
+    <div className="animate-fade-up rounded-2xl border border-accent/25 bg-accent-soft/50 px-4 py-3">
       <div className="grid items-stretch gap-2 md:grid-cols-[1fr_auto_1fr] md:gap-3">
-        <div className="rounded-2xl border border-line bg-surface px-4 py-3">
+        <div className="rounded-xl bg-surface px-4 py-3">
           <Dropdown
             align="start"
             ariaLabel={t("unit_from")}
             onChange={setFromUnit}
             options={unitOptions}
+            triggerClassName={unitTrigger}
             value={fromUnit}
-            variant="boxed"
+            variant="bare"
           />
           <input
             aria-label={t("unit_value")}
-            className="mt-2 w-full min-w-0 bg-transparent text-end text-4xl font-semibold tabular-nums text-ink outline-none"
+            className="mt-2 w-full min-w-0 bg-transparent text-end text-3xl font-semibold tabular-nums text-ink outline-none sm:text-4xl"
             dir="ltr"
             inputMode="decimal"
             onChange={(event) => {
@@ -123,26 +129,25 @@ export function UnitConverterAnswer({ data }: { data: UnitConversionData }) {
           </p>
         </div>
         <div className="grid place-items-center">
-          <button
-            aria-label={t("unit_swap")}
-            className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
-            onClick={swap}
-            title={t("unit_swap")}
-            type="button"
-          >
+          <button aria-label={t("unit_swap")} className={ICON_BTN} onClick={swap} title={t("unit_swap")} type="button">
             <ArrowLeftRight aria-hidden="true" className="size-4.5 max-md:rotate-90" />
           </button>
         </div>
-        <div className="rounded-2xl border border-line bg-surface px-4 py-3">
+        <div className="rounded-xl bg-surface px-4 py-3">
           <Dropdown
             align="start"
             ariaLabel={t("unit_to")}
             onChange={setToUnit}
             options={unitOptions}
+            triggerClassName={unitTrigger}
             value={toUnit}
-            variant="boxed"
+            variant="bare"
           />
-          <p className="mt-2 min-h-10 truncate text-end text-4xl font-semibold tabular-nums text-ink" dir="ltr">
+          <p
+            className="mt-2 min-h-10 truncate text-end text-3xl font-semibold tabular-nums text-ink sm:text-4xl"
+            dir="ltr"
+            title={converted === null ? undefined : formatValue(converted)}
+          >
             {converted === null ? "–" : formatValue(converted)}
           </p>
           <p className="mt-2 truncate border-t border-line pt-2 text-xs text-ink-3" dir="ltr">

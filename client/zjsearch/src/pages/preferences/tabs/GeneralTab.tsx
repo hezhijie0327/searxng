@@ -55,7 +55,6 @@ export function GeneralTab({
                     engines — mirrors upstream simple preferences behaviour */}
                 {globals.categories.map((category) => (
                   <CategoryTab
-                    active={form.categories.includes(category)}
                     category={category}
                     key={category}
                     label={categoryLabel(category, t)}
@@ -64,6 +63,7 @@ export function GeneralTab({
                         prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category],
                       );
                     }}
+                    selected={form.categories.includes(category)}
                   />
                 ))}
               </div>
