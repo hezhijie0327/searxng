@@ -246,9 +246,6 @@ plugins:
   searx.plugins.tor_check.SXNGPlugin:
     active: false
 
-  searx.plugins.currency_convert.SXNGPlugin:
-    active: true
-
   searx.plugins.tracker_url_remover.SXNGPlugin:
     active: true
 
