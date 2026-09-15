@@ -227,6 +227,7 @@ export const ZH_CN: Record<StringKey, string> = {
   widget_hash: "计算字符串哈希(MD5、SHA-1、SHA-256…)",
   widget_random: "随机 UUID、字符串、整数、浮点数、颜色",
   widget_unit: "单位之间互相换算",
+  widget_currency: "货币之间互相换算（聚合汇率）",
   widget_tor: "检测是否正在使用 Tor",
   tor_using: "你正在使用 Tor",
   tor_not_using: "你未使用 Tor",

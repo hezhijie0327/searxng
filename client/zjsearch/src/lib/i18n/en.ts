@@ -229,6 +229,7 @@ export const EN = {
   widget_hash: "Hash a string (MD5, SHA-1, SHA-256, …)",
   widget_random: "Random UUID, string, int, float or color",
   widget_unit: "Convert between units",
+  widget_currency: "Convert between currencies (aggregated rates)",
   widget_tor: "Check if you are using Tor",
   tor_using: "You are using Tor",
   tor_not_using: "You are not using Tor",
