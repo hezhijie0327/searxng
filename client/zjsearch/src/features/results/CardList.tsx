@@ -42,7 +42,16 @@ export function CardList({
   renderItem?: (result: ResultItem, index: number) => ReactNode;
 }) {
   return (
-    <div className={clsx(spaced && "space-y-1", className)}>
+    <div
+      className={clsx(
+        // wide containers split the list into two columns so an absent rail
+        // doesn't leave half the results column blank; the prose-capped
+        // snippets fill ~half-width cards instead
+        "gap-x-8 @[64rem]:columns-2 @[64rem]:[&>*]:mb-1",
+        spaced && "space-y-1",
+        className,
+      )}
+    >
       {entries.map(({ result, index }) => (
         <ResultRow index={index} key={index} selected={selected === index}>
           {renderItem ? (
